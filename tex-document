@@ -360,6 +360,11 @@ $data{$to} = $data{$from};
 delete $data{$from};
 __PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y
 
+meta::function('new', <<'__/OjBmsWjusObXQP4BvqEC/Nnj3rtfrdoV4heH2O7m0s');
+clone(@_);
+
+__/OjBmsWjusObXQP4BvqEC/Nnj3rtfrdoV4heH2O7m0s
+
 meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
 __GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM
