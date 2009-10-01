@@ -126,6 +126,13 @@ meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
 shell
 __zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
 
+meta::data('meta-associations', <<'__GGcLMIdIpQPyuKPkIVDso+D8DmmbfkaLqgG4z5YhJeA');
+^function:: .pl
+^internal_function:: .pl
+^meta:: .pl
+^bootstrap:: .pl
+__GGcLMIdIpQPyuKPkIVDso+D8DmmbfkaLqgG4z5YhJeA
+
 meta::data('name', <<'__KVjUFtCKpaRy17UJA2y36v1UKt2EUn5moUXqZMtM3HU');
 object
 __KVjUFtCKpaRy17UJA2y36v1UKt2EUn5moUXqZMtM3HU
@@ -162,13 +169,23 @@ messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %d
 associate($name, $value || join('', <STDIN>) || "\n");
 __4e/yca7FeKtJK0U61l9uCtsCPTiznglZlwh6U3iRLvY
 
-meta::function('edit', <<'__35YrIzrL8rUWpvFrOQY4NIL0KybZ8OEndLy3JkIIEfQ');
+meta::function('edit', <<'__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k');
 my ($name, %options) = @_;
+
+my $meta_extension = join '', grep {
+  my $s = $_;
+  $s =~ s/\s.*$//;
+  $name =~ /$s/
+} split /\n/, &{'meta-associations'}();
+
+$meta_extension =~ s/^.*\s//;
+chomp $meta_extension;
+
 messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} keys %data;
-associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options),
+associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $meta_extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 delete $data{$name} if length($data{$name}) == 0;
-__35YrIzrL8rUWpvFrOQY4NIL0KybZ8OEndLy3JkIIEfQ
+__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -322,7 +339,7 @@ print $handle $contents;
 close $handle;
 __+NhpMabvNL+hHZaTZwBoFx2IFa79cjOZwGxEXX+xG0o
 
-meta::internal_function('invoke_editor_on', <<'__4Qkh4HQjoCLvAQ83W1ClaVM5dkrhv2YNMxIHO18k1cA');
+meta::internal_function('invoke_editor_on', <<'__97Lgs5+qfyAu92Vv5GCVVSYgUgFhOKYkVYXlbWoUs6U');
 my ($data, %options) = @_;
 my $content_hash     = sha256_base64($data);
 my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
@@ -330,7 +347,8 @@ my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
 my $options          = $options{'options'} || $ENV{'VISUAL_OPTS'} || $ENV{'EDITOR_OPTS'} || '';
 my $extension        = $options{'extension'} || '';
 
-my (undef, $filename) = tempfile("$0." . ("X" x 32) . $extension, OPEN => 0);
+my (undef, $filename) = tempfile("$0." . ("X" x 32), OPEN => 0);
+$filename .= $extension;
 
 file::write($filename, $data);
 system("$editor $options \"$filename\"");
@@ -338,7 +356,7 @@ system("$editor $options \"$filename\"");
 my $result = file::read($filename);
 unlink $filename;
 $result;
-__4Qkh4HQjoCLvAQ83W1ClaVM5dkrhv2YNMxIHO18k1cA
+__97Lgs5+qfyAu92Vv5GCVVSYgUgFhOKYkVYXlbWoUs6U
 
 meta::internal_function('messages::error', <<'__200qXouilOAQNa4NkmIj6l+Rvb49Jpy8yxvIX29NcK4');
 my ($message) = @_;
