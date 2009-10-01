@@ -122,9 +122,9 @@ something most people will normally do. In the future there may be a locking mec
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
-meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
-shell
-__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
+meta::data('default-action', <<'__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU');
+intro
+__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU
 
 meta::data('document', <<'__ESaq3KC/dDmA1eE98iTQkDGGENfEsPoQxOAAZnylmYU');
 = TeX Document Generator
@@ -155,6 +155,66 @@ meta::data('header', <<'__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g');
 \usepackage{palatino,mathpazo,amsmath,amssymb}
 __eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g
 
+meta::data('intro', <<'__06e0+SX5131O199c+6BVmscewyBKcCXWNHwbdfXqNac');
+This is a TeX document generator.
+
+If this is your first time using it, then you'll probably want to install
+the VIM highlighter for the custom TeX format. To do that, run this:
+
+  $ tex-document install-vim-highlighter
+
+If you don't mind an extra line at the end of your .vimrc file, then you
+can automatically associate .cltex files:
+
+  $ tex-document update-vimrc
+
+Now you're ready to go.
+
+To create a new TeX document, do this:
+
+  $ tex-document new newdoc
+
+Next, edit the contents of your new document:
+
+  $ ./newdoc e
+
+Once you're done editing, you can build and display the document:
+
+  $ ./newdoc make
+
+Alternately, you can use the shell interface (exit with the 'exit' command or
+control-D):
+
+  $ ./newdoc shell
+  tex-document$ e
+  tex-document$ make
+  ...
+  tex-document$ ^D
+  $
+
+If you edit and run make a lot, I recommend you save your document just to be
+on the safe side. Normally the document is not committed to disk until you exit
+the shell, but you can commit at any time by using the 'save' command.
+
+To extract your document in its original form, you can say this:
+
+  $ ./newdoc document > file
+
+And to extract the generated TeX:
+
+  $ ./newdoc compile-to-tex > file
+
+__06e0+SX5131O199c+6BVmscewyBKcCXWNHwbdfXqNac
+
+meta::data('meta-associations', <<'__snxmcN8761KbehEUDoTHmdbA4zoAN1Jy7D0OJmlL9Z0');
+^function:: .pl
+^internal_function:: .pl
+^meta:: .pl
+^bootstrap:: .pl
+^data::document$ .cltex
+^data::vim-highlighter$ .vim
+__snxmcN8761KbehEUDoTHmdbA4zoAN1Jy7D0OJmlL9Z0
+
 meta::data('name', <<'__MyX0rdO1O8lBOay1b19w6THTKQKU8ah1XPoRH26kXPU');
 tex-document
 __MyX0rdO1O8lBOay1b19w6THTKQKU8ah1XPoRH26kXPU
@@ -182,6 +242,36 @@ __a4ayc/80/OGda4BO/1o/V0etpOqiLx1JwB5S3beHW0s
 meta::data('tex', <<'__36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4');
 latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
 __36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4
+
+meta::data('vim-highlighter', <<'__rHK8+R1uJAbvnRCtLyhRzf4wgCHMzBCXNEZHN7yH1yc');
+" Cleaner TeX
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   Cleaner TeX (a variant of LaTeX)
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn match  cltTitle   /^= .*$/
+syn match  cltAuthor  /^a .*$/
+syn match  cltDate    /^d .*$/
+syn match  cltSection /^\s*- .*$/
+syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
+
+runtime! syntax/tex.vim
+
+hi link cltTitle    Identifier
+hi link cltAuthor   Identifier
+hi link cltDate     Identifier
+
+hi link cltSection  Type
+
+hi link cltVerbatim String
+
+let b:current_syntax = "cltex"
+__rHK8+R1uJAbvnRCtLyhRzf4wgCHMzBCXNEZHN7yH1yc
 
 meta::function('cat', <<'__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk');
 my ($name) = @_;
@@ -316,18 +406,28 @@ messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %d
 associate($name, $value || join('', <STDIN>) || "\n");
 __4e/yca7FeKtJK0U61l9uCtsCPTiznglZlwh6U3iRLvY
 
-meta::function('e', <<'__b75J8v2o261vKX/kR9miHuJIKNjr2oAFUxsost+vffU');
-edit('data::document');
+meta::function('e', <<'__VOcQy5WG275NZGlFODdYHYBe3oJ7/CHmTT/L9O1I6t0');
+edit('data::document', extension => '.tex');
 reload();
-__b75J8v2o261vKX/kR9miHuJIKNjr2oAFUxsost+vffU
+__VOcQy5WG275NZGlFODdYHYBe3oJ7/CHmTT/L9O1I6t0
 
-meta::function('edit', <<'__35YrIzrL8rUWpvFrOQY4NIL0KybZ8OEndLy3JkIIEfQ');
+meta::function('edit', <<'__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k');
 my ($name, %options) = @_;
+
+my $meta_extension = join '', grep {
+  my $s = $_;
+  $s =~ s/\s.*$//;
+  $name =~ /$s/
+} split /\n/, &{'meta-associations'}();
+
+$meta_extension =~ s/^.*\s//;
+chomp $meta_extension;
+
 messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} keys %data;
-associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options),
+associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $meta_extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 delete $data{$name} if length($data{$name}) == 0;
-__35YrIzrL8rUWpvFrOQY4NIL0KybZ8OEndLy3JkIIEfQ
+__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -338,6 +438,22 @@ meta::function('import', <<'__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA');
 my ($name) = @_;
 associate($name, join('', <STDIN>));
 __oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA
+
+meta::function('install-vim-highlighter', <<'__3qCLWaQi9Dp8Xjs/XCdFMcPXj4H4+DWldUwYv9/fAGs');
+my $home = $ENV{'HOME'};
+mkdir "$home/.vim";
+mkdir "$home/.vim/syntax";
+file::write("$home/.vim/syntax/cltex.vim", retrieve('data::vim-highlighter'));
+
+<<"EOF";
+The highlighter was created successfully. To have syntax highlighting activated
+automatically, append this line to your .vimrc:
+
+  au BufRead,BufNewFile *.cltex set filetype=cltex
+
+Alternately, you can run $0 update-vimrc.
+EOF
+__3qCLWaQi9Dp8Xjs/XCdFMcPXj4H4+DWldUwYv9/fAGs
 
 meta::function('ls', <<'__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg');
 join("\n", sort keys %externalized_functions);
@@ -360,10 +476,9 @@ $data{$to} = $data{$from};
 delete $data{$from};
 __PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y
 
-meta::function('new', <<'__/OjBmsWjusObXQP4BvqEC/Nnj3rtfrdoV4heH2O7m0s');
+meta::function('new', <<'__FQjehdFg7T3T2iHPMlGp6nAnrKAsQUIK5CXW02wNnos');
 clone(@_);
-
-__/OjBmsWjusObXQP4BvqEC/Nnj3rtfrdoV4heH2O7m0s
+__FQjehdFg7T3T2iHPMlGp6nAnrKAsQUIK5CXW02wNnos
 
 meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
@@ -448,6 +563,12 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
+meta::function('update-vimrc', <<'__QweSkvdteATxlMZfDti3sl2iWNE+LbkHc1E7FkqNuCg');
+open my $fh, '>>', "$ENV{'HOME'}/.vimrc";
+print $fh "au BufRead,BufNewFile *.cltex set filetype=cltex";
+close $fh;
+__QweSkvdteATxlMZfDti3sl2iWNE+LbkHc1E7FkqNuCg
+
 meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
 <<"EOD" . join '  ', split /\n/, ls ();
 Usage: $0 [options] action [arguments]
@@ -499,7 +620,7 @@ print $handle $contents;
 close $handle;
 __+NhpMabvNL+hHZaTZwBoFx2IFa79cjOZwGxEXX+xG0o
 
-meta::internal_function('invoke_editor_on', <<'__4Qkh4HQjoCLvAQ83W1ClaVM5dkrhv2YNMxIHO18k1cA');
+meta::internal_function('invoke_editor_on', <<'__NkMNlm3zEcaD/zXbiOVuo2rkEiwu4gcpSOXOBLsbrQ8');
 my ($data, %options) = @_;
 my $content_hash     = sha256_base64($data);
 my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
@@ -507,7 +628,8 @@ my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
 my $options          = $options{'options'} || $ENV{'VISUAL_OPTS'} || $ENV{'EDITOR_OPTS'} || '';
 my $extension        = $options{'extension'} || '';
 
-my (undef, $filename) = tempfile("$0." . ("X" x 32) . $extension, OPEN => 0);
+my (undef, $filename) = tempfile("$0." . ("X" x 32), OPEN => 0);
+$filename .= $extension;
 
 file::write($filename, $data);
 system("$editor $options \"$filename\"");
@@ -515,7 +637,8 @@ system("$editor $options \"$filename\"");
 my $result = file::read($filename);
 unlink $filename;
 $result;
-__4Qkh4HQjoCLvAQ83W1ClaVM5dkrhv2YNMxIHO18k1cA
+
+__NkMNlm3zEcaD/zXbiOVuo2rkEiwu4gcpSOXOBLsbrQ8
 
 meta::internal_function('messages::error', <<'__200qXouilOAQNa4NkmIj6l+Rvb49Jpy8yxvIX29NcK4');
 my ($message) = @_;
