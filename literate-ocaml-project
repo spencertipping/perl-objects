@@ -366,9 +366,9 @@ meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__BZtZdT5hM9v5IXlKKYkJr6ge62F3Bz+Cc7l+QA6OMcA');
-/tmp/literate-ocaml-project.edlCtSMEKBu6FJFLtpf-qJRzKM2uxIck9OEzG23Vl3g/document.pdf
-__BZtZdT5hM9v5IXlKKYkJr6ge62F3Bz+Cc7l+QA6OMcA
+meta::data('pdf-output-file', <<'__oZdf0jyS/kLpZfGwwuMI2OK/tt4p1OwCoY0Z0N9MWmQ');
+/tmp/literate-ocaml-project.Q7j-MmSr74MuQaObvyBbBaivonO5fF7xQvHMHCi205g/document.pdf
+__oZdf0jyS/kLpZfGwwuMI2OK/tt4p1OwCoY0Z0N9MWmQ
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
@@ -910,7 +910,7 @@ my %options = @_;
 `ocaml $options{'in'}`;
 __RGdbCxc2zlwCZFKEQS8VGmaouCqzdyUqPk+E3KjrEw0
 
-meta::section('00-introduction', <<'__zlEFAEHk5R+iI1mhkRyPKcCk/E408eXRifz4NOlxzHU');
+meta::section('00-introduction', <<'__F4d/G+dyCjJNgMvAqDBcQhYBPlR3xyw4JMajrzOb1tE');
 - Introduction to Literate Coding
   Literate coding allows you to write \TeX{} primarily, but insert code snippets where appropriate. For example:
 
@@ -941,10 +941,10 @@ meta::section('00-introduction', <<'__zlEFAEHk5R+iI1mhkRyPKcCk/E408eXRifz4NOlxzH
   these parameters:
 
   e[
-    +[\tt in]              Input filename after literate-to-source (unlit) conversion.
-    +[\tt out]             Expected output filename.
-    +[\tt profile]         Name of the active build profile.
-    +[\tt build_directory] Absolute pathname of the build directory.
+    +[\tt in]               Input filename after literate-to-source (unlit) conversion.
+    +[\tt out]              Expected output filename.
+    +[\tt profile]          Name of the active build profile.
+    +[\tt build\_directory] Absolute pathname of the build directory.
   ]e
 
   There may also be other parameters later. An example of a simple build profile is:
@@ -953,7 +953,7 @@ meta::section('00-introduction', <<'__zlEFAEHk5R+iI1mhkRyPKcCk/E408eXRifz4NOlxzH
   my %options = @_;
   `ocamlopt $options{'in'} -o $options{'out'}`;
   :.
-__zlEFAEHk5R+iI1mhkRyPKcCk/E408eXRifz4NOlxzHU
+__F4d/G+dyCjJNgMvAqDBcQhYBPlR3xyw4JMajrzOb1tE
 
 meta::unlit_converter('create_sections', <<'__sUEcZkQbKEhRUbj5hKceGP4VevPCE9+rz0yea91XZVc');
 my ($document) = @_;
