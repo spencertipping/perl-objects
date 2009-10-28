@@ -137,6 +137,18 @@ meta::data('name', <<'__KVjUFtCKpaRy17UJA2y36v1UKt2EUn5moUXqZMtM3HU');
 object
 __KVjUFtCKpaRy17UJA2y36v1UKt2EUn5moUXqZMtM3HU
 
+meta::function('add-to', <<'__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q');
+my ($filename) = @_;
+my @members = grep /^implementation::/, keys %data;
+
+for (@members) {
+  my $destination_name = basename($_);
+  open my($handle), "| $filename import $destination_name" or messages::error("Attribute $_ could not be written.");
+  print $handle retrieve($_);
+  close $handle;
+}
+__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q
+
 meta::function('cat', <<'__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk');
 my ($name) = @_;
 $data{$name};
@@ -192,10 +204,21 @@ my $name = shift;
 grep {$_ eq $name} keys %data;
 __bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk
 
+meta::function('grab', <<'__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8');
+my ($filename, @attribute_names) = @_;
+associate("implementation::$_", `$filename cat $_`) for @attribute_names;
+__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8
+
 meta::function('import', <<'__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA');
 my ($name) = @_;
 associate($name, join('', <STDIN>));
 __oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA
+
+meta::function('lock', <<'__VTyQSQauC4LFHxYTJhus499/qkzVt6stbxsovwA5kGs');
+my (undef, undef, $mode) = stat $0;
+chmod $mode & 0555, $0;
+
+__VTyQSQauC4LFHxYTJhus499/qkzVt6stbxsovwA5kGs
 
 meta::function('ls', <<'__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg');
 join("\n", sort keys %externalized_functions);
@@ -212,6 +235,19 @@ $data{$to} = $data{$from};
 delete $data{$from};
 __PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y
 
+meta::function('pull', <<'__IIDq/dsWHEYECpYpzXqTvkcve38taGb7d0m+Vsq+TQk');
+my ($class_name) = @_;
+my @attributes = grep /^implementation::/, split /\n/, `$class_name ls-a`;
+
+for (@attributes) {
+  s/^\s+//;
+  s/\s+$//;
+  print STDERR "Adding $_\n";
+  associate(basename($_), `$class_name cat "$_"`);
+}
+
+__IIDq/dsWHEYECpYpzXqTvkcve38taGb7d0m+Vsq+TQk
+
 meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
 __GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM
@@ -224,7 +260,7 @@ for my $to_be_deleted (@_) {
 delete @data{@_};
 __7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww
 
-meta::function('save', <<'__HuNR2A6/zt/GGZDRiR1x82a4nBxpAlIR1QGc4kUySto');
+meta::function('save', <<'__vhEbj5ff7CB7CfXgtAmJ/BCNllK5d8QgJfHWaHlBu70');
 my $serialized_data = serialize();
 my $final_state     = state();
 
@@ -238,10 +274,12 @@ if ($observed_state ne $final_state) {
   messages::error("The state of this object ($final_state) is inconsistent with the state of $temporary_filename ($observed_state).\n" .
                   "$0 has not been updated.");
 } else {
-  file::write($0, $serialized_data);
-  unlink $temporary_filename;
+  eval {file::write($0, $serialized_data)};
+  warn $@ if $@;
+  my $observed_self_state = `perl $0 state`;
+  unlink $temporary_filename if $observed_self_state eq $final_state;
 }
-__HuNR2A6/zt/GGZDRiR1x82a4nBxpAlIR1QGc4kUySto
+__vhEbj5ff7CB7CfXgtAmJ/BCNllK5d8QgJfHWaHlBu70
 
 meta::function('serialize', <<'__KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw');
 my @keys_without_internals = grep(!/^internal::/, sort keys %data);
@@ -252,7 +290,7 @@ join "\n", $data{'bootstrap::initialization'},
            "__END__";
 __KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw
 
-meta::function('shell', <<'__1pX0YiaO1Jx8AIJ3/w6tbrNGcmnuuZfIo6840aq4bU4');
+meta::function('shell', <<'__g0FKviVlh5VYzuV+REx/lpPg3EmMtycTaZTK85Zq/SU');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -278,8 +316,10 @@ while (defined ($_ = $term->readline($prompt))) {
 
   $term->addhistory($command_line) if $command_line;
   $prompt = name() . '$ ';
+
+  save();
 }
-__1pX0YiaO1Jx8AIJ3/w6tbrNGcmnuuZfIo6840aq4bU4
+__g0FKviVlh5VYzuV+REx/lpPg3EmMtycTaZTK85Zq/SU
 
 meta::function('size', <<'__lDGr6yVnDwcDWLkJH16MNukltjG2ypBSk/ktYb80h80');
 length(serialize());
@@ -294,6 +334,12 @@ __qjqsCy4CTt88dIi7IWM+Varpb3GcHsYrFTxW7EwpLW0
 meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
+
+meta::function('unlock', <<'__2f3NoSvgge16m8wBuDokogr54ssy8D8fKdZ7+RtZitE');
+my (undef, undef, $mode) = stat $0;
+chmod $mode | 0200, $0;
+
+__2f3NoSvgge16m8wBuDokogr54ssy8D8fKdZ7+RtZitE
 
 meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
 <<"EOD" . join '  ', split /\n/, ls ();
