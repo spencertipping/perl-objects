@@ -31,6 +31,14 @@ meta::meta('datatypes::bootstrap', <<'__guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLC
 meta::define_form 'bootstrap', sub {};
 __guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM
 
+meta::meta('datatypes::code_filter', <<'__gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M');
+meta::define_form 'code_filter', sub {
+  my ($name, $value) = @_;
+  *{"code_filter::$name"} = eval "sub {\n$value\n}";
+  carp $@ if $@;
+};
+__gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M
+
 meta::meta('datatypes::data', <<'__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
@@ -58,6 +66,22 @@ meta::define_form 'internal_function', sub {
   carp $@ if $@;
 };
 __heBxmlI7O84FgR+9+ULeiCTWJ4hqd079Z02rZnl9Ong
+
+meta::meta('datatypes::line_filter', <<'__/k1BhEweDsgaEdqrALbIEjvKhsVrk/hv//e/KPydA6A');
+meta::define_form 'line_filter', sub {
+  my ($name, $value) = @_;
+  *{"line_filter::$name"} = eval "sub {\n$value\n}";
+  carp $@ if $@;
+};
+__/k1BhEweDsgaEdqrALbIEjvKhsVrk/hv//e/KPydA6A
+
+meta::meta('datatypes::unlit_converter', <<'__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE');
+meta::define_form 'unlit_converter', sub {
+  my ($name, $value) = @_;
+  *{"unlit_converter::$name"} = eval "sub {\n$value\n}";
+  carp $@ if $@;
+};
+__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE
 
 meta::meta('internal::runtime', <<'__Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA');
 meta::define_form 'internal', \&meta::meta::implementation;
@@ -122,17 +146,36 @@ something most people will normally do. In the future there may be a locking mec
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
+meta::code_filter('verbatim', <<'__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s');
+my ($line, %settings) = @_;
+
+unless ($settings{'name'}) {
+  return '\begin{verbatim}' if $settings{'begin'};
+  return '\end{verbatim}'   if $settings{'end'};
+}
+
+return $line;
+__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s
+
 meta::data('default-action', <<'__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU');
 intro
 __xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU
 
-meta::data('document', <<'__ESaq3KC/dDmA1eE98iTQkDGGENfEsPoQxOAAZnylmYU');
+meta::data('document', <<'__XTJAsZ2LWKGEYCet0rXSP8DwQBh2w15+p7Q6mmOdQ6A');
 = TeX Document Generator
 a Spencer Tipping
+begin
 
 - Introduction
   The \TeX{} document generator is a simple utility for encapsulating the
   generation and compilation of \TeX{} documents.
+
+  It simplifies:
+
+  e[
+    + Writing \TeX{} documents quickly
+    + Writing literate code
+  ]e
 
   - Usage
     The easiest way to use the system is to clone a new document, like this:
@@ -145,17 +188,17 @@ a Spencer Tipping
     ``e'' command:
 
     ::
-    $ my-document
+    $ my-document shell
     my-document$ e
     :.
-__ESaq3KC/dDmA1eE98iTQkDGGENfEsPoQxOAAZnylmYU
+__XTJAsZ2LWKGEYCet0rXSP8DwQBh2w15+p7Q6mmOdQ6A
 
 meta::data('header', <<'__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g');
 \documentclass{article}
 \usepackage{palatino,mathpazo,amsmath,amssymb}
 __eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g
 
-meta::data('intro', <<'__06e0+SX5131O199c+6BVmscewyBKcCXWNHwbdfXqNac');
+meta::data('intro', <<'__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw');
 This is a TeX document generator.
 
 If this is your first time using it, then you'll probably want to install
@@ -203,17 +246,19 @@ To extract your document in its original form, you can say this:
 And to extract the generated TeX:
 
   $ ./newdoc compile-to-tex > file
+__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw
 
-__06e0+SX5131O199c+6BVmscewyBKcCXWNHwbdfXqNac
-
-meta::data('meta-associations', <<'__snxmcN8761KbehEUDoTHmdbA4zoAN1Jy7D0OJmlL9Z0');
+meta::data('meta-associations', <<'__Ql36C0s7UTZWfcWP/PM0xaUnVTY2wKIqUxjVsrvsZDU');
 ^function:: .pl
 ^internal_function:: .pl
 ^meta:: .pl
 ^bootstrap:: .pl
 ^data::document$ .cltex
 ^data::vim-highlighter$ .vim
-__snxmcN8761KbehEUDoTHmdbA4zoAN1Jy7D0OJmlL9Z0
+^unlit_converter:: .pl
+^line_filter:: .pl
+^code_filter:: .pl
+__Ql36C0s7UTZWfcWP/PM0xaUnVTY2wKIqUxjVsrvsZDU
 
 meta::data('name', <<'__MyX0rdO1O8lBOay1b19w6THTKQKU8ah1XPoRH26kXPU');
 tex-document
@@ -223,9 +268,9 @@ meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__JCId+LwVE2TogmeGpH6J6OLfdNshvXceAu9eK8fHotY');
-/tmp/tex-document.tTrxjpspYwk-44vfLR+dV9o0qYhQSWJs2lzNft8RU0E/document.pdf
-__JCId+LwVE2TogmeGpH6J6OLfdNshvXceAu9eK8fHotY
+meta::data('pdf-output-file', <<'__tFA84XAs7yM9v+osGnVIsQMu6yJffnoNslnzwDZA8Ys');
+/tmp/tex-document.xk2VWDh4ZgOvAtdIIPbrIuXgugV6JFWL6Rg1HL4pOLw/document.pdf
+__tFA84XAs7yM9v+osGnVIsQMu6yJffnoNslnzwDZA8Ys
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
@@ -243,7 +288,7 @@ meta::data('tex', <<'__36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4');
 latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
 __36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4
 
-meta::data('vim-highlighter', <<'__rHK8+R1uJAbvnRCtLyhRzf4wgCHMzBCXNEZHN7yH1yc');
+meta::data('vim-highlighter', <<'__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX)
@@ -257,21 +302,44 @@ endif
 syn match  cltTitle   /^= .*$/
 syn match  cltAuthor  /^a .*$/
 syn match  cltDate    /^d .*$/
+syn match  cltBegin   /^begin$/
 syn match  cltSection /^\s*- .*$/
 syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
 
+syn match  cltEnumeratedThing /^\s*[eid]\[/
+syn match  cltEnumeratedThing /^\s*\][eid]/
+syn match  cltItem            /^\s*+\s/
+syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
+
 runtime! syntax/tex.vim
 
+hi link cltBegin    Keyword
 hi link cltTitle    Identifier
 hi link cltAuthor   Identifier
 hi link cltDate     Identifier
+
+hi link cltEnumeratedThing Special
+hi link cltItem            Special
+hi link cltQuantifiedItem  Special
 
 hi link cltSection  Type
 
 hi link cltVerbatim String
 
 let b:current_syntax = "cltex"
-__rHK8+R1uJAbvnRCtLyhRzf4wgCHMzBCXNEZHN7yH1yc
+__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo
+
+meta::function('add-to', <<'__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q');
+my ($filename) = @_;
+my @members = grep /^implementation::/, keys %data;
+
+for (@members) {
+  my $destination_name = basename($_);
+  open my($handle), "| $filename import $destination_name" or messages::error("Attribute $_ could not be written.");
+  print $handle retrieve($_);
+  close $handle;
+}
+__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q
 
 meta::function('cat', <<'__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk');
 my ($name) = @_;
@@ -337,61 +405,11 @@ associate('data::pdf-output-file', my $result = "$temporary_directory/$filename.
 $result;
 __HfmDCotLaO8/ha33D7dUqCAhPmSSrWt1lJc73NXcPz8
 
-meta::function('compile-to-tex', <<'__vuvIqAhKZtj2yBPEk9jdnMlcgCySv2RVZyYbTUhN7nU');
-my %indentation_levels = (
-  0 => '\section',
-  2 => '\subsection',
-  4 => '\subsubsection',
-  6 => '\paragraph',
-  8 => '\subparagraph');
-
-my $result                       = header() . "\n";
-my $sections_already_encountered = 0;
-my $inside_code_block            = 0;
-my $code_block_indentation       = 0;
-
-for (split /\n/, document()) {
-  # Step 1. Convert title, author, and date.
-  unless ($inside_code_block) {
-    s/^= (.*)$/\\title{$1}/;
-    s/^a (.*)$/\\author{$1}/;
-    s/^d (.*)$/\\date{$1}/;
-  }
-
-  # Step 2. Convert -- that is, unindent -- code.
-  if (/^(\s*):\.$/) {
-    $inside_code_block = $code_block_indentation = 0;
-    $_ = '\end{verbatim}';
-  }
-
-  if ($inside_code_block) {
-    my $spaces_to_delete = ' ' x $code_block_indentation;
-    s/^$spaces_to_delete//;
-  }
-
-  if (/^(\s*)::$/) {
-    $inside_code_block      = 1;
-    $code_block_indentation = length($1);
-    $_ = '\begin{verbatim}';
-  }
-
-  # Step 3. Convert section headings.
-  if (/^(\s*)- (.*)$/) {
-    unless ($sections_already_encountered) {
-      $result .= '\begin{document}\maketitle ';
-      $result .= '\tableofcontents ' if &{'table-of-contents'}();
-      $sections_already_encountered = 1;
-    }
-
-    my $section = $indentation_levels{length($1)} || die "Invalid indentation level:\n$_";
-    $_ = "${section} {${2}}";
-  }
-
-  $result .= "$_\n";
-}
-
-"$result\\end{document}";
-__vuvIqAhKZtj2yBPEk9jdnMlcgCySv2RVZyYbTUhN7nU
+meta::function('compile-to-tex', <<'__cvWyD1kaLfBVnSppeGw/hSpleoWxLARJQwP1tUKvebc');
+my ($document) = document();
+$document = &$_($document) for (grep /^unlit_converter::/, sort keys %data);
+$document;
+__cvWyD1kaLfBVnSppeGw/hSpleoWxLARJQwP1tUKvebc
 
 meta::function('cp', <<'__yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4');
 my ($from, $to) = @_;
@@ -434,6 +452,11 @@ my $name = shift;
 grep {$_ eq $name} keys %data;
 __bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk
 
+meta::function('grab', <<'__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8');
+my ($filename, @attribute_names) = @_;
+associate("implementation::$_", `$filename cat $_`) for @attribute_names;
+__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8
+
 meta::function('import', <<'__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA');
 my ($name) = @_;
 associate($name, join('', <STDIN>));
@@ -454,6 +477,11 @@ automatically, append this line to your .vimrc:
 Alternately, you can run $0 update-vimrc.
 EOF
 __3qCLWaQi9Dp8Xjs/XCdFMcPXj4H4+DWldUwYv9/fAGs
+
+meta::function('lock', <<'__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y');
+my (undef, undef, $mode) = stat $0;
+chmod $mode & 0555, $0;
+__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y
 
 meta::function('ls', <<'__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg');
 join("\n", sort keys %externalized_functions);
@@ -479,6 +507,18 @@ __PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y
 meta::function('new', <<'__FQjehdFg7T3T2iHPMlGp6nAnrKAsQUIK5CXW02wNnos');
 clone(@_);
 __FQjehdFg7T3T2iHPMlGp6nAnrKAsQUIK5CXW02wNnos
+
+meta::function('pull', <<'__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg');
+my ($class_name) = @_;
+my @attributes = grep /^implementation::/, split /\n/, `$class_name ls-a`;
+
+for (@attributes) {
+  s/^\s+//;
+  s/\s+$//;
+  print STDERR "Adding $_\n";
+  associate(basename($_), `$class_name cat "$_"`);
+}
+__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg
 
 meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
@@ -563,6 +603,11 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
+meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
+my (undef, undef, $mode) = stat $0;
+chmod $mode | 0200, $0;
+__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA
+
 meta::function('update-vimrc', <<'__QweSkvdteATxlMZfDti3sl2iWNE+LbkHc1E7FkqNuCg');
 open my $fh, '>>', "$ENV{'HOME'}/.vimrc";
 print $fh "au BufRead,BufNewFile *.cltex set filetype=cltex";
@@ -620,7 +665,7 @@ print $handle $contents;
 close $handle;
 __+NhpMabvNL+hHZaTZwBoFx2IFa79cjOZwGxEXX+xG0o
 
-meta::internal_function('invoke_editor_on', <<'__NkMNlm3zEcaD/zXbiOVuo2rkEiwu4gcpSOXOBLsbrQ8');
+meta::internal_function('invoke_editor_on', <<'__97Lgs5+qfyAu92Vv5GCVVSYgUgFhOKYkVYXlbWoUs6U');
 my ($data, %options) = @_;
 my $content_hash     = sha256_base64($data);
 my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
@@ -637,8 +682,7 @@ system("$editor $options \"$filename\"");
 my $result = file::read($filename);
 unlink $filename;
 $result;
-
-__NkMNlm3zEcaD/zXbiOVuo2rkEiwu4gcpSOXOBLsbrQ8
+__97Lgs5+qfyAu92Vv5GCVVSYgUgFhOKYkVYXlbWoUs6U
 
 meta::internal_function('messages::error', <<'__200qXouilOAQNa4NkmIj6l+Rvb49Jpy8yxvIX29NcK4');
 my ($message) = @_;
@@ -676,6 +720,113 @@ my $noise  = $name || state();
 $noise =~ s/\//-/g;
 "$0.$noise";
 __zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
+
+meta::line_filter('convert_header_info', <<'__1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE');
+my ($line) = @_;
+
+$line =~ s/^= (.*)$/\\title{$1}/;
+$line =~ s/^a (.*)$/\\author{$1}/;
+$line =~ s/^d (.*)$/\\date{$1}/;
+
+my $document_header = '\begin{document}\maketitle';
+$document_header .= '\tableofcontents' if &{'table-of-contents'}();
+
+$line =~ s/^begin$/$document_header/;
+
+$line;
+__1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE
+
+meta::line_filter('convert_itemized_environments', <<'__ALAptDKGAFawh7jgFZo/RoW5oHCjUVEUEn68mWYAARw');
+my ($line) = @_;
+
+$line =~ s/^\s*\+ /\\item /;
+$line =~ s/^\s*\+\[([^\]]*)\] /\\item[\1] /;
+
+$line =~ s/^\s*e\[$/\\begin{enumerate}/;
+$line =~ s/^\s*i\[$/\\begin{itemize}/;
+$line =~ s/^\s*d\[$/\\begin{description}/;
+
+$line =~ s/^\s*\]e$/\\end{enumerate}/;
+$line =~ s/^\s*\]i$/\\end{itemize}/;
+$line =~ s/^\s*\]d$/\\end{description}/;
+
+$line;
+__ALAptDKGAFawh7jgFZo/RoW5oHCjUVEUEn68mWYAARw
+
+meta::line_filter('convert_sections', <<'__lmhXPw+0a86ufxG3kCALtSl8Raqrt+7YZomx7zISUbw');
+my ($line) = @_;
+
+my %indentation_levels = (
+  0 => '\section',
+  2 => '\subsection',
+  4 => '\subsubsection',
+  6 => '\paragraph',
+  8 => '\subparagraph');
+
+if ($line =~ /^(\s*)- (.*)$/) {
+  my $section = $indentation_levels{length($1)} || die "Invalid indentation level:\n$_";
+  "${section} {${2}}";
+} else {
+  $line;
+}
+__lmhXPw+0a86ufxG3kCALtSl8Raqrt+7YZomx7zISUbw
+
+meta::unlit_converter('append_footer', <<'__xZrf+gAwEiK7btRcm+mwC/qtHsXp2FQ/Z8ZCwMvSw4Q');
+my ($document) = @_;
+"$document\n\\end{document}";
+__xZrf+gAwEiK7btRcm+mwC/qtHsXp2FQ/Z8ZCwMvSw4Q
+
+meta::unlit_converter('main', <<'__3D082OWBmT2cWw4D6ktyDGp1MHknawaTDW2B0gvZPyM');
+my ($document) = @_;
+
+my $sections_already_encountered = 0;
+my $inside_code_block            = 0;
+my $code_block_indentation       = 0;
+my $code_section_name            = '';
+my $result                       = '';
+
+for (split /\n/, $document) {
+  # Handle code blocks.
+  if (/^(\s*):\.$/) {
+    $inside_code_block = $code_block_indentation = 0;
+
+    for my $filter_name (grep /^code_filter::/, sort keys %data) {
+      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation, end => 1);
+    }
+  }
+
+  if ($inside_code_block) {
+    my $spaces_to_delete = ' ' x $code_block_indentation;
+    s/^$spaces_to_delete//;
+    for my $filter_name (grep /^code_filter::/, sort keys %data) {
+      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation);
+    }
+  } else {
+    for my $filter_name (grep /^line_filter::/, sort keys %data) {
+      $_ = &$filter_name($_);
+    }
+  }
+
+  if (/^(\s*)::(\s.*)?$/) {
+    $inside_code_block      = 1;
+    $code_block_indentation = length($1);
+    $code_section_name      = $2;
+
+    for my $filter_name (grep /^code_filter::/, sort keys %data) {
+      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation, begin => 1);
+    }
+  }
+
+  $result .= "$_\n";
+}
+
+$result;
+__3D082OWBmT2cWw4D6ktyDGp1MHknawaTDW2B0gvZPyM
+
+meta::unlit_converter('prepend_header', <<'__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw');
+my ($document) = @_;
+header() . "\n$document";
+__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();
