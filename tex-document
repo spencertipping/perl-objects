@@ -39,16 +39,17 @@ meta::define_form 'code_filter', sub {
 };
 __gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M
 
-meta::meta('datatypes::data', <<'__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68');
+meta::meta('datatypes::data', <<'__96H42jUO3qe63MqMco7Ih6e1BtrIcB+e18KFqPpfIek');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "data::$name";
   *{$name} = sub {
-    $data{"data::$name"} = $_[1] || join '', <STDIN> if @_ > 0 && @_[0] == '=';
-    $data{"data::$name"};
+    associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    retrieve("data::$name");
   };
 };
-__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68
+
+__96H42jUO3qe63MqMco7Ih6e1BtrIcB+e18KFqPpfIek
 
 meta::meta('datatypes::function', <<'__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0');
 meta::define_form 'function', sub {
@@ -193,10 +194,12 @@ begin
     :.
 __XTJAsZ2LWKGEYCet0rXSP8DwQBh2w15+p7Q6mmOdQ6A
 
-meta::data('header', <<'__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g');
+meta::data('header', <<'__zeSfCVl2tCsALl6XJBVoCjly+0q5x42jmqiSdpxQE9s');
 \documentclass{article}
-\usepackage{palatino,mathpazo,amsmath,amssymb}
-__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g
+\usepackage{amsmath,amssymb,pxfonts}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks]{hyperref}
+__zeSfCVl2tCsALl6XJBVoCjly+0q5x42jmqiSdpxQE9s
 
 meta::data('intro', <<'__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw');
 This is a TeX document generator.
@@ -268,9 +271,9 @@ meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__tFA84XAs7yM9v+osGnVIsQMu6yJffnoNslnzwDZA8Ys');
-/tmp/tex-document.xk2VWDh4ZgOvAtdIIPbrIuXgugV6JFWL6Rg1HL4pOLw/document.pdf
-__tFA84XAs7yM9v+osGnVIsQMu6yJffnoNslnzwDZA8Ys
+meta::data('pdf-output-file', <<'__QmHeeVUTLryA7iEdT36oMAFQlymoANZXh3o7Io1TCZo');
+/tmp/tex-document.Xn4r5dE8JF9PwhufmZ2PusRXUCvIwDVenDtMTkUAR+s/document.pdf
+__QmHeeVUTLryA7iEdT36oMAFQlymoANZXh3o7Io1TCZo
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
@@ -429,7 +432,7 @@ edit('data::document', extension => '.tex');
 reload();
 __VOcQy5WG275NZGlFODdYHYBe3oJ7/CHmTT/L9O1I6t0
 
-meta::function('edit', <<'__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k');
+meta::function('edit', <<'__OtbuwBGfWZZef+v2WP0gCvvxbtpyxi1FbVD11BTjZzQ');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -445,7 +448,10 @@ messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} key
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $meta_extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 delete $data{$name} if length($data{$name}) == 0;
-__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k
+
+save();
+
+__OtbuwBGfWZZef+v2WP0gCvvxbtpyxi1FbVD11BTjZzQ
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -532,7 +538,7 @@ for my $to_be_deleted (@_) {
 delete @data{@_};
 __7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww
 
-meta::function('save', <<'__HuNR2A6/zt/GGZDRiR1x82a4nBxpAlIR1QGc4kUySto');
+meta::function('save', <<'__m9TBLhwDWYJ99v28UxGiil8BHQdaAaLr3Hd7X8OTecA');
 my $serialized_data = serialize();
 my $final_state     = state();
 
@@ -546,10 +552,14 @@ if ($observed_state ne $final_state) {
   messages::error("The state of this object ($final_state) is inconsistent with the state of $temporary_filename ($observed_state).\n" .
                   "$0 has not been updated.");
 } else {
-  file::write($0, $serialized_data);
-  unlink $temporary_filename;
+  eval {file::write($0, $serialized_data)};
+  warn $@ if $@;
+  my $observed_self_state = `perl $0 state`;
+  chomp $observed_self_state;
+  unlink $temporary_filename if $observed_self_state eq $final_state;
 }
-__HuNR2A6/zt/GGZDRiR1x82a4nBxpAlIR1QGc4kUySto
+
+__m9TBLhwDWYJ99v28UxGiil8BHQdaAaLr3Hd7X8OTecA
 
 meta::function('serialize', <<'__KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw');
 my @keys_without_internals = grep(!/^internal::/, sort keys %data);
@@ -736,7 +746,7 @@ $line =~ s/^begin$/$document_header/;
 $line;
 __1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE
 
-meta::line_filter('convert_itemized_environments', <<'__ALAptDKGAFawh7jgFZo/RoW5oHCjUVEUEn68mWYAARw');
+meta::line_filter('convert_itemized_environments', <<'__gAE2Xtr56GtOlw89sIcBSU7zkQUP/eBlx479kht7O2s');
 my ($line) = @_;
 
 $line =~ s/^\s*\+ /\\item /;
@@ -746,12 +756,17 @@ $line =~ s/^\s*e\[$/\\begin{enumerate}/;
 $line =~ s/^\s*i\[$/\\begin{itemize}/;
 $line =~ s/^\s*d\[$/\\begin{description}/;
 
+$line =~ s/^\s*a\[$/\\begin{align*}/;
+
 $line =~ s/^\s*\]e$/\\end{enumerate}/;
 $line =~ s/^\s*\]i$/\\end{itemize}/;
 $line =~ s/^\s*\]d$/\\end{description}/;
 
+$line =~ s/^\s*\]a$/\\end{align*}/;
+
 $line;
-__ALAptDKGAFawh7jgFZo/RoW5oHCjUVEUEn68mWYAARw
+
+__gAE2Xtr56GtOlw89sIcBSU7zkQUP/eBlx479kht7O2s
 
 meta::line_filter('convert_sections', <<'__lmhXPw+0a86ufxG3kCALtSl8Raqrt+7YZomx7zISUbw');
 my ($line) = @_;

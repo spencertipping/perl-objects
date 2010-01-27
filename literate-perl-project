@@ -5,9 +5,12 @@ use Carp        'carp';
 use Digest::SHA 'sha256_base64';
 
 my %data;
+my %transient;
 my %externalized_functions;
 my @data_types;
 my @script_args;
+
+$|++;
 
 sub meta::define_form {
   my ($namespace, $delegate) = @_;
@@ -39,7 +42,7 @@ meta::define_form 'code_filter', sub {
 };
 __gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M
 
-meta::meta('datatypes::data', <<'__96H42jUO3qe63MqMco7Ih6e1BtrIcB+e18KFqPpfIek');
+meta::meta('datatypes::data', <<'__j7lFraXGRfKk8ymj2mDJhNbCQMk9FSciN1hdDhzM99U');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "data::$name";
@@ -48,8 +51,7 @@ meta::define_form 'data', sub {
     retrieve("data::$name");
   };
 };
-
-__96H42jUO3qe63MqMco7Ih6e1BtrIcB+e18KFqPpfIek
+__j7lFraXGRfKk8ymj2mDJhNbCQMk9FSciN1hdDhzM99U
 
 meta::meta('datatypes::function', <<'__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0');
 meta::define_form 'function', sub {
@@ -76,17 +78,51 @@ meta::define_form 'line_filter', sub {
 };
 __/k1BhEweDsgaEdqrALbIEjvKhsVrk/hv//e/KPydA6A
 
-meta::meta('datatypes::profile', <<'__ooDHth9M5OueUrUkgnPd0FXBXu16i2n8xg0w+pmXkVE');
-meta::define_form 'profile', sub {
+meta::meta('datatypes::section', <<'__+sIaXu/jTubQJpv321ESZdZajbA4tb4E31KzSLZLA0c');
+meta::define_form 'section', sub {
   my ($name, $value) = @_;
-  *{"profile::$name"} = eval "sub {\n$value\n}";
+  $externalized_functions{$name} = "section::$name";
+
+  my $stuff_to_eval = '';
+
+  my @lines         = split /\n/, $value;
+  my $in_code_piece = 0;
+  my $spaces        = '';
+
+  for (@lines) {
+    s/^$spaces// if $in_code_piece;
+    $in_code_piece &= ! /^\s*:.$/;
+    $stuff_to_eval .= "$_\n" if $in_code_piece;
+    $spaces = $1 if $in_code_piece |= /^(\s*)::$/;
+  }
+
+  eval $stuff_to_eval;
   carp $@ if $@;
 };
-__ooDHth9M5OueUrUkgnPd0FXBXu16i2n8xg0w+pmXkVE
+__+sIaXu/jTubQJpv321ESZdZajbA4tb4E31KzSLZLA0c
 
-meta::meta('datatypes::section', <<'__dyHqM5u2qiIza2BZZUe8tCJbUbz1UmJwCpsYozFvBmc');
-meta::define_form 'section', sub {};
-__dyHqM5u2qiIza2BZZUe8tCJbUbz1UmJwCpsYozFvBmc
+meta::meta('datatypes::test', <<'__ueZczgsgipzDeioOy/gRBU5qUY/J01ZD6aS8UX0/cRY');
+meta::define_form 'test', sub {
+  my ($name, $value) = @_;
+
+  my $stuff_to_eval = "sub {\n";
+  my @lines         = split /\n/, $value;
+  my $in_code_piece = 0;
+  my $spaces        = '';
+
+  for (@lines) {
+    s/^$spaces// if $in_code_piece;
+    $in_code_piece &= ! /^\s*:.$/;
+    $stuff_to_eval .= "$_\n" if $in_code_piece;
+    $spaces = $1 if $in_code_piece |= /^(\s*)::$/;
+  }
+
+  $stuff_to_eval .= "\n}";
+
+  $transient{'tests'}{$name} = eval $stuff_to_eval;
+  carp $@ if $@;
+};
+__ueZczgsgipzDeioOy/gRBU5qUY/J01ZD6aS8UX0/cRY
 
 meta::meta('datatypes::unlit_converter', <<'__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE');
 meta::define_form 'unlit_converter', sub {
@@ -100,7 +136,7 @@ meta::meta('internal::runtime', <<'__Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
 meta::define_form 'internal', \&meta::meta::implementation;
 __Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
 
-meta::bootstrap('initialization', <<'__bzFASokNzruPfsSIlwZC8OG4NFNI9EfmMYeL/oWGaDs');
+meta::bootstrap('initialization', <<'__ynZW5t0TeKZlfH7tCNrNhNwdHJSP7ipCx9cfBgbVth8');
 #!/usr/bin/perl
 
 use File::Temp  'tempfile';
@@ -108,9 +144,12 @@ use Carp        'carp';
 use Digest::SHA 'sha256_base64';
 
 my %data;
+my %transient;
 my %externalized_functions;
 my @data_types;
 my @script_args;
+
+$|++;
 
 sub meta::define_form {
   my ($namespace, $delegate) = @_;
@@ -130,19 +169,19 @@ meta::define_form 'meta', sub {
   carp $@ if $@;
 };
 
-__bzFASokNzruPfsSIlwZC8OG4NFNI9EfmMYeL/oWGaDs
+__ynZW5t0TeKZlfH7tCNrNhNwdHJSP7ipCx9cfBgbVth8
 
-meta::bootstrap('pod', <<'__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o');
+meta::bootstrap('pod', <<'__Bu0JNmB4+PnXErSFUjITydzG9gUH+tOkN6A5eoIdd4A');
 
 =head1 NAME
 
-object - Stateful file-based object
+Literate Perl Project
 
 =head1 SYNOPSYS
 
-object [options] action [arguments...]
+literate-perl-project new /filename/
 
-object shell
+/filename/ [action] [parameters]
 
 =head1 DESCRIPTION
 
@@ -156,19 +195,22 @@ object is rewritten only if that hashsum is correct. This ensures that the repla
 Currently the only known way to lose your data is to edit the serialization-related functions in such a way that they no longer function. However, this is not
 something most people will normally do. In the future there may be a locking mechanism to prevent unintentional edits of these attributes.
 
+=head1 USAGE
+
+A literate Perl project encapsulates a small development environment that can be useful for writing medium-sized Perl projects using a functional design
+pattern. The code is divided into sections, each of which defines a top-level function of its name. So, for instance, C<section::example> defines a function
+called C<example>. Code placed inside C<section::example> should be delimited by C<::> and C<:.>. Run this command:
+
+  C<literate-perl-project cat section::assertions>
+
+for an example of this coding style.
+
+Other data types include tests, functions, data, and meta. These are described in more detail at http://spencertipping.com#self-modifying-perl.
+
 =cut
-__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
-meta::code_filter('ocaml', <<'__QFbEjTsynjJMakDMUcNnuimkfFrOIIFYhlOcz0dVOwI');
-my ($line, %settings) = @_;
 
-if ($settings{'name'} =~ /\socaml(\s|$)/) {
-  return '\begin{ocamlcode}' if $settings{'begin'};
-  return '\end{ocamlcode}'   if $settings{'end'};
-}
-
-return $line;
-__QFbEjTsynjJMakDMUcNnuimkfFrOIIFYhlOcz0dVOwI
+__Bu0JNmB4+PnXErSFUjITydzG9gUH+tOkN6A5eoIdd4A
 
 meta::code_filter('verbatim', <<'__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s');
 my ($line, %settings) = @_;
@@ -181,65 +223,18 @@ unless ($settings{'name'}) {
 return $line;
 __AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s
 
-meta::data('cltex-vim-highlighter', <<'__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo');
-" Cleaner TeX
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   Cleaner TeX (a variant of LaTeX)
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn match  cltTitle   /^= .*$/
-syn match  cltAuthor  /^a .*$/
-syn match  cltDate    /^d .*$/
-syn match  cltBegin   /^begin$/
-syn match  cltSection /^\s*- .*$/
-syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
-
-syn match  cltEnumeratedThing /^\s*[eid]\[/
-syn match  cltEnumeratedThing /^\s*\][eid]/
-syn match  cltItem            /^\s*+\s/
-syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
-
-runtime! syntax/tex.vim
-
-hi link cltBegin    Keyword
-hi link cltTitle    Identifier
-hi link cltAuthor   Identifier
-hi link cltDate     Identifier
-
-hi link cltEnumeratedThing Special
-hi link cltItem            Special
-hi link cltQuantifiedItem  Special
-
-hi link cltSection  Type
-
-hi link cltVerbatim String
-
-let b:current_syntax = "cltex"
-__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo
-
 meta::data('default-action', <<'__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU');
 intro
 __xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU
 
-meta::data('default-profile', <<'__rLolUSEA+AtW/DzNFMZb5V2UgAzad1hcX0Goh+OY+b4');
-run
-__rLolUSEA+AtW/DzNFMZb5V2UgAzad1hcX0Goh+OY+b4
-
-meta::data('document', <<'__38zrG0j5TGSHp0RwIEolgs0s7tPFRMJUty0obo+Z+7s');
-= Literate OCaml Project
+meta::data('document', <<'__XTJAsZ2LWKGEYCet0rXSP8DwQBh2w15+p7Q6mmOdQ6A');
+= TeX Document Generator
 a Spencer Tipping
 begin
 
 - Introduction
   The \TeX{} document generator is a simple utility for encapsulating the
-  generation and compilation of \TeX{} documents. Combined with literate
-  OCaml processing, it provides a way to simultaneously write good
-  documentation and simplify the build process for your program.
+  generation and compilation of \TeX{} documents.
 
   It simplifies:
 
@@ -249,29 +244,25 @@ begin
   ]e
 
   - Usage
-    The easiest way to use the system is to clone a new project, like this:
+    The easiest way to use the system is to clone a new document, like this:
 
     ::
-    $ literate-ocaml-project clone my-project
+    $ tex-document clone my-document
     :.
 
-    Then you can edit your new project by entering its shell and issuing the
+    Then you can edit your new document by entering its shell and issuing the
     ``e'' command:
 
     ::
     $ my-document shell
     my-document$ e
     :.
-__38zrG0j5TGSHp0RwIEolgs0s7tPFRMJUty0obo+Z+7s
+__XTJAsZ2LWKGEYCet0rXSP8DwQBh2w15+p7Q6mmOdQ6A
 
-meta::data('header', <<'__SonLChWgyOqhK+2WcupCsI3GoJLNWo9cobO0PIXVAHI');
+meta::data('header', <<'__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g');
 \documentclass{article}
-\usepackage{palatino,mathpazo,amsmath,amssymb,listings}
-
-\lstnewenvironment{ocamlcode}
-  {\lstset{language=[Objective]caml,frame=tlb,basicstyle={\scriptsize\tt}}}
-  {}
-__SonLChWgyOqhK+2WcupCsI3GoJLNWo9cobO0PIXVAHI
+\usepackage{palatino,mathpazo,amsmath,amssymb}
+__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g
 
 meta::data('intro', <<'__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw');
 This is a TeX document generator.
@@ -323,53 +314,31 @@ And to extract the generated TeX:
   $ ./newdoc compile-to-tex > file
 __uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw
 
-meta::data('meta-associations', <<'__N3KxYcBOzsS3OT1/dhxdDQoOlLHlHzvjQUHQVbvR1XM');
+meta::data('meta-associations', <<'__LFbUILfqPrYMsFUSJaFljSVU6jHl6baHEj7ML+iA/Ns');
 ^function:: .pl
 ^internal_function:: .pl
 ^meta:: .pl
 ^bootstrap:: .pl
 ^data::document$ .cltex
--vim-highlighter$ .vim
-^section:: .ocamltex
+^data::vim-highlighter$ .vim
 ^unlit_converter:: .pl
 ^line_filter:: .pl
 ^code_filter:: .pl
-^profile:: .pl
-__N3KxYcBOzsS3OT1/dhxdDQoOlLHlHzvjQUHQVbvR1XM
+^section:: .perltex
+^test:: .perltex
+__LFbUILfqPrYMsFUSJaFljSVU6jHl6baHEj7ML+iA/Ns
 
-meta::data('name', <<'__qUJIiBdWgxwK2BNKAYW1jW2bfWWB3gersY5X5lBXcO8');
-literate-ocaml-project
-__qUJIiBdWgxwK2BNKAYW1jW2bfWWB3gersY5X5lBXcO8
-
-meta::data('ocamltex-vim-highlighter', <<'__t466fjjfb63cNJow0A3UqQQB7IIO1JX9bvEyjonZT4k');
-" TeX with OCaml
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   TeX with OCaml in it
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn region ocamltexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<ocaml\>.*$/ contains=ocamltexSection
-syn match  ocamltexSection /^\s*- .*$/ contained
-
-runtime! syntax/ocaml.vim
-
-hi link ocamltexSection Special
-hi link ocamltexComment Comment
-
-let b:current_syntax = "ocamltex"
-__t466fjjfb63cNJow0A3UqQQB7IIO1JX9bvEyjonZT4k
+meta::data('name', <<'__qNXapTTnlupS2sRncp0ZdtSx9Lq1wJCxENfMkDYmeUU');
+literate-perl-project
+__qNXapTTnlupS2sRncp0ZdtSx9Lq1wJCxENfMkDYmeUU
 
 meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__oZdf0jyS/kLpZfGwwuMI2OK/tt4p1OwCoY0Z0N9MWmQ');
-/tmp/literate-ocaml-project.Q7j-MmSr74MuQaObvyBbBaivonO5fF7xQvHMHCi205g/document.pdf
-__oZdf0jyS/kLpZfGwwuMI2OK/tt4p1OwCoY0Z0N9MWmQ
+meta::data('pdf-output-file', <<'__6DaRuyycnuZwaScXoGN+aCJzpisnNSHoUeHR2JgK8w4');
+/tmp/literate-perl-project.yyPHydu-O71iQkty48xCYpcF67VrX-BoTJ9s5HemGDo/document.pdf
+__6DaRuyycnuZwaScXoGN+aCJzpisnNSHoUeHR2JgK8w4
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
@@ -387,6 +356,47 @@ meta::data('tex', <<'__36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4');
 latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
 __36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4
 
+meta::data('vim-highlighter', <<'__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo');
+" Cleaner TeX
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   Cleaner TeX (a variant of LaTeX)
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn match  cltTitle   /^= .*$/
+syn match  cltAuthor  /^a .*$/
+syn match  cltDate    /^d .*$/
+syn match  cltBegin   /^begin$/
+syn match  cltSection /^\s*- .*$/
+syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
+
+syn match  cltEnumeratedThing /^\s*[eid]\[/
+syn match  cltEnumeratedThing /^\s*\][eid]/
+syn match  cltItem            /^\s*+\s/
+syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
+
+runtime! syntax/tex.vim
+
+hi link cltBegin    Keyword
+hi link cltTitle    Identifier
+hi link cltAuthor   Identifier
+hi link cltDate     Identifier
+
+hi link cltEnumeratedThing Special
+hi link cltItem            Special
+hi link cltQuantifiedItem  Special
+
+hi link cltSection  Type
+
+hi link cltVerbatim String
+
+let b:current_syntax = "cltex"
+__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo
+
 meta::function('add-to', <<'__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q');
 my ($filename) = @_;
 my @members = grep /^implementation::/, keys %data;
@@ -398,23 +408,6 @@ for (@members) {
   close $handle;
 }
 __KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q
-
-meta::function('build', <<'__4Lp2CNnntEJAojZM3II/pFzJ1LU2cfLvxlMsJgsJSsg');
-my ($profile) = @_;
-$profile ||= &{'default-profile'}();
-
-my $unlit_source_code = unlit($profile);
-my $state             = state();
-$state =~ s/\//-/g;
-my $build_directory   = "/tmp/$state";
-
-mkdir $build_directory;
-file::write("$build_directory/input.ml", $unlit_source_code);
-&{"profile::$profile"}(in              => "$build_directory/input.ml",
-                       out             => "$build_directory/$profile",
-                       profile         => $profile,
-                       build_directory => $build_directory);
-__4Lp2CNnntEJAojZM3II/pFzJ1LU2cfLvxlMsJgsJSsg
 
 meta::function('cat', <<'__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk');
 my ($name) = @_;
@@ -504,7 +497,7 @@ edit('data::document', extension => '.tex');
 reload();
 __VOcQy5WG275NZGlFODdYHYBe3oJ7/CHmTT/L9O1I6t0
 
-meta::function('edit', <<'__OtbuwBGfWZZef+v2WP0gCvvxbtpyxi1FbVD11BTjZzQ');
+meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -522,8 +515,7 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
 delete $data{$name} if length($data{$name}) == 0;
 
 save();
-
-__OtbuwBGfWZZef+v2WP0gCvvxbtpyxi1FbVD11BTjZzQ
+__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -540,35 +532,21 @@ my ($name) = @_;
 associate($name, join('', <STDIN>));
 __oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA
 
-meta::function('install-vim-highlighters', <<'__S9G7+5oBYqFAmTiBsEi0BzDB6UeM75H09wm4tG6uHGA');
+meta::function('install-vim-highlighter', <<'__3qCLWaQi9Dp8Xjs/XCdFMcPXj4H4+DWldUwYv9/fAGs');
 my $home = $ENV{'HOME'};
 mkdir "$home/.vim";
 mkdir "$home/.vim/syntax";
-file::write("$home/.vim/syntax/cltex.vim", retrieve('data::cltex-vim-highlighter'));
-file::write("$home/.vim/syntax/ocamltex.vim", retrieve('data::ocamltex-vim-highlighter'));
+file::write("$home/.vim/syntax/cltex.vim", retrieve('data::vim-highlighter'));
 
 <<"EOF";
-The highlighters were created successfully. To have syntax highlighting activated
-automatically, append this to your .vimrc:
+The highlighter was created successfully. To have syntax highlighting activated
+automatically, append this line to your .vimrc:
 
-  au BufRead,BufNewFile *.cltex    set filetype=cltex
-  au BufRead,BufNewFile *.ocamltex set filetype=ocamltex
+  au BufRead,BufNewFile *.cltex set filetype=cltex
 
 Alternately, you can run $0 update-vimrc.
 EOF
-__S9G7+5oBYqFAmTiBsEi0BzDB6UeM75H09wm4tG6uHGA
-
-meta::function('list', <<'__+bxJbCjbt91ELEYggMKi3XgsZ3Nf9oa0lPiCTWTW384');
-my ($line_number, $profile) = @_;
-$profile ||= 'run';
-my @lines = split /\n/, unlit($profile);
-my $result = '';
-for (0 .. scalar(@lines)) {
-  $result .= sprintf "% 4d: %s\n", $_ + 1, $lines[$_] if abs ($_ + 1 - $line_number) < 10;
-}
-$result;
-
-__+bxJbCjbt91ELEYggMKi3XgsZ3Nf9oa0lPiCTWTW384
+__3qCLWaQi9Dp8Xjs/XCdFMcPXj4H4+DWldUwYv9/fAGs
 
 meta::function('lock', <<'__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y');
 my (undef, undef, $mode) = stat $0;
@@ -699,69 +677,23 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
-meta::function('unlit', <<'__qJxQQTnIdxxWBaOiySqDtTNC9V8xmwwiJXmRFACA8kA');
-my ($profile, %options) = @_;
-$profile ||= &{'default-profile'}();
-
-my $literate_code    = join "\n", map retrieve($_), grep /^section::/, sort keys %data;
-my $inside_code      = 0;
-my $code_indentation = 0;
-my $resulting_code   = '(* ';
-
-for my $line (split /\n/, $literate_code) {
-  if ($inside_code && $line =~ /^\s*:\.$/) {
-    $inside_code = $code_indentation = 0;
-    $line =~ s/^/(* /;
-  }
-
-  if ($inside_code) {
-    my $spaces = ' ' x $code_indentation;
-    $line =~ s/^$spaces//;
-  }
-
-  if ($line =~ /^(\s*)::(.*)$/) {
-    my $spaces             = $1;
-    my $code_section_rules = $2;
-    my $indentation        = length $spaces;
-
-    if ($code_section_rules =~ /\socaml(\s|$)/) {
-      # See whether we should include this code piece. Its inclusion depends on the active
-      # profile and whatever guards are present.
-
-      if ($code_section_rules =~ /if\s*\(([^)]*)\)/) {
-        my $guards   = $1;
-        my @profiles = split /\|/, $guards;
-
-        if (grep {s/^\s*//; s/\s*$//; $_ eq $profile} @profiles) {
-          $inside_code      = 1;
-          $code_indentation = $indentation;
-          $line =~ s/$/ *)/;
-        }
-      } else {
-        $inside_code      = 1;
-        $code_indentation = $indentation;
-        $line =~ s/$/ *)/;
-      }
-    }
-  }
-
-  $resulting_code .= "$line\n";
+meta::function('test', <<'__GbjV5vpkpoWlPPk0QJP7Mpj0I5xr+SMcP32FT6/QhI4');
+for (keys %{$transient{'tests'}}) {
+  print "Running test $_\n";
+  $transient{'tests'}{$_}->();
 }
-
-$resulting_code . ' *)';
-__qJxQQTnIdxxWBaOiySqDtTNC9V8xmwwiJXmRFACA8kA
+__GbjV5vpkpoWlPPk0QJP7Mpj0I5xr+SMcP32FT6/QhI4
 
 meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA
 
-meta::function('update-vimrc', <<'__sRyErNBmLBe0jRSE6VYb8QPNC/6/rBd+nf5X7r3XBtM');
+meta::function('update-vimrc', <<'__QweSkvdteATxlMZfDti3sl2iWNE+LbkHc1E7FkqNuCg');
 open my $fh, '>>', "$ENV{'HOME'}/.vimrc";
-print $fh "au BufRead,BufNewFile *.cltex    set filetype=cltex\n";
-print $fh "au BufRead,BufNewFile *.ocamltex set filetype=ocamltex";
+print $fh "au BufRead,BufNewFile *.cltex set filetype=cltex";
 close $fh;
-__sRyErNBmLBe0jRSE6VYb8QPNC/6/rBd+nf5X7r3XBtM
+__QweSkvdteATxlMZfDti3sl2iWNE+LbkHc1E7FkqNuCg
 
 meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
 <<"EOD" . join '  ', split /\n/, ls ();
@@ -885,7 +817,7 @@ $line =~ s/^begin$/$document_header/;
 $line;
 __1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE
 
-meta::line_filter('convert_itemized_environments', <<'__gAE2Xtr56GtOlw89sIcBSU7zkQUP/eBlx479kht7O2s');
+meta::line_filter('convert_itemized_environments', <<'__ALAptDKGAFawh7jgFZo/RoW5oHCjUVEUEn68mWYAARw');
 my ($line) = @_;
 
 $line =~ s/^\s*\+ /\\item /;
@@ -895,19 +827,14 @@ $line =~ s/^\s*e\[$/\\begin{enumerate}/;
 $line =~ s/^\s*i\[$/\\begin{itemize}/;
 $line =~ s/^\s*d\[$/\\begin{description}/;
 
-$line =~ s/^\s*a\[$/\\begin{align*}/;
-
 $line =~ s/^\s*\]e$/\\end{enumerate}/;
 $line =~ s/^\s*\]i$/\\end{itemize}/;
 $line =~ s/^\s*\]d$/\\end{description}/;
 
-$line =~ s/^\s*\]a$/\\end{align*}/;
-
 $line;
+__ALAptDKGAFawh7jgFZo/RoW5oHCjUVEUEn68mWYAARw
 
-__gAE2Xtr56GtOlw89sIcBSU7zkQUP/eBlx479kht7O2s
-
-meta::line_filter('convert_sections', <<'__r7g/dpG55JIga/lA77C7KlRs+wzunUtHKGgnLpn34CY');
+meta::line_filter('convert_sections', <<'__lmhXPw+0a86ufxG3kCALtSl8Raqrt+7YZomx7zISUbw');
 my ($line) = @_;
 
 my %indentation_levels = (
@@ -919,78 +846,42 @@ my %indentation_levels = (
 
 if ($line =~ /^(\s*)- (.*)$/) {
   my $section = $indentation_levels{length($1)} || die "Invalid indentation level:\n$_";
-  my $section_name = $2;
-  my $label_name   = lc $section_name;
-
-  $label_name =~ s/[^A-Za-z0-9.]/-/g;
-
-  "${section} {$section_name} \\label{sec:$label_name}";
+  "${section} {${2}}";
 } else {
   $line;
 }
+__lmhXPw+0a86ufxG3kCALtSl8Raqrt+7YZomx7zISUbw
 
-__r7g/dpG55JIga/lA77C7KlRs+wzunUtHKGgnLpn34CY
-
-meta::profile('debug', <<'__RGdbCxc2zlwCZFKEQS8VGmaouCqzdyUqPk+E3KjrEw0');
-my %options = @_;
-`ocaml $options{'in'}`;
-__RGdbCxc2zlwCZFKEQS8VGmaouCqzdyUqPk+E3KjrEw0
-
-meta::profile('run', <<'__RGdbCxc2zlwCZFKEQS8VGmaouCqzdyUqPk+E3KjrEw0');
-my %options = @_;
-`ocaml $options{'in'}`;
-__RGdbCxc2zlwCZFKEQS8VGmaouCqzdyUqPk+E3KjrEw0
-
-meta::section('00-introduction', <<'__F4d/G+dyCjJNgMvAqDBcQhYBPlR3xyw4JMajrzOb1tE');
-- Introduction to Literate Coding
-  Literate coding allows you to write \TeX{} primarily, but insert code snippets where appropriate. For example:
-
-  :: ocaml
-  open Printf
-  let _ = Printf.printf "Hello world!\n"
-  :.
-
-  Compiling the system is also simple:
+meta::section('assertions', <<'__jK9Rd6rc39V77SvLFiA3wvG59KYNDL1rHNHhQQRXSMI');
+- Assertions for Testing
+  Here are some sample assertions that can be used:
 
   ::
-  $ ./my-project compile [optional-output-filename]
+  sub assert (&$) {
+    my $thunk = $_[0];
+    my $result = eval {$thunk->()};
+    print "| error: $@\n"   if     $@;
+    print "| fail: $_[1]\n" unless $result;
+    print "| pass: $_[1]\n" if     $result;
+  }
   :.
+__jK9Rd6rc39V77SvLFiA3wvG59KYNDL1rHNHhQQRXSMI
 
-- Build Profiles
-  Each build profile provides a set of compiler options. In addition, sections of code can be conditionally included using this syntax at the beginning of your
-  \verb|::|-\verb|:.| blocks:
+meta::test('example', <<'__dbBZRBhTNxflE30E42LT3WYqMV2jf+zCRtnZdwWdZDg');
+- Example Tests
+  You can replace these with your own tests, or add new ones.
 
   ::
-  ocaml if(profile1 | profile2 | ... | profileN)
+  assert {3 == 3} 'numerical equality';
+  assert {3 != 4} 'numerical inequality';
   :.
+__dbBZRBhTNxflE30E42LT3WYqMV2jf+zCRtnZdwWdZDg
 
-  :: ocaml if (run)
-  let _ = Printf.printf "You seem to be using the /run/ profile.\n"
-  :.
-
-  Each build profile can be configured independently using a \verb|profile::| variable. Profiles are simply Perl functions that will be passed a hash containing
-  these parameters:
-
-  e[
-    +[\tt in]               Input filename after literate-to-source (unlit) conversion.
-    +[\tt out]              Expected output filename.
-    +[\tt profile]          Name of the active build profile.
-    +[\tt build\_directory] Absolute pathname of the build directory.
-  ]e
-
-  There may also be other parameters later. An example of a simple build profile is:
-
-  ::
-  my %options = @_;
-  `ocamlopt $options{'in'} -o $options{'out'}`;
-  :.
-__F4d/G+dyCjJNgMvAqDBcQhYBPlR3xyw4JMajrzOb1tE
-
-meta::unlit_converter('create_sections', <<'__sUEcZkQbKEhRUbj5hKceGP4VevPCE9+rz0yea91XZVc');
+meta::unlit_converter('create_sections', <<'__3B8xPfI6sd/h5qx4VCgsXNpNnGyHsVGdHsAwUWihmXw');
 my ($document) = @_;
-$document .= "\n" . retrieve($_) . "\n" for (grep /^section::/, sort keys %data);
+$document .= "\n" . retrieve($_) . "\n" for (grep /^section::/ || /^test::/, sort keys %data);
 $document;
-__sUEcZkQbKEhRUbj5hKceGP4VevPCE9+rz0yea91XZVc
+__3B8xPfI6sd/h5qx4VCgsXNpNnGyHsVGdHsAwUWihmXw
 
 meta::unlit_converter('main', <<'__3D082OWBmT2cWw4D6ktyDGp1MHknawaTDW2B0gvZPyM');
 my ($document) = @_;

@@ -31,16 +31,17 @@ meta::meta('datatypes::bootstrap', <<'__guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLC
 meta::define_form 'bootstrap', sub {};
 __guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM
 
-meta::meta('datatypes::data', <<'__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68');
+meta::meta('datatypes::data', <<'__96H42jUO3qe63MqMco7Ih6e1BtrIcB+e18KFqPpfIek');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "data::$name";
   *{$name} = sub {
-    $data{"data::$name"} = $_[1] || join '', <STDIN> if @_ > 0 && @_[0] == '=';
-    $data{"data::$name"};
+    associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    retrieve("data::$name");
   };
 };
-__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68
+
+__96H42jUO3qe63MqMco7Ih6e1BtrIcB+e18KFqPpfIek
 
 meta::meta('datatypes::function', <<'__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0');
 meta::define_form 'function', sub {
@@ -178,13 +179,26 @@ messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %d
 associate($name, $value || join('', <STDIN>) || "\n");
 __4e/yca7FeKtJK0U61l9uCtsCPTiznglZlwh6U3iRLvY
 
-meta::function('edit', <<'__35YrIzrL8rUWpvFrOQY4NIL0KybZ8OEndLy3JkIIEfQ');
+meta::function('edit', <<'__OtbuwBGfWZZef+v2WP0gCvvxbtpyxi1FbVD11BTjZzQ');
 my ($name, %options) = @_;
+
+my $meta_extension = join '', grep {
+  my $s = $_;
+  $s =~ s/\s.*$//;
+  $name =~ /$s/
+} split /\n/, &{'meta-associations'}();
+
+$meta_extension =~ s/^.*\s//;
+chomp $meta_extension;
+
 messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} keys %data;
-associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options),
+associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $meta_extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 delete $data{$name} if length($data{$name}) == 0;
-__35YrIzrL8rUWpvFrOQY4NIL0KybZ8OEndLy3JkIIEfQ
+
+save();
+
+__OtbuwBGfWZZef+v2WP0gCvvxbtpyxi1FbVD11BTjZzQ
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -247,7 +261,7 @@ for my $to_be_deleted (@_) {
 delete @data{@_};
 __7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww
 
-meta::function('save', <<'__HuNR2A6/zt/GGZDRiR1x82a4nBxpAlIR1QGc4kUySto');
+meta::function('save', <<'__m9TBLhwDWYJ99v28UxGiil8BHQdaAaLr3Hd7X8OTecA');
 my $serialized_data = serialize();
 my $final_state     = state();
 
@@ -261,10 +275,14 @@ if ($observed_state ne $final_state) {
   messages::error("The state of this object ($final_state) is inconsistent with the state of $temporary_filename ($observed_state).\n" .
                   "$0 has not been updated.");
 } else {
-  file::write($0, $serialized_data);
-  unlink $temporary_filename;
+  eval {file::write($0, $serialized_data)};
+  warn $@ if $@;
+  my $observed_self_state = `perl $0 state`;
+  chomp $observed_self_state;
+  unlink $temporary_filename if $observed_self_state eq $final_state;
 }
-__HuNR2A6/zt/GGZDRiR1x82a4nBxpAlIR1QGc4kUySto
+
+__m9TBLhwDWYJ99v28UxGiil8BHQdaAaLr3Hd7X8OTecA
 
 meta::function('serialize', <<'__KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw');
 my @keys_without_internals = grep(!/^internal::/, sort keys %data);

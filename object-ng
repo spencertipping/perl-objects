@@ -1,15 +1,12 @@
 #!/usr/bin/perl
 
-use File::Temp  'tempfile';
-use Carp        'carp';
-use Digest::SHA 'sha256_base64';
+use File::Temp  qw/tempfile/;
+use Digest::SHA qw/sha256_base64/;
+use Storable    qw/freeze thaw/;
 
 my %data;
-my %externalized_functions;
-my @data_types;
-my @script_args;
 
-sub meta::define_form {
+$data->{'define_form'} = sub {
   my ($namespace, $delegate) = @_;
   push @data_types, $namespace;
   *{"meta::${namespace}::implementation"} = $delegate;
@@ -24,23 +21,23 @@ sub meta::define_form {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   eval $value;
-  carp $@ if $@;
+  warn $@ if $@;
 };
 
 meta::meta('datatypes::bootstrap', <<'__guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM');
 meta::define_form 'bootstrap', sub {};
 __guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM
 
-meta::meta('datatypes::data', <<'__j7lFraXGRfKk8ymj2mDJhNbCQMk9FSciN1hdDhzM99U');
+meta::meta('datatypes::data', <<'__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "data::$name";
   *{$name} = sub {
-    associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
-    retrieve("data::$name");
+    $data{"data::$name"} = $_[1] || join '', <STDIN> if @_ > 0 && @_[0] == '=';
+    $data{"data::$name"};
   };
 };
-__j7lFraXGRfKk8ymj2mDJhNbCQMk9FSciN1hdDhzM99U
+__BbqBTgoNfUhDgUoDmty0D7Okp/jdQ8n6XWTCIcsKc68
 
 meta::meta('datatypes::function', <<'__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0');
 meta::define_form 'function', sub {
@@ -181,7 +178,7 @@ messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %d
 associate($name, $value || join('', <STDIN>) || "\n");
 __4e/yca7FeKtJK0U61l9uCtsCPTiznglZlwh6U3iRLvY
 
-meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
+meta::function('edit', <<'__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -197,9 +194,7 @@ messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} key
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $meta_extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 delete $data{$name} if length($data{$name}) == 0;
-
-save();
-__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE
+__hirfvFHbr2CiWw3TUKJSeUxwR+bKc0d3kDs+J58/w7k
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -262,7 +257,7 @@ for my $to_be_deleted (@_) {
 delete @data{@_};
 __7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww
 
-meta::function('save', <<'__uWXGnrQr+A7Cl0zcsDuiokbWAw1XdMdjeq9gDcTMJIw');
+meta::function('save', <<'__vhEbj5ff7CB7CfXgtAmJ/BCNllK5d8QgJfHWaHlBu70');
 my $serialized_data = serialize();
 my $final_state     = state();
 
@@ -279,10 +274,9 @@ if ($observed_state ne $final_state) {
   eval {file::write($0, $serialized_data)};
   warn $@ if $@;
   my $observed_self_state = `perl $0 state`;
-  chomp $observed_self_state;
   unlink $temporary_filename if $observed_self_state eq $final_state;
 }
-__uWXGnrQr+A7Cl0zcsDuiokbWAw1XdMdjeq9gDcTMJIw
+__vhEbj5ff7CB7CfXgtAmJ/BCNllK5d8QgJfHWaHlBu70
 
 meta::function('serialize', <<'__KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw');
 my @keys_without_internals = grep(!/^internal::/, sort keys %data);
