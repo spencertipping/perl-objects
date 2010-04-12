@@ -4,6 +4,8 @@ use File::Temp  'tempfile';
 use Carp        'carp';
 use Digest::SHA 'sha256_base64';
 
+$|++;
+
 my %data;
 my %externalized_functions;
 my @data_types;
@@ -63,12 +65,14 @@ meta::meta('internal::runtime', <<'__Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
 meta::define_form 'internal', \&meta::meta::implementation;
 __Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
 
-meta::bootstrap('initialization', <<'__bzFASokNzruPfsSIlwZC8OG4NFNI9EfmMYeL/oWGaDs');
+meta::bootstrap('initialization', <<'__eAoB//22c4PJnJQF2S4Px24njtvjLQIauFTibuoc1gY');
 #!/usr/bin/perl
 
 use File::Temp  'tempfile';
 use Carp        'carp';
 use Digest::SHA 'sha256_base64';
+
+$|++;
 
 my %data;
 my %externalized_functions;
@@ -93,7 +97,7 @@ meta::define_form 'meta', sub {
   carp $@ if $@;
 };
 
-__bzFASokNzruPfsSIlwZC8OG4NFNI9EfmMYeL/oWGaDs
+__eAoB//22c4PJnJQF2S4Px24njtvjLQIauFTibuoc1gY
 
 meta::bootstrap('pod', <<'__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o');
 
@@ -175,11 +179,17 @@ messages::error("No such attribute $from") unless $data{$from};
 $data{$from};
 __yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4
 
-meta::function('create', <<'__4e/yca7FeKtJK0U61l9uCtsCPTiznglZlwh6U3iRLvY');
+meta::function('create', <<'__KqmhRHM8upjmvV6ihzwt0Bw/ekn/vsssH3dE6Km0vck');
 my ($name, $value) = @_;
 messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %data;
-associate($name, $value || join('', <STDIN>) || "\n");
-__4e/yca7FeKtJK0U61l9uCtsCPTiznglZlwh6U3iRLvY
+if ($value) {
+  associate($name, $value);
+} else {
+  associate($name,'');
+  edit ($name);
+}
+
+__KqmhRHM8upjmvV6ihzwt0Bw/ekn/vsssH3dE6Km0vck
 
 meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
 my ($name, %options) = @_;
@@ -206,15 +216,40 @@ my $name = shift;
 grep {$_ eq $name} keys %data;
 __bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk
 
+meta::function('export', <<'__GGT5NuryUwnWJLFk9QuWalyMXeo7uCT4nMAn/UnkCa4');
+# Exports data into a text file.
+#   export attr1 attr2 attr3 ... file.txt
+
+my $name = pop @_;
+my @attributes = @_;
+
+if (@attributes) {
+  my $file = join "\n", map {cat($_)} @attributes;
+  file::write ($name, $file);
+} else {
+  messages::error ("Not enough arguments");
+}
+
+__GGT5NuryUwnWJLFk9QuWalyMXeo7uCT4nMAn/UnkCa4
+
 meta::function('grab', <<'__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8');
 my ($filename, @attribute_names) = @_;
 associate("implementation::$_", `$filename cat $_`) for @attribute_names;
 __sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8
 
-meta::function('import', <<'__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA');
-my ($name) = @_;
-associate($name, join('', <STDIN>));
-__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA
+meta::function('import', <<'__GfbLY6C546YO6McrmMsEzmhPS+Gdi7M0sI00aEVSto0');
+my $name  = pop @_;
+my @files = @_;
+
+if (@files) {
+  my $files = join "", map {file::read ($_)} @files;
+  associate ($name, $files); 
+}
+else {
+  associate($name, join('', <STDIN>));
+}
+
+__GfbLY6C546YO6McrmMsEzmhPS+Gdi7M0sI00aEVSto0
 
 meta::function('lock', <<'__VTyQSQauC4LFHxYTJhus499/qkzVt6stbxsovwA5kGs');
 my (undef, undef, $mode) = stat $0;
@@ -236,6 +271,12 @@ messages::error("The '$from' attribute does not exist.") unless grep $from, keys
 $data{$to} = $data{$from};
 delete $data{$from};
 __PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y
+
+meta::function('perl', <<'__qVgCXY6incnpC0PQJp3P9kNpxRfhrTVhvB4PU09xapE');
+eval($_[0]);
+print $@ if $@;
+
+__qVgCXY6incnpC0PQJp3P9kNpxRfhrTVhvB4PU09xapE
 
 meta::function('pull', <<'__IIDq/dsWHEYECpYpzXqTvkcve38taGb7d0m+Vsq+TQk');
 my ($class_name) = @_;
@@ -293,7 +334,7 @@ join "\n", $data{'bootstrap::initialization'},
            "__END__";
 __KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw
 
-meta::function('shell', <<'__g0FKviVlh5VYzuV+REx/lpPg3EmMtycTaZTK85Zq/SU');
+meta::function('shell', <<'__TNkPWqJRr0LhP3/rDW8I/Ztchru+UWiv3fDm3hThlIs');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -301,28 +342,36 @@ $term->ornaments(0);
 my $prompt = name() . '$ ';
 my $OUT = $term->OUT || \*STDOUT;
 
+$term->Attribs->{attempted_completion_function} = \&complete;
+
 while (defined ($_ = $term->readline($prompt))) {
   my $command_line = $_;
-  my @args = split /\s+/;
+  my @args = grep length, split /\s+|("[^"\\]*(?:\\")?")/;
   my $function_name = shift @args;
 
   return if $function_name eq 'exit';
 
-  if ($externalized_functions{$function_name}) {
-    my $result = eval {&{$function_name}(@args)};
-    messages::warning($@) if $@;
-    chomp $result;
-    print $OUT $result, "\n" unless $@;
-  } else {
-    messages::warning("Command not found: $function_name");
+  s/^"(.*)"$/\1/, s/\\\\"/"/g for @args;
+
+  if ($function_name) {
+    if ($externalized_functions{$function_name}) {
+      my $result = eval {&{$function_name}(@args)};
+      messages::warning($@) if $@;
+      chomp $result;
+      print $OUT $result, "\n" unless $@;
+    } else {
+      messages::warning("Command not found: $function_name");
+    }
   }
 
-  $term->addhistory($command_line) if $command_line;
-  $prompt = name() . '$ ';
+  for my $watch (@{$transient{'watch_list'}}) {
+    print $OUT eval($watch), "\n";
+    print $OUT "Error evaluating watched expression $watch: $@\n" if $@;
+  }
 
-  save();
+  $prompt = name() . '$ ';
 }
-__g0FKviVlh5VYzuV+REx/lpPg3EmMtycTaZTK85Zq/SU
+__TNkPWqJRr0LhP3/rDW8I/Ztchru+UWiv3fDm3hThlIs
 
 meta::function('size', <<'__lDGr6yVnDwcDWLkJH16MNukltjG2ypBSk/ktYb80h80');
 length(serialize());
@@ -364,6 +413,42 @@ my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
 __T4JEqOUYjMzssdVwV/rdgAhvr0Vz9TQUo0noTdeBLxw
+
+meta::internal_function('complete', <<'__4cC3h2m6zI39bcCB7iNvbkyOFxwg216DdrXHkWcR6N8');
+my @functions  = sort keys %externalized_functions;
+my @attributes = sort keys %data;
+
+sub match {
+  my ($text, @options) = @_;
+  my @matches = sort grep /^$text/, @options;
+
+  if    (@matches == 0) {return undef;}
+  elsif (@matches == 1) {return $matches [0];}
+  elsif (@matches >  1) {return ((longest ($matches [0], $matches [@matches - 1])), @matches);}
+}
+
+sub longest {
+  my ($s1, $s2) = @_; 
+  return substr ($s1, 0, length $1) if ($s1 ^ $s2) =~ /^(\0*)/;
+  return ''; 
+}
+
+# This is another way to implement autocompletion.
+#
+# my $attribs = $term->Attribs;
+# $attribs->{completion_entry_function} = $attribs->{list_completion_function};
+# $attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions];
+
+my ($text, $line) = @_;
+if ($line =~ / /) {
+  # Start matching attribute names.
+  match ($text, @attributes);
+} else {
+  # Start of line, so it's a function.
+  match ($text, @functions);
+}
+
+__4cC3h2m6zI39bcCB7iNvbkyOFxwg216DdrXHkWcR6N8
 
 meta::internal_function('execute', <<'__FfzmdPKSa4vnT4WNSN3uCxnwrUFKfkQbS6auoIa/SgE');
 my ($name, %options) = @_;
