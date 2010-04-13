@@ -7,6 +7,7 @@ use Digest::SHA 'sha256_base64';
 $|++;
 
 my %data;
+my %transient;
 my %externalized_functions;
 my @data_types;
 my @script_args;
@@ -61,11 +62,58 @@ meta::define_form 'internal_function', sub {
 };
 __heBxmlI7O84FgR+9+ULeiCTWJ4hqd079Z02rZnl9Ong
 
+meta::meta('datatypes::library', <<'__3RHc2q2OKjeHL1QRq6jhHHCeSrNLDPWTwSax7MclXRE');
+meta::define_form 'library', sub {
+  eval $_[1];
+  warn $@ if $@;
+};
+__3RHc2q2OKjeHL1QRq6jhHHCeSrNLDPWTwSax7MclXRE
+
+meta::meta('datatypes::list-type', <<'__OKczvJ+6wi8VPNFcZ9ohlXjw+ychodWCfcELdli9p+w');
+meta::define_form '_list_type', sub {
+  my ($outer_name, $outer_value) = @_;
+  $externalized_functions{$outer_name} = "_list_type::$outer_name";
+  
+  *{$outer_name} = sub {
+    associate("${outer_value}::$_", '') for @_;
+  };
+
+  meta::define_form $outer_value, sub {
+    my ($name, $value) = @_;
+    $externalized_functions{$name} = "${outer_value}::$name";
+    *{$name} = sub {
+      my ($command, @xs) = @_;
+      my $xs = join "\n", @xs;
+      return grep length, split /\n/, retrieve("${outer_value}::$name")               if $command eq 'items';
+      associate("${outer_value}::$name", retrieve("${outer_value}::$name") . "\n$xs") if $command eq 'add' || $command eq '<<';
+      edit("${outer_value}::$name")                                                   if $command eq 'edit';
+      return retrieve("${outer_value}::$name");
+    };
+  };
+};
+__OKczvJ+6wi8VPNFcZ9ohlXjw+ychodWCfcELdli9p+w
+
+meta::meta('datatypes::note', <<'__TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34');
+meta::define_form 'note', sub {
+  my ($name, undef) = @_;
+  $externalized_functions{$name} = "note::$name";
+  *{$name} = sub {edit("note::$name")};
+};
+__TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
+
+meta::meta('datatypes::vim-highlighter', <<'__vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0');
+meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
+__vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0
+
 meta::meta('internal::runtime', <<'__Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA');
 meta::define_form 'internal', \&meta::meta::implementation;
 __Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
 
-meta::bootstrap('initialization', <<'__eAoB//22c4PJnJQF2S4Px24njtvjLQIauFTibuoc1gY');
+meta::_list_type('list', <<'__ozA5XMClOtEgdzZUav/0c1lAk3Vku/dc4e2tQHgNkTk');
+list
+__ozA5XMClOtEgdzZUav/0c1lAk3Vku/dc4e2tQHgNkTk
+
+meta::bootstrap('initialization', <<'__plktoDCjGQioE48vwfrH0xL3ulcYnTWp+fUvaFwRnnc');
 #!/usr/bin/perl
 
 use File::Temp  'tempfile';
@@ -75,6 +123,7 @@ use Digest::SHA 'sha256_base64';
 $|++;
 
 my %data;
+my %transient;
 my %externalized_functions;
 my @data_types;
 my @script_args;
@@ -97,45 +146,20 @@ meta::define_form 'meta', sub {
   carp $@ if $@;
 };
 
-__eAoB//22c4PJnJQF2S4Px24njtvjLQIauFTibuoc1gY
-
-meta::bootstrap('pod', <<'__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o');
-
-=head1 NAME
-
-object - Stateful file-based object
-
-=head1 SYNOPSYS
-
-object [options] action [arguments...]
-
-object shell
-
-=head1 DESCRIPTION
-
-Stateful objects preserve their state between executions by rewriting themselves. Each time the script exits it replaces its contents with its new state. Thus
-state management, for user-writable scripts, is completely transparent.
-
-An object rewrites itself only if its state has changed. This may seem like a dangerous operation, but some checks are put into place to ensure that it goes
-smoothly. First, the object is initially written to a separate file. Next, that file is executed and asked to provide a hashsum of its contents. The original
-object is rewritten only if that hashsum is correct. This ensures that the replacement object is functional and has the right data.
-
-Currently the only known way to lose your data is to edit the serialization-related functions in such a way that they no longer function. However, this is not
-something most people will normally do. In the future there may be a locking mechanism to prevent unintentional edits of these attributes.
-
-=cut
-__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
+__plktoDCjGQioE48vwfrH0xL3ulcYnTWp+fUvaFwRnnc
 
 meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
 shell
 __zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
 
-meta::data('meta-associations', <<'__GGcLMIdIpQPyuKPkIVDso+D8DmmbfkaLqgG4z5YhJeA');
+meta::data('meta-associations', <<'__S6Cws215rfkeL7uHARRL6Hl6AerdHCmI86Od37/NZKg');
 ^function:: .pl
+^library:: .pl
 ^internal_function:: .pl
 ^meta:: .pl
 ^bootstrap:: .pl
-__GGcLMIdIpQPyuKPkIVDso+D8DmmbfkaLqgG4z5YhJeA
+^vim_highlighter:: .vim
+__S6Cws215rfkeL7uHARRL6Hl6AerdHCmI86Od37/NZKg
 
 meta::data('name', <<'__KVjUFtCKpaRy17UJA2y36v1UKt2EUn5moUXqZMtM3HU');
 object
@@ -179,7 +203,7 @@ messages::error("No such attribute $from") unless $data{$from};
 $data{$from};
 __yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4
 
-meta::function('create', <<'__KqmhRHM8upjmvV6ihzwt0Bw/ekn/vsssH3dE6Km0vck');
+meta::function('create', <<'__YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc');
 my ($name, $value) = @_;
 messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %data;
 if ($value) {
@@ -188,10 +212,9 @@ if ($value) {
   associate($name,'');
   edit ($name);
 }
+__YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc
 
-__KqmhRHM8upjmvV6ihzwt0Bw/ekn/vsssH3dE6Km0vck
-
-meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
+meta::function('edit', <<'__wmkQAgPhtPrNx2Sc88M1MNK4gG2sn/UGqsnAtRv6ksY');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -209,7 +232,7 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
 delete $data{$name} if length($data{$name}) == 0;
 
 save();
-__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE
+__wmkQAgPhtPrNx2Sc88M1MNK4gG2sn/UGqsnAtRv6ksY
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -251,34 +274,37 @@ else {
 
 __GfbLY6C546YO6McrmMsEzmhPS+Gdi7M0sI00aEVSto0
 
-meta::function('lock', <<'__VTyQSQauC4LFHxYTJhus499/qkzVt6stbxsovwA5kGs');
+meta::function('lock', <<'__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y');
 my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
-
-__VTyQSQauC4LFHxYTJhus499/qkzVt6stbxsovwA5kGs
+__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y
 
 meta::function('ls', <<'__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg');
 join("\n", sort keys %externalized_functions);
 __M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg
 
-meta::function('ls-a', <<'__6jKXRDXpIkzIOkcLtB2FOSTuZxqjBLyLZsF1vEmVn18');
-join("\n", map {"  $_"} sort keys %data) . "\n";
-__6jKXRDXpIkzIOkcLtB2FOSTuZxqjBLyLZsF1vEmVn18
+meta::function('ls-a', <<'__3Ou+kVmaLIe1oZKBOufKY7pSsksgTSAfNeXRniPFZPk');
+join("\n", sort keys %data);
+__3Ou+kVmaLIe1oZKBOufKY7pSsksgTSAfNeXRniPFZPk
 
-meta::function('mv', <<'__PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y');
+meta::function('mv', <<'__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4');
 my ($from, $to) = @_;
 messages::error("The '$from' attribute does not exist.") unless grep $from, keys %data;
-$data{$to} = $data{$from};
-delete $data{$from};
-__PY7iwIY+6QtPN4V5hV4MOImRJVAKDkMmEKtkN34cv5Y
+associate($to, retrieve($from));
+rm($from);
+__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4
 
-meta::function('perl', <<'__qVgCXY6incnpC0PQJp3P9kNpxRfhrTVhvB4PU09xapE');
-eval($_[0]);
-print $@ if $@;
+meta::function('perl', <<'__Ojd593Fa9fx1Yx2XuPzK6WTUyxO70Nbmlbl9YRodUWA');
+my $result = eval($_[0]);
+$@ ? $@ : $result;
+__Ojd593Fa9fx1Yx2XuPzK6WTUyxO70Nbmlbl9YRodUWA
 
-__qVgCXY6incnpC0PQJp3P9kNpxRfhrTVhvB4PU09xapE
+meta::function('pop-state', <<'__eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM');
+%data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
+reload();
+__eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM
 
-meta::function('pull', <<'__IIDq/dsWHEYECpYpzXqTvkcve38taGb7d0m+Vsq+TQk');
+meta::function('pull', <<'__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg');
 my ($class_name) = @_;
 my @attributes = grep /^implementation::/, split /\n/, `$class_name ls-a`;
 
@@ -288,8 +314,13 @@ for (@attributes) {
   print STDERR "Adding $_\n";
   associate(basename($_), `$class_name cat "$_"`);
 }
+__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg
 
-__IIDq/dsWHEYECpYpzXqTvkcve38taGb7d0m+Vsq+TQk
+meta::function('push-state', <<'__ik0ofu7R8gHAKSmMjek79V+yfgdjdK5Jmtwf7h8SpJk');
+push @{$transient{'states'} = $transient{'states'} || []}, {%data};
+my $state_count = scalar @{$transient{'states'}};
+"There are now $state_count states on the stack.";
+__ik0ofu7R8gHAKSmMjek79V+yfgdjdK5Jmtwf7h8SpJk
 
 meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
@@ -334,24 +365,24 @@ join "\n", $data{'bootstrap::initialization'},
            "__END__";
 __KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw
 
-meta::function('shell', <<'__TNkPWqJRr0LhP3/rDW8I/Ztchru+UWiv3fDm3hThlIs');
+meta::function('shell', <<'__mzNaDzdnJhpI/Va1/nY8LTN9BQtfr77CFKIeK2GdIC0');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
 $term->ornaments(0);
-my $prompt = name() . '$ ';
+my $prompt = &{'name'}() . '$ ';
 my $OUT = $term->OUT || \*STDOUT;
 
 $term->Attribs->{attempted_completion_function} = \&complete;
 
 while (defined ($_ = $term->readline($prompt))) {
   my $command_line = $_;
-  my @args = grep length, split /\s+|("[^"\\]*(?:\\")?")/;
+  my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
   my $function_name = shift @args;
 
   return if $function_name eq 'exit';
 
-  s/^"(.*)"$/\1/, s/\\\\"/"/g for @args;
+  s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
 
   if ($function_name) {
     if ($externalized_functions{$function_name}) {
@@ -369,9 +400,9 @@ while (defined ($_ = $term->readline($prompt))) {
     print $OUT "Error evaluating watched expression $watch: $@\n" if $@;
   }
 
-  $prompt = name() . '$ ';
+  $prompt = &{'name'}() . '$ ';
 }
-__TNkPWqJRr0LhP3/rDW8I/Ztchru+UWiv3fDm3hThlIs
+__mzNaDzdnJhpI/Va1/nY8LTN9BQtfr77CFKIeK2GdIC0
 
 meta::function('size', <<'__lDGr6yVnDwcDWLkJH16MNukltjG2ypBSk/ktYb80h80');
 length(serialize());
@@ -387,11 +418,38 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
-meta::function('unlock', <<'__2f3NoSvgge16m8wBuDokogr54ssy8D8fKdZ7+RtZitE');
+meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
+__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA
 
-__2f3NoSvgge16m8wBuDokogr54ssy8D8fKdZ7+RtZitE
+meta::function('update-from', <<'__8cUncWUFuzX5fV+tgmVU+RvuWGPysHg3WqI6pYTcrQI');
+# Upgrade all attributes that aren't customized. In this case, we want everything except for configuration::, code::, and attribute::.
+return "That is a really bad idea." if $0 =~ /\.\/(.*)/ && $_[0] eq $1 || $_[0] eq $0;
+
+terminal::message('info', 'Replicating state...');
+&{'push-state'}();
+terminal::message('info', 'Updating meta attributes...');
+for my $attribute (grep length && /^meta::/, split(/\n/, `$_[0] ls-a`)) {
+  associate($attribute, join('', `$_[0] cat $attribute`));
+  reload();
+  print '.';
+}
+
+print "\n";
+terminal::message('info', 'Updating non-meta attributes...');
+for my $attribute (grep length && ! (/^configuration::/ || /^code::/ || /^attribute::/ || /^function::pop-state$/ ||
+                                     /^list::/ || /^issue::/ || /^data::/ || /^meta::datatypes/), split(/\n/, `$_[0] ls-a`)) {
+  associate($attribute, join('', `$_[0] cat $attribute`));
+  reload();     # Necessary to activate new datatypes.
+  print '.';
+}
+
+print "\n";
+terminal::message('info', 'Reloading new configuration');
+reload();
+terminal::message('info', "Imported from $_[0]. Run pop-state to undo this change.");
+__8cUncWUFuzX5fV+tgmVU+RvuWGPysHg3WqI6pYTcrQI
 
 meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
 <<"EOD" . join '  ', split /\n/, ls ();
@@ -399,6 +457,11 @@ Usage: $0 [options] action [arguments]
 Defined actions:
 EOD
 __oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I
+
+meta::function('vim', <<'__1EcCMR8Tks8HBoOg+zAKJ4LlrRIY8nvLs4M1VTr2Zec');
+# Installs VIM highlighters.
+file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for map {s/^vim_highlighter:://o; $_} grep /^vim_highlighter::/, sort keys %data;
+__1EcCMR8Tks8HBoOg+zAKJ4LlrRIY8nvLs4M1VTr2Zec
 
 meta::internal_function('associate', <<'__D8BKmEFp/adiPPqPnXyMOzlsBMCmuZi62UpJWdoFg/0');
 my ($name, $value, %options) = @_;
@@ -414,7 +477,7 @@ $name =~ s/^[^:]*:://;
 $name;
 __T4JEqOUYjMzssdVwV/rdgAhvr0Vz9TQUo0noTdeBLxw
 
-meta::internal_function('complete', <<'__4cC3h2m6zI39bcCB7iNvbkyOFxwg216DdrXHkWcR6N8');
+meta::internal_function('complete', <<'__lhlD80z2kvEUEeHPqLFw6JE8xUdXr6J5Q1gXHg4beHg');
 my @functions  = sort keys %externalized_functions;
 my @attributes = sort keys %data;
 
@@ -447,15 +510,14 @@ if ($line =~ / /) {
   # Start of line, so it's a function.
   match ($text, @functions);
 }
+__lhlD80z2kvEUEeHPqLFw6JE8xUdXr6J5Q1gXHg4beHg
 
-__4cC3h2m6zI39bcCB7iNvbkyOFxwg216DdrXHkWcR6N8
-
-meta::internal_function('execute', <<'__FfzmdPKSa4vnT4WNSN3uCxnwrUFKfkQbS6auoIa/SgE');
+meta::internal_function('execute', <<'__Ge94WTpmLuqsMDappj5G/G2BKILAE0GjeCqAeHLW6fQ');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
 eval {&{"meta::$namespace"}(basename($name), retrieve($name))};
-carp $@ if $@ && $options{'carp'};
-__FfzmdPKSa4vnT4WNSN3uCxnwrUFKfkQbS6auoIa/SgE
+warn $@ if $@ && $options{'carp'};
+__Ge94WTpmLuqsMDappj5G/G2BKILAE0GjeCqAeHLW6fQ
 
 meta::internal_function('file::read', <<'__ZxBqZsMZZRuLMQp8Sy//ZsoAvriDebjYLGAX7p7AxXg');
 my $name = shift;
@@ -508,10 +570,9 @@ $name =~ s/::.*$//;
 $name;
 __D7UfKyyYZ1slZZyaS28hIt8a68jkI3ELBaddROXOHug
 
-meta::internal_function('retrieve', <<'__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk');
-my ($name) = @_;
-$data{$name};
-__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk
+meta::internal_function('retrieve', <<'__Erqqkp11FEHKsitr0DEJZ6OCGDYAs+U6BSu4UvLvsFM');
+@data{@_};
+__Erqqkp11FEHKsitr0DEJZ6OCGDYAs+U6BSu4UvLvsFM
 
 meta::internal_function('serialize::single', <<'__lDBHaXpbrfER2envI2Ipy77IcdjUnlZou+rggaxsAWE');
 my $name               = shift || $_;
@@ -528,6 +589,35 @@ my $noise  = $name || state();
 $noise =~ s/\//-/g;
 "$0.$noise";
 __zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
+
+meta::library('terminal', <<'__bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q');
+# Functions for nice-looking terminal output.
+
+package terminal;
+
+use constant black  => "0;0";
+use constant red    => "1;31";
+use constant yellow => "1;33";
+use constant green  => "1;32";
+use constant blue   => "1;34";
+use constant purple => "1;35";
+use constant cyan   => "1;36";
+
+my %default_colors = (info => green);
+my $longest_prefix = 0;
+$longest_prefix = $longest_prefix < $_ ? $_ : $longest_prefix for map length, keys %default_colors;
+
+sub message {
+  my ($prefix, $message) = @_;
+  my $color = $default_colors{$prefix};
+  my $padding = ' ' x ($longest_prefix - length $prefix);
+  print "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
+}
+__bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q
+
+meta::list('dependencies', <<'__47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU');
+
+__47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();
