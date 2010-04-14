@@ -191,11 +191,25 @@ something most people will normally do. In the future there may be a locking mec
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
-meta::code('main', <<'__kDth4s43RHWL0CS8H+IrbUhrHu1yq0l+CvL+f1eftQ4');
-This source code will be automatically run through an unlit phase when you enter a build rule.
+meta::code('main', <<'__G8mWSQdGb/DO5kSlWyAQGYP7z6paCLQbp6GZRZpQUQk');
+This source code will be automatically run through an unlit phase when you enter a build rule. It should be the base point for other module includes; an example of this is shown below. You can
+include modules from anywhere inside your program, and a module can be included more than once. If you have separate build configurations, it can be useful to delegate building to different
+top-level code loaders; so, for example, this /main/ code block would just load other code blocks, and a /debug/ code block might load a slightly different set.
 
-  var foo = bar;
-__kDth4s43RHWL0CS8H+IrbUhrHu1yq0l+CvL+f1eftQ4
+To see what your code will end up looking like, run /unlit main/.
+
+:: get util
+__G8mWSQdGb/DO5kSlWyAQGYP7z6paCLQbp6GZRZpQUQk
+
+meta::code('scratch', <<'__/SXyRH9dwO+mHab6d18t1cV8/NBYOYnTK3ZurR+nzn4');
+This is for scratchwork that isn't part of your system. It could be used for testing or other experimentation.
+
+:: get main
+__/SXyRH9dwO+mHab6d18t1cV8/NBYOYnTK3ZurR+nzn4
+
+meta::code('util', <<'__MPk0PTno+Xk+05NuiWkhKJDdoggh4uPjBtujjGea6+U');
+This is for more generic utilities that are likely to be factored out into a separate library later. Most bottom-up projects will end up having such code.
+__MPk0PTno+Xk+05NuiWkhKJDdoggh4uPjBtujjGea6+U
 
 meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
 shell
@@ -249,6 +263,10 @@ for (@_) {
 }
 __qP6xPZE75s9g0XJIiC6FGw0vnj2j0glUzsAHxyA3lvY
 
+meta::function('code', <<'__NBNecoJ9JVwyGbA+8LrNYjQKQyQOxdFAkjgZ4ueT5QA');
+join "\n\n", map preprocess(retrieve("code::$_")), @_;
+__NBNecoJ9JVwyGbA+8LrNYjQKQyQOxdFAkjgZ4ueT5QA
+
 meta::function('cp', <<'__yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4');
 my ($from, $to) = @_;
 $data{$to} = $data{$from} if $data{$from};
@@ -267,7 +285,7 @@ if ($value) {
 }
 __YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc
 
-meta::function('edit', <<'__wmkQAgPhtPrNx2Sc88M1MNK4gG2sn/UGqsnAtRv6ksY');
+meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -282,8 +300,10 @@ chomp $meta_extension;
 messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} keys %data;
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $meta_extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
+delete $data{$name} if length($data{$name}) == 0;
+
 save();
-__wmkQAgPhtPrNx2Sc88M1MNK4gG2sn/UGqsnAtRv6ksY
+__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -310,10 +330,18 @@ my ($filename, @attribute_names) = @_;
 associate("implementation::$_", `$filename cat $_`) for @attribute_names;
 __sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8
 
-meta::function('import', <<'__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA');
-my ($name) = @_;
-associate($name, join('', <STDIN>));
-__oK2Kj5RYHcEUK0Iyiqu8w7zipbg+QNF4VO4hm7BkUNA
+meta::function('import', <<'__7f1Q36AcIJ8/OaaYPGUq10PPFTKnEF0CMxS56DRsjKk');
+my $name  = pop @_;
+my @files = @_;
+
+if (@files) {
+  my $files = join "", map {file::read ($_)} @files;
+  associate ($name, $files); 
+}
+else {
+  associate($name, join('', <STDIN>));
+}
+__7f1Q36AcIJ8/OaaYPGUq10PPFTKnEF0CMxS56DRsjKk
 
 meta::function('load-dependencies', <<'__oYAWdUSIg7K9xPssNpQhu7nUGr94qBGg5QJpTDAA3sA');
 my $errors = '';
@@ -358,6 +386,12 @@ meta::function('pop-state', <<'__eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM');
 %data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
 reload();
 __eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM
+
+meta::function('preprocess', <<'__iThtgn456jv3ixJpSiZ9sf7wL5/mrODDleqlETW10xA');
+my ($document) = @_;
+my %commands = (get => sub {code(split /\s+/, $_[0])});
+join "\n", map {m/^\s*::\s*(\w+)\s(.*)$/o && defined $commands{$1} ? $commands{$1}($2, $_) : $_} split /\n/, $document;
+__iThtgn456jv3ixJpSiZ9sf7wL5/mrODDleqlETW10xA
 
 meta::function('pull', <<'__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg');
 my ($class_name) = @_;
@@ -518,9 +552,9 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
-meta::function('unlit', <<'__hqLsEcPRicLQoWRJMsYhwjFkzx5yWnMzOedeNpsi3pc');
-join "\n", map {$_ =~ /^A-Z/ ? &{'comment-line'}($_) : $_} split /\n\n+/, &{'code'};
-__hqLsEcPRicLQoWRJMsYhwjFkzx5yWnMzOedeNpsi3pc
+meta::function('unlit', <<'__suPPQL9TR/n4+Mo+je3UozSqO8d3DvGgFv08badHZEo');
+join "\n//\n", map {m/^\s*[^0-9a-z_()\[\]{}! ]/o ? s/^/\/\/ /omg : s/^(\s*)!/\1 /o; $_} split /\n\n+/, code(@_);
+__suPPQL9TR/n4+Mo+je3UozSqO8d3DvGgFv08badHZEo
 
 meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
 my (undef, undef, $mode) = stat $0;
@@ -719,7 +753,7 @@ sub message {
 }
 __bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q
 
-meta::vim_highlighter('ljs', <<'__mWHmLRIyWl7qUu+cRLIKNXybR9y89waBgYrQuuNt9jk');
+meta::vim_highlighter('ljs', <<'__C/r36bDvmDL8xlvB7nvvJA1jzB+BYtppOTFMCLaDnug');
 " Literate JavaScript | Spencer Tipping <spencer@spencertipping.com>
 
 if version < 600
@@ -730,15 +764,20 @@ endif
 
 syn include @javascript syntax/javascript.vim
 
-syn region lCodeRegion    start=/^\s*[^A-Z]/ end=/^$/ contains=@javascript fold
-syn region lCommentRegion start=/^\s*[A-Z]/  end=/^$/ fold
+syn match ljsGetDirective /::\s*get\s.*$/     contained
+syn cluster directives add=ljsGetDirective
 
-hi link lCommentRegion comment
+syn case match
+syn region lCodeRegion    start=/^\s*[!0-9a-z_()\[\]{}'"]/   end=/^$/ contains=@javascript transparent fold
+syn region lCommentRegion start=/^\s*[^!0-9a-z_()\[\]{}'" ]/ end=/^$/ contains=@directives fold
+
+hi link lCommentRegion  comment
+hi link ljsGetDirective special
 
 set foldmethod=syntax
 
 let b:current_syntax = "ljs"
-__mWHmLRIyWl7qUu+cRLIKNXybR9y89waBgYrQuuNt9jk
+__C/r36bDvmDL8xlvB7nvvJA1jzB+BYtppOTFMCLaDnug
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();
