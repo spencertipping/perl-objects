@@ -117,6 +117,26 @@ meta::define_form 'note', sub {
 };
 __TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
 
+meta::meta('datatypes::sh', <<'__5cST7E0Z7BY2WLU3462a5xZ5Ox9RbnmNHEa7NyS72os');
+meta::define_form 'sh', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "sh::$name";
+  *{$name} = sub {
+    my ($name, @args) = @_;
+    my $filename      = state_based_filename() . '.tmp';
+    my $new_value     = $value;
+
+    @args || push(@args, $name) && ($name = 'unlit');
+
+    file::write($filename, &$name(@args));
+    $new_value =~ s/__code__/$filename/go;
+    my $output = qx|$new_value|;
+    unlink $filename;
+    $output;
+  };
+};
+__5cST7E0Z7BY2WLU3462a5xZ5Ox9RbnmNHEa7NyS72os
+
 meta::meta('datatypes::vim-highlighter', <<'__vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0');
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 __vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0
@@ -191,21 +211,19 @@ something most people will normally do. In the future there may be a locking mec
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
-meta::code('main', <<'__G8mWSQdGb/DO5kSlWyAQGYP7z6paCLQbp6GZRZpQUQk');
+meta::code('main', <<'__lklwtyeLELFItwL/sEClVDqr7HSXplqEkon3o9+WcMs');
 This source code will be automatically run through an unlit phase when you enter a build rule. It should be the base point for other module includes; an example of this is shown below. You can
 include modules from anywhere inside your program, and a module can be included more than once. If you have separate build configurations, it can be useful to delegate building to different
 top-level code loaders; so, for example, this /main/ code block would just load other code blocks, and a /debug/ code block might load a slightly different set.
 
 To see what your code will end up looking like, run /unlit main/.
-
 :: get util
-__G8mWSQdGb/DO5kSlWyAQGYP7z6paCLQbp6GZRZpQUQk
+__lklwtyeLELFItwL/sEClVDqr7HSXplqEkon3o9+WcMs
 
-meta::code('scratch', <<'__/SXyRH9dwO+mHab6d18t1cV8/NBYOYnTK3ZurR+nzn4');
+meta::code('scratch', <<'__UFvA92B98GVzh3boXGxl19QiD9162rJI14MuI2vyVq0');
 This is for scratchwork that isn't part of your system. It could be used for testing or other experimentation.
-
 :: get main
-__/SXyRH9dwO+mHab6d18t1cV8/NBYOYnTK3ZurR+nzn4
+__UFvA92B98GVzh3boXGxl19QiD9162rJI14MuI2vyVq0
 
 meta::code('util', <<'__MPk0PTno+Xk+05NuiWkhKJDdoggh4uPjBtujjGea6+U');
 This is for more generic utilities that are likely to be factored out into a separate library later. Most bottom-up projects will end up having such code.
@@ -752,6 +770,14 @@ sub message {
   print "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
 __bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q
+
+meta::sh('js', <<'__qGEHHjKcAKXQz3fhJNhOtnWH3pjzV5E13Ndz4KxZrvs');
+js __code__
+__qGEHHjKcAKXQz3fhJNhOtnWH3pjzV5E13Ndz4KxZrvs
+
+meta::sh('node', <<'__SSgRGyOQPbEleu+2TMjU4OCmMnjOWFSaJj0iwGkBsug');
+node __code__
+__SSgRGyOQPbEleu+2TMjU4OCmMnjOWFSaJj0iwGkBsug
 
 meta::vim_highlighter('ljs', <<'__C/r36bDvmDL8xlvB7nvvJA1jzB+BYtppOTFMCLaDnug');
 " Literate JavaScript | Spencer Tipping <spencer@spencertipping.com>
