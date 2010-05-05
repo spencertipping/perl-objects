@@ -117,7 +117,7 @@ meta::define_form 'note', sub {
 };
 __TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
 
-meta::meta('datatypes::sh', <<'__5cST7E0Z7BY2WLU3462a5xZ5Ox9RbnmNHEa7NyS72os');
+meta::meta('datatypes::sh', <<'__+0AR2hHnh+UldymM4MpYnXCE52tHTO+7Lp7HXSsKyTM');
 meta::define_form 'sh', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "sh::$name";
@@ -130,12 +130,12 @@ meta::define_form 'sh', sub {
 
     file::write($filename, &$name(@args));
     $new_value =~ s/__code__/$filename/go;
-    my $output = qx|$new_value|;
+    my $output = system($new_value);
     unlink $filename;
     $output;
   };
 };
-__5cST7E0Z7BY2WLU3462a5xZ5Ox9RbnmNHEa7NyS72os
+__+0AR2hHnh+UldymM4MpYnXCE52tHTO+7Lp7HXSsKyTM
 
 meta::meta('datatypes::vim-highlighter', <<'__vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0');
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
@@ -361,6 +361,22 @@ else {
 }
 __7f1Q36AcIJ8/OaaYPGUq10PPFTKnEF0CMxS56DRsjKk
 
+meta::function('listing', <<'__ISxcI25BrOnRRxDUQm5UL5wWzHJxL/OY8QdSUdnRJoE');
+my ($profile, $line, $context) = @_;
+$line    ||= 1;
+$context ||= 4;
+
+my $result = '';
+my @lines  = split /\n/, unlit($profile);
+for my $l ($line - $context .. $line + $context) {
+  next if $l <= 0;
+  last if $l >  @lines;
+  $result .= sprintf "\033[1;34m%6d\033[0;0m: %s%s%s\n", $l, $l == $line ? "\033[1;32m" : '', $lines[$l - 1], $l == $line ? "\033[0;0m" : '';
+}
+
+$result;
+__ISxcI25BrOnRRxDUQm5UL5wWzHJxL/OY8QdSUdnRJoE
+
 meta::function('load-dependencies', <<'__oYAWdUSIg7K9xPssNpQhu7nUGr94qBGg5QJpTDAA3sA');
 my $errors = '';
 for (grep length, split /\n/, &{'dependencies'}()) {
@@ -405,11 +421,11 @@ meta::function('pop-state', <<'__eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM');
 reload();
 __eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM
 
-meta::function('preprocess', <<'__iThtgn456jv3ixJpSiZ9sf7wL5/mrODDleqlETW10xA');
+meta::function('preprocess', <<'__SP+M4pf8VRk5hJv0AVOHi8DdG8vAj6ClENKjab8Vbg8');
 my ($document) = @_;
-my %commands = (get => sub {code(split /\s+/, $_[0])});
+my %commands = (get => sub {"\n" . code(split /\s+/, $_[0]) . "\n"});
 join "\n", map {m/^\s*::\s*(\w+)\s(.*)$/o && defined $commands{$1} ? $commands{$1}($2, $_) : $_} split /\n/, $document;
-__iThtgn456jv3ixJpSiZ9sf7wL5/mrODDleqlETW10xA
+__SP+M4pf8VRk5hJv0AVOHi8DdG8vAj6ClENKjab8Vbg8
 
 meta::function('pull', <<'__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg');
 my ($class_name) = @_;
@@ -570,9 +586,9 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
-meta::function('unlit', <<'__suPPQL9TR/n4+Mo+je3UozSqO8d3DvGgFv08badHZEo');
-join "\n//\n", map {m/^\s*[^0-9a-z_()\[\]{}! ]/o ? s/^/\/\/ /omg : s/^(\s*)!/\1 /o; $_} split /\n\n+/, code(@_);
-__suPPQL9TR/n4+Mo+je3UozSqO8d3DvGgFv08badHZEo
+meta::function('unlit', <<'__mHW0V1RkAGfY6knX3jpBVyo6OVIjN55Z5o1rIDrqxFU');
+join "\n//\n", map {m/^\s*[^0-9a-z_()\[\]{}!\/ ]/o ? s/^/\/\/ /omg : s/^(\s*)!/\1 /o; $_} split /\n\n+/, code(@_);
+__mHW0V1RkAGfY6knX3jpBVyo6OVIjN55Z5o1rIDrqxFU
 
 meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
 my (undef, undef, $mode) = stat $0;
@@ -779,7 +795,17 @@ meta::sh('node', <<'__SSgRGyOQPbEleu+2TMjU4OCmMnjOWFSaJj0iwGkBsug');
 node __code__
 __SSgRGyOQPbEleu+2TMjU4OCmMnjOWFSaJj0iwGkBsug
 
-meta::vim_highlighter('ljs', <<'__C/r36bDvmDL8xlvB7nvvJA1jzB+BYtppOTFMCLaDnug');
+meta::sh('node-repl', <<'__q9vTbSQ20/rHKteKvyoqfWOUHbXPrRXR8WvCi2vaMDY');
+node-repl __code__
+__q9vTbSQ20/rHKteKvyoqfWOUHbXPrRXR8WvCi2vaMDY
+
+meta::sh('stats', <<'__e/Rj98I2/T+yRRdecrhlw5H3dWmBW2Vup15b2cbzKLg');
+echo $(cat __code__ | grep -v '//' | grep -v '^\s*$' | wc -l) LOC, \
+     $(cat __code__ | grep '//' | wc -l) comment lines, \
+     $(cat __code__ | grep '^\s*$' | wc -l) whitespace lines
+__e/Rj98I2/T+yRRdecrhlw5H3dWmBW2Vup15b2cbzKLg
+
+meta::vim_highlighter('ljs', <<'__EELq7R8BHu1htK8/oKRUrIUWVVYqdfaJgsvdyUimtss');
 " Literate JavaScript | Spencer Tipping <spencer@spencertipping.com>
 
 if version < 600
@@ -794,8 +820,8 @@ syn match ljsGetDirective /::\s*get\s.*$/     contained
 syn cluster directives add=ljsGetDirective
 
 syn case match
-syn region lCodeRegion    start=/^\s*[!0-9a-z_()\[\]{}'"]/   end=/^$/ contains=@javascript transparent fold
-syn region lCommentRegion start=/^\s*[^!0-9a-z_()\[\]{}'" ]/ end=/^$/ contains=@directives fold
+syn region lCodeRegion    start=/^\s*[\/!0-9a-z_()\[\]{}'"]/   end=/^$/ contains=@javascript transparent fold
+syn region lCommentRegion start=/^\s*[^\/!0-9a-z_()\[\]{}'" ]/ end=/^$/ contains=@directives fold
 
 hi link lCommentRegion  comment
 hi link ljsGetDirective special
@@ -803,7 +829,7 @@ hi link ljsGetDirective special
 set foldmethod=syntax
 
 let b:current_syntax = "ljs"
-__C/r36bDvmDL8xlvB7nvvJA1jzB+BYtppOTFMCLaDnug
+__EELq7R8BHu1htK8/oKRUrIUWVVYqdfaJgsvdyUimtss
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();

@@ -214,7 +214,7 @@ if ($value) {
 }
 __YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc
 
-meta::function('edit', <<'__wmkQAgPhtPrNx2Sc88M1MNK4gG2sn/UGqsnAtRv6ksY');
+meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -232,7 +232,7 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
 delete $data{$name} if length($data{$name}) == 0;
 
 save();
-__wmkQAgPhtPrNx2Sc88M1MNK4gG2sn/UGqsnAtRv6ksY
+__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE
 
 meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
 my $name = shift;
@@ -283,9 +283,10 @@ meta::function('ls', <<'__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg');
 join("\n", sort keys %externalized_functions);
 __M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg
 
-meta::function('ls-a', <<'__3Ou+kVmaLIe1oZKBOufKY7pSsksgTSAfNeXRniPFZPk');
-join("\n", sort keys %data);
-__3Ou+kVmaLIe1oZKBOufKY7pSsksgTSAfNeXRniPFZPk
+meta::function('ls-a', <<'__ZF0mLdFoa0pys6NZ+Yz5lsmaE2GeJMG2Aw1C3j88moQ');
+my $criteria = join '|', @_;
+join("\n", grep(/$criteria/, sort keys %data));
+__ZF0mLdFoa0pys6NZ+Yz5lsmaE2GeJMG2Aw1C3j88moQ
 
 meta::function('mv', <<'__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4');
 my ($from, $to) = @_;
