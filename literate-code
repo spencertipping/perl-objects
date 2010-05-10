@@ -78,12 +78,15 @@ meta::define_form 'internal_function', sub {
 };
 __heBxmlI7O84FgR+9+ULeiCTWJ4hqd079Z02rZnl9Ong
 
-meta::meta('datatypes::library', <<'__3RHc2q2OKjeHL1QRq6jhHHCeSrNLDPWTwSax7MclXRE');
+meta::meta('datatypes::library', <<'__Uu9nRiHABRn+x19zBWmHpJF8gbfMA5v5MlpNoSE8MqE');
 meta::define_form 'library', sub {
-  eval $_[1];
+  my ($name, $value) = @_;
+  eval $value;
+  $externalized_functions{$name} = "library::$name";
+  *{$name} = sub {edit("library::$name")};
   warn $@ if $@;
 };
-__3RHc2q2OKjeHL1QRq6jhHHCeSrNLDPWTwSax7MclXRE
+__Uu9nRiHABRn+x19zBWmHpJF8gbfMA5v5MlpNoSE8MqE
 
 meta::meta('datatypes::list-type', <<'__OKczvJ+6wi8VPNFcZ9ohlXjw+ychodWCfcELdli9p+w');
 meta::define_form '_list_type', sub {
@@ -396,14 +399,28 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y
 
-meta::function('ls', <<'__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg');
-join("\n", sort keys %externalized_functions);
-__M3wGXSw8/xm3RiNq0uLWke1dHm2OWQbvJpHkngdPafg
-
-meta::function('ls-a', <<'__ZF0mLdFoa0pys6NZ+Yz5lsmaE2GeJMG2Aw1C3j88moQ');
+meta::function('ls', <<'__OlQOgKhp6VUThx34wxmM3MFkwsHfR/c8dqvu07z059E');
 my $criteria = join '|', @_;
-join("\n", grep(/$criteria/, sort keys %data));
-__ZF0mLdFoa0pys6NZ+Yz5lsmaE2GeJMG2Aw1C3j88moQ
+my @lines = grep /$criteria/, sort keys %externalized_functions;
+my $length = 0;
+$length >= length($_) or $length = length($_) for @lines;
+
+my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
+join("\n", sort @new_lines);
+__OlQOgKhp6VUThx34wxmM3MFkwsHfR/c8dqvu07z059E
+
+meta::function('ls-a', <<'__S5EydJRu+YIfcFmTMz1ZHX0cANJq32bU5JnYCe1tWdk');
+my $criteria = join '|', @_;
+my @lines    = grep(/$criteria/, sort keys %data);
+my $length   = 0;
+
+my %inverses;
+$inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
+
+$length >= length($_) or $length = length($_) for @lines;
+my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . ($inverses{$_} || ''), @lines);
+join "\n", @new_lines;
+__S5EydJRu+YIfcFmTMz1ZHX0cANJq32bU5JnYCe1tWdk
 
 meta::function('mv', <<'__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4');
 my ($from, $to) = @_;
@@ -596,15 +613,17 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA
 
-meta::function('update-from', <<'__8cUncWUFuzX5fV+tgmVU+RvuWGPysHg3WqI6pYTcrQI');
+meta::function('update-from', <<'__jJ2tfSk/Quz8/1PiYxIwQjBRt/hYg51iJhAdxcdaHkM');
 # Upgrade all attributes that aren't customized. In this case, we want everything except for configuration::, code::, and attribute::.
 return "That is a really bad idea." if $0 =~ /\.\/(.*)/ && $_[0] eq $1 || $_[0] eq $0;
+
+my @attributes = map {s/\s+.*//; $_} split(/\n/, qx|$_[0] ls-a|);
 
 terminal::message('info', 'Replicating state...');
 &{'push-state'}();
 terminal::message('info', 'Updating meta attributes...');
-for my $attribute (grep length && /^meta::/, split(/\n/, `$_[0] ls-a`)) {
-  associate($attribute, join('', `$_[0] cat $attribute`));
+for my $attribute (grep length && /^meta::/, @attributes) {
+  associate($attribute, join('', qx|$_[0] cat $attribute|));
   reload();
   print '.';
 }
@@ -612,8 +631,8 @@ for my $attribute (grep length && /^meta::/, split(/\n/, `$_[0] ls-a`)) {
 print "\n";
 terminal::message('info', 'Updating non-meta attributes...');
 for my $attribute (grep length && ! (/^configuration::/ || /^code::/ || /^attribute::/ || /^function::pop-state$/ ||
-                                     /^list::/ || /^issue::/ || /^data::/ || /^meta::datatypes/), split(/\n/, `$_[0] ls-a`)) {
-  associate($attribute, join('', `$_[0] cat $attribute`));
+                                     /^list::/ || /^issue::/ || /^data::/ || /^meta::datatypes/), @attributes) {
+  associate($attribute, join('', qx|$_[0] cat $attribute|));
   reload();     # Necessary to activate new datatypes.
   print '.';
 }
@@ -622,7 +641,7 @@ print "\n";
 terminal::message('info', 'Reloading new configuration');
 reload();
 terminal::message('info', "Imported from $_[0]. Run pop-state to undo this change.");
-__8cUncWUFuzX5fV+tgmVU+RvuWGPysHg3WqI6pYTcrQI
+__jJ2tfSk/Quz8/1PiYxIwQjBRt/hYg51iJhAdxcdaHkM
 
 meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
 <<"EOD" . join '  ', split /\n/, ls ();
