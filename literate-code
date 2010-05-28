@@ -467,41 +467,6 @@ meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
 __GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM
 
-meta::function('repl', <<'__w4q9MpioWHnb4gpiwN2R0N69hoQm0kvxzUBS6knEULg');
-my ($name, @options) = @_;
-
-use Term::ReadLine;
-
-my $term = new Term::ReadLine "$0 repl for $name";
-$term->ornaments(0);
-my $OUT    = $term->OUT || \*STDOUT;
-my $prompt = &{'name'}() . "/$name> ";
-
-terminal::message('repl', 'initializing symbol table');
-types::clear_symbols();
-types::load_symbols($name) if $name;
-types::initialize_symbols();
-types::initialize_debugging_symbols() if grep /^debug$/, @options;
-
-terminal::message('repl', 'running session');
-run('cached-dependencies') unless grep /^nodeps$/, @options;
-run($name) if $name;
-
-terminal::message('repl', 'ready');
-while (defined ($_ = $term->readline($prompt))) {
-  my $result = eval {reader::read_form($_)->eval()->serialize()};
-  $@ ? chomp $@ && terminal::message('error', $@) : terminal::message('result', $result);
-}
-
-print "\n";
-if ($name) {
-  terminal::message('repl', 'storing symbol table');
-  types::store_symbols($name);
-}
-
-terminal::message('repl', 'exiting');
-__w4q9MpioWHnb4gpiwN2R0N69hoQm0kvxzUBS6knEULg
-
 meta::function('rm', <<'__7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
@@ -818,6 +783,11 @@ __SSgRGyOQPbEleu+2TMjU4OCmMnjOWFSaJj0iwGkBsug
 meta::sh('node-repl', <<'__q9vTbSQ20/rHKteKvyoqfWOUHbXPrRXR8WvCi2vaMDY');
 node-repl __code__
 __q9vTbSQ20/rHKteKvyoqfWOUHbXPrRXR8WvCi2vaMDY
+
+meta::sh('repl', <<'__mZSpnGQX2qkdLWYyPAw1JtPcPhknLNP8EJccqCoUkHk');
+js -f __code__ -f -
+
+__mZSpnGQX2qkdLWYyPAw1JtPcPhknLNP8EJccqCoUkHk
 
 meta::sh('stats', <<'__e/Rj98I2/T+yRRdecrhlw5H3dWmBW2Vup15b2cbzKLg');
 echo $(cat __code__ | grep -v '//' | grep -v '^\s*$' | wc -l) LOC, \
