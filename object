@@ -484,12 +484,12 @@ reload();
 terminal::message('info', "Imported from $_[0]. Run pop-state to undo this change.");
 __jJ2tfSk/Quz8/1PiYxIwQjBRt/hYg51iJhAdxcdaHkM
 
-meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
-<<"EOD" . join '  ', split /\n/, ls ();
+meta::function('usage', <<'__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs');
+<<"EOD" . ls ();
 Usage: $0 [options] action [arguments]
-Defined actions:
+Defined actions (and the attribute that defines them):
 EOD
-__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I
+__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs
 
 meta::function('vim', <<'__1EcCMR8Tks8HBoOg+zAKJ4LlrRIY8nvLs4M1VTr2Zec');
 # Installs VIM highlighters.
