@@ -169,14 +169,15 @@ meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
 shell
 __zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
 
-meta::data('meta-associations', <<'__S6Cws215rfkeL7uHARRL6Hl6AerdHCmI86Od37/NZKg');
+meta::data('meta-associations', <<'__YJ8CcOn6EUE8a20rw8g5rxkXefRjN2r6v8/uEgWL98o');
 ^function:: .pl
 ^library:: .pl
 ^internal_function:: .pl
 ^meta:: .pl
 ^bootstrap:: .pl
+^internal:: .pl
 ^vim_highlighter:: .vim
-__S6Cws215rfkeL7uHARRL6Hl6AerdHCmI86Od37/NZKg
+__YJ8CcOn6EUE8a20rw8g5rxkXefRjN2r6v8/uEgWL98o
 
 meta::data('name', <<'__KVjUFtCKpaRy17UJA2y36v1UKt2EUn5moUXqZMtM3HU');
 object
