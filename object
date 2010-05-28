@@ -622,7 +622,7 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
 
-meta::library('terminal', <<'__adJ0EBrfOS/K31goii5CQdLwenYLKehVW3ny0aI2+ag');
+meta::library('terminal', <<'__RbkWKocUJqj7Mxjf+sj7Y0YbZLmWxnWr7LzdUBfamc8');
 # Functions for nice-looking terminal output.
 
 package terminal;
@@ -643,10 +643,10 @@ sub color {
   $longest_prefix = $longest_prefix < length($_[0]) ? length($_[0]) : $longest_prefix;
 }
 
-color    'info',  'green';
-color  'status',  'green';
-color   'error',    'red';
-color 'warning', 'yellow';
+color    'info',  green;
+color  'status',  green;
+color   'error',    red;
+color 'warning', yellow;
 
 sub message {
   my ($prefix, $message) = @_;
@@ -654,7 +654,7 @@ sub message {
   my $padding = ' ' x ($longest_prefix - length $prefix);
   print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__adJ0EBrfOS/K31goii5CQdLwenYLKehVW3ny0aI2+ag
+__RbkWKocUJqj7Mxjf+sj7Y0YbZLmWxnWr7LzdUBfamc8
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();
