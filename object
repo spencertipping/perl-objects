@@ -622,19 +622,18 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
 
-meta::library('terminal', <<'__RbkWKocUJqj7Mxjf+sj7Y0YbZLmWxnWr7LzdUBfamc8');
+meta::library('terminal', <<'__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA');
 # Functions for nice-looking terminal output.
 
 package terminal;
 
-use constant black  => "0;0";
-use constant red    => "1;31";
-use constant yellow => "1;33";
-use constant green  => "1;32";
-use constant blue   => "1;34";
-use constant purple => "1;35";
-use constant cyan   => "1;36";
-
+my %color_conversions = (black  => "0;0",
+                         red    => "1;31",
+                         yellow => "1;33",
+                         green  => "1;32",
+                         blue   => "1;34",
+                         purple => "1;35",
+                         cyan   => "1;36");
 my $longest_prefix = 0;
 my %default_colors = ();
 
@@ -643,18 +642,18 @@ sub color {
   $longest_prefix = $longest_prefix < length($_[0]) ? length($_[0]) : $longest_prefix;
 }
 
-color    'info',  green;
-color  'status',  green;
-color   'error',    red;
-color 'warning', yellow;
+color    'info',  'green';
+color  'status',  'green';
+color   'error',    'red';
+color 'warning', 'yellow';
 
 sub message {
   my ($prefix, $message) = @_;
-  my $color = $default_colors{$prefix};
+  my $color = $color_conversions{$default_colors{$prefix}};
   my $padding = ' ' x ($longest_prefix - length $prefix);
   print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__RbkWKocUJqj7Mxjf+sj7Y0YbZLmWxnWr7LzdUBfamc8
+__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();
