@@ -288,6 +288,11 @@ meta::function('code', <<'__NBNecoJ9JVwyGbA+8LrNYjQKQyQOxdFAkjgZ4ueT5QA');
 join "\n\n", map preprocess(retrieve("code::$_")), @_;
 __NBNecoJ9JVwyGbA+8LrNYjQKQyQOxdFAkjgZ4ueT5QA
 
+meta::function('compile', <<'__fS4SFKwDwlQRAPgdkfOItg4KJJn5c4BwZzQkiAe8Kvc');
+my $name = name();
+file::write("$name.js", unlit('main'));
+__fS4SFKwDwlQRAPgdkfOItg4KJJn5c4BwZzQkiAe8Kvc
+
 meta::function('cp', <<'__yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4');
 my ($from, $to) = @_;
 $data{$to} = $data{$from} if $data{$from};
@@ -305,6 +310,10 @@ if ($value) {
   edit ($name);
 }
 __YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc
+
+meta::function('deps', <<'__H7NNNb3N0fcC8pi11kmu/0Fel01bMEEiaaXkmLaMkMU');
+associate("code::${$_}[0]-lib", join('', qx/${$_}[0] cat ${$_}[1]/)) for map [split /\s+/], grep length && ! /^#/, split /\n/, dependencies();
+__H7NNNb3N0fcC8pi11kmu/0Fel01bMEEiaaXkmLaMkMU
 
 meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
 my ($name, %options) = @_;
@@ -771,6 +780,11 @@ sub message {
   print "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
 __bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q
+
+meta::list('dependencies', <<'__S9JkBLUE47e8OJf9B3iDqpNyY2Ycq0ZvaFlH6Fo+plA');
+# Dependencies go here, one per line. These are files whose code will be imported; for example:
+# ./foo main    # imports code::main as code::foo-lib from ./foo
+__S9JkBLUE47e8OJf9B3iDqpNyY2Ycq0ZvaFlH6Fo+plA
 
 meta::sh('js', <<'__qGEHHjKcAKXQz3fhJNhOtnWH3pjzV5E13Ndz4KxZrvs');
 js __code__
