@@ -311,9 +311,16 @@ if ($value) {
 }
 __YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc
 
-meta::function('deps', <<'__H7NNNb3N0fcC8pi11kmu/0Fel01bMEEiaaXkmLaMkMU');
-associate("code::${$_}[0]-lib", join('', qx/${$_}[0] cat ${$_}[1]/)) for map [split /\s+/], grep length && ! /^#/, split /\n/, dependencies();
-__H7NNNb3N0fcC8pi11kmu/0Fel01bMEEiaaXkmLaMkMU
+meta::function('deps', <<'__SZ4U6b8mZigWcPg3LLsBHJGEgtUKpWe3Pvy87e88W2E');
+&{'push-state'}();
+terminal::message('info', 'The old state of this object is being preserved. Run pop-state to revert after this import is complete.');
+for (grep length && ! /^#/, split /\n/, dependencies()) {
+  my ($name, $attribute) = split;
+  (my $processed_name = $name) =~ s/^\.\///;
+  terminal::message('status', "Importing $attribute from $name as $processed_name-lib");
+  associate("code::$processed_name-lib", join('', qx/$name cat code::$attribute/));
+}
+__SZ4U6b8mZigWcPg3LLsBHJGEgtUKpWe3Pvy87e88W2E
 
 meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
 my ($name, %options) = @_;
