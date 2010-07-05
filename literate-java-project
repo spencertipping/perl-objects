@@ -304,9 +304,9 @@ hi link cltVerbatim String
 let b:current_syntax = "cltex"
 __9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo
 
-meta::data('default-action', <<'__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU');
-intro
-__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU
+meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
+shell
+__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
 
 meta::data('document', <<'__wL3mQBENL1bayfKm7t5kR1Rd3EQ+UpvRvbOPWmZWG9k');
 = Literate Java Project
@@ -350,56 +350,6 @@ meta::data('header', <<'__nY40dHcW0eplhM0JxlFWyiRbppzHFRsT+4AQ/XOKaLs');
   {\lstset{language=java,frame=tlb,basicstyle={\scriptsize\tt}}}
   {}
 __nY40dHcW0eplhM0JxlFWyiRbppzHFRsT+4AQ/XOKaLs
-
-meta::data('intro', <<'__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw');
-This is a TeX document generator.
-
-If this is your first time using it, then you'll probably want to install
-the VIM highlighter for the custom TeX format. To do that, run this:
-
-  $ tex-document install-vim-highlighter
-
-If you don't mind an extra line at the end of your .vimrc file, then you
-can automatically associate .cltex files:
-
-  $ tex-document update-vimrc
-
-Now you're ready to go.
-
-To create a new TeX document, do this:
-
-  $ tex-document new newdoc
-
-Next, edit the contents of your new document:
-
-  $ ./newdoc e
-
-Once you're done editing, you can build and display the document:
-
-  $ ./newdoc make
-
-Alternately, you can use the shell interface (exit with the 'exit' command or
-control-D):
-
-  $ ./newdoc shell
-  tex-document$ e
-  tex-document$ make
-  ...
-  tex-document$ ^D
-  $
-
-If you edit and run make a lot, I recommend you save your document just to be
-on the safe side. Normally the document is not committed to disk until you exit
-the shell, but you can commit at any time by using the 'save' command.
-
-To extract your document in its original form, you can say this:
-
-  $ ./newdoc document > file
-
-And to extract the generated TeX:
-
-  $ ./newdoc compile-to-tex > file
-__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw
 
 meta::data('javatex-vim-highlighter', <<'__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU');
 " TeX with Java
