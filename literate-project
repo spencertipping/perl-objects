@@ -42,6 +42,16 @@ meta::define_form 'code_filter', sub {
 };
 __gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M
 
+meta::meta('datatypes::cpp_section', <<'__iSq5SVn3Vw0i1zHw0zegKAuS4cKl8QE2lqgoLXAYscI');
+meta::define_form 'cpp_section', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "cpp_section::$name";
+  *{$name} = sub {
+    edit("cpp_section::$name");
+  };
+};
+__iSq5SVn3Vw0i1zHw0zegKAuS4cKl8QE2lqgoLXAYscI
+
 meta::meta('datatypes::data', <<'__s2euAFkA/SbXvMzOkLZXrqX3TdtBzEODSWBAt7wXECA');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
@@ -70,6 +80,16 @@ meta::define_form 'internal_function', sub {
   carp $@ if $@;
 };
 __heBxmlI7O84FgR+9+ULeiCTWJ4hqd079Z02rZnl9Ong
+
+meta::meta('datatypes::java_section', <<'__+OMNe3P39/PtqlXYIuMYT/tIyOF3QVpZJcXdO0xbkRw');
+meta::define_form 'java_section', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "java_section::$name";
+  *{$name} = sub {
+    edit("java_section::$name");
+  };
+};
+__+OMNe3P39/PtqlXYIuMYT/tIyOF3QVpZJcXdO0xbkRw
 
 meta::meta('datatypes::library', <<'__Uu9nRiHABRn+x19zBWmHpJF8gbfMA5v5MlpNoSE8MqE');
 meta::define_form 'library', sub {
@@ -133,16 +153,6 @@ meta::define_form 'note', sub {
   *{$name} = sub {edit("note::$name")};
 };
 __TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
-
-meta::meta('datatypes::section', <<'__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A');
-meta::define_form 'section', sub {
-  my ($name, $value) = @_;
-  $externalized_functions{$name} = "section::$name";
-  *{$name} = sub {
-    edit("section::$name");
-  };
-};
-__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A
 
 meta::meta('datatypes::unlit_converter', <<'__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE');
 meta::define_form 'unlit_converter', sub {
@@ -226,7 +236,7 @@ something most people will normally do. In the future there may be a locking mec
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
-meta::code_filter('cpp', <<'__J+5G2Ah4rFLjh+hXCWKaPEA8K7DUFFJXq7PqntfcKPs');
+meta::code_filter('cpp', <<'__HuOGDIOLyhf93WG3PukRATD4xDKFHpQhtlmuP0rtgYY');
 use File::Path 'mkpath';
 
 my ($line, %settings) = @_;
@@ -245,14 +255,17 @@ if ($settings =~ /\scpp(\s|$)/) {
     open my $fh, $settings{'begin'} ? '>' : '>>', "$directory/$filename.cc";
     print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
     close $fh;
+
+    return "\\lstset{caption=$filename}\n\\begin{cppcode}" if $settings{'begin'};
+  } else {
+    return '\begin{cppcode}' if $settings{'begin'};
   }
 
-  return '\begin{cppcode}' if $settings{'begin'};
-  return '\end{cppcode}'   if $settings{'end'};
+  return '\end{cppcode}' if $settings{'end'};
 }
 
 return $line;
-__J+5G2Ah4rFLjh+hXCWKaPEA8K7DUFFJXq7PqntfcKPs
+__HuOGDIOLyhf93WG3PukRATD4xDKFHpQhtlmuP0rtgYY
 
 meta::code_filter('java', <<'__PT32XU9AIJR/3AH1pwb3r9HBTeOP13/eF1u57+7KwNI');
 use File::Path 'mkpath';
@@ -297,60 +310,32 @@ unless ($settings{'name'}) {
 return $line;
 __AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s
 
-meta::data('cltex-vim-highlighter', <<'__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo');
-" Cleaner TeX
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   Cleaner TeX (a variant of LaTeX)
+meta::cpp_section('cpp-introduction', <<'__dIO7xsJfuJqvPXdHd7TAMttntR4IjRjbT8tXbJv6WXI');
+- Introduction to C++ Literate Coding
+  The C++ literate code interface is much like the Java one, except that code sections use the \verb|name=x| attribute rather than \verb|class=| and \verb|package=|. The name is expected to
+  include an extension, so for example \verb|:: cpp name=src/foo.h| is a correct heading.
 
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn match  cltTitle   /^= .*$/
-syn match  cltAuthor  /^a .*$/
-syn match  cltDate    /^d .*$/
-syn match  cltBegin   /^begin$/
-syn match  cltSection /^\s*- .*$/
-syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
-
-syn match  cltEnumeratedThing /^\s*[eid]\[/
-syn match  cltEnumeratedThing /^\s*\][eid]/
-syn match  cltItem            /^\s*+\s/
-syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
-
-runtime! syntax/tex.vim
-
-hi link cltBegin    Keyword
-hi link cltTitle    Identifier
-hi link cltAuthor   Identifier
-hi link cltDate     Identifier
-
-hi link cltEnumeratedThing Special
-hi link cltItem            Special
-hi link cltQuantifiedItem  Special
-
-hi link cltSection  Type
-
-hi link cltVerbatim String
-
-let b:current_syntax = "cltex"
-__9M68+fUDGVDeeJP8SWHRqHPh2Bq1y6WM6Spq8bnK9yo
+  :: cpp name=hello.cc
+  #include<iostream>
+  int main () {
+    std::cout << "Hello world!" << std::endl;
+  }
+  :.
+__dIO7xsJfuJqvPXdHd7TAMttntR4IjRjbT8tXbJv6WXI
 
 meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
 shell
 __zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
 
-meta::data('document', <<'__wL3mQBENL1bayfKm7t5kR1Rd3EQ+UpvRvbOPWmZWG9k');
-= Literate Java Project
+meta::data('document', <<'__XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w');
+= Literate Project
 a Spencer Tipping
 begin
 
 - Introduction
   The \TeX{} document generator is a simple utility for encapsulating the
   generation and compilation of \TeX{} documents. Combined with literate
-  Java processing, it provides a way to simultaneously write good
+  Java and C++ processing, it provides a way to simultaneously write good
   documentation and simplify the build process for your program.
 
   It simplifies:
@@ -364,7 +349,7 @@ begin
     The easiest way to use the system is to clone a new project, like this:
 
     ::
-    $ literate-java-project clone my-project
+    $ literate-project clone my-project
     :.
 
     Then you can edit your new project by entering its shell and issuing the
@@ -374,42 +359,57 @@ begin
     $ my-document shell
     my-document$ e
     :.
-__wL3mQBENL1bayfKm7t5kR1Rd3EQ+UpvRvbOPWmZWG9k
 
-meta::data('header', <<'__nY40dHcW0eplhM0JxlFWyiRbppzHFRsT+4AQ/XOKaLs');
+  %section(java_section::java-introduction)
+  %section(cpp_section::cpp-introduction)
+__XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w
+
+meta::data('header', <<'__Qo9defQea2KYRXC2NZ4nixkBmMrVVK335ebzw5sRtR0');
 \documentclass{article}
-\usepackage{palatino,mathpazo,amsmath,amssymb,listings}
 
-\lstnewenvironment{javacode}
-  {\lstset{language=java,frame=tlb,basicstyle={\scriptsize\tt}}}
-  {}
-__nY40dHcW0eplhM0JxlFWyiRbppzHFRsT+4AQ/XOKaLs
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,pxfonts,listings,geometry,color}
+\usepackage[colorlinks]{hyperref}
 
-meta::data('meta-associations', <<'__HKdjpy3K7zVPqa40UaKyIUAUD4fGyvnkRAl7zUoPmVQ');
+\definecolor{gray95}{rgb}{0.95,0.95,0.95}
+
+\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
+
+\lstset{columns=fixed,frame=l,basicstyle={\scriptsize\tt},
+        basewidth=0.5em,numbers=left,backgroundcolor=\color{gray95}}
+
+\lstnewenvironment{javacode}{\lstset{language=java}}{}
+\lstnewenvironment{cppcode} {\lstset{language=c++}} {}
+__Qo9defQea2KYRXC2NZ4nixkBmMrVVK335ebzw5sRtR0
+
+meta::data('meta-associations', <<'__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w');
 ^function:: .pl
+^library:: .pl
 ^internal_function:: .pl
 ^meta:: .pl
 ^bootstrap:: .pl
 ^data::document$ .cltex
 ^vim_highlighter:: .vim
-^section:: .javatex
+^java_section:: .javatex
+^cpp_section:: .cpptex
 ^unlit_converter:: .pl
 ^line_filter:: .pl
 ^code_filter:: .pl
 ^profile:: .pl
-__HKdjpy3K7zVPqa40UaKyIUAUD4fGyvnkRAl7zUoPmVQ
+^data::header$ .tex
+__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w
 
-meta::data('name', <<'__RHl89noGWWtUWtIudaXCGU9zT3dzrAa6znNK1bvvHwQ');
-literate-java-project
-__RHl89noGWWtUWtIudaXCGU9zT3dzrAa6znNK1bvvHwQ
+meta::data('name', <<'__LjoXE2rWcenuglagwlKvDIbYcxZTXiV3FsPD5W57vEc');
+literate-project
+__LjoXE2rWcenuglagwlKvDIbYcxZTXiV3FsPD5W57vEc
 
 meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__c5j2/kU9Gw4tNwaB2m8F5EfKPdPYDrMSdkDDGV6HRvE');
-/tmp/literate-java-project.uNmbg8LeX2WKc0JroI1XRcf3jHKGj32sO7pFCeVcR6Q/document.pdf
-__c5j2/kU9Gw4tNwaB2m8F5EfKPdPYDrMSdkDDGV6HRvE
+meta::data('pdf-output-file', <<'__QEia1hIXu3KwD+8gIQoGx9RIJcnHVqcOr0R2j5b/iKs');
+/tmp/literate-project.HW+nUVGeQlBntpgWkDQKI90Ft6dLXF9YJ0hElwDwFuY/document.pdf
+__QEia1hIXu3KwD+8gIQoGx9RIJcnHVqcOr0R2j5b/iKs
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
@@ -594,24 +594,6 @@ else {
 }
 __7f1Q36AcIJ8/OaaYPGUq10PPFTKnEF0CMxS56DRsjKk
 
-meta::function('install-vim-highlighters', <<'__qKwDdQ1bDPFx6t/oiiEMc3lmCgfcKHOtNFym4bY/nFg');
-my $home = $ENV{'HOME'};
-mkdir "$home/.vim";
-mkdir "$home/.vim/syntax";
-file::write("$home/.vim/syntax/cltex.vim", retrieve('data::cltex-vim-highlighter'));
-file::write("$home/.vim/syntax/javatex.vim", retrieve('data::javatex-vim-highlighter'));
-
-<<"EOF";
-The highlighters were created successfully. To have syntax highlighting activated
-automatically, append this to your .vimrc:
-
-  au BufRead,BufNewFile *.cltex   set filetype=cltex
-  au BufRead,BufNewFile *.javatex set filetype=javatex
-
-Alternately, you can run $0 update-vimrc.
-EOF
-__qKwDdQ1bDPFx6t/oiiEMc3lmCgfcKHOtNFym4bY/nFg
-
 meta::function('lock', <<'__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y');
 my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
@@ -781,58 +763,6 @@ meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
 sha256_base64 serialize();
 __1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
 
-meta::function('unlit', <<'__qJxQQTnIdxxWBaOiySqDtTNC9V8xmwwiJXmRFACA8kA');
-my ($profile, %options) = @_;
-$profile ||= &{'default-profile'}();
-
-my $literate_code    = join "\n", map retrieve($_), grep /^section::/, sort keys %data;
-my $inside_code      = 0;
-my $code_indentation = 0;
-my $resulting_code   = '(* ';
-
-for my $line (split /\n/, $literate_code) {
-  if ($inside_code && $line =~ /^\s*:\.$/) {
-    $inside_code = $code_indentation = 0;
-    $line =~ s/^/(* /;
-  }
-
-  if ($inside_code) {
-    my $spaces = ' ' x $code_indentation;
-    $line =~ s/^$spaces//;
-  }
-
-  if ($line =~ /^(\s*)::(.*)$/) {
-    my $spaces             = $1;
-    my $code_section_rules = $2;
-    my $indentation        = length $spaces;
-
-    if ($code_section_rules =~ /\socaml(\s|$)/) {
-      # See whether we should include this code piece. Its inclusion depends on the active
-      # profile and whatever guards are present.
-
-      if ($code_section_rules =~ /if\s*\(([^)]*)\)/) {
-        my $guards   = $1;
-        my @profiles = split /\|/, $guards;
-
-        if (grep {s/^\s*//; s/\s*$//; $_ eq $profile} @profiles) {
-          $inside_code      = 1;
-          $code_indentation = $indentation;
-          $line =~ s/$/ *)/;
-        }
-      } else {
-        $inside_code      = 1;
-        $code_indentation = $indentation;
-        $line =~ s/$/ *)/;
-      }
-    }
-  }
-
-  $resulting_code .= "$line\n";
-}
-
-$resulting_code . ' *)';
-__qJxQQTnIdxxWBaOiySqDtTNC9V8xmwwiJXmRFACA8kA
-
 meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
@@ -867,13 +797,6 @@ terminal::message('info', 'Reloading new configuration');
 reload();
 terminal::message('info', "Imported from $_[0]. Run pop-state to undo this change.");
 __jJ2tfSk/Quz8/1PiYxIwQjBRt/hYg51iJhAdxcdaHkM
-
-meta::function('update-vimrc', <<'__VJ/A7S8PvUf38Tb82V3BFnW1BEfYw6HXtqb8Vqo8Yk0');
-open my $fh, '>>', "$ENV{'HOME'}/.vimrc";
-print $fh "au BufRead,BufNewFile *.cltex   set filetype=cltex\n";
-print $fh "au BufRead,BufNewFile *.javatex set filetype=javatex";
-close $fh;
-__VJ/A7S8PvUf38Tb82V3BFnW1BEfYw6HXtqb8Vqo8Yk0
 
 meta::function('usage', <<'__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs');
 <<"EOD" . ls ();
@@ -1021,6 +944,41 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
 
+meta::java_section('java-introduction', <<'__A3KF4Pr3gD/4XG4sMrPH+Ak7OpswEl/WQAmdOK9Isp8');
+- Introduction to Java Literate Coding
+  Literate coding allows you to write \TeX{} primarily, but insert Java code snippets where appropriate.\footnote{Take a look at {\tt java\_section::java-introduction} to see the how to set
+  the language and options for code sections.} For example:
+
+  :: java class=test
+  public class test {
+    public static void main (String[] args) {
+      System.out.println ("This is a test class");
+    }
+  }
+  :.
+
+  :: java class=test package=com.spencertipping
+  package com.spencertipping;
+  public class test {
+    public static void main (String[] args) {
+      System.out.println ("This is in package com.spencertipping.");
+    }
+  }
+  :.
+
+  Compiling the system is also simple:
+
+  ::
+  $ ./my-project compile
+  :.
+
+  This generates all of the Java source files in a directory, usually {\tt /tmp/src/}. The output directory can be changed like this:
+
+  ::
+  $ ./my-project source-directory = src/
+  :.
+__A3KF4Pr3gD/4XG4sMrPH+Ak7OpswEl/WQAmdOK9Isp8
+
 meta::library('terminal', <<'__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA');
 # Functions for nice-looking terminal output.
 
@@ -1113,45 +1071,11 @@ if ($line =~ /^(\s*)- (.*)$/) {
 }
 __2dvR+HcKtutFCWe6cEFSERoj36PbA6u91tQcJgcwJWk
 
-meta::section('00-introduction', <<'__TmO/0003Bdqolpwm2iwCiamzmTnOZ6ArJcv4eEiu6O4');
-- Introduction to Literate Coding
-  Literate coding allows you to write \TeX{} primarily, but insert code snippets where appropriate. For example:
-
-  :: java class=test
-  public class test {
-    public static void main (String[] args) {
-      System.out.println ("This is a test class");
-    }
-  }
-  :.
-
-  :: java class=test package=com.spencertipping
-  package com.spencertipping;
-  public class test {
-    public static void main (String[] args) {
-      System.out.println ("This is in package com.spencertipping.");
-    }
-  }
-  :.
-
-  Compiling the system is also simple:
-
-  ::
-  $ ./my-project compile
-  :.
-
-  This generates all of the Java source files in a directory, usually {\tt /tmp/src/}. The output directory can be changed like this:
-
-  ::
-  $ ./my-project source-directory = src/
-  :.
-__TmO/0003Bdqolpwm2iwCiamzmTnOZ6ArJcv4eEiu6O4
-
-meta::unlit_converter('create_sections', <<'__sUEcZkQbKEhRUbj5hKceGP4VevPCE9+rz0yea91XZVc');
+meta::unlit_converter('create_sections', <<'__hMABUTlrgmVTt4JFwi0HvAb2ehkYaGLJ25qslKDQurE');
 my ($document) = @_;
-$document .= "\n" . retrieve($_) . "\n" for (grep /^section::/, sort keys %data);
+1 while $document =~ s/^\s*%section\(([^)]+)\)\s*$/\n$data{$1}\n/omg;
 $document;
-__sUEcZkQbKEhRUbj5hKceGP4VevPCE9+rz0yea91XZVc
+__hMABUTlrgmVTt4JFwi0HvAb2ehkYaGLJ25qslKDQurE
 
 meta::unlit_converter('main', <<'__3D082OWBmT2cWw4D6ktyDGp1MHknawaTDW2B0gvZPyM');
 my ($document) = @_;
@@ -1209,6 +1133,50 @@ meta::unlit_converter('zz_prepend_header', <<'__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0
 my ($document) = @_;
 header() . "\n$document";
 __4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw
+
+meta::vim_highlighter('cltex', <<'__i99D+bM2oHb2kJ9JHMYOpio7eDlvgAvVVrOhkUTyaxM');
+" Cleaner TeX
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   Cleaner TeX (a variant of LaTeX)
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn match  cltTitle   /^= .*$/
+syn match  cltAuthor  /^a .*$/
+syn match  cltDate    /^d .*$/
+syn match  cltBegin   /^begin$/
+syn match  cltSection /^\s*- .*$/
+syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
+
+syn match  cltEnumeratedThing /^\s*[eid]\[/
+syn match  cltEnumeratedThing /^\s*\][eid]/
+syn match  cltItem            /^\s*+\s/
+syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
+
+runtime! syntax/tex.vim
+
+syn match  cltInclude /^\s*%section([^)]\+)$/
+
+hi link cltBegin    Keyword
+hi link cltTitle    Identifier
+hi link cltAuthor   Identifier
+hi link cltDate     Identifier
+
+hi link cltEnumeratedThing Special
+hi link cltItem            Special
+hi link cltQuantifiedItem  Special
+hi link cltInclude         Special
+
+hi link cltSection  Type
+
+hi link cltVerbatim String
+
+let b:current_syntax = "cltex"
+__i99D+bM2oHb2kJ9JHMYOpio7eDlvgAvVVrOhkUTyaxM
 
 meta::vim_highlighter('cpptex', <<'__N6YI1WK23oeIYylZ/zbeqw7wUunykPr0tAAhFL+VojQ');
 " TeX with C++
