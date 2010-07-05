@@ -134,9 +134,15 @@ meta::define_form 'note', sub {
 };
 __TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
 
-meta::meta('datatypes::section', <<'__dyHqM5u2qiIza2BZZUe8tCJbUbz1UmJwCpsYozFvBmc');
-meta::define_form 'section', sub {};
-__dyHqM5u2qiIza2BZZUe8tCJbUbz1UmJwCpsYozFvBmc
+meta::meta('datatypes::section', <<'__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A');
+meta::define_form 'section', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "section::$name";
+  *{$name} = sub {
+    edit("section::$name");
+  };
+};
+__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A
 
 meta::meta('datatypes::unlit_converter', <<'__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE');
 meta::define_form 'unlit_converter', sub {
@@ -219,6 +225,34 @@ something most people will normally do. In the future there may be a locking mec
 
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
+
+meta::code_filter('cpp', <<'__J+5G2Ah4rFLjh+hXCWKaPEA8K7DUFFJXq7PqntfcKPs');
+use File::Path 'mkpath';
+
+my ($line, %settings) = @_;
+
+my $settings = $settings{'name'};
+if ($settings =~ /\scpp(\s|$)/) {
+  my %properties;
+  my @keys_and_values = split /\s+/, $settings;
+  for (@keys_and_values) {
+    my ($k, $v) = split /=/;
+    $properties{$k} = $v;
+  }
+
+  if (my $filename = $properties{'name'}) {
+    mkpath(my $directory = &{'source-directory'}() . '/');
+    open my $fh, $settings{'begin'} ? '>' : '>>', "$directory/$filename.cc";
+    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
+    close $fh;
+  }
+
+  return '\begin{cppcode}' if $settings{'begin'};
+  return '\end{cppcode}'   if $settings{'end'};
+}
+
+return $line;
+__J+5G2Ah4rFLjh+hXCWKaPEA8K7DUFFJXq7PqntfcKPs
 
 meta::code_filter('java', <<'__PT32XU9AIJR/3AH1pwb3r9HBTeOP13/eF1u57+7KwNI');
 use File::Path 'mkpath';
@@ -351,41 +385,19 @@ meta::data('header', <<'__nY40dHcW0eplhM0JxlFWyiRbppzHFRsT+4AQ/XOKaLs');
   {}
 __nY40dHcW0eplhM0JxlFWyiRbppzHFRsT+4AQ/XOKaLs
 
-meta::data('javatex-vim-highlighter', <<'__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU');
-" TeX with Java
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   TeX with Java in it
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn region javatexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<java\>.*$/ contains=javatexSection
-syn match  javatexSection /^\s*- .*$/           contained
-
-runtime! syntax/java.vim
-
-hi link javatexSection Special
-hi link javatexComment Comment
-
-let b:current_syntax = "javatex"
-__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU
-
-meta::data('meta-associations', <<'__5l9K0pfxp7XL+QkT9VfEtP7hQ72gTYqvIOSXA6DO8vQ');
+meta::data('meta-associations', <<'__HKdjpy3K7zVPqa40UaKyIUAUD4fGyvnkRAl7zUoPmVQ');
 ^function:: .pl
 ^internal_function:: .pl
 ^meta:: .pl
 ^bootstrap:: .pl
 ^data::document$ .cltex
--vim-highlighter$ .vim
+^vim_highlighter:: .vim
 ^section:: .javatex
 ^unlit_converter:: .pl
 ^line_filter:: .pl
 ^code_filter:: .pl
 ^profile:: .pl
-__5l9K0pfxp7XL+QkT9VfEtP7hQ72gTYqvIOSXA6DO8vQ
+__HKdjpy3K7zVPqa40UaKyIUAUD4fGyvnkRAl7zUoPmVQ
 
 meta::data('name', <<'__RHl89noGWWtUWtIudaXCGU9zT3dzrAa6znNK1bvvHwQ');
 literate-java-project
@@ -1197,6 +1209,50 @@ meta::unlit_converter('zz_prepend_header', <<'__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0
 my ($document) = @_;
 header() . "\n$document";
 __4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw
+
+meta::vim_highlighter('cpptex', <<'__N6YI1WK23oeIYylZ/zbeqw7wUunykPr0tAAhFL+VojQ');
+" TeX with C++
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   TeX with C++ in it
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn region cpptexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<cpp\>.*$/ contains=cpptexSection
+syn match  cpptexSection /^\s*- .*$/           contained
+
+runtime! syntax/cpp.vim
+
+hi link cpptexSection Special
+hi link cpptexComment Comment
+
+let b:current_syntax = "cpptex"
+__N6YI1WK23oeIYylZ/zbeqw7wUunykPr0tAAhFL+VojQ
+
+meta::vim_highlighter('javatex', <<'__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU');
+" TeX with Java
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   TeX with Java in it
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn region javatexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<java\>.*$/ contains=javatexSection
+syn match  javatexSection /^\s*- .*$/           contained
+
+runtime! syntax/java.vim
+
+hi link javatexSection Special
+hi link javatexComment Comment
+
+let b:current_syntax = "javatex"
+__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU
 
 meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
 my $initial_state = sha256_base64 serialize();
