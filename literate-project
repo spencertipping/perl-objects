@@ -267,7 +267,7 @@ if ($settings =~ /\scpp(\s|$)/) {
 return $line;
 __HuOGDIOLyhf93WG3PukRATD4xDKFHpQhtlmuP0rtgYY
 
-meta::code_filter('java', <<'__PT32XU9AIJR/3AH1pwb3r9HBTeOP13/eF1u57+7KwNI');
+meta::code_filter('java', <<'__Q16rFeNkyBdV6W9RLL9GKTJwnstfRqIfBpmDbVFNOqQ');
 use File::Path 'mkpath';
 
 my ($line, %settings) = @_;
@@ -290,6 +290,8 @@ if ($settings =~ /\sjava(\s|$)/) {
     open my $fh, $settings{'begin'} ? '>' : '>>', "$directory/${classname}.java";
     print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
     close $fh;
+
+    return "\\lstset{caption=$properties{package}.$properties{class}}\n\\begin{javacode}" if $settings{'begin'};
   }
 
   return '\begin{javacode}' if $settings{'begin'};
@@ -297,7 +299,7 @@ if ($settings =~ /\sjava(\s|$)/) {
 }
 
 return $line;
-__PT32XU9AIJR/3AH1pwb3r9HBTeOP13/eF1u57+7KwNI
+__Q16rFeNkyBdV6W9RLL9GKTJwnstfRqIfBpmDbVFNOqQ
 
 meta::code_filter('verbatim', <<'__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s');
 my ($line, %settings) = @_;
@@ -364,23 +366,27 @@ begin
   %section(cpp_section::cpp-introduction)
 __XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w
 
-meta::data('header', <<'__Qo9defQea2KYRXC2NZ4nixkBmMrVVK335ebzw5sRtR0');
+meta::data('header', <<'__JOAEi/KSei9Tbett/cIDLf6NofQ9E0sz4kIWNVQx30o');
 \documentclass{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,pxfonts,listings,geometry,color}
+\usepackage{amsmath,amssymb,pxfonts,listings,color}
 \usepackage[colorlinks]{hyperref}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox[rgb]{0.2,0.2,0.2}{\parbox{\textwidth}{\hspace{2pt}#1#2\tt{}#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
 
 \definecolor{gray95}{rgb}{0.95,0.95,0.95}
 
 \newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
 
-\lstset{columns=fixed,frame=l,basicstyle={\scriptsize\tt},
-        basewidth=0.5em,numbers=left,backgroundcolor=\color{gray95}}
+\lstset{columns=fixed,basicstyle={\scriptsize\tt},basewidth=0.5em,xleftmargin=5pt}
 
 \lstnewenvironment{javacode}{\lstset{language=java}}{}
 \lstnewenvironment{cppcode} {\lstset{language=c++}} {}
-__Qo9defQea2KYRXC2NZ4nixkBmMrVVK335ebzw5sRtR0
+__JOAEi/KSei9Tbett/cIDLf6NofQ9E0sz4kIWNVQx30o
 
 meta::data('meta-associations', <<'__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w');
 ^function:: .pl
@@ -407,9 +413,9 @@ meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__QEia1hIXu3KwD+8gIQoGx9RIJcnHVqcOr0R2j5b/iKs');
-/tmp/literate-project.HW+nUVGeQlBntpgWkDQKI90Ft6dLXF9YJ0hElwDwFuY/document.pdf
-__QEia1hIXu3KwD+8gIQoGx9RIJcnHVqcOr0R2j5b/iKs
+meta::data('pdf-output-file', <<'__j9r4Nlc4hK6Li8+ulH53I5ADBi4E/Fq5N7ItO9pTWrQ');
+/tmp/literate-project.OOvbqlBKFVXkNjlRikfp59j0Uks4vxX+DDK8dLY5H18/document.pdf
+__j9r4Nlc4hK6Li8+ulH53I5ADBi4E/Fq5N7ItO9pTWrQ
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
