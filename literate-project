@@ -399,25 +399,28 @@ begin
   %section(cpp_section::cpp-introduction)
 __XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w
 
-meta::data('header', <<'__1h1K8bRuphwoT4/m0Xd+QnMTVIXOEbZbjYvoNFqK8vg');
+meta::data('header', <<'__5SLn59hilcM+Lm4+/UWrWd0T4HIpRRrCYKNNwaCfWNs');
 \documentclass{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,pxfonts,listings,color}
 \usepackage[colorlinks]{hyperref}
 
+\definecolor{gray}{rgb}{0.6,0.6,0.6}
+
 \usepackage{caption}
-\DeclareCaptionFormat{listing}{\llap{#1#2\hspace{2pt}}\tt{}#3}
+\DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
 \captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
 
 \newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
 
-\lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\scriptsize}}
+\lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
 
 \lstnewenvironment{javacode}{\lstset{language=java}}{}
 \lstnewenvironment{cppcode} {\lstset{language=c++}} {}
 \lstnewenvironment{resource}{}{}
-__1h1K8bRuphwoT4/m0Xd+QnMTVIXOEbZbjYvoNFqK8vg
+
+__5SLn59hilcM+Lm4+/UWrWd0T4HIpRRrCYKNNwaCfWNs
 
 meta::data('meta-associations', <<'__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w');
 ^function:: .pl
