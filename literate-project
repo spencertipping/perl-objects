@@ -236,8 +236,9 @@ something most people will normally do. In the future there may be a locking mec
 =cut
 __0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
 
-meta::code_filter('cpp', <<'__HuOGDIOLyhf93WG3PukRATD4xDKFHpQhtlmuP0rtgYY');
+meta::code_filter('cpp', <<'__RnBPiqLeW7JfaMHW0CgoNF/vpNWmNs4SJULj+/ehEjo');
 use File::Path 'mkpath';
+use File::Basename 'dirname';
 
 my ($line, %settings) = @_;
 
@@ -251,8 +252,8 @@ if ($settings =~ /\scpp(\s|$)/) {
   }
 
   if (my $filename = $properties{'name'}) {
-    mkpath(my $directory = &{'source-directory'}() . '/');
-    open my $fh, $settings{'begin'} ? '>' : '>>', "$directory/$filename.cc";
+    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
+    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
     print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
     close $fh;
 
@@ -265,7 +266,7 @@ if ($settings =~ /\scpp(\s|$)/) {
 }
 
 return $line;
-__HuOGDIOLyhf93WG3PukRATD4xDKFHpQhtlmuP0rtgYY
+__RnBPiqLeW7JfaMHW0CgoNF/vpNWmNs4SJULj+/ehEjo
 
 meta::code_filter('java', <<'__Q16rFeNkyBdV6W9RLL9GKTJwnstfRqIfBpmDbVFNOqQ');
 use File::Path 'mkpath';
@@ -300,6 +301,38 @@ if ($settings =~ /\sjava(\s|$)/) {
 
 return $line;
 __Q16rFeNkyBdV6W9RLL9GKTJwnstfRqIfBpmDbVFNOqQ
+
+meta::code_filter('resource', <<'__gnuMnVX94wNmeabRscK/Tp+seTmMoqXAeoOdJ+H8ZX0');
+use File::Path 'mkpath';
+use File::Basename 'dirname';
+
+my ($line, %settings) = @_;
+
+my $settings = $settings{'name'};
+if ($settings =~ /\sresource(\s|$)/) {
+  my %properties;
+  my @keys_and_values = split /\s+/, $settings;
+  for (@keys_and_values) {
+    my ($k, $v) = split /=/;
+    $properties{$k} = $v;
+  }
+
+  if (my $filename = $properties{'name'}) {
+    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
+    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
+    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
+    close $fh;
+
+    return "\\lstset{caption=$filename}\n\\begin{resource}" if $settings{'begin'};
+  } else {
+    return '\begin{resource}' if $settings{'begin'};
+  }
+
+  return '\end{resource}' if $settings{'end'};
+}
+
+return $line;
+__gnuMnVX94wNmeabRscK/Tp+seTmMoqXAeoOdJ+H8ZX0
 
 meta::code_filter('verbatim', <<'__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s');
 my ($line, %settings) = @_;
@@ -366,7 +399,7 @@ begin
   %section(cpp_section::cpp-introduction)
 __XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w
 
-meta::data('header', <<'__JOAEi/KSei9Tbett/cIDLf6NofQ9E0sz4kIWNVQx30o');
+meta::data('header', <<'__mvExz3H3dUZFpTLSB0yisrg3oIELOo4DlQQvc4TngyU');
 \documentclass{article}
 
 \usepackage[utf8]{inputenc}
@@ -386,7 +419,8 @@ meta::data('header', <<'__JOAEi/KSei9Tbett/cIDLf6NofQ9E0sz4kIWNVQx30o');
 
 \lstnewenvironment{javacode}{\lstset{language=java}}{}
 \lstnewenvironment{cppcode} {\lstset{language=c++}} {}
-__JOAEi/KSei9Tbett/cIDLf6NofQ9E0sz4kIWNVQx30o
+\lstnewenvironment{resource}{}{}
+__mvExz3H3dUZFpTLSB0yisrg3oIELOo4DlQQvc4TngyU
 
 meta::data('meta-associations', <<'__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w');
 ^function:: .pl
@@ -413,9 +447,9 @@ meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
 /tmp
 __6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
 
-meta::data('pdf-output-file', <<'__j9r4Nlc4hK6Li8+ulH53I5ADBi4E/Fq5N7ItO9pTWrQ');
-/tmp/literate-project.OOvbqlBKFVXkNjlRikfp59j0Uks4vxX+DDK8dLY5H18/document.pdf
-__j9r4Nlc4hK6Li8+ulH53I5ADBi4E/Fq5N7ItO9pTWrQ
+meta::data('pdf-output-file', <<'__JXP9FfvG/GFB929uXIhpslX5gR4LZNvb+diAT4nBsLU');
+/tmp/literate-project.Qv42V+Kaeuw8zUy4I4rMsHBgISI-HuyqE1MIlMj2B0g/document.pdf
+__JXP9FfvG/GFB929uXIhpslX5gR4LZNvb+diAT4nBsLU
 
 meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
 evince
