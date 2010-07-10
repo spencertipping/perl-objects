@@ -42,16 +42,17 @@ meta::define_form 'code_filter', sub {
 };
 __gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M
 
-meta::meta('datatypes::data', <<'__j7lFraXGRfKk8ymj2mDJhNbCQMk9FSciN1hdDhzM99U');
+meta::meta('datatypes::data', <<'__s2euAFkA/SbXvMzOkLZXrqX3TdtBzEODSWBAt7wXECA');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "data::$name";
   *{$name} = sub {
     associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    edit("data::$name")                                  if $_[0] eq 'edit';
     retrieve("data::$name");
   };
 };
-__j7lFraXGRfKk8ymj2mDJhNbCQMk9FSciN1hdDhzM99U
+__s2euAFkA/SbXvMzOkLZXrqX3TdtBzEODSWBAt7wXECA
 
 meta::meta('datatypes::function', <<'__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0');
 meta::define_form 'function', sub {
@@ -111,6 +112,19 @@ meta::define_form '_list_type', sub {
   };
 };
 __OKczvJ+6wi8VPNFcZ9ohlXjw+ychodWCfcELdli9p+w
+
+meta::meta('datatypes::message-color', <<'__nWmJgsP4S3LFdMPQnL+foYc9c5fgqIlEm6RppolzoX0');
+meta::define_form 'message_color', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "message_color::$name";
+  terminal::color($name, $value);
+  *{$name} = sub {
+    associate("message_color::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    edit("message_color::$name")                                  if $_[0] eq 'edit';
+    retrieve("message_color::$name");
+  };
+};
+__nWmJgsP4S3LFdMPQnL+foYc9c5fgqIlEm6RppolzoX0
 
 meta::meta('datatypes::note', <<'__TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34');
 meta::define_form 'note', sub {
@@ -771,12 +785,12 @@ print $fh "au BufRead,BufNewFile *.cltex set filetype=cltex";
 close $fh;
 __QweSkvdteATxlMZfDti3sl2iWNE+LbkHc1E7FkqNuCg
 
-meta::function('usage', <<'__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I');
-<<"EOD" . join '  ', split /\n/, ls ();
+meta::function('usage', <<'__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs');
+<<"EOD" . ls ();
 Usage: $0 [options] action [arguments]
-Defined actions:
+Defined actions (and the attribute that defines them):
 EOD
-__oHVev4RtZlF/82SSE87y4Bf7ran2afn/HDtukOQBf9I
+__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs
 
 meta::function('view', <<'__wEtlK5H0ttR24UvcFUsgg5Es1V/VbjMJlU+SKiO2jKs');
 my $pdf_reader      = &{'pdf-reader'}();
@@ -917,30 +931,38 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
 
-meta::library('terminal', <<'__bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q');
+meta::library('terminal', <<'__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA');
 # Functions for nice-looking terminal output.
 
 package terminal;
 
-use constant black  => "0;0";
-use constant red    => "1;31";
-use constant yellow => "1;33";
-use constant green  => "1;32";
-use constant blue   => "1;34";
-use constant purple => "1;35";
-use constant cyan   => "1;36";
-
-my %default_colors = (info => green);
+my %color_conversions = (black  => "0;0",
+                         red    => "1;31",
+                         yellow => "1;33",
+                         green  => "1;32",
+                         blue   => "1;34",
+                         purple => "1;35",
+                         cyan   => "1;36");
 my $longest_prefix = 0;
-$longest_prefix = $longest_prefix < $_ ? $_ : $longest_prefix for map length, keys %default_colors;
+my %default_colors = ();
+
+sub color {
+  $default_colors{$_[0]} = $_[1];
+  $longest_prefix = $longest_prefix < length($_[0]) ? length($_[0]) : $longest_prefix;
+}
+
+color    'info',  'green';
+color  'status',  'green';
+color   'error',    'red';
+color 'warning', 'yellow';
 
 sub message {
   my ($prefix, $message) = @_;
-  my $color = $default_colors{$prefix};
+  my $color = $color_conversions{$default_colors{$prefix}};
   my $padding = ' ' x ($longest_prefix - length $prefix);
-  print "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
+  print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__bakqo5o+Exi5Kw4onujvi9Pu3zR9lQA8cPKfYj6L74Q
+__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA
 
 meta::line_filter('convert_header_info', <<'__1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE');
 my ($line) = @_;
