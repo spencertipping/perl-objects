@@ -30,6 +30,16 @@ meta::define_form 'meta', sub {
   carp $@ if $@;
 };
 
+meta::meta('datatypes::asm_section', <<'__fbMlgAJXPv/FTfGfPjZLAYw3JBWjAXE1x793jZBF7Mo');
+meta::define_form 'asm_section', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "asm_section::$name";
+  *{$name} = sub {
+    edit("asm_section::$name");
+  };
+};
+__fbMlgAJXPv/FTfGfPjZLAYw3JBWjAXE1x793jZBF7Mo
+
 meta::meta('datatypes::bootstrap', <<'__guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM');
 meta::define_form 'bootstrap', sub {};
 __guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM
@@ -154,6 +164,16 @@ meta::define_form 'note', sub {
 };
 __TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
 
+meta::meta('datatypes::section', <<'__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A');
+meta::define_form 'section', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "section::$name";
+  *{$name} = sub {
+    edit("section::$name");
+  };
+};
+__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A
+
 meta::meta('datatypes::unlit_converter', <<'__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE');
 meta::define_form 'unlit_converter', sub {
   my ($name, $value) = @_;
@@ -173,6 +193,17 @@ __Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
 meta::_list_type('list', <<'__ozA5XMClOtEgdzZUav/0c1lAk3Vku/dc4e2tQHgNkTk');
 list
 __ozA5XMClOtEgdzZUav/0c1lAk3Vku/dc4e2tQHgNkTk
+
+meta::asm_section('asm-introduction', <<'__qY2gmVqzjpJlDNiCcXsgAR9TWp5PLg6Pk4ON1GP0/qI');
+- Introduction to Assembly Literate Coding
+  Assembly-language snippets are specified in much the same way as C++ snippets. The only difference is that the \verb|asm| marker is used instead of \verb|cpp|.
+
+  :: asm name=test.s
+  main:
+    movl $1, %eax
+    ret
+  :.
+__qY2gmVqzjpJlDNiCcXsgAR9TWp5PLg6Pk4ON1GP0/qI
 
 meta::bootstrap('initialization', <<'__plktoDCjGQioE48vwfrH0xL3ulcYnTWp+fUvaFwRnnc');
 #!/usr/bin/perl
@@ -399,30 +430,22 @@ begin
   %section(cpp_section::cpp-introduction)
 __XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w
 
-meta::data('header', <<'__5SLn59hilcM+Lm4+/UWrWd0T4HIpRRrCYKNNwaCfWNs');
+meta::data('header', <<'__+1Y/wU/2Nj0I9wPewkdYhDgKhTrwWXecN7fixPF0usI');
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,pxfonts,listings,color}
-\usepackage[colorlinks]{hyperref}
+%section(section::header-packages)
+%section(section::header-listings)
+%section(section::header-refs)
 
-\definecolor{gray}{rgb}{0.6,0.6,0.6}
+%section(section::header-cpp)
+%section(section::header-java)
+%section(section::header-asm)
+%section(section::header-resource)
 
-\usepackage{caption}
-\DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
-\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
+%section(section::header-proof)
+__+1Y/wU/2Nj0I9wPewkdYhDgKhTrwWXecN7fixPF0usI
 
-\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
-
-\lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
-
-\lstnewenvironment{javacode}{\lstset{language=java}}{}
-\lstnewenvironment{cppcode} {\lstset{language=c++}} {}
-\lstnewenvironment{resource}{}{}
-
-__5SLn59hilcM+Lm4+/UWrWd0T4HIpRRrCYKNNwaCfWNs
-
-meta::data('meta-associations', <<'__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w');
+meta::data('meta-associations', <<'__YGF2U3a+Yjyf2sIZvkfH/Q69OjeY2N0IG8a/oQP+2jo');
 ^function:: .pl
 ^library:: .pl
 ^internal_function:: .pl
@@ -432,12 +455,14 @@ meta::data('meta-associations', <<'__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w
 ^vim_highlighter:: .vim
 ^java_section:: .javatex
 ^cpp_section:: .cpptex
+^asm_section:: .asmtex
+^section:: .cltex
 ^unlit_converter:: .pl
 ^line_filter:: .pl
 ^code_filter:: .pl
 ^profile:: .pl
-^data::header$ .tex
-__DVlfIHkYXJ4+o/MvyDFYl59WCQmDx7HU8XchAsqz9/w
+^data::header$ .cltex
+__YGF2U3a+Yjyf2sIZvkfH/Q69OjeY2N0IG8a/oQP+2jo
 
 meta::data('name', <<'__LjoXE2rWcenuglagwlKvDIbYcxZTXiV3FsPD5W57vEc');
 literate-project
@@ -1116,6 +1141,46 @@ if ($line =~ /^(\s*)- (.*)$/) {
 }
 __2dvR+HcKtutFCWe6cEFSERoj36PbA6u91tQcJgcwJWk
 
+meta::section('header-asm', <<'__Cvp8Mj9WBQk9BB4i5Z59BmU4O+OsEm0jFdOotC3sK78');
+\lstnewenvironment{asmcode} {}{}
+__Cvp8Mj9WBQk9BB4i5Z59BmU4O+OsEm0jFdOotC3sK78
+
+meta::section('header-cpp', <<'__9D5O4Z6TbE1w0d/QZf6mh5gTqK3uqngGW5JnsVahKrI');
+\lstnewenvironment{cppcode} {\lstset{language=c++}} {}
+__9D5O4Z6TbE1w0d/QZf6mh5gTqK3uqngGW5JnsVahKrI
+
+meta::section('header-java', <<'__c8wVpTVdLTbXiGk6I2ndXsi/BvG/J2tcEr6hWcQaPpg');
+\lstnewenvironment{javacode}{\lstset{language=java}}{}
+__c8wVpTVdLTbXiGk6I2ndXsi/BvG/J2tcEr6hWcQaPpg
+
+meta::section('header-listings', <<'__QfAvgYOeTiIvdge3tOlNbkDqoEBD10Je3eKQjtnvDlw');
+\definecolor{gray}{rgb}{0.6,0.6,0.6}
+
+\usepackage{caption}
+\DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
+\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
+
+\lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
+__QfAvgYOeTiIvdge3tOlNbkDqoEBD10Je3eKQjtnvDlw
+
+meta::section('header-packages', <<'__gAYewXeZ5+PV5yzWF64x6UcHha8VYx98W4Bh0ETihoc');
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,pxfonts,listings,color}
+\usepackage[colorlinks]{hyperref}
+__gAYewXeZ5+PV5yzWF64x6UcHha8VYx98W4Bh0ETihoc
+
+meta::section('header-proof', <<'__0IQyfHZQmmk2W+K2IAUXzYQ8ozjpmMFeO7vnh5+T0X0');
+\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}
+__0IQyfHZQmmk2W+K2IAUXzYQ8ozjpmMFeO7vnh5+T0X0
+
+meta::section('header-refs', <<'__FyTRTeUUlD24fqBIVXql0GRwKOZnNt8gSl0VMTWHJV0');
+\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
+__FyTRTeUUlD24fqBIVXql0GRwKOZnNt8gSl0VMTWHJV0
+
+meta::section('header-resource', <<'__yJjX5ArJ7RQtwU2GDufcCGCreYGjYZx9C3FrvHa9JQ0');
+\lstnewenvironment{resource}{}{}
+__yJjX5ArJ7RQtwU2GDufcCGCreYGjYZx9C3FrvHa9JQ0
+
 meta::unlit_converter('create_sections', <<'__hMABUTlrgmVTt4JFwi0HvAb2ehkYaGLJ25qslKDQurE');
 my ($document) = @_;
 1 while $document =~ s/^\s*%section\(([^)]+)\)\s*$/\n$data{$1}\n/omg;
@@ -1178,6 +1243,28 @@ meta::unlit_converter('zz_prepend_header', <<'__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0
 my ($document) = @_;
 header() . "\n$document";
 __4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw
+
+meta::vim_highlighter('asmtex', <<'__xmCrBQ06Enn0XsYJnPsyTgeBClFw7BA/giJSfcXEHeM');
+" TeX with Assembly
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   TeX with Assembly in it
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn region asmtexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<asm\>.*$/ contains=asmtexSection
+syn match  asmtexSection /^\s*- .*$/ contained
+
+runtime! syntax/asm.vim
+
+hi link asmtexSection Special
+hi link asmtexComment Comment
+
+let b:current_syntax = "asmtex"
+__xmCrBQ06Enn0XsYJnPsyTgeBClFw7BA/giJSfcXEHeM
 
 meta::vim_highlighter('cltex', <<'__i99D+bM2oHb2kJ9JHMYOpio7eDlvgAvVVrOhkUTyaxM');
 " Cleaner TeX

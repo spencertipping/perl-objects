@@ -439,7 +439,7 @@ for (@_) {
 }
 __qP6xPZE75s9g0XJIiC6FGw0vnj2j0glUzsAHxyA3lvY
 
-meta::function('compile', <<'__HfmDCotLaO8/ha33D7dUqCAhPmSSrWt1lJc73NXcPz8');
+meta::function('compile', <<'__0sHLYUeHTttt7KQzm7Ox1zaylfNgmDoGXcSUhkNLlIw');
 my $tex_command         = tex();
 my $pdftex_command      = pdftex();
 my $filename            = 'document';
@@ -461,21 +461,12 @@ $pdftex_command =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
 mkdir $temporary_directory;
 file::write("$temporary_directory/$filename.tex", $contents);
 
-if (&{'table-of-contents'}()) {
-  print "First invocation of TeX:\n";
-  system($tex_command);
-  print "Second invocation of TeX:\n";
-  system($tex_command);
-  print "PDFTeX:\n";
-  system($pdftex_command);
-} else {
-  print "PDFTeX:\n";
-  system($pdftex_command);
-}
+my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_command) || system($pdftex_command) : system($pdftex_command);
 
-associate('data::pdf-output-file', my $result = "$temporary_directory/$filename.pdf", execute => 1);
+associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
 $result;
-__HfmDCotLaO8/ha33D7dUqCAhPmSSrWt1lJc73NXcPz8
+
+__0sHLYUeHTttt7KQzm7Ox1zaylfNgmDoGXcSUhkNLlIw
 
 meta::function('compile-to-tex', <<'__cvWyD1kaLfBVnSppeGw/hSpleoWxLARJQwP1tUKvebc');
 my ($document) = document();
@@ -608,11 +599,11 @@ my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . ($inverses{$_} || ''
 join "\n", @new_lines;
 __S5EydJRu+YIfcFmTMz1ZHX0cANJq32bU5JnYCe1tWdk
 
-meta::function('make', <<'__8mAUcwqcvcEhgs6tEjHaIx3uF9QOC+9DAI7NmulvJ74');
-compile();
-view();
+meta::function('make', <<'__F1Xp0whSyRxnzOSYrjeYb4fYeR7vglInUe9D0ZkgbH0');
+compile() || view();
 clean();
-__8mAUcwqcvcEhgs6tEjHaIx3uF9QOC+9DAI7NmulvJ74
+
+__F1Xp0whSyRxnzOSYrjeYb4fYeR7vglInUe9D0ZkgbH0
 
 meta::function('mv', <<'__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4');
 my ($from, $to) = @_;
