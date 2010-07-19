@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
+
 =head2 Original implementation by Spencer Tipping
 
 The prototype for this script is licensed under the terms of the MIT source code license.
@@ -74,17 +75,17 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __76b8f680d46687c639143238fec5e33429ea2a80
 
-meta::meta('type::data', <<'__3b42cb703e9222201db85270cf2b2e42d74566ac');
+meta::meta('type::data', <<'__53c2fa38577a7e80eaacdada3a786992406c6f40');
 meta::configure 'data', extension => '', inherit => 0;
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
-  meta::externalize $name, sub {
+  meta::externalize $name, "data::$name", sub {
     associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
     edit("data::$name")                                  if $_[0] eq 'edit';
     retrieve("data::$name");
   };
 };
-__3b42cb703e9222201db85270cf2b2e42d74566ac
+__53c2fa38577a7e80eaacdada3a786992406c6f40
 
 meta::meta('type::function', <<'__cb9c838848345106e4dd83f120e884243ebfea68');
 meta::configure 'function', extension => '.pl', inherit => 1;
@@ -147,10 +148,11 @@ meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 __7d47c7cc891f6d30ab57f964247637a023723ca6
 
-meta::bootstrap('initialization', <<'__d2fc1778b05f515c40473908c41814e8d6ba23f8');
+meta::bootstrap('initialization', <<'__53e36328be939a3a915e0860e2cbee8c8a583568');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
+
 =head2 Original implementation by Spencer Tipping
 
 The prototype for this script is licensed under the terms of the MIT source code license.
@@ -187,8 +189,7 @@ meta::define_form 'meta', sub {
   eval $value;
   warn $@ if $@;
 };
-
-__d2fc1778b05f515c40473908c41814e8d6ba23f8
+__53e36328be939a3a915e0860e2cbee8c8a583568
 
 meta::data('default-action', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 shell
