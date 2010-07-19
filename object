@@ -1,14 +1,17 @@
 #!/usr/bin/perl
 
-# Self-modifying Perl script | Spencer Tipping
-# The prototype for this script is licensed under the terms of the MIT source code license.
-# However, this script in particular may be under different licensing terms. To find out how
-# this script is licensed, please contact whoever sent it to you. Alternatively, you may
-# run it with the 'license' argument if they have specified a license that way.
+=head1 Self-modifying Perl script
+=head2 Original implementation by Spencer Tipping
 
-# You should not edit this file directly. For information about how it was constructed, go
-# to http://spencertipping.com/#section=self-modifying-perl. For quick usage guidelines, run
-# this script with the 'usage' argument.
+The prototype for this script is licensed under the terms of the MIT source code license.
+However, this script in particular may be under different licensing terms. To find out how
+this script is licensed, please contact whoever sent it to you. Alternatively, you may
+run it with the 'license' argument if they have specified a license that way.
+
+You should not edit this file directly. For information about how it was constructed, go
+to L<http://spencertipping.com/#section=self-modifying-perl>. For quick usage guidelines, run
+this script with the 'usage' argument.
+=cut
 
 $|++;
 
@@ -144,18 +147,21 @@ meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 __7d47c7cc891f6d30ab57f964247637a023723ca6
 
-meta::bootstrap('initialization', <<'__b704afbc2954bd209054fab4c9e094f8d84fa4ef');
+meta::bootstrap('initialization', <<'__d2fc1778b05f515c40473908c41814e8d6ba23f8');
 #!/usr/bin/perl
 
-# Self-modifying Perl script | Spencer Tipping
-# The prototype for this script is licensed under the terms of the MIT source code license.
-# However, this script in particular may be under different licensing terms. To find out how
-# this script is licensed, please contact whoever sent it to you. Alternatively, you may
-# run it with the 'license' argument if they have specified a license that way.
+=head1 Self-modifying Perl script
+=head2 Original implementation by Spencer Tipping
 
-# You should not edit this file directly. For information about how it was constructed, go
-# to http://spencertipping.com/#section=self-modifying-perl. For quick usage guidelines, run
-# this script with the 'usage' argument.
+The prototype for this script is licensed under the terms of the MIT source code license.
+However, this script in particular may be under different licensing terms. To find out how
+this script is licensed, please contact whoever sent it to you. Alternatively, you may
+run it with the 'license' argument if they have specified a license that way.
+
+You should not edit this file directly. For information about how it was constructed, go
+to L<http://spencertipping.com/#section=self-modifying-perl>. For quick usage guidelines, run
+this script with the 'usage' argument.
+=cut
 
 $|++;
 
@@ -182,7 +188,7 @@ meta::define_form 'meta', sub {
   warn $@ if $@;
 };
 
-__b704afbc2954bd209054fab4c9e094f8d84fa4ef
+__d2fc1778b05f515c40473908c41814e8d6ba23f8
 
 meta::data('default-action', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 shell
@@ -539,13 +545,13 @@ meta::function('vim', <<'__921dce569d3825e09152d45631b04660a883921e');
 file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for map {s/^vim_highlighter:://o; $_} grep /^vim_highlighter::/, sort keys %data;
 __921dce569d3825e09152d45631b04660a883921e
 
-meta::internal_function('associate', <<'__e2f6638c2004f25809e5ed487afdfe80777e90b0');
+meta::internal_function('associate', <<'__1dff35185713bb0a7e9876d00550d210aac80e68');
 my ($name, $value, %options) = @_;
 my $namespace = namespace($name);
-messages::error("Namespace $namespace does not exist") unless grep {$_ eq $namespace} @data_types;
+messages::error("Namespace $namespace does not exist") unless $datatypes{$namespace};
 $data{$name} = $value;
 execute($name) if $options{'execute'};
-__e2f6638c2004f25809e5ed487afdfe80777e90b0
+__1dff35185713bb0a7e9876d00550d210aac80e68
 
 meta::internal_function('basename', <<'__9264831c13f20c4038bc51c04523e60784ac9505');
 my ($name) = @_;
