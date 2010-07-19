@@ -1,0 +1,1213 @@
+#!/usr/bin/perl
+
+=head1 Self-modifying Perl script
+
+=head2 Original implementation by Spencer Tipping
+
+The prototype for this script is licensed under the terms of the MIT source code license.
+However, this script in particular may be under different licensing terms. To find out how
+this script is licensed, please contact whoever sent it to you. Alternatively, you may
+run it with the 'license' argument if they have specified a license that way.
+
+You should not edit this file directly. For information about how it was constructed, go
+to L<http://spencertipping.com/#section=self-modifying-perl>. For quick usage guidelines, run
+this script with the 'usage' argument.
+=cut
+
+$|++;
+
+my %data;
+my %transient;
+my %externalized_functions;
+my %datatypes;
+
+sub meta::define_form {
+  my ($namespace, $delegate) = @_;
+  $datatypes{$namespace} = $delegate;
+  *{"meta::${namespace}::implementation"} = $delegate;
+  *{"meta::$namespace"} = sub {
+    my ($name, $value) = @_;
+    chomp $value;
+    $data{"${namespace}::$name"} = $value;
+    $delegate->($name, $value);
+  };
+}
+
+meta::define_form 'meta', sub {
+  my ($name, $value) = @_;
+  eval $value;
+  warn $@ if $@;
+};
+meta::meta('configure', <<'__eef2c1281aa263312688eaa0bf3f2f68390d0827');
+# A function to configure transients. Transients can be used to store any number of
+# different things, but one of the more common usages is type descriptors.
+
+sub meta::configure {
+  my ($datatype, %options) = @_;
+  $transient{$_}{$datatype} = $options{$_} for keys %options;
+}
+__eef2c1281aa263312688eaa0bf3f2f68390d0827
+
+meta::meta('externalize', <<'__c80794c0f2d6e2884caa7e6a780f6bf17de1b470');
+# Function externalization. Data types should call this method when defining a function
+# that has an external interface.
+
+sub meta::externalize {
+  my ($name, $attribute, $implementation) = @_;
+  $externalized_functions{$name} = $attribute;
+  *{"::$name"} = $implementation || $attribute;
+}
+__c80794c0f2d6e2884caa7e6a780f6bf17de1b470
+
+meta::meta('functor::filter', <<'__7e0c718016caf5fc1c9059dbf2ea311ccd69ab84');
+# Creates a filter type. These are stored in their own namespaces, but are enumerable
+# by their attribute names (which match their function names, conveniently).
+
+sub meta::functor::filter {
+  my ($typename) = @_;
+
+  meta::configure $typename, extension => '.pl', inherit => 1;
+  meta::define_form $typename, sub {
+    my ($name, $value) = @_;
+    meta::externalize "${typename}::$name", "${typename}::$name", eval "sub{\n$value\n}";
+    warn $@ if $@;
+  };
+}
+__7e0c718016caf5fc1c9059dbf2ea311ccd69ab84
+
+meta::meta('functor::section', <<'__f2c94d76f1ba6d7aa0205a24f066b4480635a2bc');
+sub meta::functor::section {
+  my ($typename, %options) = @_;
+
+  meta::configure $typename, %options, inherit => 0;
+  meta::define_form $typename, sub {
+    my ($name, $value) = @_;
+    meta::externalize $name, "${typename}::$name", sub {
+      edit("${typename}::$name");
+    };
+  };
+}
+__f2c94d76f1ba6d7aa0205a24f066b4480635a2bc
+
+meta::meta('internal::runtime', <<'__8e8cc66f6a9977507d211918b65cbfba78e814ea');
+meta::configure 'internal', extension => '.pl', inherit => 1;
+meta::define_form 'internal', \&meta::meta::implementation;
+__8e8cc66f6a9977507d211918b65cbfba78e814ea
+
+meta::meta('type::asm_section', <<'__737aa048ca16972043bfa83016059ef056c66218');
+meta::functor::section 'asm_section', extension => '.asmtex';
+__737aa048ca16972043bfa83016059ef056c66218
+
+meta::meta('type::bootstrap', <<'__76b8f680d46687c639143238fec5e33429ea2a80');
+# Bootstrap attributes don't get executed. The reason for this is that because
+# they are serialized directly into the header of the file (and later duplicated
+# as regular data attributes), they will have already been executed when the
+# file is loaded.
+
+meta::configure 'bootstrap', extension => '.pl', inherit => 1;
+meta::define_form 'bootstrap', sub {};
+__76b8f680d46687c639143238fec5e33429ea2a80
+
+meta::meta('type::code_filter', <<'__b167251131f1ca2cd3393654b015201c02589f00');
+meta::functor::filter 'code_filter';
+__b167251131f1ca2cd3393654b015201c02589f00
+
+meta::meta('type::cpp_section', <<'__4cf2e8a06bb1bb88405f1d1828775d2ece69cd58');
+meta::functor::section 'cpp_section', extension => '.cpptex';
+__4cf2e8a06bb1bb88405f1d1828775d2ece69cd58
+
+meta::meta('type::data', <<'__53c2fa38577a7e80eaacdada3a786992406c6f40');
+meta::configure 'data', extension => '', inherit => 0;
+meta::define_form 'data', sub {
+  my ($name, undef) = @_;
+  meta::externalize $name, "data::$name", sub {
+    associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    edit("data::$name")                                  if $_[0] eq 'edit';
+    retrieve("data::$name");
+  };
+};
+__53c2fa38577a7e80eaacdada3a786992406c6f40
+
+meta::meta('type::function', <<'__cb9c838848345106e4dd83f120e884243ebfea68');
+meta::configure 'function', extension => '.pl', inherit => 1;
+meta::define_form 'function', sub {
+  my ($name, $value) = @_;
+  meta::externalize $name, "function::$name", eval("sub {\n$value\n}");
+  warn $@ if $@;
+};
+__cb9c838848345106e4dd83f120e884243ebfea68
+
+meta::meta('type::internal_function', <<'__581839c4aa38453088de1f6c734e28284f336088');
+meta::configure 'internal_function', extension => '.pl', inherit => 1;
+meta::define_form 'internal_function', sub {
+  my ($name, $value) = @_;
+  *{$name} = eval "sub {\n$value\n}";
+  warn $@ if $@;
+};
+__581839c4aa38453088de1f6c734e28284f336088
+
+meta::meta('type::java_section', <<'__339d2c08392a2be9075be834122f8cd8f96fdb28');
+meta::functor::section 'java_section', extension => '.javatex';
+__339d2c08392a2be9075be834122f8cd8f96fdb28
+
+meta::meta('type::library', <<'__5f879740b47b2a48430b0a34cdf1b4f013c389a0');
+meta::configure 'library', extension => '.pl', inherit => 1;
+meta::define_form 'library', sub {
+  my ($name, $value) = @_;
+  eval $value;
+  $externalized_functions{$name} = "library::$name";
+  *{$name} = sub {edit("library::$name")};
+  warn $@ if $@;
+};
+__5f879740b47b2a48430b0a34cdf1b4f013c389a0
+
+meta::meta('type::line_filter', <<'__b167251131f1ca2c0a0eb830ee0f3cac3b4300c0');
+meta::functor::filter 'line_filter';
+__b167251131f1ca2c0a0eb830ee0f3cac3b4300c0
+
+meta::meta('type::message_color', <<'__4091dd406919aaa054897c70e7d187a81e0b6a68');
+meta::configure 'message_color', inherit => 1;
+meta::define_form 'message_color', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "message_color::$name";
+  terminal::color($name, $value);
+  *{$name} = sub {
+    associate("message_color::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    edit("message_color::$name")                                  if $_[0] eq 'edit';
+    retrieve("message_color::$name");
+  };
+};
+__4091dd406919aaa054897c70e7d187a81e0b6a68
+
+meta::meta('type::meta', <<'__7d9446b8ef4af840e5bca1e475376638dcdf1b68');
+meta::configure 'meta', extension => '.pl', inherit => 1;
+__7d9446b8ef4af840e5bca1e475376638dcdf1b68
+
+meta::meta('type::note', <<'__5ec26340c37fc180a1f9f607559639b08db73608');
+meta::configure 'note', inherit => 0;
+meta::define_form 'note', sub {
+  my ($name, undef) = @_;
+  $externalized_functions{$name} = "note::$name";
+  *{$name} = sub {edit("note::$name")};
+};
+__5ec26340c37fc180a1f9f607559639b08db73608
+
+meta::meta('type::section', <<'__a71c2648f3a627ecfe99855027657cec1b98d50c');
+meta::functor::section 'section', extension => '.cltex';
+__a71c2648f3a627ecfe99855027657cec1b98d50c
+
+meta::meta('type::unlit_converter', <<'__64d04be82341524ea0c80902f66ca70c9ac3d998');
+meta::functor::filter 'unlit_converter';
+__64d04be82341524ea0c80902f66ca70c9ac3d998
+
+meta::meta('type::vim_highlighter', <<'__7d47c7cc891f6d30ab57f964247637a023723ca6');
+meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
+meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
+__7d47c7cc891f6d30ab57f964247637a023723ca6
+
+meta::asm_section('asm-introduction', <<'__4e5faf6582ed39682b003d2c04c3a2a042cfc5d0');
+- Introduction to Assembly Literate Coding
+  Assembly-language snippets are specified in much the same way as C++ snippets. The only difference is that the \verb|asm| marker is used instead of \verb|cpp|.
+
+  :: asm name=test.s
+  main:
+    movl $1, %eax
+    ret
+  :.
+__4e5faf6582ed39682b003d2c04c3a2a042cfc5d0
+
+meta::bootstrap('initialization', <<'__9baff1b8e6d73687511511ec22e70e306fdda6d8');
+#!/usr/bin/perl
+
+=head1 Self-modifying Perl script
+
+=head2 Original implementation by Spencer Tipping
+
+The prototype for this script is licensed under the terms of the MIT source code license.
+However, this script in particular may be under different licensing terms. To find out how
+this script is licensed, please contact whoever sent it to you. Alternatively, you may
+run it with the 'license' argument if they have specified a license that way.
+
+You should not edit this file directly. For information about how it was constructed, go
+to L<http://spencertipping.com/#section=self-modifying-perl>. For quick usage guidelines, run
+this script with the 'usage' argument.
+=cut
+
+$|++;
+
+my %data;
+my %transient;
+my %externalized_functions;
+my %datatypes;
+
+sub meta::define_form {
+  my ($namespace, $delegate) = @_;
+  $datatypes{$namespace} = $delegate;
+  *{"meta::${namespace}::implementation"} = $delegate;
+  *{"meta::$namespace"} = sub {
+    my ($name, $value) = @_;
+    chomp $value;
+    $data{"${namespace}::$name"} = $value;
+    $delegate->($name, $value);
+  };
+}
+
+meta::define_form 'meta', sub {
+  my ($name, $value) = @_;
+  eval $value;
+  warn $@ if $@;
+};
+__9baff1b8e6d73687511511ec22e70e306fdda6d8
+
+meta::code_filter('asm', <<'__d8758d20b95369e8baf07fd06a153e498af18e50');
+use File::Path 'mkpath';
+use File::Basename 'dirname';
+
+my ($line, %settings) = @_;
+
+my $settings = $settings{'name'};
+if ($settings =~ /\sasm(\s|$)/) {
+  my %properties;
+  my @keys_and_values = split /\s+/, $settings;
+  for (@keys_and_values) {
+    my ($k, $v) = split /=/;
+    $properties{$k} = $v;
+  }
+
+  if (my $filename = $properties{'name'}) {
+    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
+    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
+    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
+    close $fh;
+
+    return "\\lstset{caption=$filename}\n\\begin{asmcode}" if $settings{'begin'};
+  } else {
+    return '\begin{asmcode}' if $settings{'begin'};
+  }
+
+  return '\end{asmcode}' if $settings{'end'};
+}
+
+return $line;
+__d8758d20b95369e8baf07fd06a153e498af18e50
+
+meta::code_filter('cpp', <<'__f33778bcd9ed93a8f13b4ac05310126ca156a6ec');
+use File::Path 'mkpath';
+use File::Basename 'dirname';
+
+my ($line, %settings) = @_;
+
+my $settings = $settings{'name'};
+if ($settings =~ /\scpp(\s|$)/) {
+  my %properties;
+  my @keys_and_values = split /\s+/, $settings;
+  for (@keys_and_values) {
+    my ($k, $v) = split /=/;
+    $properties{$k} = $v;
+  }
+
+  if (my $filename = $properties{'name'}) {
+    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
+    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
+    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
+    close $fh;
+
+    return "\\lstset{caption=$filename}\n\\begin{cppcode}" if $settings{'begin'};
+  } else {
+    return '\begin{cppcode}' if $settings{'begin'};
+  }
+
+  return '\end{cppcode}' if $settings{'end'};
+}
+
+return $line;
+__f33778bcd9ed93a8f13b4ac05310126ca156a6ec
+
+meta::code_filter('java', <<'__75428536b2b3d1144797953874b792808b2b8e80');
+use File::Path 'mkpath';
+
+my ($line, %settings) = @_;
+
+my $settings = $settings{'name'};
+if ($settings =~ /\sjava(\s|$)/) {
+  my %properties;
+  my @keys_and_values = split /\s+/, $settings;
+  for (@keys_and_values) {
+    my ($k, $v) = split /=/;
+    $properties{$k} = $v;
+  }
+
+  if ($properties{'class'}) {
+    my $classname         = $properties{'class'};
+    my $package_directory = $properties{'package'};
+    $package_directory =~ tr[.][/];
+
+    mkpath(my $directory = &{'source-directory'}() . '/' . $package_directory);
+    open my $fh, $settings{'begin'} ? '>' : '>>', "$directory/${classname}.java";
+    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
+    close $fh;
+
+    return "\\lstset{caption=$properties{package}.$properties{class}}\n\\begin{javacode}" if $settings{'begin'};
+  }
+
+  return '\begin{javacode}' if $settings{'begin'};
+  return '\end{javacode}'   if $settings{'end'};
+}
+
+return $line;
+__75428536b2b3d1144797953874b792808b2b8e80
+
+meta::code_filter('resource', <<'__868ae08007546e6baa413f60d98d87f810de542e');
+use File::Path 'mkpath';
+use File::Basename 'dirname';
+
+my ($line, %settings) = @_;
+
+my $settings = $settings{'name'};
+if ($settings =~ /\sresource(\s|$)/) {
+  my %properties;
+  my @keys_and_values = split /\s+/, $settings;
+  for (@keys_and_values) {
+    my ($k, $v) = split /=/;
+    $properties{$k} = $v;
+  }
+
+  if (my $filename = $properties{'name'}) {
+    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
+    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
+    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
+    close $fh;
+
+    return "\\lstset{caption=$filename}\n\\begin{resource}" if $settings{'begin'};
+  } else {
+    return '\begin{resource}' if $settings{'begin'};
+  }
+
+  return '\end{resource}' if $settings{'end'};
+}
+
+return $line;
+__868ae08007546e6baa413f60d98d87f810de542e
+
+meta::code_filter('verbatim', <<'__5dd84ef062d4c490247f4208b5dfa4765b4657f8');
+my ($line, %settings) = @_;
+
+unless ($settings{'name'}) {
+  return '\begin{verbatim}' if $settings{'begin'};
+  return '\end{verbatim}'   if $settings{'end'};
+}
+
+return $line;
+__5dd84ef062d4c490247f4208b5dfa4765b4657f8
+
+meta::cpp_section('cpp-introduction', <<'__76d2d07c70dbfc1491ed3e38f7e93c8309467b2c');
+- Introduction to C++ Literate Coding
+  The C++ literate code interface is much like the Java one, except that code sections use the \verb|name=x| attribute rather than \verb|class=| and \verb|package=|. The name is expected to
+  include an extension, so for example \verb|:: cpp name=src/foo.h| is a correct heading.
+
+  :: cpp name=hello.cc
+  #include<iostream>
+  int main () {
+    std::cout << "Hello world!" << std::endl;
+  }
+  :.
+__76d2d07c70dbfc1491ed3e38f7e93c8309467b2c
+
+meta::data('default-action', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
+shell
+__0b27c4057f19ced02b9dd5049e78f02a912922f0
+
+meta::data('license', <<'__ae3dd02c1e98eee021fce579a25f2fecbe09108c');
+MIT License
+Copyright (c) 2010 Spencer Tipping
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+__ae3dd02c1e98eee021fce579a25f2fecbe09108c
+
+meta::data('name', <<'__89192a5453e924c8dad5b4bedab7cdb4f89b2bd0');
+literate-project
+__89192a5453e924c8dad5b4bedab7cdb4f89b2bd0
+
+meta::function('add-to', <<'__034dc988a3b9d65c347896e44c26b1504973dfe0');
+my ($filename) = @_;
+my @members = grep /^implementation::/, keys %data;
+
+for (@members) {
+  my $destination_name = basename($_);
+  open my($handle), "| $filename import $destination_name" or messages::error("Attribute $_ could not be written.");
+  print $handle retrieve($_);
+  close $handle;
+}
+__034dc988a3b9d65c347896e44c26b1504973dfe0
+
+meta::function('cat', <<'__d8c73dd00d45e202e5a954205a4deb7c8ce20198');
+my ($name) = @_;
+$data{$name};
+__d8c73dd00d45e202e5a954205a4deb7c8ce20198
+
+meta::function('clone', <<'__8bcdbca03e26a1b8e4c4cde0a91e8d9495d322d8');
+for (@_) {
+  if ($_) {
+    eval {
+      file::write($_, serialize(), noclobber => 1);
+      chmod(0700, $_);
+      print "File $_ cloned successfully.\n";
+    };
+
+    print "$@\n" if $@;
+  }
+}
+__8bcdbca03e26a1b8e4c4cde0a91e8d9495d322d8
+
+meta::function('cp', <<'__81043c18707c4138726c4b40557d0b30419f3ca8');
+my ($from, $to) = @_;
+$data{$to} = $data{$from} if $data{$from};
+messages::error("No such attribute $from") unless $data{$from};
+$data{$from};
+__81043c18707c4138726c4b40557d0b30419f3ca8
+
+meta::function('create', <<'__bc27b918ade7d018076387cc00b3ecb0d3100b28');
+my ($name, $value) = @_;
+messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %data;
+if ($value) {
+  associate($name, $value);
+} else {
+  associate($name,'');
+  edit ($name);
+}
+__bc27b918ade7d018076387cc00b3ecb0d3100b28
+
+meta::function('edit', <<'__8079a7b4bd774dd084cc3600d80a46bbc7169660');
+my ($name, %options) = @_;
+my $extension = $transient{extension}{namespace($name)} || '';
+
+messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} keys %data;
+associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $extension),
+          execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
+save();
+__8079a7b4bd774dd084cc3600d80a46bbc7169660
+
+meta::function('exists', <<'__ed7cd3a08670be10217f6f6c2f291ee4ee8ec180');
+my $name = shift;
+grep {$_ eq $name} keys %data;
+__ed7cd3a08670be10217f6f6c2f291ee4ee8ec180
+
+meta::function('export', <<'__a0a5e6f8ff03fbd8884952a071c36c74dca19d30');
+# Exports data into a text file.
+#   export attr1 attr2 attr3 ... file.txt
+
+my $name = pop @_;
+my @attributes = @_;
+
+if (@attributes) {
+  my $file = join "\n", map {cat($_)} @attributes;
+  file::write ($name, $file);
+} else {
+  messages::error ("Not enough arguments");
+}
+__a0a5e6f8ff03fbd8884952a071c36c74dca19d30
+
+meta::function('grab', <<'__2a2ff1f06bfd5860ba1467224d377064a4d3d36c');
+my ($filename, @attribute_names) = @_;
+associate("implementation::$_", `$filename cat $_`) for @attribute_names;
+__2a2ff1f06bfd5860ba1467224d377064a4d3d36c
+
+meta::function('hash', <<'__9fe408f05ae31e04bd9f43509ee954a0eb02d524');
+my ($data) = @_;
+fast_hash($data);
+__9fe408f05ae31e04bd9f43509ee954a0eb02d524
+
+meta::function('import', <<'__35186ce8e0008a3c475e7ee8ce22eba8eb0147b8');
+my $name  = pop @_;
+my @files = @_;
+
+if (@files) {
+  my $files = join "", map {file::read ($_)} @files;
+  associate ($name, $files); 
+}
+else {
+  associate($name, join('', <STDIN>));
+}
+__35186ce8e0008a3c475e7ee8ce22eba8eb0147b8
+
+meta::function('import-bundle', <<'__8f4056900159fc187bf4fff4ff38e4c271bebb88');
+eval join '', <STDIN>;
+messages::error($@) if $@;
+__8f4056900159fc187bf4fff4ff38e4c271bebb88
+
+meta::function('lock', <<'__0a6ef8184203a9e00d7b3a68b3ea4cdce5206718');
+my (undef, undef, $mode) = stat $0;
+chmod $mode & 0555, $0;
+__0a6ef8184203a9e00d7b3a68b3ea4cdce5206718
+
+meta::function('ls', <<'__ae90207f7fc22688f52c3c20833a1ab684f99484');
+my $criteria = join '|', @_;
+my @lines = grep /$criteria/, sort keys %externalized_functions;
+my $length = 0;
+$length >= length($_) or $length = length($_) for @lines;
+
+my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
+join("\n", sort @new_lines);
+__ae90207f7fc22688f52c3c20833a1ab684f99484
+
+meta::function('ls-a', <<'__525bc068df4bf0228d806548819ddee3a00f51a8');
+my $criteria = join '|', @_;
+my @lines    = grep(/$criteria/, sort keys %data);
+my $length   = 0;
+
+my %inverses;
+$inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
+
+$length >= length($_) or $length = length($_) for @lines;
+my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . ($inverses{$_} || ''), @lines);
+join "\n", @new_lines;
+__525bc068df4bf0228d806548819ddee3a00f51a8
+
+meta::function('mv', <<'__c1eceb445ae33ee8dab1c4a091dc83588dc25360');
+my ($from, $to) = @_;
+my $destination_namespace = namespace($to);
+
+return messages::error("'$from' does not exist.") unless grep $from, keys %data;
+return messages::error("The namepsace '$destination_namespace' does not exist") unless $datatypes{$destination_namespace};
+
+associate($to, retrieve($from));
+rm($from);
+__c1eceb445ae33ee8dab1c4a091dc83588dc25360
+
+meta::function('perl', <<'__dadbc1389e6bececc479a96836ef4a984db32d08');
+my $result = eval($_[0]);
+$@ ? $@ : $result;
+__dadbc1389e6bececc479a96836ef4a984db32d08
+
+meta::function('pop-state', <<'__9f332e60ed3a06256755d1c40762d640418eadec');
+%data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
+reload();
+__9f332e60ed3a06256755d1c40762d640418eadec
+
+meta::function('pull', <<'__2fe532e0e1a07cd40522c2e0136ff568097a04b0');
+my ($class_name) = @_;
+my @attributes = grep /^implementation::/, split /\n/, `$class_name ls-a`;
+
+for (@attributes) {
+  s/^\s+//;
+  s/\s+$//;
+  print STDERR "Adding $_\n";
+  associate(basename($_), `$class_name cat "$_"`);
+}
+__2fe532e0e1a07cd40522c2e0136ff568097a04b0
+
+meta::function('push-state', <<'__828f0ca8ca67a8f0a6fa7c468465f2cc7cce2e42');
+push @{$transient{'states'} = $transient{'states'} || []}, {%data};
+my $state_count = scalar @{$transient{'states'}};
+"There are now $state_count states on the stack.";
+__828f0ca8ca67a8f0a6fa7c468465f2cc7cce2e42
+
+meta::function('reload', <<'__2edf00e050bffadca927ebe07bc9d1cc1042c958');
+execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;
+__2edf00e050bffadca927ebe07bc9d1cc1042c958
+
+meta::function('rm', <<'__f5e76ae8a069901026783b40c18272a2c0f52e99');
+for my $to_be_deleted (@_) {
+  messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
+}
+
+delete @data{@_};
+__f5e76ae8a069901026783b40c18272a2c0f52e99
+
+meta::function('save', <<'__7ac36ea0596663386a3ad4ce9690317a145169b8');
+my $serialized_data = serialize();
+my $final_state     = state();
+
+my $temporary_filename = temporary_name();
+file::write($temporary_filename, $serialized_data);
+chmod 0700, $temporary_filename;
+
+my $observed_state = `perl $temporary_filename state`;
+chomp $observed_state;
+if (! verify()) {
+  terminal::message('error', "The state of this object ($final_state) is inconsistent with the state of $temporary_filename ($observed_state).");
+  messages::error("$0 has not been updated.");
+} else {
+  eval {file::write($0, $serialized_data)};
+  messages::warning($@) if $@;
+  my $observed_self_state = `perl $0 state`;
+  chomp $observed_self_state;
+  unlink $temporary_filename if $observed_self_state eq $final_state;
+  terminal::message('info', "$0 saved successfully.");
+}
+__7ac36ea0596663386a3ad4ce9690317a145169b8
+
+meta::function('serialize', <<'__5b036c94b035cc2ce4c6715c72bdb6dc0109eb80');
+my $criteria               = join '|', @_;
+
+my @matching_keys          = grep length && m/$criteria/, sort keys %data;
+my @keys_without_internals = grep ! /^internal::/, @matching_keys;
+
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
+                                                       grep(! /^meta::/,   @keys_without_internals),
+                                                       grep(/^internal::/, @matching_keys);
+
+my @final_array            = $criteria ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+
+terminal::message('info', "No attributes matched $criteria") unless @final_array;
+join "\n", @final_array;
+__5b036c94b035cc2ce4c6715c72bdb6dc0109eb80
+
+meta::function('shell', <<'__f9ddecd04b3f3248fa31f9feb4cf703433911333');
+use Term::ReadLine;
+
+my $term = new Term::ReadLine "$0 shell";
+$term->ornaments(0);
+my $prompt = &{'name'}() . '$ ';
+my $OUT = $term->OUT || \*STDOUT;
+
+$term->Attribs->{attempted_completion_function} = \&complete;
+
+while (defined ($_ = $term->readline($prompt))) {
+  my $command_line = $_;
+  my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
+  my $function_name = shift @args;
+
+  return if $function_name eq 'exit';
+
+  s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
+
+  if ($function_name) {
+    if ($externalized_functions{$function_name}) {
+      my $result = eval {&{$function_name}(@args)};
+      messages::warning($@) if $@;
+      chomp $result;
+      print $OUT $result, "\n" unless $@;
+    } else {
+      messages::warning("Command not found: $function_name");
+    }
+  }
+
+  for my $watch (@{$transient{'watch_list'}}) {
+    print $OUT eval($watch), "\n";
+    print $OUT "Error evaluating watched expression $watch: $@\n" if $@;
+  }
+
+  $prompt = name() . '$ ';
+}
+__f9ddecd04b3f3248fa31f9feb4cf703433911333
+
+meta::function('size', <<'__06791c8c37f59a0070308a0811c0b59897bb43af');
+length(serialize());
+__06791c8c37f59a0070308a0811c0b59897bb43af
+
+meta::function('snapshot', <<'__f3d6e5d8627a085a994ac4b06b289c746aee70d0');
+my ($name) = @_;
+file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
+chmod 0700, $finalname;
+__f3d6e5d8627a085a994ac4b06b289c746aee70d0
+
+meta::function('state', <<'__d8635a68462f4dd8aaa16b302636e6e4c9199d60');
+fast_hash(serialize());
+__d8635a68462f4dd8aaa16b302636e6e4c9199d60
+
+meta::function('unlock', <<'__0a6ef8184203a9e00d7b3a689f6ae4ac23322820');
+my (undef, undef, $mode) = stat $0;
+chmod $mode | 0200, $0;
+__0a6ef8184203a9e00d7b3a689f6ae4ac23322820
+
+meta::function('update-from', <<'__3ea99acdf948de3fe3ec6780110dd5c886770b68');
+# Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
+# and we determine it here by checking for $transients{inherit}{$type}.
+
+my $target     = (grep /^[^-]/, @_)[0];
+my @options    = grep /^-/, @_;
+my @attributes = grep length && s/\s+.*//o, split(/\n/, qx|$target ls-a|);
+
+my $update_single = sub {
+  my ($attribute) = @_;
+  associate($attribute, join('', qx|$target cat '$attribute'|));
+  reload();
+};
+
+terminal::message('info', 'Replicating state...');
+&{'push-state'}();
+
+terminal::message('info', 'Updating meta attributes...');
+&$update_single($_) for grep /^meta::/, @attributes;
+
+unless (verify()) {
+  terminal::message('warning', 'One of the meta-attributes triggered a verification failure.');
+  terminal::message('warning', 'It is possible, though indicative of bad design if true, that one of the non-meta attributes');
+  terminal::message('warning', 'will solve this problem.');
+}
+
+terminal::message('info', 'Updating non-meta attributes...');
+&$update_single($_) for grep ! /^meta::/ && $transients{inherit}{$_}, @attributes;
+
+terminal::message('info', 'Reloading new configuration');
+reload();
+
+if (verify()) {
+  terminal::message('info', "Successfully updated from $_[0]. Run pop-state to undo this change.");
+} elsif (grep /^--force$/o || /^-f$/o, @options) {
+  terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
+  terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
+  terminal::message('info',    'Run pop-state to undo the update and return to a working state.');
+} else {
+  terminal::message('error', 'Verification failed after the upgrade was complete.');
+  terminal::message('info',  "$0 has been reverted to its pre-upgrade state.");
+  terminal::message('info',  "If you want to upgrade and keep the failure state, then run update-from $target --force.");
+  &{'pop-state'}();
+}
+__3ea99acdf948de3fe3ec6780110dd5c886770b68
+
+meta::function('usage', <<'__687ace96b07cb784693313e8538b89e0d7556edc');
+<<"EOD" . ls ();
+Usage: $0 [options] action [arguments]
+Defined actions (and the attribute that defines them):
+EOD
+__687ace96b07cb784693313e8538b89e0d7556edc
+
+meta::function('verify', <<'__2a2a93dc19f1de70e2b6bec478ccd298180b4f08');
+my $serialized_data = serialize();
+my $state           = state();
+
+my $temporary_filename = temporary_name();
+file::write($temporary_filename, $serialized_data);
+chmod 0700, $temporary_filename;
+
+chomp(my $observed_state = join '', qx|perl '$temporary_filename' state|);
+
+my $result = $observed_state eq $state;
+terminal::message('error', "Verification failed; '$observed_state' (produced by $temporary_filename) != '$state' (expected)") unless $result;
+unlink $temporary_filename if $result;
+$transient{temporary_filename} = $temporary_filename;
+
+$result;
+__2a2a93dc19f1de70e2b6bec478ccd298180b4f08
+
+meta::function('vim', <<'__921dce569d3825e09152d45631b04660a883921e');
+# Installs VIM highlighters.
+file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for map {s/^vim_highlighter:://o; $_} grep /^vim_highlighter::/, sort keys %data;
+__921dce569d3825e09152d45631b04660a883921e
+
+meta::internal_function('associate', <<'__1dff35185713bb0a7e9876d00550d210aac80e68');
+my ($name, $value, %options) = @_;
+my $namespace = namespace($name);
+messages::error("Namespace $namespace does not exist") unless $datatypes{$namespace};
+$data{$name} = $value;
+execute($name) if $options{'execute'};
+__1dff35185713bb0a7e9876d00550d210aac80e68
+
+meta::internal_function('basename', <<'__9264831c13f20c4038bc51c04523e60784ac9505');
+my ($name) = @_;
+$name =~ s/^[^:]*:://;
+$name;
+__9264831c13f20c4038bc51c04523e60784ac9505
+
+meta::internal_function('complete', <<'__d3a05408732df2b869dc1f74937cdd908c409b64');
+my @functions  = sort keys %externalized_functions;
+my @attributes = sort keys %data;
+
+sub match {
+  my ($text, @options) = @_;
+  my @matches = sort grep /^$text/, @options;
+
+  if    (@matches == 0) {return undef;}
+  elsif (@matches == 1) {return $matches [0];}
+  elsif (@matches >  1) {return ((longest ($matches [0], $matches [@matches - 1])), @matches);}
+}
+
+sub longest {
+  my ($s1, $s2) = @_; 
+  return substr ($s1, 0, length $1) if ($s1 ^ $s2) =~ /^(\0*)/;
+  return ''; 
+}
+
+# This is another way to implement autocompletion.
+#
+# my $attribs = $term->Attribs;
+# $attribs->{completion_entry_function} = $attribs->{list_completion_function};
+# $attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions];
+
+my ($text, $line) = @_;
+if ($line =~ / /) {
+  # Start matching attribute names.
+  match ($text, @attributes);
+} else {
+  # Start of line, so it's a function.
+  match ($text, @functions);
+}
+__d3a05408732df2b869dc1f74937cdd908c409b64
+
+meta::internal_function('execute', <<'__212c3f0165477514627b0a08e9a5136c11d06160');
+my ($name, %options) = @_;
+my $namespace = namespace($name);
+eval {&{"meta::$namespace"}(basename($name), retrieve($name))};
+warn $@ if $@ && $options{'carp'};
+__212c3f0165477514627b0a08e9a5136c11d06160
+
+meta::internal_function('fast_hash', <<'__3e9de0b4ebf1ead4442da0e0379e5d08a0330e10');
+my ($data)     = @_;
+my $piece_size = length($data) >> 3;
+
+my @pieces     = map substr($data, $piece_size * $_, $piece_size), 0 .. 7;
+my @hashes     = (fnv_hash($pieces[0]));
+
+push @hashes, fnv_hash($pieces[$_] . $hashes[-1]) for 0 .. 7;
+push @hashes, fnv_hash(substr($data, $piece_size * 8) . length($data));
+
+$hashes[$_] ^= $hashes[$_ + 4] for 0 .. 3;
+
+sprintf '%08x' x 5, @hashes[0 .. 3], $hashes[8];
+__3e9de0b4ebf1ead4442da0e0379e5d08a0330e10
+
+meta::internal_function('file::read', <<'__a9dcc370c25299a439f53f48a292bd54d5872450');
+my $name = shift;
+open my($handle), "<", $name;
+my $result = join "", <$handle>;
+close $handle;
+$result;
+__a9dcc370c25299a439f53f48a292bd54d5872450
+
+meta::internal_function('file::write', <<'__e27cdf44fa10cad03138bdf8bf4eadd8293085a8');
+my ($name, $contents, %options) = @_;
+die "Choosing not to overwrite file $name" if $options{'noclobber'} && -f $name;
+open my($handle), ">", $name or die "Can't open $name for writing";
+print $handle $contents;
+close $handle;
+__e27cdf44fa10cad03138bdf8bf4eadd8293085a8
+
+meta::internal_function('fnv_hash', <<'__dfcdff5099c85850c662d2509db43a24c1b945d0');
+# A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
+# for efficiency, which may compromise its effectiveness for short strings.
+
+my ($data) = @_;
+
+my ($fnv_prime, $fnv_offset) = (16777619, 2166136261);
+my $hash                     = $fnv_offset;
+my $modulus                  = 2 ** 32;
+
+(($hash ^= $_) *= $fnv_prime) %= $modulus for unpack('ccccL*', $data . substr($data, -4));
+$hash;
+__dfcdff5099c85850c662d2509db43a24c1b945d0
+
+meta::internal_function('invoke_editor_on', <<'__87c6bbe7cce94460894fde18319aae60e8945b20');
+my ($data, %options) = @_;
+my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
+                       messages::error('Either the $VISUAL or $EDITOR environment variable should be set to a valid editor.');
+my $options          = $options{'options'} || $ENV{'VISUAL_OPTS'} || $ENV{'EDITOR_OPTS'} || '';
+my $extension        = $options{'extension'} || '';
+
+my $filename         = temporary_name() . $extension;
+
+file::write($filename, $data);
+system("$editor $options \"$filename\"");
+
+my $result = file::read($filename);
+unlink $filename;
+$result;
+__87c6bbe7cce94460894fde18319aae60e8945b20
+
+meta::internal_function('messages::error', <<'__077fde943ebf9b30d8304ce06ff9664082640a96');
+my ($message) = @_;
+terminal::message('error', $message);
+die;
+__077fde943ebf9b30d8304ce06ff9664082640a96
+
+meta::internal_function('messages::warning', <<'__077fde943ebf9b30b4d802380cc9965802b21334');
+my ($message) = @_;
+terminal::message('warning', $message);
+__077fde943ebf9b30b4d802380cc9965802b21334
+
+meta::internal_function('namespace', <<'__9264831c13f20c4046ffb300440fdfd3020f3040');
+my ($name) = @_;
+$name =~ s/::.*$//;
+$name;
+__9264831c13f20c4046ffb300440fdfd3020f3040
+
+meta::internal_function('retrieve', <<'__19cb3368500ca29133c9af4b0aeca2d006e92cdc');
+@data{@_};
+__19cb3368500ca29133c9af4b0aeca2d006e92cdc
+
+meta::internal_function('serialize_single', <<'__4425fdc9fbf79c606714e7a48b56fc70244f9aa0');
+my $name               = shift || $_;
+my $contents           = $data{$name};
+my $delimiter          = '__' . fast_hash($contents);
+my $meta_function_name = "meta::" . namespace($name);
+my $invocation_name    = basename $name;
+"$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
+__4425fdc9fbf79c606714e7a48b56fc70244f9aa0
+
+meta::internal_function('state_based_filename', <<'__b311f9c8cb487680ba86665ce3fd4f0e73b5d404');
+my ($name) = @_;
+my $noise  = $name || state();
+$noise =~ s/\//-/g;
+"$0.$noise";
+__b311f9c8cb487680ba86665ce3fd4f0e73b5d404
+
+meta::internal_function('temporary_name', <<'__502903a00f963f20789f2a28f1989158ff458fb0');
+use File::Temp 'tempfile';
+my (undef, $temporary_filename) = tempfile("$0." . 'X' x 32, OPEN => 0);
+$temporary_filename;
+__502903a00f963f20789f2a28f1989158ff458fb0
+
+meta::java_section('java-introduction', <<'__2069ecd847abc7f05d7381c0834756d8e14003a0');
+- Introduction to Java Literate Coding
+  Literate coding allows you to write \TeX{} primarily, but insert Java code snippets where appropriate.\footnote{Take a look at {\tt java\_section::java-introduction} to see the how to set
+  the language and options for code sections.} For example:
+
+  :: java class=test
+  public class test {
+    public static void main (String[] args) {
+      System.out.println ("This is a test class");
+    }
+  }
+  :.
+
+  :: java class=test package=com.spencertipping
+  package com.spencertipping;
+  public class test {
+    public static void main (String[] args) {
+      System.out.println ("This is in package com.spencertipping.");
+    }
+  }
+  :.
+
+  Compiling the system is also simple:
+
+  ::
+  $ ./my-project compile
+  :.
+
+  This generates all of the Java source files in a directory, usually {\tt /tmp/src/}. The output directory can be changed like this:
+
+  ::
+  $ ./my-project source-directory = src/
+  :.
+__2069ecd847abc7f05d7381c0834756d8e14003a0
+
+meta::library('terminal', <<'__7f27e8189c10f7b06f17f9a4bb0c25c06af099b0');
+# Functions for nice-looking terminal output.
+
+package terminal;
+
+my %color_conversions = (black  => "0;0",
+                         red    => "1;31",
+                         yellow => "1;33",
+                         green  => "1;32",
+                         blue   => "1;34",
+                         purple => "1;35",
+                         cyan   => "1;36");
+my $longest_prefix = 0;
+my %default_colors = ();
+
+sub color {
+  $default_colors{$_[0]} = $_[1];
+  $longest_prefix = $longest_prefix < length($_[0]) ? length($_[0]) : $longest_prefix;
+}
+
+color    'info',  'green';
+color  'status',  'green';
+color   'error',    'red';
+color 'warning', 'yellow';
+
+sub message {
+  my ($prefix, $message) = @_;
+  my $color = $color_conversions{$default_colors{$prefix}};
+  my $padding = ' ' x ($longest_prefix - length $prefix);
+  print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
+}
+__7f27e8189c10f7b06f17f9a4bb0c25c06af099b0
+
+meta::line_filter('convert_header_info', <<'__d9d88f188b3fa5e03f276c36441d66a84a0c90c0');
+my ($line) = @_;
+
+$line =~ s/^= (.*)$/\\title{$1}/;
+$line =~ s/^a (.*)$/\\author{$1}/;
+$line =~ s/^d (.*)$/\\date{$1}/;
+
+my $document_header = '\begin{document}\maketitle';
+$document_header .= '\tableofcontents' if &{'table-of-contents'}();
+
+$line =~ s/^begin$/$document_header/;
+
+$line;
+__d9d88f188b3fa5e03f276c36441d66a84a0c90c0
+
+meta::line_filter('convert_itemized_environments', <<'__d5e03bfd5dd50a78d28025747eea221013ce2820');
+my ($line) = @_;
+
+$line =~ s/^\s*\+ /\\item /;
+$line =~ s/^\s*\+\[([^\]]*)\] /\\item[\1] /;
+
+$line =~ s/^\s*e\[$/\\begin{enumerate}/;
+$line =~ s/^\s*i\[$/\\begin{itemize}/;
+$line =~ s/^\s*d\[$/\\begin{description}/;
+
+$line =~ s/^\s*a\[$/\\begin{align*}/;
+
+$line =~ s/^\s*\]e$/\\end{enumerate}/;
+$line =~ s/^\s*\]i$/\\end{itemize}/;
+$line =~ s/^\s*\]d$/\\end{description}/;
+
+$line =~ s/^\s*\]a$/\\end{align*}/;
+
+$line;
+__d5e03bfd5dd50a78d28025747eea221013ce2820
+
+meta::line_filter('convert_sections', <<'__b97d64492ab40988db2a4f15ec13bf88047fc8f2');
+my ($line) = @_;
+
+my %indentation_levels = (
+  0 => '\section',
+  2 => '\subsection',
+  4 => '\subsubsection',
+  6 => '\paragraph',
+  8 => '\subparagraph');
+
+if ($line =~ /^(\s*)- (.*)$/) {
+  my $section = $indentation_levels{length($1)} || die "Invalid indentation level:\n$_";
+  my $section_name = $2;
+  my $label_name   = lc $section_name;
+
+  $label_name =~ s/[^A-Za-z0-9.]/-/g;
+
+  "${section} {$section_name} \\label{sec:$label_name}";
+} else {
+  $line;
+}
+__b97d64492ab40988db2a4f15ec13bf88047fc8f2
+
+meta::section('header-asm', <<'__00ce4e606f080cf8303278801c8a90fe5f04a5cc');
+\lstnewenvironment{asmcode} {}{}
+__00ce4e606f080cf8303278801c8a90fe5f04a5cc
+
+meta::section('header-cpp', <<'__c7ff94d05ea836102b4b8d880da6e600405d59b4');
+\lstnewenvironment{cppcode} {\lstset{language=c++}} {}
+__c7ff94d05ea836102b4b8d880da6e600405d59b4
+
+meta::section('header-java', <<'__43cec188a4502d90dd2b80f0ce9a7fb0e30a46f0');
+\lstnewenvironment{javacode}{\lstset{language=java}}{}
+__43cec188a4502d90dd2b80f0ce9a7fb0e30a46f0
+
+meta::section('header-listings', <<'__05326ff0a31d59a85724aa6c94891594e11879c2');
+\definecolor{gray}{rgb}{0.6,0.6,0.6}
+
+\usepackage{caption}
+\DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
+\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
+
+\lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
+__05326ff0a31d59a85724aa6c94891594e11879c2
+
+meta::section('header-packages', <<'__7e2d34f4201b662f20aba628f2f227bcc600cbb8');
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,pxfonts,listings,color}
+\usepackage[colorlinks]{hyperref}
+__7e2d34f4201b662f20aba628f2f227bcc600cbb8
+
+meta::section('header-proof', <<'__9beb226e1a2bd9627f7a40d8b6b3c664d3c1e920');
+\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}
+__9beb226e1a2bd9627f7a40d8b6b3c664d3c1e920
+
+meta::section('header-refs', <<'__d1b9293899080168718381946f530fb044b739e0');
+\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
+__d1b9293899080168718381946f530fb044b739e0
+
+meta::section('header-resource', <<'__00ce4e601cac6d79d6f04368f0368bd0d64c93ec');
+\lstnewenvironment{resource}{}{}
+__00ce4e601cac6d79d6f04368f0368bd0d64c93ec
+
+meta::unlit_converter('create_sections', <<'__da88bdd8f5fa4c9c097d0d967f14e9008b8a1488');
+my ($document) = @_;
+1 while $document =~ s/^\s*%section\(([^)]+)\)\s*$/\n$data{$1}\n/omg;
+$document;
+__da88bdd8f5fa4c9c097d0d967f14e9008b8a1488
+
+meta::unlit_converter('main', <<'__88c16bbce80366a886e89d92c63fde38e7e80e02');
+my ($document) = @_;
+
+my $sections_already_encountered = 0;
+my $inside_code_block            = 0;
+my $code_block_indentation       = 0;
+my $code_section_name            = '';
+my $result                       = '';
+
+for (split /\n/, $document) {
+  # Handle code blocks.
+  if (/^(\s*):\.$/) {
+    $inside_code_block = $code_block_indentation = 0;
+
+    for my $filter_name (grep /^code_filter::/, sort keys %data) {
+      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation, end => 1);
+    }
+  }
+
+  if ($inside_code_block) {
+    my $spaces_to_delete = ' ' x $code_block_indentation;
+    s/^$spaces_to_delete//;
+    for my $filter_name (grep /^code_filter::/, sort keys %data) {
+      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation);
+    }
+  } else {
+    for my $filter_name (grep /^line_filter::/, sort keys %data) {
+      $_ = &$filter_name($_);
+    }
+  }
+
+  if (/^(\s*)::(\s.*)?$/) {
+    $inside_code_block      = 1;
+    $code_block_indentation = length($1);
+    $code_section_name      = $2;
+
+    for my $filter_name (grep /^code_filter::/, sort keys %data) {
+      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation, begin => 1);
+    }
+  }
+
+  $result .= "$_\n";
+}
+
+$result;
+__88c16bbce80366a886e89d92c63fde38e7e80e02
+
+meta::unlit_converter('zz_append_footer', <<'__23190ba449f1fc407d7e4fe80b1f339852986c63');
+my ($document) = @_;
+"$document\n\\end{document}";
+__23190ba449f1fc407d7e4fe80b1f339852986c63
+
+meta::unlit_converter('zz_prepend_header', <<'__46b4c02411a339ba6dfc921c38df2e3805012f18');
+my ($document) = @_;
+header() . "\n$document";
+__46b4c02411a339ba6dfc921c38df2e3805012f18
+
+meta::internal('runtime', <<'__7d96eda0c745c3e47c5f8638467508912a0446b0');
+my $initial_state        = state();
+chomp(my $default_action = retrieve('data::default-action'));
+
+my $function_name = shift(@ARGV) || $default_action || 'usage';
+$function_name = 'usage' unless $externalized_functions{$function_name};
+
+chomp(my $result = &$function_name(@ARGV));
+print "$result\n" if $result;
+
+END {
+  save() unless $initial_state eq state();
+}
+
+__7d96eda0c745c3e47c5f8638467508912a0446b0
+
+__END__
