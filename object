@@ -38,7 +38,6 @@ meta::define_form 'meta', sub {
   eval $value;
   warn $@ if $@;
 };
-
 meta::meta('configure', <<'__eef2c1281aa263312688eaa0bf3f2f68390d0827');
 # A function to configure transients. Transients can be used to store any number of
 # different things, but one of the more common usages is type descriptors.
@@ -148,7 +147,7 @@ meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 __7d47c7cc891f6d30ab57f964247637a023723ca6
 
-meta::bootstrap('initialization', <<'__53e36328be939a3a915e0860e2cbee8c8a583568');
+meta::bootstrap('initialization', <<'__9baff1b8e6d73687511511ec22e70e306fdda6d8');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
@@ -189,7 +188,7 @@ meta::define_form 'meta', sub {
   eval $value;
   warn $@ if $@;
 };
-__53e36328be939a3a915e0860e2cbee8c8a583568
+__9baff1b8e6d73687511511ec22e70e306fdda6d8
 
 meta::data('default-action', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 shell
@@ -324,6 +323,11 @@ else {
 }
 __35186ce8e0008a3c475e7ee8ce22eba8eb0147b8
 
+meta::function('import-bundle', <<'__8f4056900159fc187bf4fff4ff38e4c271bebb88');
+eval join '', <STDIN>;
+messages::error($@) if $@;
+__8f4056900159fc187bf4fff4ff38e4c271bebb88
+
 meta::function('lock', <<'__0a6ef8184203a9e00d7b3a68b3ea4cdce5206718');
 my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
@@ -426,14 +430,21 @@ if (! verify()) {
 }
 __7ac36ea0596663386a3ad4ce9690317a145169b8
 
-meta::function('serialize', <<'__60e09603d6592fb345e07534157d3e7dc05a8e50');
-my @nontrivial_keys        = grep length, sort keys %data;
-my @keys_without_internals = grep ! /^internal::/, @nontrivial_keys;
-join "\n", $data{'bootstrap::initialization'}, (map serialize_single(@_), grep(/^meta::/,     @keys_without_internals),
-                                                                          grep(! /^meta::/,   @keys_without_internals),
-                                                                          grep(/^internal::/, @nontrivial_keys)),
-           '__END__';
-__60e09603d6592fb345e07534157d3e7dc05a8e50
+meta::function('serialize', <<'__5b036c94b035cc2ce4c6715c72bdb6dc0109eb80');
+my $criteria               = join '|', @_;
+
+my @matching_keys          = grep length && m/$criteria/, sort keys %data;
+my @keys_without_internals = grep ! /^internal::/, @matching_keys;
+
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
+                                                       grep(! /^meta::/,   @keys_without_internals),
+                                                       grep(/^internal::/, @matching_keys);
+
+my @final_array            = $criteria ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+
+terminal::message('info', "No attributes matched $criteria") unless @final_array;
+join "\n", @final_array;
+__5b036c94b035cc2ce4c6715c72bdb6dc0109eb80
 
 meta::function('shell', <<'__f9ddecd04b3f3248fa31f9feb4cf703433911333');
 use Term::ReadLine;
