@@ -30,7 +30,17 @@ meta::define_form 'meta', sub {
   carp $@ if $@;
 };
 
-meta::meta('datatypes::asm_section', <<'__fbMlgAJXPv/FTfGfPjZLAYw3JBWjAXE1x793jZBF7Mo');
+meta::meta('configure', <<'__eef2c1281aa263312688eaa0bf3f2f68390d0827');
+# A function to configure transients. Transients can be used to store any number of
+# different things, but one of the more common usages is type descriptors.
+
+sub meta::configure {
+  my ($datatype, %options) = @_;
+  $transient{$_}{$datatype} = $options{$_} for keys %options;
+}
+__eef2c1281aa263312688eaa0bf3f2f68390d0827
+
+meta::meta('datatypes::asm_section', <<'__b1d3cef0d2190780ab01c4a8801afad0f6f78ef0');
 meta::define_form 'asm_section', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "asm_section::$name";
@@ -38,21 +48,21 @@ meta::define_form 'asm_section', sub {
     edit("asm_section::$name");
   };
 };
-__fbMlgAJXPv/FTfGfPjZLAYw3JBWjAXE1x793jZBF7Mo
+__b1d3cef0d2190780ab01c4a8801afad0f6f78ef0
 
-meta::meta('datatypes::bootstrap', <<'__guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM');
+meta::meta('datatypes::bootstrap', <<'__5de13e28b13a75348b144c5402d2c8e4070a33dc');
 meta::define_form 'bootstrap', sub {};
-__guYWiOv4zBmdrlI3k3sW7f/q/xsX38Xvzz0dwwLCIRM
+__5de13e28b13a75348b144c5402d2c8e4070a33dc
 
-meta::meta('datatypes::code_filter', <<'__gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M');
+meta::meta('datatypes::code_filter', <<'__c23e10a8e8ff80503f0a9e5ccadc60b0d745b0c0');
 meta::define_form 'code_filter', sub {
   my ($name, $value) = @_;
   *{"code_filter::$name"} = eval "sub {\n$value\n}";
   carp $@ if $@;
 };
-__gIaVDqDoWT04Y/vzEYyoyadmT36MLhB1ERa09udQZ9M
+__c23e10a8e8ff80503f0a9e5ccadc60b0d745b0c0
 
-meta::meta('datatypes::cpp_section', <<'__iSq5SVn3Vw0i1zHw0zegKAuS4cKl8QE2lqgoLXAYscI');
+meta::meta('datatypes::cpp_section', <<'__113186b8fae5a808f15707442f0a934863c2558c');
 meta::define_form 'cpp_section', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "cpp_section::$name";
@@ -60,9 +70,9 @@ meta::define_form 'cpp_section', sub {
     edit("cpp_section::$name");
   };
 };
-__iSq5SVn3Vw0i1zHw0zegKAuS4cKl8QE2lqgoLXAYscI
+__113186b8fae5a808f15707442f0a934863c2558c
 
-meta::meta('datatypes::data', <<'__s2euAFkA/SbXvMzOkLZXrqX3TdtBzEODSWBAt7wXECA');
+meta::meta('datatypes::data', <<'__728b10b0dda67e84391c3b04529e4d6cffb303e8');
 meta::define_form 'data', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "data::$name";
@@ -72,26 +82,26 @@ meta::define_form 'data', sub {
     retrieve("data::$name");
   };
 };
-__s2euAFkA/SbXvMzOkLZXrqX3TdtBzEODSWBAt7wXECA
+__728b10b0dda67e84391c3b04529e4d6cffb303e8
 
-meta::meta('datatypes::function', <<'__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0');
+meta::meta('datatypes::function', <<'__bee70500e8bdff5ced5db6e4e41ac8c8fe4f1900');
 meta::define_form 'function', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "function::$name";
   *{$name} = eval "sub {\n$value\n}";
   carp $@ if $@;
 };
-__XSIHGGHv0Sh0JBj9KIrP/OzuuB2epyvn9pgtZyWE6t0
+__bee70500e8bdff5ced5db6e4e41ac8c8fe4f1900
 
-meta::meta('datatypes::internal_function', <<'__heBxmlI7O84FgR+9+ULeiCTWJ4hqd079Z02rZnl9Ong');
+meta::meta('datatypes::internal_function', <<'__ce845f487837a2f819952650b26095f4fb79dd2a');
 meta::define_form 'internal_function', sub {
   my ($name, $value) = @_;
   *{$name} = eval "sub {\n$value\n}";
   carp $@ if $@;
 };
-__heBxmlI7O84FgR+9+ULeiCTWJ4hqd079Z02rZnl9Ong
+__ce845f487837a2f819952650b26095f4fb79dd2a
 
-meta::meta('datatypes::java_section', <<'__+OMNe3P39/PtqlXYIuMYT/tIyOF3QVpZJcXdO0xbkRw');
+meta::meta('datatypes::java_section', <<'__aa9990c06cc20f48f4680d7800fc7e5c5dc42018');
 meta::define_form 'java_section', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "java_section::$name";
@@ -99,9 +109,9 @@ meta::define_form 'java_section', sub {
     edit("java_section::$name");
   };
 };
-__+OMNe3P39/PtqlXYIuMYT/tIyOF3QVpZJcXdO0xbkRw
+__aa9990c06cc20f48f4680d7800fc7e5c5dc42018
 
-meta::meta('datatypes::library', <<'__Uu9nRiHABRn+x19zBWmHpJF8gbfMA5v5MlpNoSE8MqE');
+meta::meta('datatypes::library', <<'__0e733a20fd7207a4bcb901b09d3372f04729dd88');
 meta::define_form 'library', sub {
   my ($name, $value) = @_;
   eval $value;
@@ -109,17 +119,17 @@ meta::define_form 'library', sub {
   *{$name} = sub {edit("library::$name")};
   warn $@ if $@;
 };
-__Uu9nRiHABRn+x19zBWmHpJF8gbfMA5v5MlpNoSE8MqE
+__0e733a20fd7207a4bcb901b09d3372f04729dd88
 
-meta::meta('datatypes::line_filter', <<'__/k1BhEweDsgaEdqrALbIEjvKhsVrk/hv//e/KPydA6A');
+meta::meta('datatypes::line_filter', <<'__e9b6f7e869c133880c225ee40019f34841eb6ba0');
 meta::define_form 'line_filter', sub {
   my ($name, $value) = @_;
   *{"line_filter::$name"} = eval "sub {\n$value\n}";
   carp $@ if $@;
 };
-__/k1BhEweDsgaEdqrALbIEjvKhsVrk/hv//e/KPydA6A
+__e9b6f7e869c133880c225ee40019f34841eb6ba0
 
-meta::meta('datatypes::list-type', <<'__OKczvJ+6wi8VPNFcZ9ohlXjw+ychodWCfcELdli9p+w');
+meta::meta('datatypes::list-type', <<'__b7b8af4c5a5b9b00a6f8aa58e236b16c5fd3874c');
 meta::define_form '_list_type', sub {
   my ($outer_name, $outer_value) = @_;
   $externalized_functions{$outer_name} = "_list_type::$outer_name";
@@ -141,9 +151,9 @@ meta::define_form '_list_type', sub {
     };
   };
 };
-__OKczvJ+6wi8VPNFcZ9ohlXjw+ychodWCfcELdli9p+w
+__b7b8af4c5a5b9b00a6f8aa58e236b16c5fd3874c
 
-meta::meta('datatypes::message-color', <<'__nWmJgsP4S3LFdMPQnL+foYc9c5fgqIlEm6RppolzoX0');
+meta::meta('datatypes::message-color', <<'__6023be8c80f207d83a73416c42a2d110b6b5eecc');
 meta::define_form 'message_color', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "message_color::$name";
@@ -154,17 +164,17 @@ meta::define_form 'message_color', sub {
     retrieve("message_color::$name");
   };
 };
-__nWmJgsP4S3LFdMPQnL+foYc9c5fgqIlEm6RppolzoX0
+__6023be8c80f207d83a73416c42a2d110b6b5eecc
 
-meta::meta('datatypes::note', <<'__TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34');
+meta::meta('datatypes::note', <<'__9b5cd0288960482807628dd8e0445382db8b5210');
 meta::define_form 'note', sub {
   my ($name, undef) = @_;
   $externalized_functions{$name} = "note::$name";
   *{$name} = sub {edit("note::$name")};
 };
-__TGOjJwmj+QJp1giUQqg2bEaQe8RvqnrFEqyZhIpSC34
+__9b5cd0288960482807628dd8e0445382db8b5210
 
-meta::meta('datatypes::section', <<'__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A');
+meta::meta('datatypes::section', <<'__e7eb96a01f4307f0223833acf8c5f330ef07e108');
 meta::define_form 'section', sub {
   my ($name, $value) = @_;
   $externalized_functions{$name} = "section::$name";
@@ -172,29 +182,124 @@ meta::define_form 'section', sub {
     edit("section::$name");
   };
 };
-__64/s4ZhFZEtDHWkuedDXmHRFDLD7UdnM26O3x0//X0A
+__e7eb96a01f4307f0223833acf8c5f330ef07e108
 
-meta::meta('datatypes::unlit_converter', <<'__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE');
+meta::meta('datatypes::unlit_converter', <<'__968811d0de835080cde4a48318abd6e7a134933e');
 meta::define_form 'unlit_converter', sub {
   my ($name, $value) = @_;
   *{"unlit_converter::$name"} = eval "sub {\n$value\n}";
   carp $@ if $@;
 };
-__2X1thh9LQ0oUWCfeWj297YwiGJA/klB7hVI2sWEFtEE
+__968811d0de835080cde4a48318abd6e7a134933e
 
-meta::meta('datatypes::vim-highlighter', <<'__vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0');
+meta::meta('datatypes::vim-highlighter', <<'__d62ba8a830b689aaffc59f555a65fd28eb3f7dd0');
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
-__vsGBLVDC3S+pX/k/zl5CgXeAQz2QjpBkLgx0CJ4vcn0
+__d62ba8a830b689aaffc59f555a65fd28eb3f7dd0
 
-meta::meta('internal::runtime', <<'__Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA');
+meta::meta('externalize', <<'__c80794c0f2d6e2884caa7e6a780f6bf17de1b470');
+# Function externalization. Data types should call this method when defining a function
+# that has an external interface.
+
+sub meta::externalize {
+  my ($name, $attribute, $implementation) = @_;
+  $externalized_functions{$name} = $attribute;
+  *{"::$name"} = $implementation || $attribute;
+}
+__c80794c0f2d6e2884caa7e6a780f6bf17de1b470
+
+meta::meta('internal::runtime', <<'__8e8cc66f6a9977507d211918b65cbfba78e814ea');
+meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
-__Nd6Dp1A6nL7yAGeoRfeZETeaW8vnPN8HI9Diqo66vDA
+__8e8cc66f6a9977507d211918b65cbfba78e814ea
 
-meta::_list_type('list', <<'__ozA5XMClOtEgdzZUav/0c1lAk3Vku/dc4e2tQHgNkTk');
+meta::meta('type::bootstrap', <<'__76b8f680d46687c639143238fec5e33429ea2a80');
+# Bootstrap attributes don't get executed. The reason for this is that because
+# they are serialized directly into the header of the file (and later duplicated
+# as regular data attributes), they will have already been executed when the
+# file is loaded.
+
+meta::configure 'bootstrap', extension => '.pl', inherit => 1;
+meta::define_form 'bootstrap', sub {};
+__76b8f680d46687c639143238fec5e33429ea2a80
+
+meta::meta('type::data', <<'__53c2fa38577a7e80eaacdada3a786992406c6f40');
+meta::configure 'data', extension => '', inherit => 0;
+meta::define_form 'data', sub {
+  my ($name, undef) = @_;
+  meta::externalize $name, "data::$name", sub {
+    associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    edit("data::$name")                                  if $_[0] eq 'edit';
+    retrieve("data::$name");
+  };
+};
+__53c2fa38577a7e80eaacdada3a786992406c6f40
+
+meta::meta('type::function', <<'__cb9c838848345106e4dd83f120e884243ebfea68');
+meta::configure 'function', extension => '.pl', inherit => 1;
+meta::define_form 'function', sub {
+  my ($name, $value) = @_;
+  meta::externalize $name, "function::$name", eval("sub {\n$value\n}");
+  warn $@ if $@;
+};
+__cb9c838848345106e4dd83f120e884243ebfea68
+
+meta::meta('type::internal_function', <<'__581839c4aa38453088de1f6c734e28284f336088');
+meta::configure 'internal_function', extension => '.pl', inherit => 1;
+meta::define_form 'internal_function', sub {
+  my ($name, $value) = @_;
+  *{$name} = eval "sub {\n$value\n}";
+  warn $@ if $@;
+};
+__581839c4aa38453088de1f6c734e28284f336088
+
+meta::meta('type::library', <<'__5f879740b47b2a48430b0a34cdf1b4f013c389a0');
+meta::configure 'library', extension => '.pl', inherit => 1;
+meta::define_form 'library', sub {
+  my ($name, $value) = @_;
+  eval $value;
+  $externalized_functions{$name} = "library::$name";
+  *{$name} = sub {edit("library::$name")};
+  warn $@ if $@;
+};
+__5f879740b47b2a48430b0a34cdf1b4f013c389a0
+
+meta::meta('type::message_color', <<'__4091dd406919aaa054897c70e7d187a81e0b6a68');
+meta::configure 'message_color', inherit => 1;
+meta::define_form 'message_color', sub {
+  my ($name, $value) = @_;
+  $externalized_functions{$name} = "message_color::$name";
+  terminal::color($name, $value);
+  *{$name} = sub {
+    associate("message_color::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
+    edit("message_color::$name")                                  if $_[0] eq 'edit';
+    retrieve("message_color::$name");
+  };
+};
+__4091dd406919aaa054897c70e7d187a81e0b6a68
+
+meta::meta('type::meta', <<'__7d9446b8ef4af840e5bca1e475376638dcdf1b68');
+meta::configure 'meta', extension => '.pl', inherit => 1;
+__7d9446b8ef4af840e5bca1e475376638dcdf1b68
+
+meta::meta('type::note', <<'__5ec26340c37fc180a1f9f607559639b08db73608');
+meta::configure 'note', inherit => 0;
+meta::define_form 'note', sub {
+  my ($name, undef) = @_;
+  $externalized_functions{$name} = "note::$name";
+  *{$name} = sub {edit("note::$name")};
+};
+__5ec26340c37fc180a1f9f607559639b08db73608
+
+meta::meta('type::vim_highlighter', <<'__7d47c7cc891f6d30ab57f964247637a023723ca6');
+meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
+meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
+__7d47c7cc891f6d30ab57f964247637a023723ca6
+
+meta::_list_type('list', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 list
-__ozA5XMClOtEgdzZUav/0c1lAk3Vku/dc4e2tQHgNkTk
+__0b27c4057f19ced02b9dd5049e78f02a912922f0
 
-meta::asm_section('asm-introduction', <<'__qY2gmVqzjpJlDNiCcXsgAR9TWp5PLg6Pk4ON1GP0/qI');
+meta::asm_section('asm-introduction', <<'__4e5faf6582ed39682b003d2c04c3a2a042cfc5d0');
 - Introduction to Assembly Literate Coding
   Assembly-language snippets are specified in much the same way as C++ snippets. The only difference is that the \verb|asm| marker is used instead of \verb|cpp|.
 
@@ -203,9 +308,9 @@ meta::asm_section('asm-introduction', <<'__qY2gmVqzjpJlDNiCcXsgAR9TWp5PLg6Pk4ON1
     movl $1, %eax
     ret
   :.
-__qY2gmVqzjpJlDNiCcXsgAR9TWp5PLg6Pk4ON1GP0/qI
+__4e5faf6582ed39682b003d2c04c3a2a042cfc5d0
 
-meta::bootstrap('initialization', <<'__plktoDCjGQioE48vwfrH0xL3ulcYnTWp+fUvaFwRnnc');
+meta::bootstrap('initialization', <<'__8c901310353562a01a2ed67e5933447c8af23050');
 #!/usr/bin/perl
 
 use File::Temp  'tempfile';
@@ -238,9 +343,9 @@ meta::define_form 'meta', sub {
   carp $@ if $@;
 };
 
-__plktoDCjGQioE48vwfrH0xL3ulcYnTWp+fUvaFwRnnc
+__8c901310353562a01a2ed67e5933447c8af23050
 
-meta::bootstrap('pod', <<'__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o');
+meta::bootstrap('pod', <<'__fc19db6676875b18d8747cc1f9869f28c5ccf310');
 
 =head1 NAME
 
@@ -265,9 +370,9 @@ Currently the only known way to lose your data is to edit the serialization-rela
 something most people will normally do. In the future there may be a locking mechanism to prevent unintentional edits of these attributes.
 
 =cut
-__0h2CBA2cqa4qd6nox9dul6Jn9hcJFHw3uPdC89Xim7o
+__fc19db6676875b18d8747cc1f9869f28c5ccf310
 
-meta::code_filter('cpp', <<'__RnBPiqLeW7JfaMHW0CgoNF/vpNWmNs4SJULj+/ehEjo');
+meta::code_filter('cpp', <<'__f33778bcd9ed93a8f13b4ac05310126ca156a6ec');
 use File::Path 'mkpath';
 use File::Basename 'dirname';
 
@@ -297,9 +402,9 @@ if ($settings =~ /\scpp(\s|$)/) {
 }
 
 return $line;
-__RnBPiqLeW7JfaMHW0CgoNF/vpNWmNs4SJULj+/ehEjo
+__f33778bcd9ed93a8f13b4ac05310126ca156a6ec
 
-meta::code_filter('java', <<'__Q16rFeNkyBdV6W9RLL9GKTJwnstfRqIfBpmDbVFNOqQ');
+meta::code_filter('java', <<'__75428536b2b3d1144797953874b792808b2b8e80');
 use File::Path 'mkpath';
 
 my ($line, %settings) = @_;
@@ -331,9 +436,9 @@ if ($settings =~ /\sjava(\s|$)/) {
 }
 
 return $line;
-__Q16rFeNkyBdV6W9RLL9GKTJwnstfRqIfBpmDbVFNOqQ
+__75428536b2b3d1144797953874b792808b2b8e80
 
-meta::code_filter('resource', <<'__gnuMnVX94wNmeabRscK/Tp+seTmMoqXAeoOdJ+H8ZX0');
+meta::code_filter('resource', <<'__868ae08007546e6baa413f60d98d87f810de542e');
 use File::Path 'mkpath';
 use File::Basename 'dirname';
 
@@ -363,9 +468,9 @@ if ($settings =~ /\sresource(\s|$)/) {
 }
 
 return $line;
-__gnuMnVX94wNmeabRscK/Tp+seTmMoqXAeoOdJ+H8ZX0
+__868ae08007546e6baa413f60d98d87f810de542e
 
-meta::code_filter('verbatim', <<'__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s');
+meta::code_filter('verbatim', <<'__5dd84ef062d4c490247f4208b5dfa4765b4657f8');
 my ($line, %settings) = @_;
 
 unless ($settings{'name'}) {
@@ -374,9 +479,9 @@ unless ($settings{'name'}) {
 }
 
 return $line;
-__AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s
+__5dd84ef062d4c490247f4208b5dfa4765b4657f8
 
-meta::cpp_section('cpp-introduction', <<'__dIO7xsJfuJqvPXdHd7TAMttntR4IjRjbT8tXbJv6WXI');
+meta::cpp_section('cpp-introduction', <<'__76d2d07c70dbfc1491ed3e38f7e93c8309467b2c');
 - Introduction to C++ Literate Coding
   The C++ literate code interface is much like the Java one, except that code sections use the \verb|name=x| attribute rather than \verb|class=| and \verb|package=|. The name is expected to
   include an extension, so for example \verb|:: cpp name=src/foo.h| is a correct heading.
@@ -387,13 +492,13 @@ meta::cpp_section('cpp-introduction', <<'__dIO7xsJfuJqvPXdHd7TAMttntR4IjRjbT8tXb
     std::cout << "Hello world!" << std::endl;
   }
   :.
-__dIO7xsJfuJqvPXdHd7TAMttntR4IjRjbT8tXbJv6WXI
+__76d2d07c70dbfc1491ed3e38f7e93c8309467b2c
 
-meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
+meta::data('default-action', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 shell
-__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
+__0b27c4057f19ced02b9dd5049e78f02a912922f0
 
-meta::data('document', <<'__XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w');
+meta::data('document', <<'__1a076e24950885d86aa19a7091238f14f2866b80');
 = Literate Project
 a Spencer Tipping
 begin
@@ -428,9 +533,9 @@ begin
 
   %section(java_section::java-introduction)
   %section(cpp_section::cpp-introduction)
-__XW4xW28DeSANK/Iw1uVNnd0GlWrYOz768eQpJqEGm+w
+__1a076e24950885d86aa19a7091238f14f2866b80
 
-meta::data('header', <<'__+1Y/wU/2Nj0I9wPewkdYhDgKhTrwWXecN7fixPF0usI');
+meta::data('header', <<'__302eb61a42d4c76c8d16aa60dce481481bfdb0e8');
 \documentclass{article}
 
 %section(section::header-packages)
@@ -443,9 +548,9 @@ meta::data('header', <<'__+1Y/wU/2Nj0I9wPewkdYhDgKhTrwWXecN7fixPF0usI');
 %section(section::header-resource)
 
 %section(section::header-proof)
-__+1Y/wU/2Nj0I9wPewkdYhDgKhTrwWXecN7fixPF0usI
+__302eb61a42d4c76c8d16aa60dce481481bfdb0e8
 
-meta::data('meta-associations', <<'__YGF2U3a+Yjyf2sIZvkfH/Q69OjeY2N0IG8a/oQP+2jo');
+meta::data('meta-associations', <<'__0056e44a28ba9f400494108a0efff872dd29df28');
 ^function:: .pl
 ^library:: .pl
 ^internal_function:: .pl
@@ -462,41 +567,41 @@ meta::data('meta-associations', <<'__YGF2U3a+Yjyf2sIZvkfH/Q69OjeY2N0IG8a/oQP+2jo
 ^code_filter:: .pl
 ^profile:: .pl
 ^data::header$ .cltex
-__YGF2U3a+Yjyf2sIZvkfH/Q69OjeY2N0IG8a/oQP+2jo
+__0056e44a28ba9f400494108a0efff872dd29df28
 
-meta::data('name', <<'__LjoXE2rWcenuglagwlKvDIbYcxZTXiV3FsPD5W57vEc');
+meta::data('name', <<'__89192a5453e924c8dad5b4bedab7cdb4f89b2bd0');
 literate-project
-__LjoXE2rWcenuglagwlKvDIbYcxZTXiV3FsPD5W57vEc
+__89192a5453e924c8dad5b4bedab7cdb4f89b2bd0
 
-meta::data('output-dir', <<'__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ');
+meta::data('output-dir', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 /tmp
-__6WcazSRIScVxZ8ZY+i+Wl1IEj3qxhKPc9cRstNVq4SQ
+__0b27c4057f19ced02b9dd5049e78f02a912922f0
 
-meta::data('pdf-output-file', <<'__Plcvk4FnaN2NfjkRnKEV3eO+daHH5Jmbmu6JqkH96p8');
+meta::data('pdf-output-file', <<'__1220935b0ab54e02e8006c30c5b042c8210d7ec0');
 /tmp/literate-project.gcL4xXz8M52mcTkIxG4tEAezgsttH-GvdVZkYdil844/document.pdf
-__Plcvk4FnaN2NfjkRnKEV3eO+daHH5Jmbmu6JqkH96p8
+__1220935b0ab54e02e8006c30c5b042c8210d7ec0
 
-meta::data('pdf-reader', <<'__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A');
+meta::data('pdf-reader', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 evince
-__BlFO10Obn0hAHVxLShDpKtlpv0BTeJ7iqm1v7vjCM+A
+__0b27c4057f19ced02b9dd5049e78f02a912922f0
 
-meta::data('pdftex', <<'__aHolEJEGN4wnHiydZyVzwRrETVuJhJOGo/nKL9tsLRY');
+meta::data('pdftex', <<'__01657b64298df02eae3f3f00ad4c0fb4ed0aeb40');
 pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
-__aHolEJEGN4wnHiydZyVzwRrETVuJhJOGo/nKL9tsLRY
+__01657b64298df02eae3f3f00ad4c0fb4ed0aeb40
 
-meta::data('source-directory', <<'__6LWkZJSOFm8d76O9WGT2KrUBnNx936I9+gu3p3z9hLs');
+meta::data('source-directory', <<'__4a45e9044eba547b6171bca8b5abef546bd74300');
 /tmp/src
-__6LWkZJSOFm8d76O9WGT2KrUBnNx936I9+gu3p3z9hLs
+__4a45e9044eba547b6171bca8b5abef546bd74300
 
-meta::data('table-of-contents', <<'__a4ayc/80/OGda4BO/1o/V0etpOqiLx1JwB5S3beHW0s');
+meta::data('table-of-contents', <<'__0b27c4057f19ced02b9dd5049e78f02a912922f0');
 1
-__a4ayc/80/OGda4BO/1o/V0etpOqiLx1JwB5S3beHW0s
+__0b27c4057f19ced02b9dd5049e78f02a912922f0
 
-meta::data('tex', <<'__36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4');
+meta::data('tex', <<'__62453824969eb0a703b751844757f280258a3090');
 latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
-__36pVFkgFfbTr/DrquMMaLrTY5F5S/VJ5Z3Jc90KC+q4
+__62453824969eb0a703b751844757f280258a3090
 
-meta::function('add-to', <<'__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q');
+meta::function('add-to', <<'__034dc988a3b9d65c347896e44c26b1504973dfe0');
 my ($filename) = @_;
 my @members = grep /^implementation::/, keys %data;
 
@@ -506,21 +611,21 @@ for (@members) {
   print $handle retrieve($_);
   close $handle;
 }
-__KBgra0vG1gIsUI8CCVf4ZEdCatZDCdVO6HuUx+jOJ9Q
+__034dc988a3b9d65c347896e44c26b1504973dfe0
 
-meta::function('cat', <<'__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk');
+meta::function('cat', <<'__d8c73dd00d45e202e5a954205a4deb7c8ce20198');
 my ($name) = @_;
 $data{$name};
-__h2PeSpk/pPmrzLRTTofdLTbhj06IWUw5WWke6ggUsdk
+__d8c73dd00d45e202e5a954205a4deb7c8ce20198
 
-meta::function('clean', <<'__YiaR22ZfeeFhhPYBUFHWBZqstuOzKtkv2XqmTuXhy1E');
+meta::function('clean', <<'__0ec80b6a66a9abd8e293bcb8b693d2a0aa6d28f0');
 my $output_directory = &{'pdf-output-file'}();
 $output_directory =~ s+/.*++g;
 unlink <$output_directory/*>;
 rmdir $output_directory;
-__YiaR22ZfeeFhhPYBUFHWBZqstuOzKtkv2XqmTuXhy1E
+__0ec80b6a66a9abd8e293bcb8b693d2a0aa6d28f0
 
-meta::function('clone', <<'__qP6xPZE75s9g0XJIiC6FGw0vnj2j0glUzsAHxyA3lvY');
+meta::function('clone', <<'__8bcdbca03e26a1b8e4c4cde0a91e8d9495d322d8');
 for (@_) {
   if ($_) {
     eval {
@@ -532,9 +637,9 @@ for (@_) {
     print "$@\n" if $@;
   }
 }
-__qP6xPZE75s9g0XJIiC6FGw0vnj2j0glUzsAHxyA3lvY
+__8bcdbca03e26a1b8e4c4cde0a91e8d9495d322d8
 
-meta::function('compile', <<'__BGic8KOk19AvsJI5t2yZ/R/ONbJ+lvK9Yy4EB15Zib4');
+meta::function('compile', <<'__4abd766ef970c578b11a748074749da8c306d550');
 my $tex_command         = tex();
 my $pdftex_command      = pdftex();
 my $filename            = 'document';
@@ -560,22 +665,22 @@ my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_comm
 
 associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
 $result;
-__BGic8KOk19AvsJI5t2yZ/R/ONbJ+lvK9Yy4EB15Zib4
+__4abd766ef970c578b11a748074749da8c306d550
 
-meta::function('compile-to-tex', <<'__cvWyD1kaLfBVnSppeGw/hSpleoWxLARJQwP1tUKvebc');
+meta::function('compile-to-tex', <<'__1e9e9b40e51eb2d8219a76acb7915644cae96208');
 my ($document) = document();
 $document = &$_($document) for (grep /^unlit_converter::/, sort keys %data);
 $document;
-__cvWyD1kaLfBVnSppeGw/hSpleoWxLARJQwP1tUKvebc
+__1e9e9b40e51eb2d8219a76acb7915644cae96208
 
-meta::function('cp', <<'__yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4');
+meta::function('cp', <<'__81043c18707c4138726c4b40557d0b30419f3ca8');
 my ($from, $to) = @_;
 $data{$to} = $data{$from} if $data{$from};
 messages::error("No such attribute $from") unless $data{$from};
 $data{$from};
-__yn1SQkcEk6o+gnuCy3QGVFtQb2piaCoUdJPGUkLjpD4
+__81043c18707c4138726c4b40557d0b30419f3ca8
 
-meta::function('create', <<'__YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc');
+meta::function('create', <<'__bc27b918ade7d018076387cc00b3ecb0d3100b28');
 my ($name, $value) = @_;
 messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %data;
 if ($value) {
@@ -584,14 +689,14 @@ if ($value) {
   associate($name,'');
   edit ($name);
 }
-__YDNTuzkJSNUIk4tbdwxep6/rT8uGnceIj7rljM9gusc
+__bc27b918ade7d018076387cc00b3ecb0d3100b28
 
-meta::function('e', <<'__VOcQy5WG275NZGlFODdYHYBe3oJ7/CHmTT/L9O1I6t0');
+meta::function('e', <<'__e77e4f88d416e6e88b65a9c43b6ea6b8c708e220');
 edit('data::document', extension => '.tex');
 reload();
-__VOcQy5WG275NZGlFODdYHYBe3oJ7/CHmTT/L9O1I6t0
+__e77e4f88d416e6e88b65a9c43b6ea6b8c708e220
 
-meta::function('edit', <<'__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE');
+meta::function('edit', <<'__62f42ff68e2dce085c035aeac6dcd01889b5a7e8');
 my ($name, %options) = @_;
 
 my $meta_extension = join '', grep {
@@ -609,14 +714,14 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
 delete $data{$name} if length($data{$name}) == 0;
 
 save();
-__rAkSOSll0evjt/D0qmnz2M++ACqz6cPtN8TLTHdQUJE
+__62f42ff68e2dce085c035aeac6dcd01889b5a7e8
 
-meta::function('exists', <<'__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk');
+meta::function('exists', <<'__ed7cd3a08670be10217f6f6c2f291ee4ee8ec180');
 my $name = shift;
 grep {$_ eq $name} keys %data;
-__bxU1sDtIh3+P1x0HuuY0f7sKHr9qNZUEl64m2fvwmDk
+__ed7cd3a08670be10217f6f6c2f291ee4ee8ec180
 
-meta::function('export', <<'__I4eRG7HtLDZhFgrlr0QDrQO5MRwJYGFlotQsWQIE/d8');
+meta::function('export', <<'__a0a5e6f8ff03fbd8884952a071c36c74dca19d30');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
 
@@ -629,21 +734,21 @@ if (@attributes) {
 } else {
   messages::error ("Not enough arguments");
 }
-__I4eRG7HtLDZhFgrlr0QDrQO5MRwJYGFlotQsWQIE/d8
+__a0a5e6f8ff03fbd8884952a071c36c74dca19d30
 
-meta::function('files', <<'__m7EeTwfWa+KNekunGpnyF77ZE5n0qlaCzK70nPgXk4o');
+meta::function('files', <<'__ff79fe9021cfbc0807007384d601f644fd2416c0');
 # Quickly generate files
 terminal::message('status', 'Generating files from main document...');
 &{'compile-to-tex'}();
 terminal::message('status', 'Done.');
-__m7EeTwfWa+KNekunGpnyF77ZE5n0qlaCzK70nPgXk4o
+__ff79fe9021cfbc0807007384d601f644fd2416c0
 
-meta::function('grab', <<'__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8');
+meta::function('grab', <<'__2a2ff1f06bfd5860ba1467224d377064a4d3d36c');
 my ($filename, @attribute_names) = @_;
 associate("implementation::$_", `$filename cat $_`) for @attribute_names;
-__sXs1aeJVBERH6nWE7ZpWiIO5Cg7fSBWcoscDg1DHzD8
+__2a2ff1f06bfd5860ba1467224d377064a4d3d36c
 
-meta::function('import', <<'__7f1Q36AcIJ8/OaaYPGUq10PPFTKnEF0CMxS56DRsjKk');
+meta::function('import', <<'__35186ce8e0008a3c475e7ee8ce22eba8eb0147b8');
 my $name  = pop @_;
 my @files = @_;
 
@@ -654,14 +759,20 @@ if (@files) {
 else {
   associate($name, join('', <STDIN>));
 }
-__7f1Q36AcIJ8/OaaYPGUq10PPFTKnEF0CMxS56DRsjKk
+__35186ce8e0008a3c475e7ee8ce22eba8eb0147b8
 
-meta::function('lock', <<'__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y');
+meta::function('import-bundle', <<'__8f4056900159fc187bf4fff4ff38e4c271bebb88');
+eval join '', <STDIN>;
+messages::error($@) if $@;
+
+__8f4056900159fc187bf4fff4ff38e4c271bebb88
+
+meta::function('lock', <<'__0a6ef8184203a9e00d7b3a68b3ea4cdce5206718');
 my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
-__pqf/HijyN91BWpnS+uWYip/mFhHhcd+M9/YdlYsvv9Y
+__0a6ef8184203a9e00d7b3a68b3ea4cdce5206718
 
-meta::function('ls', <<'__OlQOgKhp6VUThx34wxmM3MFkwsHfR/c8dqvu07z059E');
+meta::function('ls', <<'__ae90207f7fc22688f52c3c20833a1ab684f99484');
 my $criteria = join '|', @_;
 my @lines = grep /$criteria/, sort keys %externalized_functions;
 my $length = 0;
@@ -669,9 +780,9 @@ $length >= length($_) or $length = length($_) for @lines;
 
 my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
 join("\n", sort @new_lines);
-__OlQOgKhp6VUThx34wxmM3MFkwsHfR/c8dqvu07z059E
+__ae90207f7fc22688f52c3c20833a1ab684f99484
 
-meta::function('ls-a', <<'__S5EydJRu+YIfcFmTMz1ZHX0cANJq32bU5JnYCe1tWdk');
+meta::function('ls-a', <<'__525bc068df4bf0228d806548819ddee3a00f51a8');
 my $criteria = join '|', @_;
 my @lines    = grep(/$criteria/, sort keys %data);
 my $length   = 0;
@@ -682,35 +793,35 @@ $inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
 $length >= length($_) or $length = length($_) for @lines;
 my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . ($inverses{$_} || ''), @lines);
 join "\n", @new_lines;
-__S5EydJRu+YIfcFmTMz1ZHX0cANJq32bU5JnYCe1tWdk
+__525bc068df4bf0228d806548819ddee3a00f51a8
 
-meta::function('make', <<'__iyMeXI5V4AfTzDMQu6wYbr6t/bNwBMAeh7RxjklLF7E');
+meta::function('make', <<'__8ec94f99998dc5087f2ffdcc19ef08a65af8ffcc');
 compile() || view();
 clean();
-__iyMeXI5V4AfTzDMQu6wYbr6t/bNwBMAeh7RxjklLF7E
+__8ec94f99998dc5087f2ffdcc19ef08a65af8ffcc
 
-meta::function('mv', <<'__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4');
+meta::function('mv', <<'__ee90b658b07f7d1e8ef24770269056306133392c');
 my ($from, $to) = @_;
 messages::error("The '$from' attribute does not exist.") unless grep $from, keys %data;
 associate($to, retrieve($from));
 rm($from);
-__ijyNZ8r34FVK0Ki9/Q0Irx5k9U0pZ+/frrdlu+qkEP4
+__ee90b658b07f7d1e8ef24770269056306133392c
 
-meta::function('new', <<'__FQjehdFg7T3T2iHPMlGp6nAnrKAsQUIK5CXW02wNnos');
+meta::function('new', <<'__9779a1b0838da12458e7d18cec2bf1e8ef592428');
 clone(@_);
-__FQjehdFg7T3T2iHPMlGp6nAnrKAsQUIK5CXW02wNnos
+__9779a1b0838da12458e7d18cec2bf1e8ef592428
 
-meta::function('perl', <<'__Ojd593Fa9fx1Yx2XuPzK6WTUyxO70Nbmlbl9YRodUWA');
+meta::function('perl', <<'__dadbc1389e6bececc479a96836ef4a984db32d08');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
-__Ojd593Fa9fx1Yx2XuPzK6WTUyxO70Nbmlbl9YRodUWA
+__dadbc1389e6bececc479a96836ef4a984db32d08
 
-meta::function('pop-state', <<'__eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM');
+meta::function('pop-state', <<'__9f332e60ed3a06256755d1c40762d640418eadec');
 %data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
 reload();
-__eqnCLsMapvq2sYSx82KCxh25zmff+JIXFMYUan2kGKM
+__9f332e60ed3a06256755d1c40762d640418eadec
 
-meta::function('pull', <<'__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg');
+meta::function('pull', <<'__2fe532e0e1a07cd40522c2e0136ff568097a04b0');
 my ($class_name) = @_;
 my @attributes = grep /^implementation::/, split /\n/, `$class_name ls-a`;
 
@@ -720,36 +831,36 @@ for (@attributes) {
   print STDERR "Adding $_\n";
   associate(basename($_), `$class_name cat "$_"`);
 }
-__ZU6uOu7dBdjjoNdEL/U7yrjicOQR5OLFQAacjrKqSCg
+__2fe532e0e1a07cd40522c2e0136ff568097a04b0
 
-meta::function('push-state', <<'__ik0ofu7R8gHAKSmMjek79V+yfgdjdK5Jmtwf7h8SpJk');
+meta::function('push-state', <<'__828f0ca8ca67a8f0a6fa7c468465f2cc7cce2e42');
 push @{$transient{'states'} = $transient{'states'} || []}, {%data};
 my $state_count = scalar @{$transient{'states'}};
 "There are now $state_count states on the stack.";
-__ik0ofu7R8gHAKSmMjek79V+yfgdjdK5Jmtwf7h8SpJk
+__828f0ca8ca67a8f0a6fa7c468465f2cc7cce2e42
 
-meta::function('reload', <<'__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM');
+meta::function('reload', <<'__00b9039c103cfa406a2e0070092823e4ca1ca968');
 execute($_) for (grep {! (/^internal::/ || /^bootstrap::/)} keys %data);
-__GwQjnnfuj0xQlervDJ9EVWzdmdz+XL3Gq0i9rdejvzM
+__00b9039c103cfa406a2e0070092823e4ca1ca968
 
-meta::function('render', <<'__3oK0CSm8flucLHFYkqn7EbxALXkyMvhecwh2/P/KWhA');
+meta::function('render', <<'__cf13120859d0beb2a904ad26f2b9922cda7b3320');
 use File::Copy 'cp';
 
 terminal::message('status', 'Building PDF...');
 compile();
 terminal::message('status', 'Copying PDF to source directory');
 cp(&{'pdf-output-file'}(), &{'source-directory'} . '/' . name() . '.pdf');
-__3oK0CSm8flucLHFYkqn7EbxALXkyMvhecwh2/P/KWhA
+__cf13120859d0beb2a904ad26f2b9922cda7b3320
 
-meta::function('rm', <<'__7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww');
+meta::function('rm', <<'__f5e76ae8a069901026783b40c18272a2c0f52e99');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
 }
 
 delete @data{@_};
-__7BVECTVo/mcT5+edC70WPc6S1xCbzAeyUCfCjkKWlww
+__f5e76ae8a069901026783b40c18272a2c0f52e99
 
-meta::function('save', <<'__uWXGnrQr+A7Cl0zcsDuiokbWAw1XdMdjeq9gDcTMJIw');
+meta::function('save', <<'__e6a1aaf4b6556238c3174820552301208d2906c4');
 my $serialized_data = serialize();
 my $final_state     = state();
 
@@ -769,18 +880,26 @@ if ($observed_state ne $final_state) {
   chomp $observed_self_state;
   unlink $temporary_filename if $observed_self_state eq $final_state;
 }
-__uWXGnrQr+A7Cl0zcsDuiokbWAw1XdMdjeq9gDcTMJIw
+__e6a1aaf4b6556238c3174820552301208d2906c4
 
-meta::function('serialize', <<'__KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw');
-my @keys_without_internals = grep(!/^internal::/, sort keys %data);
-join "\n", $data{'bootstrap::initialization'},
-           (grep {$_} (map {serialize::single(@_)} grep(/^meta::/,  @keys_without_internals),
-                                                   grep(!/^meta::/, @keys_without_internals),
-                                                   grep(/^internal::/, sort keys %data))),
-           "__END__";
-__KGiI48MlyG6RAVW5QYRK8y97y8tx+jeAwPlY5eDtMTw
+meta::function('serialize', <<'__a523cd97b5fd28a8c0f61530cc783ee850c05a57');
+my $criteria               = join '|', @_;
 
-meta::function('shell', <<'__mzNaDzdnJhpI/Va1/nY8LTN9BQtfr77CFKIeK2GdIC0');
+my @matching_keys          = grep length && m/$criteria/, sort keys %data;
+my @keys_without_internals = grep ! /^internal::/, @matching_keys;
+
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
+                                                       grep(! /^meta::/,   @keys_without_internals),
+                                                       grep(/^internal::/, @matching_keys);
+
+my @final_array            = $criteria ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+
+terminal::message('info', "No attributes matched $criteria") unless @final_array;
+join "\n", @final_array;
+
+__a523cd97b5fd28a8c0f61530cc783ee850c05a57
+
+meta::function('shell', <<'__f9ddecd04b3f3248fa31f9feb4cf703478976ce0');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -817,28 +936,28 @@ while (defined ($_ = $term->readline($prompt))) {
 
   $prompt = &{'name'}() . '$ ';
 }
-__mzNaDzdnJhpI/Va1/nY8LTN9BQtfr77CFKIeK2GdIC0
+__f9ddecd04b3f3248fa31f9feb4cf703478976ce0
 
-meta::function('size', <<'__lDGr6yVnDwcDWLkJH16MNukltjG2ypBSk/ktYb80h80');
+meta::function('size', <<'__06791c8c37f59a0070308a0811c0b59897bb43af');
 length(serialize());
-__lDGr6yVnDwcDWLkJH16MNukltjG2ypBSk/ktYb80h80
+__06791c8c37f59a0070308a0811c0b59897bb43af
 
-meta::function('snapshot', <<'__qjqsCy4CTt88dIi7IWM+Varpb3GcHsYrFTxW7EwpLW0');
+meta::function('snapshot', <<'__f3d6e5d8627a085a994ac4b06b289c746aee70d0');
 my ($name) = @_;
 file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
-__qjqsCy4CTt88dIi7IWM+Varpb3GcHsYrFTxW7EwpLW0
+__f3d6e5d8627a085a994ac4b06b289c746aee70d0
 
-meta::function('state', <<'__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI');
+meta::function('state', <<'__3d3222a03b60b6c8a9d289ce22de2e9abafc6778');
 sha256_base64 serialize();
-__1S8nzRSMoxJU/VEv2rx/NrAt1iRgXQ9ugxjUP3IFunI
+__3d3222a03b60b6c8a9d289ce22de2e9abafc6778
 
-meta::function('unlock', <<'__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA');
+meta::function('unlock', <<'__0a6ef8184203a9e00d7b3a689f6ae4ac23322820');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
-__08PohCY8fcNe+pWCO6ic6XOOKv48NkrxpNMmTOUIFdA
+__0a6ef8184203a9e00d7b3a689f6ae4ac23322820
 
-meta::function('update-from', <<'__jJ2tfSk/Quz8/1PiYxIwQjBRt/hYg51iJhAdxcdaHkM');
+meta::function('update-from', <<'__39064450cae7a1586aab086175296640608863b8');
 # Upgrade all attributes that aren't customized. In this case, we want everything except for configuration::, code::, and attribute::.
 return "That is a really bad idea." if $0 =~ /\.\/(.*)/ && $_[0] eq $1 || $_[0] eq $0;
 
@@ -866,42 +985,42 @@ print "\n";
 terminal::message('info', 'Reloading new configuration');
 reload();
 terminal::message('info', "Imported from $_[0]. Run pop-state to undo this change.");
-__jJ2tfSk/Quz8/1PiYxIwQjBRt/hYg51iJhAdxcdaHkM
+__39064450cae7a1586aab086175296640608863b8
 
-meta::function('usage', <<'__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs');
+meta::function('usage', <<'__687ace96b07cb784693313e8538b89e0d7556edc');
 <<"EOD" . ls ();
 Usage: $0 [options] action [arguments]
 Defined actions (and the attribute that defines them):
 EOD
-__7ReV+2xSkKaDnXAdgszTEQyeJETOBChyE/THZJIifMs
+__687ace96b07cb784693313e8538b89e0d7556edc
 
-meta::function('view', <<'__wEtlK5H0ttR24UvcFUsgg5Es1V/VbjMJlU+SKiO2jKs');
+meta::function('view', <<'__ba5ed66c2bd3c7acda3f08c8ce7721b0492893e8');
 my $pdf_reader      = &{'pdf-reader'}();
 my $pdf_output_file = &{'pdf-output-file'}();
 chomp $pdf_reader;
 system("$pdf_reader '$pdf_output_file'");
-__wEtlK5H0ttR24UvcFUsgg5Es1V/VbjMJlU+SKiO2jKs
+__ba5ed66c2bd3c7acda3f08c8ce7721b0492893e8
 
-meta::function('vim', <<'__1EcCMR8Tks8HBoOg+zAKJ4LlrRIY8nvLs4M1VTr2Zec');
+meta::function('vim', <<'__921dce569d3825e09152d45631b04660a883921e');
 # Installs VIM highlighters.
 file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for map {s/^vim_highlighter:://o; $_} grep /^vim_highlighter::/, sort keys %data;
-__1EcCMR8Tks8HBoOg+zAKJ4LlrRIY8nvLs4M1VTr2Zec
+__921dce569d3825e09152d45631b04660a883921e
 
-meta::internal_function('associate', <<'__D8BKmEFp/adiPPqPnXyMOzlsBMCmuZi62UpJWdoFg/0');
+meta::internal_function('associate', <<'__e2f6638c2004f25809e5ed487afdfe80777e90b0');
 my ($name, $value, %options) = @_;
 my $namespace = namespace($name);
 messages::error("Namespace $namespace does not exist") unless grep {$_ eq $namespace} @data_types;
 $data{$name} = $value;
 execute($name) if $options{'execute'};
-__D8BKmEFp/adiPPqPnXyMOzlsBMCmuZi62UpJWdoFg/0
+__e2f6638c2004f25809e5ed487afdfe80777e90b0
 
-meta::internal_function('basename', <<'__T4JEqOUYjMzssdVwV/rdgAhvr0Vz9TQUo0noTdeBLxw');
+meta::internal_function('basename', <<'__9264831c13f20c4038bc51c04523e60784ac9505');
 my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
-__T4JEqOUYjMzssdVwV/rdgAhvr0Vz9TQUo0noTdeBLxw
+__9264831c13f20c4038bc51c04523e60784ac9505
 
-meta::internal_function('complete', <<'__lhlD80z2kvEUEeHPqLFw6JE8xUdXr6J5Q1gXHg4beHg');
+meta::internal_function('complete', <<'__d3a05408732df2b869dc1f74937cdd908c409b64');
 my @functions  = sort keys %externalized_functions;
 my @attributes = sort keys %data;
 
@@ -934,32 +1053,63 @@ if ($line =~ / /) {
   # Start of line, so it's a function.
   match ($text, @functions);
 }
-__lhlD80z2kvEUEeHPqLFw6JE8xUdXr6J5Q1gXHg4beHg
+__d3a05408732df2b869dc1f74937cdd908c409b64
 
-meta::internal_function('execute', <<'__Ge94WTpmLuqsMDappj5G/G2BKILAE0GjeCqAeHLW6fQ');
+meta::internal_function('execute', <<'__212c3f0165477514627b0a08e9a5136c11d06160');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
 eval {&{"meta::$namespace"}(basename($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
-__Ge94WTpmLuqsMDappj5G/G2BKILAE0GjeCqAeHLW6fQ
+__212c3f0165477514627b0a08e9a5136c11d06160
 
-meta::internal_function('file::read', <<'__ZxBqZsMZZRuLMQp8Sy//ZsoAvriDebjYLGAX7p7AxXg');
+meta::internal_function('fast_hash', <<'__3e9de0b4ebf1ead4442da0e0379e5d08a0330e10');
+my ($data)     = @_;
+my $piece_size = length($data) >> 3;
+
+my @pieces     = map substr($data, $piece_size * $_, $piece_size), 0 .. 7;
+my @hashes     = (fnv_hash($pieces[0]));
+
+push @hashes, fnv_hash($pieces[$_] . $hashes[-1]) for 0 .. 7;
+push @hashes, fnv_hash(substr($data, $piece_size * 8) . length($data));
+
+$hashes[$_] ^= $hashes[$_ + 4] for 0 .. 3;
+
+sprintf '%08x' x 5, @hashes[0 .. 3], $hashes[8];
+
+__3e9de0b4ebf1ead4442da0e0379e5d08a0330e10
+
+meta::internal_function('file::read', <<'__a9dcc370c25299a439f53f48a292bd54d5872450');
 my $name = shift;
 open my($handle), "<", $name;
 my $result = join "", <$handle>;
 close $handle;
 $result;
-__ZxBqZsMZZRuLMQp8Sy//ZsoAvriDebjYLGAX7p7AxXg
+__a9dcc370c25299a439f53f48a292bd54d5872450
 
-meta::internal_function('file::write', <<'__+NhpMabvNL+hHZaTZwBoFx2IFa79cjOZwGxEXX+xG0o');
+meta::internal_function('file::write', <<'__e27cdf44fa10cad03138bdf8bf4eadd8293085a8');
 my ($name, $contents, %options) = @_;
 die "Choosing not to overwrite file $name" if $options{'noclobber'} && -f $name;
 open my($handle), ">", $name or die "Can't open $name for writing";
 print $handle $contents;
 close $handle;
-__+NhpMabvNL+hHZaTZwBoFx2IFa79cjOZwGxEXX+xG0o
+__e27cdf44fa10cad03138bdf8bf4eadd8293085a8
 
-meta::internal_function('invoke_editor_on', <<'__97Lgs5+qfyAu92Vv5GCVVSYgUgFhOKYkVYXlbWoUs6U');
+meta::internal_function('fnv_hash', <<'__dfcdff5099c85850c662d2509db43a24c1b945d0');
+# A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
+# for efficiency, which may compromise its effectiveness for short strings.
+
+my ($data) = @_;
+
+my ($fnv_prime, $fnv_offset) = (16777619, 2166136261);
+my $hash                     = $fnv_offset;
+my $modulus                  = 2 ** 32;
+
+(($hash ^= $_) *= $fnv_prime) %= $modulus for unpack('ccccL*', $data . substr($data, -4));
+$hash;
+
+__dfcdff5099c85850c662d2509db43a24c1b945d0
+
+meta::internal_function('invoke_editor_on', <<'__337fb3e07fa468dc526a8e686947dad0b8605ec0');
 my ($data, %options) = @_;
 my $content_hash     = sha256_base64($data);
 my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
@@ -976,45 +1126,55 @@ system("$editor $options \"$filename\"");
 my $result = file::read($filename);
 unlink $filename;
 $result;
-__97Lgs5+qfyAu92Vv5GCVVSYgUgFhOKYkVYXlbWoUs6U
+__337fb3e07fa468dc526a8e686947dad0b8605ec0
 
-meta::internal_function('messages::error', <<'__200qXouilOAQNa4NkmIj6l+Rvb49Jpy8yxvIX29NcK4');
+meta::internal_function('messages::error', <<'__f9ac51189db7434081aa077af60d8f968f835300');
 my ($message) = @_;
 die "$message\n";
-__200qXouilOAQNa4NkmIj6l+Rvb49Jpy8yxvIX29NcK4
+__f9ac51189db7434081aa077af60d8f968f835300
 
-meta::internal_function('messages::warning', <<'__DeU/1Klulk/y4fO+wtKt+liOmUKwCEYKM8BvtlXYXBc');
+meta::internal_function('messages::warning', <<'__f9ac51189db7434019b5c1861d35837651d87d20');
 my ($message) = @_;
 print "$message\n";
-__DeU/1Klulk/y4fO+wtKt+liOmUKwCEYKM8BvtlXYXBc
+__f9ac51189db7434019b5c1861d35837651d87d20
 
-meta::internal_function('namespace', <<'__D7UfKyyYZ1slZZyaS28hIt8a68jkI3ELBaddROXOHug');
+meta::internal_function('namespace', <<'__9264831c13f20c4046ffb300440fdfd3020f3040');
 my ($name) = @_;
 $name =~ s/::.*$//;
 $name;
-__D7UfKyyYZ1slZZyaS28hIt8a68jkI3ELBaddROXOHug
+__9264831c13f20c4046ffb300440fdfd3020f3040
 
-meta::internal_function('retrieve', <<'__Erqqkp11FEHKsitr0DEJZ6OCGDYAs+U6BSu4UvLvsFM');
+meta::internal_function('retrieve', <<'__19cb3368500ca29133c9af4b0aeca2d006e92cdc');
 @data{@_};
-__Erqqkp11FEHKsitr0DEJZ6OCGDYAs+U6BSu4UvLvsFM
+__19cb3368500ca29133c9af4b0aeca2d006e92cdc
 
-meta::internal_function('serialize::single', <<'__lDBHaXpbrfER2envI2Ipy77IcdjUnlZou+rggaxsAWE');
+meta::internal_function('serialize::single', <<'__042724db6db0b5742514e64fb4be2e6c94f73dd2');
 my $name               = shift || $_;
 my $contents           = $data{$name};
 my $delimiter          = "__" . sha256_base64 $contents;
 my $meta_function_name = "meta::" . namespace($name);
 my $invocation_name    = basename $name;
 "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__lDBHaXpbrfER2envI2Ipy77IcdjUnlZou+rggaxsAWE
+__042724db6db0b5742514e64fb4be2e6c94f73dd2
 
-meta::internal_function('state_based_filename', <<'__zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw');
+meta::internal_function('serialize_single', <<'__4425fdc9fbf79c606714e7a48b56fc70244f9aa0');
+my $name               = shift || $_;
+my $contents           = $data{$name};
+my $delimiter          = '__' . fast_hash($contents);
+my $meta_function_name = "meta::" . namespace($name);
+my $invocation_name    = basename $name;
+"$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
+
+__4425fdc9fbf79c606714e7a48b56fc70244f9aa0
+
+meta::internal_function('state_based_filename', <<'__b311f9c8cb487680ba86665ce3fd4f0e73b5d404');
 my ($name) = @_;
 my $noise  = $name || state();
 $noise =~ s/\//-/g;
 "$0.$noise";
-__zNSrihAkMKJG5spRYgcFdoNArFKig1u12gIp6gJ8pZw
+__b311f9c8cb487680ba86665ce3fd4f0e73b5d404
 
-meta::java_section('java-introduction', <<'__A3KF4Pr3gD/4XG4sMrPH+Ak7OpswEl/WQAmdOK9Isp8');
+meta::java_section('java-introduction', <<'__2069ecd847abc7f05d7381c0834756d8e14003a0');
 - Introduction to Java Literate Coding
   Literate coding allows you to write \TeX{} primarily, but insert Java code snippets where appropriate.\footnote{Take a look at {\tt java\_section::java-introduction} to see the how to set
   the language and options for code sections.} For example:
@@ -1047,9 +1207,9 @@ meta::java_section('java-introduction', <<'__A3KF4Pr3gD/4XG4sMrPH+Ak7OpswEl/WQAm
   ::
   $ ./my-project source-directory = src/
   :.
-__A3KF4Pr3gD/4XG4sMrPH+Ak7OpswEl/WQAmdOK9Isp8
+__2069ecd847abc7f05d7381c0834756d8e14003a0
 
-meta::library('terminal', <<'__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA');
+meta::library('terminal', <<'__7f27e8189c10f7b06f17f9a4bb0c25c06af099b0');
 # Functions for nice-looking terminal output.
 
 package terminal;
@@ -1080,9 +1240,9 @@ sub message {
   my $padding = ' ' x ($longest_prefix - length $prefix);
   print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__pvD00lNNeQAXRGZFRNjR0bf9b/Z/rZgMgNL5zN4ZsQA
+__7f27e8189c10f7b06f17f9a4bb0c25c06af099b0
 
-meta::line_filter('convert_header_info', <<'__1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE');
+meta::line_filter('convert_header_info', <<'__d9d88f188b3fa5e03f276c36441d66a84a0c90c0');
 my ($line) = @_;
 
 $line =~ s/^= (.*)$/\\title{$1}/;
@@ -1095,9 +1255,9 @@ $document_header .= '\tableofcontents' if &{'table-of-contents'}();
 $line =~ s/^begin$/$document_header/;
 
 $line;
-__1jqqbjBcdOqh/3nTKZSDbW1AgEo4kg0dQ5HdRAgxyzE
+__d9d88f188b3fa5e03f276c36441d66a84a0c90c0
 
-meta::line_filter('convert_itemized_environments', <<'__crKVW6OfRA2nN2SGPWQ/DAD9NPUws+boS8dK4cf3X2I');
+meta::line_filter('convert_itemized_environments', <<'__d5e03bfd5dd50a78d28025747eea221013ce2820');
 my ($line) = @_;
 
 $line =~ s/^\s*\+ /\\item /;
@@ -1116,9 +1276,9 @@ $line =~ s/^\s*\]d$/\\end{description}/;
 $line =~ s/^\s*\]a$/\\end{align*}/;
 
 $line;
-__crKVW6OfRA2nN2SGPWQ/DAD9NPUws+boS8dK4cf3X2I
+__d5e03bfd5dd50a78d28025747eea221013ce2820
 
-meta::line_filter('convert_sections', <<'__2dvR+HcKtutFCWe6cEFSERoj36PbA6u91tQcJgcwJWk');
+meta::line_filter('convert_sections', <<'__b97d64492ab40988db2a4f15ec13bf88047fc8f2');
 my ($line) = @_;
 
 my %indentation_levels = (
@@ -1139,21 +1299,21 @@ if ($line =~ /^(\s*)- (.*)$/) {
 } else {
   $line;
 }
-__2dvR+HcKtutFCWe6cEFSERoj36PbA6u91tQcJgcwJWk
+__b97d64492ab40988db2a4f15ec13bf88047fc8f2
 
-meta::section('header-asm', <<'__Cvp8Mj9WBQk9BB4i5Z59BmU4O+OsEm0jFdOotC3sK78');
+meta::section('header-asm', <<'__00ce4e606f080cf8303278801c8a90fe5f04a5cc');
 \lstnewenvironment{asmcode} {}{}
-__Cvp8Mj9WBQk9BB4i5Z59BmU4O+OsEm0jFdOotC3sK78
+__00ce4e606f080cf8303278801c8a90fe5f04a5cc
 
-meta::section('header-cpp', <<'__9D5O4Z6TbE1w0d/QZf6mh5gTqK3uqngGW5JnsVahKrI');
+meta::section('header-cpp', <<'__c7ff94d05ea836102b4b8d880da6e600405d59b4');
 \lstnewenvironment{cppcode} {\lstset{language=c++}} {}
-__9D5O4Z6TbE1w0d/QZf6mh5gTqK3uqngGW5JnsVahKrI
+__c7ff94d05ea836102b4b8d880da6e600405d59b4
 
-meta::section('header-java', <<'__c8wVpTVdLTbXiGk6I2ndXsi/BvG/J2tcEr6hWcQaPpg');
+meta::section('header-java', <<'__43cec188a4502d90dd2b80f0ce9a7fb0e30a46f0');
 \lstnewenvironment{javacode}{\lstset{language=java}}{}
-__c8wVpTVdLTbXiGk6I2ndXsi/BvG/J2tcEr6hWcQaPpg
+__43cec188a4502d90dd2b80f0ce9a7fb0e30a46f0
 
-meta::section('header-listings', <<'__QfAvgYOeTiIvdge3tOlNbkDqoEBD10Je3eKQjtnvDlw');
+meta::section('header-listings', <<'__05326ff0a31d59a85724aa6c94891594e11879c2');
 \definecolor{gray}{rgb}{0.6,0.6,0.6}
 
 \usepackage{caption}
@@ -1161,33 +1321,33 @@ meta::section('header-listings', <<'__QfAvgYOeTiIvdge3tOlNbkDqoEBD10Je3eKQjtnvDl
 \captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
 
 \lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
-__QfAvgYOeTiIvdge3tOlNbkDqoEBD10Je3eKQjtnvDlw
+__05326ff0a31d59a85724aa6c94891594e11879c2
 
-meta::section('header-packages', <<'__gAYewXeZ5+PV5yzWF64x6UcHha8VYx98W4Bh0ETihoc');
+meta::section('header-packages', <<'__7e2d34f4201b662f20aba628f2f227bcc600cbb8');
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,pxfonts,listings,color}
 \usepackage[colorlinks]{hyperref}
-__gAYewXeZ5+PV5yzWF64x6UcHha8VYx98W4Bh0ETihoc
+__7e2d34f4201b662f20aba628f2f227bcc600cbb8
 
-meta::section('header-proof', <<'__0IQyfHZQmmk2W+K2IAUXzYQ8ozjpmMFeO7vnh5+T0X0');
+meta::section('header-proof', <<'__9beb226e1a2bd9627f7a40d8b6b3c664d3c1e920');
 \newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}
-__0IQyfHZQmmk2W+K2IAUXzYQ8ozjpmMFeO7vnh5+T0X0
+__9beb226e1a2bd9627f7a40d8b6b3c664d3c1e920
 
-meta::section('header-refs', <<'__FyTRTeUUlD24fqBIVXql0GRwKOZnNt8gSl0VMTWHJV0');
+meta::section('header-refs', <<'__d1b9293899080168718381946f530fb044b739e0');
 \newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
-__FyTRTeUUlD24fqBIVXql0GRwKOZnNt8gSl0VMTWHJV0
+__d1b9293899080168718381946f530fb044b739e0
 
-meta::section('header-resource', <<'__yJjX5ArJ7RQtwU2GDufcCGCreYGjYZx9C3FrvHa9JQ0');
+meta::section('header-resource', <<'__00ce4e601cac6d79d6f04368f0368bd0d64c93ec');
 \lstnewenvironment{resource}{}{}
-__yJjX5ArJ7RQtwU2GDufcCGCreYGjYZx9C3FrvHa9JQ0
+__00ce4e601cac6d79d6f04368f0368bd0d64c93ec
 
-meta::unlit_converter('create_sections', <<'__hMABUTlrgmVTt4JFwi0HvAb2ehkYaGLJ25qslKDQurE');
+meta::unlit_converter('create_sections', <<'__da88bdd8f5fa4c9c097d0d967f14e9008b8a1488');
 my ($document) = @_;
 1 while $document =~ s/^\s*%section\(([^)]+)\)\s*$/\n$data{$1}\n/omg;
 $document;
-__hMABUTlrgmVTt4JFwi0HvAb2ehkYaGLJ25qslKDQurE
+__da88bdd8f5fa4c9c097d0d967f14e9008b8a1488
 
-meta::unlit_converter('main', <<'__3D082OWBmT2cWw4D6ktyDGp1MHknawaTDW2B0gvZPyM');
+meta::unlit_converter('main', <<'__88c16bbce80366a886e89d92c63fde38e7e80e02');
 my ($document) = @_;
 
 my $sections_already_encountered = 0;
@@ -1232,19 +1392,19 @@ for (split /\n/, $document) {
 }
 
 $result;
-__3D082OWBmT2cWw4D6ktyDGp1MHknawaTDW2B0gvZPyM
+__88c16bbce80366a886e89d92c63fde38e7e80e02
 
-meta::unlit_converter('zz_append_footer', <<'__xZrf+gAwEiK7btRcm+mwC/qtHsXp2FQ/Z8ZCwMvSw4Q');
+meta::unlit_converter('zz_append_footer', <<'__23190ba449f1fc407d7e4fe80b1f339852986c63');
 my ($document) = @_;
 "$document\n\\end{document}";
-__xZrf+gAwEiK7btRcm+mwC/qtHsXp2FQ/Z8ZCwMvSw4Q
+__23190ba449f1fc407d7e4fe80b1f339852986c63
 
-meta::unlit_converter('zz_prepend_header', <<'__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw');
+meta::unlit_converter('zz_prepend_header', <<'__46b4c02411a339ba6dfc921c38df2e3805012f18');
 my ($document) = @_;
 header() . "\n$document";
-__4YCmTeTBS/MGOkeIFkQRlLujLJ1g/qS0/0iCeanWkkw
+__46b4c02411a339ba6dfc921c38df2e3805012f18
 
-meta::vim_highlighter('asmtex', <<'__xmCrBQ06Enn0XsYJnPsyTgeBClFw7BA/giJSfcXEHeM');
+meta::vim_highlighter('asmtex', <<'__bc2d215061bbb390248d64703da83f7b00ba6960');
 " TeX with Assembly
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   TeX with Assembly in it
@@ -1264,9 +1424,9 @@ hi link asmtexSection Special
 hi link asmtexComment Comment
 
 let b:current_syntax = "asmtex"
-__xmCrBQ06Enn0XsYJnPsyTgeBClFw7BA/giJSfcXEHeM
+__bc2d215061bbb390248d64703da83f7b00ba6960
 
-meta::vim_highlighter('cltex', <<'__i99D+bM2oHb2kJ9JHMYOpio7eDlvgAvVVrOhkUTyaxM');
+meta::vim_highlighter('cltex', <<'__07bc9ff4440c65a8024af2e24717a356df74fdd0');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX)
@@ -1308,9 +1468,9 @@ hi link cltSection  Type
 hi link cltVerbatim String
 
 let b:current_syntax = "cltex"
-__i99D+bM2oHb2kJ9JHMYOpio7eDlvgAvVVrOhkUTyaxM
+__07bc9ff4440c65a8024af2e24717a356df74fdd0
 
-meta::vim_highlighter('cpptex', <<'__2H5AUY+IdhatqTOdpiXUmgcnlKmzCJsLpcRGMNUHyB0');
+meta::vim_highlighter('cpptex', <<'__ed79ea609df93274498774d873208bb8ad2a066c');
 " TeX with C++
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   TeX with C++ in it
@@ -1333,9 +1493,9 @@ hi link cpptexComment Comment
 hi link cpptexInclude PreProc
 
 let b:current_syntax = "cpptex"
-__2H5AUY+IdhatqTOdpiXUmgcnlKmzCJsLpcRGMNUHyB0
+__ed79ea609df93274498774d873208bb8ad2a066c
 
-meta::vim_highlighter('javatex', <<'__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU');
+meta::vim_highlighter('javatex', <<'__3e1e0b38b5b65eac67dc2e48e09dc4bf7aeb0c88');
 " TeX with Java
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   TeX with Java in it
@@ -1355,9 +1515,9 @@ hi link javatexSection Special
 hi link javatexComment Comment
 
 let b:current_syntax = "javatex"
-__nEheNk5KhfU1tIJUV7PcB9MfRb0bIbRXyu7BN/Ws6bU
+__3e1e0b38b5b65eac67dc2e48e09dc4bf7aeb0c88
 
-meta::internal('runtime', <<'__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ');
+meta::internal('runtime', <<'__ca426248a86626f523247d840dfac5e4b0cd66e0');
 my $initial_state = sha256_base64 serialize();
 
 push @script_args, shift @ARGV while @ARGV && $ARGV[0] =~ /^-/;
@@ -1376,6 +1536,6 @@ END {
   save() unless $initial_state eq $final_state;
 }
 
-__YPmIzwZkTg8URmPfjiwGRG4VDUF2ZCJqTEz+gjETYLQ
+__ca426248a86626f523247d840dfac5e4b0cd66e0
 
 __END__
