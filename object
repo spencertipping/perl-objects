@@ -692,7 +692,7 @@ $name;
 __e2799868bca51600b966845038cc7eb8
 
 meta::internal_function('retrieve', '@data{@_};');
-meta::internal_function('serialize_single', <<'__5986516079fd47e0cb0b41c4ce8b5653');
+meta::internal_function('serialize_single', <<'__405c0188889a84a6b953259066d6a8b0');
 my $name               = $_[0] || $_;
 my $contents           = $data{$name};
 my $delimiter          = '__' . fast_hash($contents);
@@ -700,9 +700,9 @@ my $meta_function_name = "meta::" . namespace($name);
 my $invocation_name    = basename($name);
 
 return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
-return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\]*$/;
+return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\\$@%&]*$/;
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__5986516079fd47e0cb0b41c4ce8b5653
+__405c0188889a84a6b953259066d6a8b0
 
 meta::internal_function('state_based_filename', <<'__29845b326633c6f0bc9b197c84802724');
 my ($name) = @_;
