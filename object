@@ -379,23 +379,6 @@ my $state_count = scalar @{$transient{'states'}};
 __8f5cf6d01bef7e78452bf9a0e11554b0
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
-meta::function('rle', <<'__51251ff8c3ebf5e01958d7b8f2584498');
-# Run-length encodes a string, and returns a Perl expression that will reproduce
-# the original. It detects runs of any number of characters, though there is no
-# guarantee that the run-length encoded string is either optimal or smaller than
-# the original.
-
-sub rle_segment {
-  my ($string) = @_;
-  1 while $string =~ s/([^']{5,})(\1+)/'.'$1'x${\(length($2) \/ length($1) + 1)} .'/g or
-          $string =~ s/([^']+?)(\1{5,})/'.'$1'x${\(length($2) \/ length($1) + 1)} .'/g;
-  $string;
-}
-
-my ($data) = @_;
-join "\n", map("'" . join("'.'", map(rle_segment($_), split /'/, $_)) . "'", split(/\n/, $data));
-__51251ff8c3ebf5e01958d7b8f2584498
-
 meta::function('rm', <<'__e9ba58a4f738c1082e8434c865fe405c');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
@@ -771,9 +754,10 @@ sub message {
 }
 __e9356da06debb0949f6b74604d4561b0
 
-meta::internal('runtime', <<'__1bfa2e039e12f9a859960eb496e499ca');
+meta::internal('runtime', <<'__e42336c0bc1b4050f504540987d85ddc');
 my $initial_state        = state();
 chomp(my $default_action = retrieve('data::default-action'));
+reload();
 
 my $function_name = shift(@ARGV) || $default_action || 'usage';
 $function_name = 'usage' unless $externalized_functions{$function_name};
@@ -785,6 +769,6 @@ END {
   save() unless $initial_state eq state();
 }
 
-__1bfa2e039e12f9a859960eb496e499ca
+__e42336c0bc1b4050f504540987d85ddc
 
 __END__
