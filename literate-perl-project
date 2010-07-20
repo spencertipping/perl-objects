@@ -223,9 +223,9 @@ unless ($settings{'name'}) {
 return $line;
 __AON9bxWzZOMpERGSJVrit8dkijYb5Re8IIg2PEC5i1s
 
-meta::data('default-action', <<'__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU');
-intro
-__xDKzcuDjAmfmXiahKkLHlXq1LiXf48bUuSkhPYiWXkU
+meta::data('default-action', <<'__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc');
+shell
+__zmNcTqv/Xk9W26j7HjnKI1UwqitrGFM+7xrzhiAWxXc
 
 meta::data('document', <<'__XTJAsZ2LWKGEYCet0rXSP8DwQBh2w15+p7Q6mmOdQ6A');
 = TeX Document Generator
@@ -263,56 +263,6 @@ meta::data('header', <<'__eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g');
 \documentclass{article}
 \usepackage{palatino,mathpazo,amsmath,amssymb}
 __eDtyvHFZSQrphEHm92Rjuvx5KOB2Cm+mxAPuG0JPt2g
-
-meta::data('intro', <<'__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw');
-This is a TeX document generator.
-
-If this is your first time using it, then you'll probably want to install
-the VIM highlighter for the custom TeX format. To do that, run this:
-
-  $ tex-document install-vim-highlighter
-
-If you don't mind an extra line at the end of your .vimrc file, then you
-can automatically associate .cltex files:
-
-  $ tex-document update-vimrc
-
-Now you're ready to go.
-
-To create a new TeX document, do this:
-
-  $ tex-document new newdoc
-
-Next, edit the contents of your new document:
-
-  $ ./newdoc e
-
-Once you're done editing, you can build and display the document:
-
-  $ ./newdoc make
-
-Alternately, you can use the shell interface (exit with the 'exit' command or
-control-D):
-
-  $ ./newdoc shell
-  tex-document$ e
-  tex-document$ make
-  ...
-  tex-document$ ^D
-  $
-
-If you edit and run make a lot, I recommend you save your document just to be
-on the safe side. Normally the document is not committed to disk until you exit
-the shell, but you can commit at any time by using the 'save' command.
-
-To extract your document in its original form, you can say this:
-
-  $ ./newdoc document > file
-
-And to extract the generated TeX:
-
-  $ ./newdoc compile-to-tex > file
-__uirjwqAxCBH+vu23aaPBO6uNM7a7cUHAYKJo8gIJsGw
 
 meta::data('meta-associations', <<'__LFbUILfqPrYMsFUSJaFljSVU6jHl6baHEj7ML+iA/Ns');
 ^function:: .pl
