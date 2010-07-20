@@ -133,12 +133,13 @@ meta::define_form 'library', sub {
 };
 __7b7511e89b4b2a98d9219d28b52f3aa8
 
-meta::meta('type::message_color', <<'__c44571f0b5276098a1b19a001f32961c');
-meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat', on_bind => sub {
+meta::meta('type::message_color', <<'__89afbdde59c2a444bd09dd18083f1948');
+meta::configure 'message_color', extension => '', inherit => 1;
+meta::define_form 'message_color', sub {
   my ($name, $value) = @_;
   terminal::color($name, $value);
 };
-__c44571f0b5276098a1b19a001f32961c
+__89afbdde59c2a444bd09dd18083f1948
 
 meta::meta('type::meta', <<'__1bc91ae85e131fd089b34bb074e36c6c');
 # This doesn't define a new type. It customizes the existing 'meta' type
@@ -340,22 +341,22 @@ eval join '', <STDIN>;
 messages::error($@) if $@;
 __e2d97250fb4faa48b5590088bf755a5e
 
-meta::function('load-state', <<'__937226b81f4b07a0bbfc761e9a1936d4');
+meta::function('load-state', <<'__55509c104a9f03407601a04010139acc');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
 
-terminal::message('info', 'Saving current state into _...');
+terminal::message('state', 'Saving current state into _...');
 &{'save-state'}('_');
 
-terminal::message('info', 'Removing attributes from %data...');
+terminal::message('state', 'Removing attributes from %data...');
 delete $data{$_} for grep ! /^state::/ && ! /^internal::runtime$/, keys %data;
 
-terminal::message('info', "Restoring state $state_name...");
+terminal::message('state', "Restoring state $state_name...");
 eval($state);
 terminal::message('error', $@) if $@;
 reload();
 verify();
-__937226b81f4b07a0bbfc761e9a1936d4
+__55509c104a9f03407601a04010139acc
 
 meta::function('lock', <<'__b458fbe0c7417d6acc56200c2a7a85c0');
 my (undef, undef, $mode) = stat $0;
@@ -598,23 +599,23 @@ Defined actions (and the attribute that defines them):
 EOD
 __7546d76b98d58e044bb7a8a4f01e3288
 
-meta::function('verify', <<'__c6fb68b08cedc6e045c6e00402e44970');
+meta::function('verify', <<'__ec683240401c53967704f3f8624fe5b0');
 my $serialized_data = serialize();
 my $state           = state();
 
 my $temporary_filename = temporary_name();
+$transient{temporary_filename} = $temporary_filename;
 file::write($temporary_filename, $serialized_data);
 chmod 0700, $temporary_filename;
 
 chomp(my $observed_state = join '', qx|perl '$temporary_filename' state|);
 
 my $result = $observed_state eq $state;
-terminal::message('error', "Verification failed; '$observed_state' (produced by $temporary_filename) != '$state' (expected)") unless $result;
 unlink $temporary_filename if $result;
-$transient{temporary_filename} = $temporary_filename;
+terminal::message('error', "Verification failed; '$observed_state' (produced by $temporary_filename) != '$state' (expected)") unless $result;
 
 $result;
-__c6fb68b08cedc6e045c6e00402e44970
+__ec683240401c53967704f3f8624fe5b0
 
 meta::function('vim', <<'__5ce9f9a0b090b1341b4548b8601b8d6a');
 # Installs VIM highlighters.
@@ -807,6 +808,7 @@ sub message {
 }
 __8e6bd3f8004860c41987d4a8589355f0
 
+meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
 meta::template('eval', <<'__23f16f81d35a9700596175206a4d9c31');
