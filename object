@@ -340,7 +340,7 @@ eval join '', <STDIN>;
 messages::error($@) if $@;
 __87c31c42c0ebfe3471bac28857efc764
 
-meta::function('load-state', <<'__4172e0ff1ed93c98c647a4d01c9edee8');
+meta::function('load-state', <<'__d1f32030d989906460ab54782759510e');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
 
@@ -348,14 +348,14 @@ terminal::message('info', 'Saving current state into _...');
 &{'save-state'}('_');
 
 terminal::message('info', 'Removing attributes from %data...');
-delete $data{$_} for grep ! /^state::/, %data;
+delete $data{$_} for grep ! /^state::/, keys %data;
 
 terminal::message('info', "Restoring state $name...");
 eval($state);
 terminal::message('error', $@) if $@;
 reload();
 verify();
-__4172e0ff1ed93c98c647a4d01c9edee8
+__d1f32030d989906460ab54782759510e
 
 meta::function('lock', <<'__224b5b38a80ec0bef8afba786b1b876e');
 my (undef, undef, $mode) = stat $0;
