@@ -512,13 +512,13 @@ terminal::message('info', 'Replicating state...');
 &{'push-state'}();
 
 terminal::message('info', 'Updating meta attributes...');
-eval qx|$target serialize '^meta::'|;
+eval qx($target serialize '^meta::');
 terminal::message('warning', $@) if $@;
 terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
 
 terminal::message('info', 'Updating non-meta attributes...');
 my $combined_pattern = join '|', map "^$_::", grep ! (/^meta$/ || /^internal$/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}};
-eval qx|$target serialize '$combined_pattern'|;
+eval qx($target serialize '$combined_pattern');
 terminal::message('warning', $@) if $@;
 reload();
 
