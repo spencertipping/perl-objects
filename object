@@ -149,7 +149,7 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __9271aa927322e2488587d8f096adcbb0
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
-meta::meta('type::state', <<'__282981f868be8a982e59a5307db9bab8');
+meta::meta('type::state', <<'__72a25988393f99f89ccf0010716e96b8');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
 # increase in size. Also, states don't contain other states -- otherwise the size
@@ -160,13 +160,18 @@ meta::meta('type::state', <<'__282981f868be8a982e59a5307db9bab8');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', sub {
   my ($name, $value) = @_;
-  meta::externalize $name, "state::$name", sub {
+  meta::externalize "state::$name", "state::$name", sub {
+    terminal::message('info', 'Saving current state into state::_...');
+    &{'save-state'}('_');
+
+    terminal::message('info', "Restoring state $name...");
+    %data = %externalized_functions = ();
     eval($value);
     terminal::message('error', $@) if $@;
     reload();
   };
 };
-__282981f868be8a982e59a5307db9bab8
+__72a25988393f99f89ccf0010716e96b8
 
 meta::meta('type::template', <<'__214fed209a6433a640f50f22fe8dc970');
 meta::configure 'template', extension => '.pl', inherit => 1;
@@ -288,15 +293,21 @@ if (defined $value) {
 }
 __3635039812e83a384cadd7e81bf4805b
 
-meta::function('edit', <<'__e148f15260a169549bb9faf888b89e2e');
+meta::function('current-state', <<'__cf7f06dc3f128384f276e1dc0c53e780');
+my @all_keys          = sort keys %data;
+my @serializable_keys = grep(/^meta::/, @all_keys), grep(! /^meta::/ && ! /^state::/, @all_keys);
+join "\n", map serialize_single($_), @serializable_keys;
+__cf7f06dc3f128384f276e1dc0c53e780
+
+meta::function('edit', <<'__afd0306257766a777bc86080e80e3554');
 my ($name, %options) = @_;
 my $extension = $transient{extension}{namespace($name)} || '';
 
-messages::error("Attribute $name does not exist.") unless grep {$_ eq $name} keys %data;
-associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, extension => $extension),
+messages::error("Attribute $name does not exist.") unless grep $_ eq $name, keys %data;
+associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 save();
-__e148f15260a169549bb9faf888b89e2e
+__afd0306257766a777bc86080e80e3554
 
 meta::function('export', <<'__c750d5e8911eea5289c09687f0987f68');
 # Exports data into a text file.
@@ -432,7 +443,12 @@ if (! verify()) {
 }
 __0895b63cde6880a8f302a24c1adb4e38
 
-meta::function('save-state', '# Creates a named copy of the current state and stores it.');
+meta::function('save-state', <<'__5ef10600b40f6880f4c21868bbbc019c');
+# Creates a named copy of the current state and stores it.
+my ($state_name) = @_;
+associate("state::$state_name", &{'current-state'}(), execute => 1);
+__5ef10600b40f6880f4c21868bbbc019c
+
 meta::function('serialize', <<'__c0d0324cdb78b5a04a7c4c40e68356b8');
 my $criteria               = join '|', @_;
 
@@ -454,7 +470,7 @@ meta::function('serialize_single', <<'__9e653d3258b8bc3c4269e6b4414bce88');
 
 my $name               = $_[0] || $_;
 my $contents           = $data{$name};
-my $meta_function_name = "meta::" . namespace($name);
+my $meta_function_name = 'meta::' . namespace($name);
 my $invocation_name    = basename($name);
 
 return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
@@ -696,22 +712,23 @@ my $modulus                  = 2 ** 32;
 $hash;
 __94ebec78c1fe9bc80e4f6e2c70c4c488
 
-meta::internal_function('invoke_editor_on', <<'__c810c120392b0de0a77ab8c81a8c67b8');
+meta::internal_function('invoke_editor_on', <<'__055b6d60a5d0af3e52918a70c213d150');
 my ($data, %options) = @_;
-my $editor           = $options{'editor'} || $ENV{'VISUAL'} || $ENV{'EDITOR'} ||
+my $editor           = $options{editor} || $ENV{VISUAL} || $ENV{EDITOR} ||
                        messages::error('Either the $VISUAL or $EDITOR environment variable should be set to a valid editor.');
-my $options          = $options{'options'} || $ENV{'VISUAL_OPTS'} || $ENV{'EDITOR_OPTS'} || '';
-my $extension        = $options{'extension'} || '';
+my $options          = $options{options} || $ENV{VISUAL_OPTS} || $ENV{EDITOR_OPTS} || '';
+my $extension        = $options{extension} || '';
+my $attribute        = $options{attribute} || '';
 
-my $filename         = temporary_name() . $extension;
+my $filename         = temporary_name() . "-$attribute" . $extension;
 
 file::write($filename, $data);
-system("$editor $options \"$filename\"");
+system("$editor $options '$filename'");
 
 my $result = file::read($filename);
 unlink $filename;
 $result;
-__c810c120392b0de0a77ab8c81a8c67b8
+__055b6d60a5d0af3e52918a70c213d150
 
 meta::internal_function('messages::error', <<'__27e50d66ebfd1be4f31f3b489824ceb0');
 my ($message) = @_;
@@ -738,11 +755,11 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __29845b326633c6f0bc9b197c84802724
 
-meta::internal_function('temporary_name', <<'__fe8eb68ec4d017b42020e454b0dc0140');
+meta::internal_function('temporary_name', <<'__f371ca30b76f08d4f8f782c0fe5996a8');
 use File::Temp 'tempfile';
-my (undef, $temporary_filename) = tempfile("$0." . 'X' x 32, OPEN => 0);
+my (undef, $temporary_filename) = tempfile("$0." . 'X' x 4, OPEN => 0);
 $temporary_filename;
-__fe8eb68ec4d017b42020e454b0dc0140
+__f371ca30b76f08d4f8f782c0fe5996a8
 
 meta::library('terminal', <<'__70c9d8000de819600ec004e0f7eda840');
 # Functions for nice-looking terminal output.
