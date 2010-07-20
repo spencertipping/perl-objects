@@ -379,6 +379,22 @@ my $state_count = scalar @{$transient{'states'}};
 __8f5cf6d01bef7e78452bf9a0e11554b0
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
+meta::function('rle', <<'__59a85ef4a54aca808f50e7b07fb54e94');
+# Run-length encodes a string, and returns a Perl expression that will reproduce
+# the original. It detects runs of any number of characters, though there is no
+# guarantee that the run-length encoded string is either optimal or smaller than
+# the original.
+
+sub rle_segment {
+  my ($string) = @_;
+  1 while $string =~ s/([^']+)(\1+)/'.'$1'x${\(length($2) / length($1) + 1)}.'/g;
+  $string;
+}
+
+my ($data) = @_;
+join "\n", "'" . map(join("'.'", map(rle_segment($_), split /'/)), split(/\n/, $data)) . "'";
+__59a85ef4a54aca808f50e7b07fb54e94
+
 meta::function('rm', <<'__e9ba58a4f738c1082e8434c865fe405c');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
@@ -425,6 +441,20 @@ my @final_array            = $criteria ? @matching_attributes : (retrieve('boots
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
 __c0d0324cdb78b5a04a7c4c40e68356b8
+
+meta::function('serialize_single', <<'__508b57e07401be981bd0b62578eb97ea');
+# Serializes a single attribute and optimizes for content.
+
+my $name               = $_[0] || $_;
+my $contents           = $data{$name};
+my $delimiter          = '__' . fast_hash($contents);
+my $meta_function_name = "meta::" . namespace($name);
+my $invocation_name    = basename($name);
+
+return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
+return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\\$@%&]*$/;
+return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
+__508b57e07401be981bd0b62578eb97ea
 
 meta::function('shell', <<'__a26ebb40ab143b30095bb08c79129354');
 use Term::ReadLine;
@@ -692,18 +722,6 @@ $name;
 __e2799868bca51600b966845038cc7eb8
 
 meta::internal_function('retrieve', '@data{@_};');
-meta::internal_function('serialize_single', <<'__405c0188889a84a6b953259066d6a8b0');
-my $name               = $_[0] || $_;
-my $contents           = $data{$name};
-my $delimiter          = '__' . fast_hash($contents);
-my $meta_function_name = "meta::" . namespace($name);
-my $invocation_name    = basename($name);
-
-return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
-return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\\$@%&]*$/;
-return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__405c0188889a84a6b953259066d6a8b0
-
 meta::internal_function('state_based_filename', <<'__29845b326633c6f0bc9b197c84802724');
 my ($name) = @_;
 my $noise  = $name || state();
