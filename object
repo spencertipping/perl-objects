@@ -149,6 +149,25 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __9271aa927322e2488587d8f096adcbb0
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::state', <<'__282981f868be8a982e59a5307db9bab8');
+# Allows temporary or long-term storage of states. Nothing particularly insightful
+# is done about compression, so storing alternative states will cause a large
+# increase in size. Also, states don't contain other states -- otherwise the size
+# increase would be exponential.
+
+# States are created with the save-state function.
+
+meta::configure 'state', inherit => 0, extension => '.pl';
+meta::define_form 'state', sub {
+  my ($name, $value) = @_;
+  meta::externalize $name, "state::$name", sub {
+    eval($value);
+    terminal::message('error', $@) if $@;
+    reload();
+  };
+};
+__282981f868be8a982e59a5307db9bab8
+
 meta::meta('type::template', <<'__214fed209a6433a640f50f22fe8dc970');
 meta::configure 'template', extension => '.pl', inherit => 1;
 meta::define_form 'template', sub {
@@ -387,11 +406,11 @@ my $delimiter          = $options{delimiter} || '=';
 $string;
 __1f2fe68a8b74b100e352b88b0f80a260
 
-meta::function('push-state', <<'__8f5cf6d01bef7e78452bf9a0e11554b0');
-push @{$transient{'states'} = $transient{'states'} || []}, {%data};
-my $state_count = scalar @{$transient{'states'}};
+meta::function('push-state', <<'__d13b96d00c130e9826cb02a856bcba70');
+push @{$transient{states} ||= []}, {%data};
+my $state_count = scalar @{$transient{states}};
 "There are now $state_count states on the stack.";
-__8f5cf6d01bef7e78452bf9a0e11554b0
+__d13b96d00c130e9826cb02a856bcba70
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e9ba58a4f738c1082e8434c865fe405c');
@@ -413,6 +432,7 @@ if (! verify()) {
 }
 __0895b63cde6880a8f302a24c1adb4e38
 
+meta::function('save-state', '# Creates a named copy of the current state and stores it.');
 meta::function('serialize', <<'__c0d0324cdb78b5a04a7c4c40e68356b8');
 my $criteria               = join '|', @_;
 
@@ -429,21 +449,22 @@ terminal::message('info', "No attributes matched $criteria") unless @final_array
 join "\n", @final_array;
 __c0d0324cdb78b5a04a7c4c40e68356b8
 
-meta::function('serialize_single', <<'__508b57e07401be981bd0b62578eb97ea');
+meta::function('serialize_single', <<'__9e653d3258b8bc3c4269e6b4414bce88');
 # Serializes a single attribute and optimizes for content.
 
 my $name               = $_[0] || $_;
 my $contents           = $data{$name};
-my $delimiter          = '__' . fast_hash($contents);
 my $meta_function_name = "meta::" . namespace($name);
 my $invocation_name    = basename($name);
 
 return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
 return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\\$@%&]*$/;
-return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__508b57e07401be981bd0b62578eb97ea
 
-meta::function('shell', <<'__13e833a0a63dc4188c35d5f40a527444');
+my $delimiter = '__' . fast_hash($contents);
+return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
+__9e653d3258b8bc3c4269e6b4414bce88
+
+meta::function('shell', <<'__cd99788c89d6813cd3406a68e3c6c7f0');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -481,9 +502,11 @@ while (defined ($_ = $term->readline($prompt))) {
     }
   }
 
+  terminal::message('states', "state stack size is $_") if $_ = scalar @{$transient{states} ||= []};
+
   $prompt = name() . '$ ';
 }
-__13e833a0a63dc4188c35d5f40a527444
+__cd99788c89d6813cd3406a68e3c6c7f0
 
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__ca1cda4868e39e9c41656c684c693a38');
@@ -494,7 +517,14 @@ chmod 0700, $finalname;
 terminal::message('info', "Created snapshot at $finalname.");
 __ca1cda4868e39e9c41656c684c693a38
 
-meta::function('state', 'fast_hash(serialize());');
+meta::function('state', <<'__c32fad4881a50928b1ce4aeca94486a0');
+my @keys = sort keys %data;
+my $hash = fast_hash(scalar @keys);
+$hash = hash("$_$hash")        for @keys;
+$hash = hash("$data{$_}$hash") for @keys;
+$hash;
+__c32fad4881a50928b1ce4aeca94486a0
+
 meta::function('unlock', <<'__224b5b38a80ec0bef8afba786b1b876e');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
@@ -750,6 +780,7 @@ sub message {
 }
 __70c9d8000de819600ec004e0f7eda840
 
+meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
 meta::template('eval', <<'__343833f4d436a0e4857bb09e8fac9c70');
 my $result = eval $_[0];
