@@ -1328,6 +1328,119 @@ my ($document) = @_;
 header() . "\n$document";
 __30eb35d4067ddf04eaa9af9883e38290
 
+meta::vim_highlighter('asmtex', <<'__f2c9e5c8ddd672289aaa79580a06e44c');
+" TeX with Assembly
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   TeX with Assembly in it
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn region asmtexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<asm\>.*$/ contains=asmtexSection
+syn match  asmtexSection /^\s*- .*$/ contained
+
+runtime! syntax/asm.vim
+
+hi link asmtexSection Special
+hi link asmtexComment Comment
+
+let b:current_syntax = "asmtex"
+__f2c9e5c8ddd672289aaa79580a06e44c
+
+meta::vim_highlighter('cltex', <<'__125c0348ccd5baa4fcd5d890cbf6a5b0');
+" Cleaner TeX
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   Cleaner TeX (a variant of LaTeX)
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn match  cltTitle   /^= .*$/
+syn match  cltAuthor  /^a .*$/
+syn match  cltDate    /^d .*$/
+syn match  cltBegin   /^begin$/
+syn match  cltSection /^\s*- .*$/
+syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
+
+syn match  cltEnumeratedThing /^\s*[eid]\[/
+syn match  cltEnumeratedThing /^\s*\][eid]/
+syn match  cltItem            /^\s*+\s/
+syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
+
+runtime! syntax/tex.vim
+
+syn match  cltInclude /^\s*%section([^)]\+)$/
+
+hi link cltBegin    Keyword
+hi link cltTitle    Identifier
+hi link cltAuthor   Identifier
+hi link cltDate     Identifier
+
+hi link cltEnumeratedThing Special
+hi link cltItem            Special
+hi link cltQuantifiedItem  Special
+hi link cltInclude         Special
+
+hi link cltSection  Type
+
+hi link cltVerbatim String
+
+let b:current_syntax = "cltex"
+__125c0348ccd5baa4fcd5d890cbf6a5b0
+
+meta::vim_highlighter('cpptex', <<'__c2f39b68a7db7de8c65ac844e026e354');
+" TeX with C++
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   TeX with C++ in it
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn region cpptexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<cpp\>.*$/ contains=cpptexSection
+syn match  cpptexSection /^\s*- .*$/ contained
+
+runtime! syntax/cpp.vim
+
+syn match  cpptexInclude /#include\s\+\(\w\|[_()]\)\+/
+
+hi link cpptexSection Special
+hi link cpptexComment Comment
+hi link cpptexInclude PreProc
+
+let b:current_syntax = "cpptex"
+__c2f39b68a7db7de8c65ac844e026e354
+
+meta::vim_highlighter('javatex', <<'__3fa76f18ee92dcf078b78968f1021ae8');
+" TeX with Java
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+" Language:   TeX with Java in it
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+syn region javatexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<java\>.*$/ contains=javatexSection
+syn match  javatexSection /^\s*- .*$/           contained
+
+runtime! syntax/java.vim
+
+hi link javatexSection Special
+hi link javatexComment Comment
+
+let b:current_syntax = "javatex"
+__3fa76f18ee92dcf078b78968f1021ae8
+
 meta::internal('runtime', <<'__dda9fd707bff8accc4623f68e65975db');
 my $initial_state        = state();
 chomp(my $default_action = retrieve('data::default-action'));
