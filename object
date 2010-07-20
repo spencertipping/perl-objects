@@ -39,7 +39,7 @@ meta::define_form 'meta', sub {
   warn $@ if $@;
 };
 
-meta::meta('configure', <<'__1a846320e20a15012045d86889c5ac10');
+meta::meta('configure', <<'__2d52fe68feb4eb6049908510a90b0890');
 # A function to configure transients. Transients can be used to store any number of
 # different things, but one of the more common usages is type descriptors.
 
@@ -47,9 +47,9 @@ sub meta::configure {
   my ($datatype, %options) = @_;
   $transient{$_}{$datatype} = $options{$_} for keys %options;
 }
-__1a846320e20a15012045d86889c5ac10
+__2d52fe68feb4eb6049908510a90b0890
 
-meta::meta('externalize', <<'__9c27671cf4a49424bb28ddb62bf44884');
+meta::meta('externalize', <<'__be24ab96352d5020c2bf26e09a1ca000');
 # Function externalization. Data types should call this method when defining a function
 # that has an external interface.
 
@@ -58,9 +58,9 @@ sub meta::externalize {
   $externalized_functions{$name} = $attribute;
   *{"::$name"} = $implementation || $attribute;
 }
-__9c27671cf4a49424bb28ddb62bf44884
+__be24ab96352d5020c2bf26e09a1ca000
 
-meta::meta('functor::editable', <<'__63a42d78297d067ca66b2be8838f2a6c');
+meta::meta('functor::editable', <<'__f816c2ec0d229e90c6c417d418558ee4');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
 
@@ -84,14 +84,14 @@ sub meta::functor::editable {
     };
   };
 }
-__63a42d78297d067ca66b2be8838f2a6c
+__f816c2ec0d229e90c6c417d418558ee4
 
-meta::meta('internal::runtime', <<'__43c46ff6344bc04d6dbac7f43c77ad30');
+meta::meta('internal::runtime', <<'__76dee7a6345cdff487ae4a102d2ff380');
 meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
-__43c46ff6344bc04d6dbac7f43c77ad30
+__76dee7a6345cdff487ae4a102d2ff380
 
-meta::meta('type::bootstrap', <<'__74115c281ce77668fcad6f14010b1478');
+meta::meta('type::bootstrap', <<'__965ced488e465d180a2a37c0e477e6e9');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
 # as regular data attributes), they will have already been executed when the
@@ -99,28 +99,28 @@ meta::meta('type::bootstrap', <<'__74115c281ce77668fcad6f14010b1478');
 
 meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
-__74115c281ce77668fcad6f14010b1478
+__965ced488e465d180a2a37c0e477e6e9
 
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
-meta::meta('type::function', <<'__8d6854866c9e4b2e790f9d8cb0faefd8');
+meta::meta('type::function', <<'__78f8b86a327348c03464ca9a75aabc58');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
   my ($name, $value) = @_;
   meta::externalize $name, "function::$name", eval("sub {\n$value\n}");
   warn $@ if $@;
 };
-__8d6854866c9e4b2e790f9d8cb0faefd8
+__78f8b86a327348c03464ca9a75aabc58
 
-meta::meta('type::internal_function', <<'__55005008fd5a1a7005b2b120b9e427f4');
+meta::meta('type::internal_function', <<'__3a21fd2f33de39a8c8746e106836f3f4');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
   my ($name, $value) = @_;
   *{$name} = eval "sub {\n$value\n}";
   warn $@ if $@;
 };
-__55005008fd5a1a7005b2b120b9e427f4
+__3a21fd2f33de39a8c8746e106836f3f4
 
-meta::meta('type::library', <<'__1b159400ac08a2880bb5aaec79b7c3d8');
+meta::meta('type::library', <<'__7b7511e89b4b2a98d9219d28b52f3aa8');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
   my ($name, $value) = @_;
@@ -131,25 +131,25 @@ meta::define_form 'library', sub {
     edit("library::$name");
   };
 };
-__1b159400ac08a2880bb5aaec79b7c3d8
+__7b7511e89b4b2a98d9219d28b52f3aa8
 
-meta::meta('type::message_color', <<'__b4a10ed3fecf36b03d7c04b91922d69d');
+meta::meta('type::message_color', <<'__c44571f0b5276098a1b19a001f32961c');
 meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat', on_bind => sub {
   my ($name, $value) = @_;
   terminal::color($name, $value);
 };
-__b4a10ed3fecf36b03d7c04b91922d69d
+__c44571f0b5276098a1b19a001f32961c
 
-meta::meta('type::meta', <<'__9271aa927322e2488587d8f096adcbb0');
+meta::meta('type::meta', <<'__1bc91ae85e131fd089b34bb074e36c6c');
 # This doesn't define a new type. It customizes the existing 'meta' type
 # defined in bootstrap::initialization. Note that horrible things will
 # happen if you redefine it using the editable functor.
 
 meta::configure 'meta', extension => '.pl', inherit => 1;
-__9271aa927322e2488587d8f096adcbb0
+__1bc91ae85e131fd089b34bb074e36c6c
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
-meta::meta('type::state', <<'__ec2b46b0e63dc6709c832d60f7544990');
+meta::meta('type::state', <<'__a791c8f8ae38aa2c81cf390845c616b0');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
 # increase in size. Also, states don't contain other states -- otherwise the size
@@ -164,20 +164,20 @@ meta::define_form 'state', sub {
     &{'load-state'}($name);
   };
 };
-__ec2b46b0e63dc6709c832d60f7544990
+__a791c8f8ae38aa2c81cf390845c616b0
 
-meta::meta('type::template', <<'__214fed209a6433a640f50f22fe8dc970');
+meta::meta('type::template', <<'__b1c16cc027616af8faab509005b0bae8');
 meta::configure 'template', extension => '.pl', inherit => 1;
 meta::define_form 'template', sub {
   my ($name, $value) = @_;
   meta::externalize "template::$name", "template::$name", eval("sub {\n$value\n}");
   warn $@ if $@;
 };
-__214fed209a6433a640f50f22fe8dc970
+__b1c16cc027616af8faab509005b0bae8
 
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
-meta::bootstrap('initialization', <<'__bb61c08f3f1cb340417ab4984db3f408');
+meta::bootstrap('initialization', <<'__faa2e5977e461738e995a778f784c3a8');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
@@ -219,10 +219,10 @@ meta::define_form 'meta', sub {
   warn $@ if $@;
 };
 
-__bb61c08f3f1cb340417ab4984db3f408
+__faa2e5977e461738e995a778f784c3a8
 
 meta::data('default-action', 'shell');
-meta::data('license', <<'__f2cf09fcaa44be7888c870b09d1cfb0e');
+meta::data('license', <<'__7031937c58246e2c8a03d320be4aab7b');
 MIT License
 Copyright (c) 2010 Spencer Tipping
 
@@ -243,17 +243,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-__f2cf09fcaa44be7888c870b09d1cfb0e
+__7031937c58246e2c8a03d320be4aab7b
 
 meta::data('name', 'object');
 meta::data('quiet', '1');
 meta::data('watching', '1');
-meta::function('cat', <<'__b66d44d61aab902c56d5c808464e99e0');
+meta::function('cat', <<'__b63b068e09f60b1ee44ef448249db716');
 my ($name) = @_;
 $data{$name};
-__b66d44d61aab902c56d5c808464e99e0
+__b63b068e09f60b1ee44ef448249db716
 
-meta::function('clone', <<'__9cf4ea7db26e6e70bc1a496af9774380');
+meta::function('clone', <<'__103914966b8337502ac50c80486b5238');
 for (@_) {
   if ($_) {
     eval {
@@ -265,16 +265,16 @@ for (@_) {
     print "$@\n" if $@;
   }
 }
-__9cf4ea7db26e6e70bc1a496af9774380
+__103914966b8337502ac50c80486b5238
 
-meta::function('cp', <<'__e9a1194816a7f6c36bc518de45aa06c8');
+meta::function('cp', <<'__c3f9f69f7ead16e839498dfa93c2f7f0');
 my ($from, $to) = @_;
 $data{$to} = $data{$from} if $data{$from};
 messages::error("No such attribute $from") unless $data{$from};
 $data{$from};
-__e9a1194816a7f6c36bc518de45aa06c8
+__c3f9f69f7ead16e839498dfa93c2f7f0
 
-meta::function('create', <<'__3635039812e83a384cadd7e81bf4805b');
+meta::function('create', <<'__20276b58b14c56a07cb655546636e070');
 my ($name, $value) = @_;
 
 messages::error("Attribute $name already exists.") if grep $_ eq $name, keys %data;
@@ -284,15 +284,15 @@ if (defined $value) {
   associate($name, '');
   edit($name);
 }
-__3635039812e83a384cadd7e81bf4805b
+__20276b58b14c56a07cb655546636e070
 
-meta::function('current-state', <<'__d4761920028697d0bb62f1603c3c7468');
+meta::function('current-state', <<'__b8c867b8782a6b38eddcd509ade6ba98');
 my @all_keys          = sort keys %data;
 my @serializable_keys = (grep(/^meta::/, @all_keys), grep(! /^meta::/ && ! /^state::/, @all_keys));
 join "\n", map serialize_single($_), @serializable_keys;
-__d4761920028697d0bb62f1603c3c7468
+__b8c867b8782a6b38eddcd509ade6ba98
 
-meta::function('edit', <<'__afd0306257766a777bc86080e80e3554');
+meta::function('edit', <<'__96054ffc3b7b2230c365af58d04ea1e8');
 my ($name, %options) = @_;
 my $extension = $transient{extension}{namespace($name)} || '';
 
@@ -300,9 +300,9 @@ messages::error("Attribute $name does not exist.") unless grep $_ eq $name, keys
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 save();
-__afd0306257766a777bc86080e80e3554
+__96054ffc3b7b2230c365af58d04ea1e8
 
-meta::function('export', <<'__c750d5e8911eea5289c09687f0987f68');
+meta::function('export', <<'__0bb56278ebe10bb4852763e472ca0460');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
 
@@ -315,14 +315,14 @@ if (@attributes) {
 } else {
   messages::error("Not enough arguments");
 }
-__c750d5e8911eea5289c09687f0987f68
+__0bb56278ebe10bb4852763e472ca0460
 
-meta::function('hash', <<'__9a26de7e7cbb9218461779d8daf79002');
+meta::function('hash', <<'__06ee0dac41d43280c5c9d2502f157634');
 my ($data) = @_;
 fast_hash($data);
-__9a26de7e7cbb9218461779d8daf79002
+__06ee0dac41d43280c5c9d2502f157634
 
-meta::function('import', <<'__6b465b501ed2e590742c9538a51add80');
+meta::function('import', <<'__e9edd800000f09136d817d5458f4f22c');
 my $name  = pop @_;
 my @files = @_;
 
@@ -333,14 +333,14 @@ if (@files) {
 else {
   associate($name, join('', <STDIN>));
 }
-__6b465b501ed2e590742c9538a51add80
+__e9edd800000f09136d817d5458f4f22c
 
-meta::function('import-bundle', <<'__87c31c42c0ebfe3471bac28857efc764');
+meta::function('import-bundle', <<'__e2d97250fb4faa48b5590088bf755a5e');
 eval join '', <STDIN>;
 messages::error($@) if $@;
-__87c31c42c0ebfe3471bac28857efc764
+__e2d97250fb4faa48b5590088bf755a5e
 
-meta::function('load-state', <<'__d1f32030d989906460ab54782759510e');
+meta::function('load-state', <<'__dde4735006ba38005efed9b12ceaf4b2');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
 
@@ -355,14 +355,14 @@ eval($state);
 terminal::message('error', $@) if $@;
 reload();
 verify();
-__d1f32030d989906460ab54782759510e
+__dde4735006ba38005efed9b12ceaf4b2
 
-meta::function('lock', <<'__224b5b38a80ec0bef8afba786b1b876e');
+meta::function('lock', <<'__b458fbe0c7417d6acc56200c2a7a85c0');
 my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
-__224b5b38a80ec0bef8afba786b1b876e
+__b458fbe0c7417d6acc56200c2a7a85c0
 
-meta::function('ls', <<'__c7788eadd6a7d11406ea840cc11c5df0');
+meta::function('ls', <<'__0cf2235219c60b24de67750866569d8c');
 my $criteria = join '|', @_;
 my @lines = grep /$criteria/ && defined $data{$externalized_functions{$_}}, sort keys %externalized_functions;
 my $length = 0;
@@ -370,9 +370,9 @@ $length >= length($_) or $length = length($_) for @lines;
 
 my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
 join("\n", sort @new_lines);
-__c7788eadd6a7d11406ea840cc11c5df0
+__0cf2235219c60b24de67750866569d8c
 
-meta::function('ls-a', <<'__9b51b6802023c3f85e083b18ee0e66e8');
+meta::function('ls-a', <<'__1c77cac04e738bf056a35bf81fdd3cda');
 my $criteria = join '|', @_;
 my @lines    = grep(/$criteria/, sort keys %data);
 my $length   = 0;
@@ -383,9 +383,9 @@ $inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
 $length >= length($_) or $length = length($_) for @lines;
 my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . sprintf('%6d  ', length(serialize_single($_))) . ($inverses{$_} || ''), @lines);
 join "\n", @new_lines;
-__9b51b6802023c3f85e083b18ee0e66e8
+__1c77cac04e738bf056a35bf81fdd3cda
 
-meta::function('mv', <<'__831188a8239540b0722a2648073d6a88');
+meta::function('mv', <<'__bbe687a4798e91a00205932019390780');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
 
@@ -394,19 +394,19 @@ return messages::error("The namepsace '$destination_namespace' does not exist") 
 
 associate($to, retrieve($from));
 rm($from);
-__831188a8239540b0722a2648073d6a88
+__bbe687a4798e91a00205932019390780
 
-meta::function('perl', <<'__e3ecc4a2e342a050208374f08e9cf9e8');
+meta::function('perl', <<'__3ff32a102276605c6ed0e15cb359ba60');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
-__e3ecc4a2e342a050208374f08e9cf9e8
+__3ff32a102276605c6ed0e15cb359ba60
 
-meta::function('pop-state', <<'__e3eae3b3420ae5686c99ba78c85b6688');
+meta::function('pop-state', <<'__7a70d9a457c4fe86d82240e0405f514b');
 %data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
 reload();
-__e3eae3b3420ae5686c99ba78c85b6688
+__7a70d9a457c4fe86d82240e0405f514b
 
-meta::function('preprocess', <<'__1f2fe68a8b74b100e352b88b0f80a260');
+meta::function('preprocess', <<'__f00305ac143c0a7a0c6d0b481af46e70');
 # Implements a simple preprocessing language. Directives are functions:
 
 # = function [arguments...]
@@ -425,24 +425,24 @@ my $delimiter          = $options{delimiter} || '=';
 1 while $string =~ s/^\s*$delimiter\s+([^\s]+)\s*(.*)$/${\(&{"template::$1"}($2))}/omg;
 
 $string;
-__1f2fe68a8b74b100e352b88b0f80a260
+__f00305ac143c0a7a0c6d0b481af46e70
 
-meta::function('push-state', <<'__d13b96d00c130e9826cb02a856bcba70');
+meta::function('push-state', <<'__c542c820446c1ef02ccf99e8533cada8');
 push @{$transient{states} ||= []}, {%data};
 my $state_count = scalar @{$transient{states}};
 "There are now $state_count states on the stack.";
-__d13b96d00c130e9826cb02a856bcba70
+__c542c820446c1ef02ccf99e8533cada8
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
-meta::function('rm', <<'__e9ba58a4f738c1082e8434c865fe405c');
+meta::function('rm', <<'__c4185524e75a7e7092154270089f1f90');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
 }
 
 delete @data{@_};
-__e9ba58a4f738c1082e8434c865fe405c
+__c4185524e75a7e7092154270089f1f90
 
-meta::function('save', <<'__0895b63cde6880a8f302a24c1adb4e38');
+meta::function('save', <<'__a78491b04479e8b8781da700e003a5a2');
 if (! verify()) {
   messages::error("$0 has not been updated.");
 } else {
@@ -451,15 +451,15 @@ if (! verify()) {
   messages::error($@) if $@;
   terminal::message('info', "$0 saved successfully.");
 }
-__0895b63cde6880a8f302a24c1adb4e38
+__a78491b04479e8b8781da700e003a5a2
 
-meta::function('save-state', <<'__5ef10600b40f6880f4c21868bbbc019c');
+meta::function('save-state', <<'__083f043be33e228c70be705a5021b029');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
-__5ef10600b40f6880f4c21868bbbc019c
+__083f043be33e228c70be705a5021b029
 
-meta::function('serialize', <<'__c0d0324cdb78b5a04a7c4c40e68356b8');
+meta::function('serialize', <<'__76ec7fbc9165edd081c68ad0c144ea0c');
 my $criteria               = join '|', @_;
 
 my @matching_keys          = grep length && (! $criteria || m/$criteria/), sort keys %data;
@@ -473,9 +473,9 @@ my @final_array            = $criteria ? @matching_attributes : (retrieve('boots
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__c0d0324cdb78b5a04a7c4c40e68356b8
+__76ec7fbc9165edd081c68ad0c144ea0c
 
-meta::function('serialize_single', <<'__9e653d3258b8bc3c4269e6b4414bce88');
+meta::function('serialize_single', <<'__b47db46a88be7bd0729f2ff08d4f52f8');
 # Serializes a single attribute and optimizes for content.
 
 my $name               = $_[0] || $_;
@@ -488,9 +488,9 @@ return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~
 
 my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__9e653d3258b8bc3c4269e6b4414bce88
+__b47db46a88be7bd0729f2ff08d4f52f8
 
-meta::function('shell', <<'__cd99788c89d6813cd3406a68e3c6c7f0');
+meta::function('shell', <<'__3efb5586962c4c10ab21308053e9b4e0');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -532,31 +532,31 @@ while (defined ($_ = $term->readline($prompt))) {
 
   $prompt = name() . '$ ';
 }
-__cd99788c89d6813cd3406a68e3c6c7f0
+__3efb5586962c4c10ab21308053e9b4e0
 
 meta::function('size', 'length(serialize());');
-meta::function('snapshot', <<'__ca1cda4868e39e9c41656c684c693a38');
+meta::function('snapshot', <<'__78a7d74c1ea7cfe40abe0068fc5468a8');
 my ($name) = @_;
 file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 
 terminal::message('info', "Created snapshot at $finalname.");
-__ca1cda4868e39e9c41656c684c693a38
+__78a7d74c1ea7cfe40abe0068fc5468a8
 
-meta::function('state', <<'__c32fad4881a50928b1ce4aeca94486a0');
+meta::function('state', <<'__af73500e0b864c75d31da74e0e290000');
 my @keys = sort keys %data;
 my $hash = fast_hash(scalar @keys);
-$hash = hash("$_$hash")        for @keys;
-$hash = hash("$data{$_}$hash") for @keys;
+$hash = fast_hash($hash . join '|', @keys);
+$hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
-__c32fad4881a50928b1ce4aeca94486a0
+__af73500e0b864c75d31da74e0e290000
 
-meta::function('unlock', <<'__224b5b38a80ec0bef8afba786b1b876e');
+meta::function('unlock', <<'__a6449d8ac7417d6acc56200c97dfbaf0');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
-__224b5b38a80ec0bef8afba786b1b876e
+__a6449d8ac7417d6acc56200c97dfbaf0
 
-meta::function('update-from', <<'__c861fe082e19426485774582aae8a124');
+meta::function('update-from', <<'__80ef7828cfe2672019f640b0191c4d18');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
@@ -589,16 +589,16 @@ if (verify()) {
   terminal::message('info',  "If you want to upgrade and keep the failure state, then run update-from $target --force.");
   &{'pop-state'}();
 }
-__c861fe082e19426485774582aae8a124
+__80ef7828cfe2672019f640b0191c4d18
 
-meta::function('usage', <<'__0be43bc0509e2668c1917dd8878f505e');
+meta::function('usage', <<'__7546d76b98d58e044bb7a8a4f01e3288');
 <<"EOD" . ls ();
 Usage: $0 action [arguments]
 Defined actions (and the attribute that defines them):
 EOD
-__0be43bc0509e2668c1917dd8878f505e
+__7546d76b98d58e044bb7a8a4f01e3288
 
-meta::function('verify', <<'__a9f34f105cf9d1904869e5f0ca8fdfd8');
+meta::function('verify', <<'__c6fb68b08cedc6e045c6e00402e44970');
 my $serialized_data = serialize();
 my $state           = state();
 
@@ -614,28 +614,28 @@ unlink $temporary_filename if $result;
 $transient{temporary_filename} = $temporary_filename;
 
 $result;
-__a9f34f105cf9d1904869e5f0ca8fdfd8
+__c6fb68b08cedc6e045c6e00402e44970
 
-meta::function('vim', <<'__edb40adffe36f0e89f1392606c67d108');
+meta::function('vim', <<'__5ce9f9a0b090b1341b4548b8601b8d6a');
 # Installs VIM highlighters.
 file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for grep s/^vim_highlighter:://o, keys %data;
-__edb40adffe36f0e89f1392606c67d108
+__5ce9f9a0b090b1341b4548b8601b8d6a
 
-meta::internal_function('associate', <<'__8d6854866c9e4b2e790f9d8cb0faefd8');
+meta::internal_function('associate', <<'__500977762279a6983ae9f3dc416e8488');
 my ($name, $value, %options) = @_;
 my $namespace = namespace($name);
 messages::error("Namespace $namespace does not exist") unless $datatypes{$namespace};
 $data{$name} = $value;
 execute($name) if $options{'execute'};
-__8d6854866c9e4b2e790f9d8cb0faefd8
+__500977762279a6983ae9f3dc416e8488
 
-meta::internal_function('basename', <<'__90dcfe980f60186ca73eb5804e33e940');
+meta::internal_function('basename', <<'__67bd9f146e1b7918a6e4fe0046665588');
 my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
-__90dcfe980f60186ca73eb5804e33e940
+__67bd9f146e1b7918a6e4fe0046665588
 
-meta::internal_function('complete', <<'__17b92f0ce1c662fc29fac1081005d3d0');
+meta::internal_function('complete', <<'__64fb0f782e9ffcb8d0a161346563d5f8');
 my @functions  = sort keys %externalized_functions;
 my @attributes = sort keys %data;
 
@@ -668,20 +668,20 @@ if ($line =~ / /) {
   # Start of line, so it's a function.
   match ($text, @functions);
 }
-__17b92f0ce1c662fc29fac1081005d3d0
+__64fb0f782e9ffcb8d0a161346563d5f8
 
-meta::internal_function('execute', <<'__e7f72ae8f9f8be3587da26d042445a60');
+meta::internal_function('execute', <<'__34a1e308f8a18b8a16144de8cbc72488');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
 eval {&{"meta::$namespace"}(basename($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
-__e7f72ae8f9f8be3587da26d042445a60
+__34a1e308f8a18b8a16144de8cbc72488
 
-meta::internal_function('fast_hash', <<'__1402f938bb3f9c8c55813f66a01f7640');
+meta::internal_function('fast_hash', <<'__db99963cb44d29b80fb10b880a2c0059');
 my ($data)     = @_;
 my $piece_size = length($data) >> 3;
 
-my @pieces     = substr($data, $piece_size * 8) . length($data), map substr($data, $piece_size * $_, $piece_size), 0 .. 7;
+my @pieces     = (substr($data, $piece_size * 8) . length($data), map(substr($data, $piece_size * $_, $piece_size), 0 .. 7));
 my @hashes     = (fnv_hash($pieces[0]));
 
 push @hashes, fnv_hash($pieces[$_ + 1] . $hashes[$_]) for 0 .. 7;
@@ -690,25 +690,25 @@ $hashes[$_] ^= $hashes[$_ + 4] for 0 .. 3;
 $hashes[0]  ^= $hashes[8];
 
 sprintf '%08x' x 4, @hashes[0 .. 3];
-__1402f938bb3f9c8c55813f66a01f7640
+__db99963cb44d29b80fb10b880a2c0059
 
-meta::internal_function('file::read', <<'__0be43bc0509e2668c1917dd8878f505e');
+meta::internal_function('file::read', <<'__931f09b408ea29a4e6449e956d14aad0');
 my $name = shift;
 open my($handle), "<", $name;
 my $result = join "", <$handle>;
 close $handle;
 $result;
-__0be43bc0509e2668c1917dd8878f505e
+__931f09b408ea29a4e6449e956d14aad0
 
-meta::internal_function('file::write', <<'__026bac5614aee674d5ad9a341d2c4be8');
+meta::internal_function('file::write', <<'__7972c08878a707bc978171420fd20d60');
 my ($name, $contents, %options) = @_;
 die "Choosing not to overwrite file $name" if $options{'noclobber'} && -f $name;
 open my($handle), ">", $name or die "Can't open $name for writing";
 print $handle $contents;
 close $handle;
-__026bac5614aee674d5ad9a341d2c4be8
+__7972c08878a707bc978171420fd20d60
 
-meta::internal_function('fnv_hash', <<'__94ebec78c1fe9bc80e4f6e2c70c4c488');
+meta::internal_function('fnv_hash', <<'__812d09b88c1e0b684793de40d63a4e78');
 # A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
 # for efficiency, which may compromise its effectiveness for short strings.
 
@@ -720,9 +720,9 @@ my $modulus                  = 2 ** 32;
 
 (($hash ^= $_) *= $fnv_prime) %= $modulus for unpack 'L*', $data . substr($data, -4) x 8;
 $hash;
-__94ebec78c1fe9bc80e4f6e2c70c4c488
+__812d09b88c1e0b684793de40d63a4e78
 
-meta::internal_function('invoke_editor_on', <<'__055b6d60a5d0af3e52918a70c213d150');
+meta::internal_function('invoke_editor_on', <<'__d2225adb09c8f3fc54922c38b90158ae');
 my ($data, %options) = @_;
 my $editor           = $options{editor} || $ENV{VISUAL} || $ENV{EDITOR} ||
                        messages::error('Either the $VISUAL or $EDITOR environment variable should be set to a valid editor.');
@@ -738,40 +738,40 @@ system("$editor $options '$filename'");
 my $result = file::read($filename);
 unlink $filename;
 $result;
-__055b6d60a5d0af3e52918a70c213d150
+__d2225adb09c8f3fc54922c38b90158ae
 
-meta::internal_function('messages::error', <<'__27e50d66ebfd1be4f31f3b489824ceb0');
+meta::internal_function('messages::error', <<'__9c7ac7a6c6f56e2c3753dd98a8e5f77c');
 my ($message) = @_;
 terminal::message('error', $message);
 die;
-__27e50d66ebfd1be4f31f3b489824ceb0
+__9c7ac7a6c6f56e2c3753dd98a8e5f77c
 
-meta::internal_function('messages::warning', <<'__70c4dfe31e4a0a80679722e0424397f4');
+meta::internal_function('messages::warning', <<'__22b57c04b4bfb0e4d41fd2b06a28d308');
 my ($message) = @_;
 terminal::message('warning', $message);
-__70c4dfe31e4a0a80679722e0424397f4
+__22b57c04b4bfb0e4d41fd2b06a28d308
 
-meta::internal_function('namespace', <<'__e2799868bca51600b966845038cc7eb8');
+meta::internal_function('namespace', <<'__88507960ac73f360cc8343d465a5203e');
 my ($name) = @_;
 $name =~ s/::.*$//;
 $name;
-__e2799868bca51600b966845038cc7eb8
+__88507960ac73f360cc8343d465a5203e
 
 meta::internal_function('retrieve', '@data{@_};');
-meta::internal_function('state_based_filename', <<'__29845b326633c6f0bc9b197c84802724');
+meta::internal_function('state_based_filename', <<'__b4c15764c5644840dd79bb382180f2f8');
 my ($name) = @_;
 my $noise  = $name || state();
 $noise =~ s/\//-/g;
 "$0.$noise";
-__29845b326633c6f0bc9b197c84802724
+__b4c15764c5644840dd79bb382180f2f8
 
-meta::internal_function('temporary_name', <<'__f371ca30b76f08d4f8f782c0fe5996a8');
+meta::internal_function('temporary_name', <<'__623e7b8ca907500039fb49e011d25be8');
 use File::Temp 'tempfile';
 my (undef, $temporary_filename) = tempfile("$0." . 'X' x 4, OPEN => 0);
 $temporary_filename;
-__f371ca30b76f08d4f8f782c0fe5996a8
+__623e7b8ca907500039fb49e011d25be8
 
-meta::library('terminal', <<'__70c9d8000de819600ec004e0f7eda840');
+meta::library('terminal', <<'__8e6bd3f8004860c41987d4a8589355f0');
 # Functions for nice-looking terminal output.
 
 package terminal;
@@ -805,30 +805,30 @@ sub message {
   return if ::quiet() and $default_colors{$prefix} eq 'green';
   print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__70c9d8000de819600ec004e0f7eda840
+__8e6bd3f8004860c41987d4a8589355f0
 
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::template('eval', <<'__343833f4d436a0e4857bb09e8fac9c70');
+meta::template('eval', <<'__23f16f81d35a9700596175206a4d9c31');
 my $result = eval $_[0];
 terminal::message('warning', "Error during template evaluation: $@") if $@;
 $result;
-__343833f4d436a0e4857bb09e8fac9c70
+__23f16f81d35a9700596175206a4d9c31
 
-meta::template('failing_conditional', <<'__431dd76cd40ff4640383f298022c6ff0');
+meta::template('failing_conditional', <<'__244b1c14b0cbc92a9492b9a8146981b8');
 my ($commands)    = @_;
 my $should_return = $commands =~ / if (.*)$/ && ! eval $1;
 terminal::message('warning', "eval of template condition failed: $@") if $@;
 $should_return;
-__431dd76cd40ff4640383f298022c6ff0
+__244b1c14b0cbc92a9492b9a8146981b8
 
-meta::template('include', <<'__140ecc14c0fbedf85b3567d8a0a605a0');
+meta::template('include', <<'__cb2e8398d50f61cac26d20500423e070');
 my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
-__140ecc14c0fbedf85b3567d8a0a605a0
+__cb2e8398d50f61cac26d20500423e070
 
-meta::internal('runtime', <<'__cb6dccd030ed7fc22a404ae06d55ab54');
+meta::internal('runtime', <<'__3598d0b03c373b820ca9d160dc1e23e0');
 my $initial_state        = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
@@ -842,6 +842,6 @@ END {
   save() unless $initial_state eq state();
 }
 
-__cb6dccd030ed7fc22a404ae06d55ab54
+__3598d0b03c373b820ca9d160dc1e23e0
 
 __END__
