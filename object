@@ -341,22 +341,23 @@ eval join '', <STDIN>;
 messages::error($@) if $@;
 __e2d97250fb4faa48b5590088bf755a5e
 
-meta::function('load-state', <<'__55509c104a9f03407601a04010139acc');
+meta::function('load-state', <<'__3c77e178d625331c3d8079b751274444');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
 
 terminal::message('state', 'Saving current state into _...');
 &{'save-state'}('_');
 
-terminal::message('state', 'Removing attributes from %data...');
+terminal::message('state', 'Removing attributes from %data and unexternalizing functions...');
 delete $data{$_} for grep ! /^state::/ && ! /^internal::runtime$/, keys %data;
+%externalized_functions = ();
 
 terminal::message('state', "Restoring state $state_name...");
 eval($state);
 terminal::message('error', $@) if $@;
 reload();
 verify();
-__55509c104a9f03407601a04010139acc
+__3c77e178d625331c3d8079b751274444
 
 meta::function('lock', <<'__b458fbe0c7417d6acc56200c2a7a85c0');
 my (undef, undef, $mode) = stat $0;
@@ -402,11 +403,6 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __3ff32a102276605c6ed0e15cb359ba60
 
-meta::function('pop-state', <<'__7a70d9a457c4fe86d82240e0405f514b');
-%data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
-reload();
-__7a70d9a457c4fe86d82240e0405f514b
-
 meta::function('preprocess', <<'__f00305ac143c0a7a0c6d0b481af46e70');
 # Implements a simple preprocessing language. Directives are functions:
 
@@ -427,12 +423,6 @@ my $delimiter          = $options{delimiter} || '=';
 
 $string;
 __f00305ac143c0a7a0c6d0b481af46e70
-
-meta::function('push-state', <<'__c542c820446c1ef02ccf99e8533cada8');
-push @{$transient{states} ||= []}, {%data};
-my $state_count = scalar @{$transient{states}};
-"There are now $state_count states on the stack.";
-__c542c820446c1ef02ccf99e8533cada8
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__c4185524e75a7e7092154270089f1f90');
@@ -491,7 +481,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
 __b47db46a88be7bd0729f2ff08d4f52f8
 
-meta::function('shell', <<'__3efb5586962c4c10ab21308053e9b4e0');
+meta::function('shell', <<'__11ab2ac8dbf995c08b94ecdc015387d6');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -529,20 +519,18 @@ while (defined ($_ = $term->readline($prompt))) {
     }
   }
 
-  terminal::message('states', "state stack size is $_") if $_ = scalar @{$transient{states} ||= []};
-
   $prompt = name() . '$ ';
 }
-__3efb5586962c4c10ab21308053e9b4e0
+__11ab2ac8dbf995c08b94ecdc015387d6
 
 meta::function('size', 'length(serialize());');
-meta::function('snapshot', <<'__78a7d74c1ea7cfe40abe0068fc5468a8');
+meta::function('snapshot', <<'__6d7c5958f8bc841c8f596fa8811896c8');
 my ($name) = @_;
 file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 
-terminal::message('info', "Created snapshot at $finalname.");
-__78a7d74c1ea7cfe40abe0068fc5468a8
+terminal::message('state', "Created snapshot at $finalname.");
+__6d7c5958f8bc841c8f596fa8811896c8
 
 meta::function('state', <<'__af73500e0b864c75d31da74e0e290000');
 my @keys = sort keys %data;
@@ -557,15 +545,14 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __a6449d8ac7417d6acc56200c97dfbaf0
 
-meta::function('update-from', <<'__80ef7828cfe2672019f640b0191c4d18');
+meta::function('update-from', <<'__662d4108af2e71b8cc1684386b31d29c');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
 my $target  = $_[0] or die 'Must specify another script to pull data from.';
 my @options = grep /^-/, @_;
 
-terminal::message('info', 'Replicating state...');
-&{'push-state'}();
+&{'save-state'}('before-update');
 
 terminal::message('info', 'Updating meta attributes...');
 eval qx($target serialize '^meta::');
@@ -579,18 +566,18 @@ terminal::message('warning', $@) if $@;
 reload();
 
 if (verify()) {
-  terminal::message('info', "Successfully updated from $_[0]. Run pop-state to undo this change.");
+  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-backup' to undo this change.");
 } elsif (grep /^--force$/o || /^-f$/o, @options) {
   terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
   terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
-  terminal::message('info',    'Run pop-state to undo the update and return to a working state.');
+  terminal::message('info',    'Run "load-state before-backup" to undo the update and return to a working state.');
 } else {
   terminal::message('error', 'Verification failed after the upgrade was complete.');
   terminal::message('info',  "$0 has been reverted to its pre-upgrade state.");
-  terminal::message('info',  "If you want to upgrade and keep the failure state, then run update-from $target --force.");
-  &{'pop-state'}();
+  terminal::message('info',  "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
+  &{'load-state'}('before-update');
 }
-__80ef7828cfe2672019f640b0191c4d18
+__662d4108af2e71b8cc1684386b31d29c
 
 meta::function('usage', <<'__7546d76b98d58e044bb7a8a4f01e3288');
 <<"EOD" . ls ();
