@@ -203,6 +203,15 @@ meta::meta('type::section', <<'__a78528a0e7aaa2c8d114c42adae348ec');
 meta::functor::section 'section', extension => '.cltex';
 __a78528a0e7aaa2c8d114c42adae348ec
 
+meta::meta('type::template', <<'__214fed209a6433a640f50f22fe8dc970');
+meta::configure 'template', extension => '.pl', inherit => 1;
+meta::define_form 'template', sub {
+  my ($name, $value) = @_;
+  meta::externalize "template::$name", "template::$name", eval("sub {\n$value\n}");
+  warn $@ if $@;
+};
+__214fed209a6433a640f50f22fe8dc970
+
 meta::meta('type::unlit_converter', <<'__818f2dd804e75b20b78d2108f083e7f0');
 meta::functor::filter 'unlit_converter';
 __818f2dd804e75b20b78d2108f083e7f0
