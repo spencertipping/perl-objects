@@ -131,7 +131,14 @@ meta::define_form 'library', sub {
 __1b159400ac08a2880bb5aaec79b7c3d8
 
 meta::meta('type::message_color', "meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat';");
-meta::meta('type::meta', "meta::functor::editable 'meta', extension => '.pl', inherit => 1, default => 'edit';");
+meta::meta('type::meta', <<'__9271aa927322e2488587d8f096adcbb0');
+# This doesn't define a new type. It customizes the existing 'meta' type
+# defined in bootstrap::initialization. Note that horrible things will
+# happen if you redefine it using the editable functor.
+
+meta::configure 'meta', extension => '.pl', inherit => 1;
+__9271aa927322e2488587d8f096adcbb0
+
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::bootstrap('initialization', <<'__bb61c08f3f1cb340417ab4984db3f408');
