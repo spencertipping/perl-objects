@@ -149,7 +149,7 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __9271aa927322e2488587d8f096adcbb0
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
-meta::meta('type::state', <<'__72a25988393f99f89ccf0010716e96b8');
+meta::meta('type::state', <<'__ec2b46b0e63dc6709c832d60f7544990');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
 # increase in size. Also, states don't contain other states -- otherwise the size
@@ -161,17 +161,10 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', sub {
   my ($name, $value) = @_;
   meta::externalize "state::$name", "state::$name", sub {
-    terminal::message('info', 'Saving current state into state::_...');
-    &{'save-state'}('_');
-
-    terminal::message('info', "Restoring state $name...");
-    %data = %externalized_functions = ();
-    eval($value);
-    terminal::message('error', $@) if $@;
-    reload();
+    &{'load-state'}($name);
   };
 };
-__72a25988393f99f89ccf0010716e96b8
+__ec2b46b0e63dc6709c832d60f7544990
 
 meta::meta('type::template', <<'__214fed209a6433a640f50f22fe8dc970');
 meta::configure 'template', extension => '.pl', inherit => 1;
@@ -293,11 +286,11 @@ if (defined $value) {
 }
 __3635039812e83a384cadd7e81bf4805b
 
-meta::function('current-state', <<'__cf7f06dc3f128384f276e1dc0c53e780');
+meta::function('current-state', <<'__d4761920028697d0bb62f1603c3c7468');
 my @all_keys          = sort keys %data;
-my @serializable_keys = grep(/^meta::/, @all_keys), grep(! /^meta::/ && ! /^state::/, @all_keys);
+my @serializable_keys = (grep(/^meta::/, @all_keys), grep(! /^meta::/ && ! /^state::/, @all_keys));
 join "\n", map serialize_single($_), @serializable_keys;
-__cf7f06dc3f128384f276e1dc0c53e780
+__d4761920028697d0bb62f1603c3c7468
 
 meta::function('edit', <<'__afd0306257766a777bc86080e80e3554');
 my ($name, %options) = @_;
@@ -346,6 +339,23 @@ meta::function('import-bundle', <<'__87c31c42c0ebfe3471bac28857efc764');
 eval join '', <STDIN>;
 messages::error($@) if $@;
 __87c31c42c0ebfe3471bac28857efc764
+
+meta::function('load-state', <<'__4172e0ff1ed93c98c647a4d01c9edee8');
+my ($state_name) = @_;
+my $state = retrieve("state::$state_name");
+
+terminal::message('info', 'Saving current state into _...');
+&{'save-state'}('_');
+
+terminal::message('info', 'Removing attributes from %data...');
+delete $data{$_} for grep ! /^state::/, %data;
+
+terminal::message('info', "Restoring state $name...");
+eval($state);
+terminal::message('error', $@) if $@;
+reload();
+verify();
+__4172e0ff1ed93c98c647a4d01c9edee8
 
 meta::function('lock', <<'__224b5b38a80ec0bef8afba786b1b876e');
 my (undef, undef, $mode) = stat $0;
