@@ -756,12 +756,12 @@ sub message {
 }
 __e9356da06debb0949f6b74604d4561b0
 
-meta::internal('runtime', <<'__9862ded32af1a24f2880f8f818168b88');
+meta::internal('runtime', <<'__cb6dccd030ed7fc22a404ae06d55ab54');
 my $initial_state        = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action || 'usage';
-$function_name = 'usage' and messages::warning("Unknown action: $function_name") unless $externalized_functions{$function_name};
+messages::warning("Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
 
 chomp(my $result = &$function_name(@ARGV));
 print "$result\n" if $result;
@@ -770,6 +770,6 @@ END {
   save() unless $initial_state eq state();
 }
 
-__9862ded32af1a24f2880f8f818168b88
+__cb6dccd030ed7fc22a404ae06d55ab54
 
 __END__
