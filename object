@@ -140,6 +140,15 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __9271aa927322e2488587d8f096adcbb0
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::template', <<'__214fed209a6433a640f50f22fe8dc970');
+meta::configure 'template', extension => '.pl', inherit => 1;
+meta::define_form 'template', sub {
+  my ($name, $value) = @_;
+  meta::externalize "template::$name", "template::$name", eval("sub {\n$value\n}");
+  warn $@ if $@;
+};
+__214fed209a6433a640f50f22fe8dc970
+
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::bootstrap('initialization', <<'__bb61c08f3f1cb340417ab4984db3f408');
 #!/usr/bin/perl
