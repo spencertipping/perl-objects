@@ -286,11 +286,11 @@ if (defined $value) {
 }
 __20276b58b14c56a07cb655546636e070
 
-meta::function('current-state', <<'__b8c867b8782a6b38eddcd509ade6ba98');
-my @all_keys          = sort keys %data;
-my @serializable_keys = (grep(/^meta::/, @all_keys), grep(! /^meta::/ && ! /^state::/, @all_keys));
-join "\n", map serialize_single($_), @serializable_keys;
-__b8c867b8782a6b38eddcd509ade6ba98
+meta::function('current-state', <<'__e7bc2b2aa46245e084cd8bc81f81ff28');
+my @valid_keys   = grep ! /^internal::runtime$/ && ! /^state::/, sort keys %data;
+my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys));
+join "\n", map serialize_single($_), @ordered_keys;
+__e7bc2b2aa46245e084cd8bc81f81ff28
 
 meta::function('edit', <<'__96054ffc3b7b2230c365af58d04ea1e8');
 my ($name, %options) = @_;
