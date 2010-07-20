@@ -60,7 +60,7 @@ sub meta::externalize {
 }
 __9c27671cf4a49424bb28ddb62bf44884
 
-meta::meta('functor::editable', <<'__b9143944720fabbefe4e4770c6421a88');
+meta::meta('functor::editable', <<'__63a42d78297d067ca66b2be8838f2a6c');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
 
@@ -71,17 +71,20 @@ sub meta::functor::editable {
   meta::define_form $typename, sub {
     my ($name, $value) = @_;
 
-    meta::externalize $name, "${typename}::$name", sub {
+    $options{on_bind} && &{$options{on_bind}}($name, $value);
+
+    meta::externalize $options{prefix} . $name, "${typename}::$name", sub {
       my $attribute             = "${typename}::$name";
       my ($command, @new_value) = @_;
 
       return edit($attribute)                                                              if $command eq 'edit'                      or $options{default} eq 'edit'   and not defined $command;
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
+      return preprocess(retrieve($attribute))                                              if $options{preprocess};
       return retrieve($attribute);
     };
   };
 }
-__b9143944720fabbefe4e4770c6421a88
+__63a42d78297d067ca66b2be8838f2a6c
 
 meta::meta('functor::filter', <<'__3dbf72d8ba58053e46acf55854322260');
 # Creates a filter type. These are stored in their own namespaces, but are enumerable
@@ -183,9 +186,12 @@ meta::meta('type::line_filter', <<'__3fb054f81002f800885ab3ec2075d09e');
 meta::functor::filter 'line_filter';
 __3fb054f81002f800885ab3ec2075d09e
 
-meta::meta('type::message_color', <<'__34d4d244c10ce2800b696ae0a6285348');
-meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat';
-__34d4d244c10ce2800b696ae0a6285348
+meta::meta('type::message_color', <<'__b4a10ed3fecf36b03d7c04b91922d69d');
+meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat', on_bind => sub {
+  my ($name, $value) = @_;
+  terminal::color($name, $value);
+};
+__b4a10ed3fecf36b03d7c04b91922d69d
 
 meta::meta('type::meta', <<'__9271aa927322e2488587d8f096adcbb0');
 # This doesn't define a new type. It customizes the existing 'meta' type
@@ -219,6 +225,10 @@ __818f2dd804e75b20b78d2108f083e7f0
 meta::meta('type::vim_highlighter', <<'__901a140fbc881c900779dc4085b2efe8');
 meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';
 __901a140fbc881c900779dc4085b2efe8
+
+meta::meta('type::watch', <<'__45620986307f4448226fed5034a9ee48');
+meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';
+__45620986307f4448226fed5034a9ee48
 
 meta::asm_section('asm-introduction', <<'__9537417c735b2a80e09f09d2015ea5bb');
 - Introduction to Assembly Literate Coding
@@ -577,15 +587,15 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __224b5b38a80ec0bef8afba786b1b876e
 
-meta::function('ls', <<'__c4d729886d9e4df48f068bfc34c57634');
+meta::function('ls', <<'__c7788eadd6a7d11406ea840cc11c5df0');
 my $criteria = join '|', @_;
-my @lines = grep /$criteria/, sort keys %externalized_functions;
+my @lines = grep /$criteria/ && defined $data{$externalized_functions{$_}}, sort keys %externalized_functions;
 my $length = 0;
 $length >= length($_) or $length = length($_) for @lines;
 
 my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
 join("\n", sort @new_lines);
-__c4d729886d9e4df48f068bfc34c57634
+__c7788eadd6a7d11406ea840cc11c5df0
 
 meta::function('ls-a', <<'__9b51b6802023c3f85e083b18ee0e66e8');
 my $criteria = join '|', @_;
@@ -672,28 +682,16 @@ for my $to_be_deleted (@_) {
 delete @data{@_};
 __e9ba58a4f738c1082e8434c865fe405c
 
-meta::function('save', <<'__39acaec4fa4523807c5d13813f948e60');
-my $serialized_data = serialize();
-my $final_state     = state();
-
-my $temporary_filename = temporary_name();
-file::write($temporary_filename, $serialized_data);
-chmod 0700, $temporary_filename;
-
-my $observed_state = `perl $temporary_filename state`;
-chomp $observed_state;
+meta::function('save', <<'__0895b63cde6880a8f302a24c1adb4e38');
 if (! verify()) {
-  terminal::message('error', "The state of this object ($final_state) is inconsistent with the state of $temporary_filename ($observed_state).");
   messages::error("$0 has not been updated.");
 } else {
+  my $serialized_data = serialize();
   eval {file::write($0, $serialized_data)};
-  messages::warning($@) if $@;
-  my $observed_self_state = `perl $0 state`;
-  chomp $observed_self_state;
-  unlink $temporary_filename if $observed_self_state eq $final_state;
+  messages::error($@) if $@;
   terminal::message('info', "$0 saved successfully.");
 }
-__39acaec4fa4523807c5d13813f948e60
+__0895b63cde6880a8f302a24c1adb4e38
 
 meta::function('serialize', <<'__c0d0324cdb78b5a04a7c4c40e68356b8');
 my $criteria               = join '|', @_;
@@ -725,13 +723,13 @@ return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
 __508b57e07401be981bd0b62578eb97ea
 
-meta::function('shell', <<'__a26ebb40ab143b30095bb08c79129354');
+meta::function('shell', <<'__13e833a0a63dc4188c35d5f40a527444');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
 $term->ornaments(0);
-my $prompt = &{'name'}() . '$ ';
-my $OUT = $term->OUT || \*STDOUT;
+my $prompt = name() . '$ ';
+my $output = $term->OUT || \*STDOUT;
 
 $term->Attribs->{attempted_completion_function} = \&complete;
 
@@ -741,28 +739,31 @@ while (defined ($_ = $term->readline($prompt))) {
   my $function_name = shift @args;
 
   return if $function_name eq 'exit';
+  associate('data::watching', 0, execute => 1), next if $function_name eq 'disable-watch';
+  associate('data::watching', 1, execute => 1), next if $function_name eq 'enable-watch';
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
 
   if ($function_name) {
     if ($externalized_functions{$function_name}) {
-      my $result = eval {&{$function_name}(@args)};
+      chomp(my $result = eval {&$function_name(@args)});
       messages::warning($@) if $@;
-      chomp $result;
-      print $OUT $result, "\n" unless $@;
+      print $output $result, "\n" unless $@;
     } else {
       messages::warning("Command not found: $function_name");
     }
   }
 
-  for my $watch (@{$transient{'watch_list'}}) {
-    print $OUT eval($watch), "\n";
-    print $OUT "Error evaluating watched expression $watch: $@\n" if $@;
+  if (watching()) {
+    for my $watch (map retrieve($_), grep /^watch::/, sort keys %data) {
+      terminal::message('watch',   "$watch => " . eval($watch));
+      terminal::message('warning', "Error evaluating watched expression $watch: $@") if $@;
+    }
   }
 
   $prompt = name() . '$ ';
 }
-__a26ebb40ab143b30095bb08c79129354
+__13e833a0a63dc4188c35d5f40a527444
 
 meta::function('size', <<'__6635b94868b03862a4580cb0a8b8f220');
 length(serialize());
@@ -845,10 +846,10 @@ $transient{temporary_filename} = $temporary_filename;
 $result;
 __a9f34f105cf9d1904869e5f0ca8fdfd8
 
-meta::function('vim', <<'__4bb5b5b84f0fe1f43c95b11c528adcc3');
+meta::function('vim', <<'__edb40adffe36f0e89f1392606c67d108');
 # Installs VIM highlighters.
-file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for map {s/^vim_highlighter:://o; $_} grep /^vim_highlighter::/, sort keys %data;
-__4bb5b5b84f0fe1f43c95b11c528adcc3
+file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for grep s/^vim_highlighter:://o, keys %data;
+__edb40adffe36f0e89f1392606c67d108
 
 meta::internal_function('associate', <<'__8d6854866c9e4b2e790f9d8cb0faefd8');
 my ($name, $value, %options) = @_;
@@ -1141,6 +1142,10 @@ if ($line =~ /^(\s*)- (.*)$/) {
 }
 __ca3e0a887e662212c2e7f56e76f331ac
 
+meta::message_color('watch', <<'__bcacab10df2b159c8230b4c8d13704e4');
+blue
+__bcacab10df2b159c8230b4c8d13704e4
+
 meta::section('header-asm', <<'__48ca68a1ec3ce1a0399975aa59491dc8');
 \lstnewenvironment{asmcode} {}{}
 __48ca68a1ec3ce1a0399975aa59491dc8
@@ -1180,6 +1185,25 @@ __37f9ad58210c0c40749456b8b09aa920
 meta::section('header-resource', <<'__48ca68a1ec3ce1a0399975aa59491dc8');
 \lstnewenvironment{resource}{}{}
 __48ca68a1ec3ce1a0399975aa59491dc8
+
+meta::template('eval', <<'__343833f4d436a0e4857bb09e8fac9c70');
+my $result = eval $_[0];
+terminal::message('warning', "Error during template evaluation: $@") if $@;
+$result;
+__343833f4d436a0e4857bb09e8fac9c70
+
+meta::template('failing_conditional', <<'__431dd76cd40ff4640383f298022c6ff0');
+my ($commands)    = @_;
+my $should_return = $commands =~ / if (.*)$/ && ! eval $1;
+terminal::message('warning', "eval of template condition failed: $@") if $@;
+$should_return;
+__431dd76cd40ff4640383f298022c6ff0
+
+meta::template('include', <<'__140ecc14c0fbedf85b3567d8a0a605a0');
+my ($commands) = @_;
+return '' if template::failing_conditional($commands);
+join "\n", map retrieve($_), split /\s+/, $commands;
+__140ecc14c0fbedf85b3567d8a0a605a0
 
 meta::unlit_converter('create_sections', <<'__887cf5f8347d69909de892d0de04018c');
 my ($document) = @_;
