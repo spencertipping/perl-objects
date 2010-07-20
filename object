@@ -150,7 +150,7 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __1bc91ae85e131fd089b34bb074e36c6c
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
-meta::meta('type::state', <<'__a791c8f8ae38aa2c81cf390845c616b0');
+meta::meta('type::state', <<'__7b201738a4417750c21aad5816c2384f');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
 # increase in size. Also, states don't contain other states -- otherwise the size
@@ -159,13 +159,8 @@ meta::meta('type::state', <<'__a791c8f8ae38aa2c81cf390845c616b0');
 # States are created with the save-state function.
 
 meta::configure 'state', inherit => 0, extension => '.pl';
-meta::define_form 'state', sub {
-  my ($name, $value) = @_;
-  meta::externalize "state::$name", "state::$name", sub {
-    &{'load-state'}($name);
-  };
-};
-__a791c8f8ae38aa2c81cf390845c616b0
+meta::define_form 'state', \&meta::bootstrap::implementation;
+__7b201738a4417750c21aad5816c2384f
 
 meta::meta('type::template', <<'__b1c16cc027616af8faab509005b0bae8');
 meta::configure 'template', extension => '.pl', inherit => 1;
