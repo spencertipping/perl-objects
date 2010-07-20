@@ -501,9 +501,11 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __224b5b38a80ec0bef8afba786b1b876e
 
-meta::function('update-from', <<'__fd1e49103cdd0ac879e5a6e05a28d098');
+meta::function('update-from', <<'__8bb829844a91ba606cf53158737bd290');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
+
+terminal::message('debug', join(', ', @_));
 
 my $target  = $_[0] or die 'Must specify another script to pull data from.';
 my @options = grep /^-/, @_;
@@ -540,7 +542,7 @@ if (verify()) {
   terminal::message('info',  "If you want to upgrade and keep the failure state, then run update-from $target --force.");
   &{'pop-state'}();
 }
-__fd1e49103cdd0ac879e5a6e05a28d098
+__8bb829844a91ba606cf53158737bd290
 
 meta::function('usage', <<'__5864e808372870b83f073f949bc002b8');
 <<"EOD" . ls ();
@@ -721,7 +723,7 @@ my (undef, $temporary_filename) = tempfile("$0." . 'X' x 32, OPEN => 0);
 $temporary_filename;
 __fe8eb68ec4d017b42020e454b0dc0140
 
-meta::library('terminal', <<'__e9356da06debb0949f6b74604d4561b0');
+meta::library('terminal', <<'__70c9d8000de819600ec004e0f7eda840');
 # Functions for nice-looking terminal output.
 
 package terminal;
@@ -744,6 +746,7 @@ sub color {
 color    'info',  'green';
 color  'status',  'green';
 color   'error',    'red';
+color   'debug',   'blue';
 color 'warning', 'yellow';
 
 sub message {
@@ -754,7 +757,7 @@ sub message {
   return if ::quiet() and $default_colors{$prefix} eq 'green';
   print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__e9356da06debb0949f6b74604d4561b0
+__70c9d8000de819600ec004e0f7eda840
 
 meta::internal('runtime', <<'__cb6dccd030ed7fc22a404ae06d55ab54');
 my $initial_state        = state();
