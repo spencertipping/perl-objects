@@ -494,24 +494,19 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __224b5b38a80ec0bef8afba786b1b876e
 
-meta::function('update-from', <<'__b46a8a20faf1db50caf245d02337da44');
+meta::function('update-from', <<'__29ab6b0808ff810469ee09e8250b5390');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
-my $target  = (grep /^[^-]/, @_)[0];
+my $target  = $_[0] or die 'Must specify another script to pull data from.';
 my @options = grep /^-/, @_;
-
-my $update_pattern = sub {
-  my ($pattern) = @_;
-  eval join('', qx|$target serialize '$pattern'|);
-  reload();
-};
 
 terminal::message('info', 'Replicating state...');
 &{'push-state'}();
 
 terminal::message('info', 'Updating meta attributes...');
-&$update_pattern('^meta::');
+eval join('', qx|$target serialize '^meta::'|);
+reload();
 
 unless (verify()) {
   terminal::message('warning', 'One of the meta-attributes triggered a verification failure.');
@@ -520,9 +515,8 @@ unless (verify()) {
 }
 
 terminal::message('info', 'Updating non-meta attributes...');
-&$update_pattern(join '|', grep($transient{inherit}{$_}, sort keys %{$transient{inherit}}));
-
-terminal::message('info', 'Reloading new configuration');
+my $combined_pattern = join '|', grep(! /^meta::/ && $transient{inherit}{$_}, sort keys %{$transient{inherit}});
+eval join('', qx|$target serialize '$combined_pattern'|);
 reload();
 
 if (verify()) {
@@ -537,7 +531,7 @@ if (verify()) {
   terminal::message('info',  "If you want to upgrade and keep the failure state, then run update-from $target --force.");
   &{'pop-state'}();
 }
-__b46a8a20faf1db50caf245d02337da44
+__29ab6b0808ff810469ee09e8250b5390
 
 meta::function('usage', <<'__5864e808372870b83f073f949bc002b8');
 <<"EOD" . ls ();
@@ -753,13 +747,13 @@ sub message {
 }
 __e9356da06debb0949f6b74604d4561b0
 
-meta::internal('runtime', <<'__e42336c0bc1b4050f504540987d85ddc');
+meta::internal('runtime', <<'__d16c81a08c6fa3aed5ba3c402cc2fa6c');
 my $initial_state        = state();
 chomp(my $default_action = retrieve('data::default-action'));
 reload();
 
 my $function_name = shift(@ARGV) || $default_action || 'usage';
-$function_name = 'usage' unless $externalized_functions{$function_name};
+$function_name = 'usage' and messages::warning("Unknown action: $function_name") unless $externalized_functions{$function_name};
 
 chomp(my $result = &$function_name(@ARGV));
 print "$result\n" if $result;
@@ -768,6 +762,6 @@ END {
   save() unless $initial_state eq state();
 }
 
-__e42336c0bc1b4050f504540987d85ddc
+__d16c81a08c6fa3aed5ba3c402cc2fa6c
 
 __END__
