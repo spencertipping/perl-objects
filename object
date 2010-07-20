@@ -494,7 +494,7 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __224b5b38a80ec0bef8afba786b1b876e
 
-meta::function('update-from', <<'__29ab6b0808ff810469ee09e8250b5390');
+meta::function('update-from', <<'__0236bbcffab0afd86d4a4370b744d878');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
@@ -515,7 +515,7 @@ unless (verify()) {
 }
 
 terminal::message('info', 'Updating non-meta attributes...');
-my $combined_pattern = join '|', grep(! /^meta::/ && $transient{inherit}{$_}, sort keys %{$transient{inherit}});
+my $combined_pattern = join '|', map "^$_::", grep(! (/^meta::/ || /^internal::runtime/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}});
 eval join('', qx|$target serialize '$combined_pattern'|);
 reload();
 
@@ -531,7 +531,7 @@ if (verify()) {
   terminal::message('info',  "If you want to upgrade and keep the failure state, then run update-from $target --force.");
   &{'pop-state'}();
 }
-__29ab6b0808ff810469ee09e8250b5390
+__0236bbcffab0afd86d4a4370b744d878
 
 meta::function('usage', <<'__5864e808372870b83f073f949bc002b8');
 <<"EOD" . ls ();
