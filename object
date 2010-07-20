@@ -536,12 +536,12 @@ if (verify()) {
 }
 __b129eaf6d62886f8d03697a0624240e0
 
-meta::function('usage', <<'__5864e808372870b83f073f949bc002b8');
+meta::function('usage', <<'__0be43bc0509e2668c1917dd8878f505e');
 <<"EOD" . ls ();
-Usage: $0 [options] action [arguments]
+Usage: $0 action [arguments]
 Defined actions (and the attribute that defines them):
 EOD
-__5864e808372870b83f073f949bc002b8
+__0be43bc0509e2668c1917dd8878f505e
 
 meta::function('verify', <<'__a9f34f105cf9d1904869e5f0ca8fdfd8');
 my $serialized_data = serialize();
