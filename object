@@ -2,7 +2,7 @@
 
 =head1 Self-modifying Perl script
 
-=head2 Original implementation by Spencer Tipping
+=head2 Original implementation by Spencer Tipping L<http://spencertipping.com>
 
 The prototype for this script is licensed under the terms of the MIT source code license.
 However, this script in particular may be under different licensing terms. To find out how
@@ -38,6 +38,7 @@ meta::define_form 'meta', sub {
   eval $value;
   warn $@ if $@;
 };
+
 meta::meta('configure', <<'__1a846320e20a15012045d86889c5ac10');
 # A function to configure transients. Transients can be used to store any number of
 # different things, but one of the more common usages is type descriptors.
@@ -59,6 +60,29 @@ sub meta::externalize {
 }
 __9c27671cf4a49424bb28ddb62bf44884
 
+meta::meta('functor::editable', <<'__b9143944720fabbefe4e4770c6421a88');
+# An editable type. This creates a type whose default action is to open an editor
+# on whichever value is mentioned. This can be changed using different flags.
+
+sub meta::functor::editable {
+  my ($typename, %options) = @_;
+  
+  meta::configure $typename, %options;
+  meta::define_form $typename, sub {
+    my ($name, $value) = @_;
+
+    meta::externalize $name, "${typename}::$name", sub {
+      my $attribute             = "${typename}::$name";
+      my ($command, @new_value) = @_;
+
+      return edit($attribute)                                                              if $command eq 'edit'                      or $options{default} eq 'edit'   and not defined $command;
+      return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
+      return retrieve($attribute);
+    };
+  };
+}
+__b9143944720fabbefe4e4770c6421a88
+
 meta::meta('internal::runtime', <<'__43c46ff6344bc04d6dbac7f43c77ad30');
 meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
@@ -74,17 +98,9 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __74115c281ce77668fcad6f14010b1478
 
-meta::meta('type::data', <<'__f5db3e36ac7506f0fe82b1c1a6b65a5c');
-meta::configure 'data', extension => '', inherit => 0;
-meta::define_form 'data', sub {
-  my ($name, undef) = @_;
-  meta::externalize $name, "data::$name", sub {
-    associate("data::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
-    edit("data::$name")                                  if $_[0] eq 'edit';
-    retrieve("data::$name");
-  };
-};
-__f5db3e36ac7506f0fe82b1c1a6b65a5c
+meta::meta('type::data', <<'__29845b326633c6f0bc9b197c84802724');
+meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';
+__29845b326633c6f0bc9b197c84802724
 
 meta::meta('type::function', <<'__8d6854866c9e4b2e790f9d8cb0faefd8');
 meta::configure 'function', extension => '.pl', inherit => 1;
@@ -104,55 +120,41 @@ meta::define_form 'internal_function', sub {
 };
 __55005008fd5a1a7005b2b120b9e427f4
 
-meta::meta('type::library', <<'__aba34c0e87d95c3c1c2b4960c18cc4ad');
+meta::meta('type::library', <<'__1b159400ac08a2880bb5aaec79b7c3d8');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
   my ($name, $value) = @_;
   eval $value;
-  $externalized_functions{$name} = "library::$name";
-  *{$name} = sub {edit("library::$name")};
   warn $@ if $@;
-};
-__aba34c0e87d95c3c1c2b4960c18cc4ad
 
-meta::meta('type::message_color', <<'__89803d2064048990b35200e02c5ca3cd');
-meta::configure 'message_color', inherit => 1;
-meta::define_form 'message_color', sub {
-  my ($name, $value) = @_;
-  $externalized_functions{$name} = "message_color::$name";
-  terminal::color($name, $value);
-  *{$name} = sub {
-    associate("message_color::$name", $_[1] || join('', <STDIN>)) if @_ > 0 && $_[0] eq '=';
-    edit("message_color::$name")                                  if $_[0] eq 'edit';
-    retrieve("message_color::$name");
+  meta::externalize $name, "library::$name", sub {
+    edit("library::$name");
   };
 };
-__89803d2064048990b35200e02c5ca3cd
+__1b159400ac08a2880bb5aaec79b7c3d8
 
-meta::meta('type::meta', <<'__e52b01501e00e6b04ebc28f010b9fcf0');
-meta::configure 'meta', extension => '.pl', inherit => 1;
-__e52b01501e00e6b04ebc28f010b9fcf0
+meta::meta('type::message_color', <<'__34d4d244c10ce2800b696ae0a6285348');
+meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat';
+__34d4d244c10ce2800b696ae0a6285348
 
-meta::meta('type::note', <<'__4240546b4b9c0138a261056887f2b6f8');
-meta::configure 'note', inherit => 0;
-meta::define_form 'note', sub {
-  my ($name, undef) = @_;
-  $externalized_functions{$name} = "note::$name";
-  *{$name} = sub {edit("note::$name")};
-};
-__4240546b4b9c0138a261056887f2b6f8
+meta::meta('type::meta', <<'__0ab5373062ad3bea1c154ce832adad74');
+meta::functor::editable 'meta', extension => '.pl', inherit => 1, default => 'edit';
+__0ab5373062ad3bea1c154ce832adad74
 
-meta::meta('type::vim_highlighter', <<'__e188e460b60ee7386d382ed0d99eae96');
-meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
-meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
-__e188e460b60ee7386d382ed0d99eae96
+meta::meta('type::note', <<'__31d70ad8e7a4f0409a1208500bedfb3e');
+meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';
+__31d70ad8e7a4f0409a1208500bedfb3e
 
-meta::bootstrap('initialization', <<'__2ac89f00f2230f50545e085edd74d320');
+meta::meta('type::vim_highlighter', <<'__901a140fbc881c900779dc4085b2efe8');
+meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';
+__901a140fbc881c900779dc4085b2efe8
+
+meta::bootstrap('initialization', <<'__bb61c08f3f1cb340417ab4984db3f408');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
 
-=head2 Original implementation by Spencer Tipping
+=head2 Original implementation by Spencer Tipping L<http://spencertipping.com>
 
 The prototype for this script is licensed under the terms of the MIT source code license.
 However, this script in particular may be under different licensing terms. To find out how
@@ -188,7 +190,8 @@ meta::define_form 'meta', sub {
   eval $value;
   warn $@ if $@;
 };
-__2ac89f00f2230f50545e085edd74d320
+
+__bb61c08f3f1cb340417ab4984db3f408
 
 meta::data('default-action', <<'__6d9df52ac01d067015f07a921b7feb16');
 shell
@@ -377,8 +380,8 @@ meta::function('pop-state', <<'__e3eae3b3420ae5686c99ba78c85b6688');
 reload();
 __e3eae3b3420ae5686c99ba78c85b6688
 
-meta::function('preprocess', <<'__30714f0082bb9e88f9a336288ddf0bdc');
-# Implements a simple preprocessing language. Directives are composed functions:
+meta::function('preprocess', <<'__1f2fe68a8b74b100e352b88b0f80a260');
+# Implements a simple preprocessing language. Directives are functions:
 
 # = function [arguments...]
 # Each function can be supplied with one or more arguments. These are mapped straight
@@ -388,13 +391,15 @@ meta::function('preprocess', <<'__30714f0082bb9e88f9a336288ddf0bdc');
 # expressions for these things. The beginning delimiter must be preceded by either
 # nothing or only whitespace. By default it is =, but that can be changed.
 
+# Template functions are defined by creating template:: attributes.
+
 my ($string, %options) = @_;
 my $delimiter          = $options{delimiter} || '=';
 
-1 while $string =~ s/^\s*$delimiter\s*(\w+)\s*(.*)$/${\(&{$1}($2))}/omg;
+1 while $string =~ s/^\s*$delimiter\s+([^\s]+)\s*(.*)$/${\(&{"template::$1"}($2))}/omg;
 
 $string;
-__30714f0082bb9e88f9a336288ddf0bdc
+__1f2fe68a8b74b100e352b88b0f80a260
 
 meta::function('pull', <<'__20174170a253f060e408d8d38242aa0a');
 my ($class_name) = @_;
@@ -449,10 +454,10 @@ if (! verify()) {
 }
 __39acaec4fa4523807c5d13813f948e60
 
-meta::function('serialize', <<'__dd3a697646a716887b6a7372df6f5d38');
+meta::function('serialize', <<'__c0d0324cdb78b5a04a7c4c40e68356b8');
 my $criteria               = join '|', @_;
 
-my @matching_keys          = grep length && m/$criteria/, sort keys %data;
+my @matching_keys          = grep length && (! $criteria || m/$criteria/), sort keys %data;
 my @keys_without_internals = grep ! /^internal::/, @matching_keys;
 
 my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
@@ -463,7 +468,7 @@ my @final_array            = $criteria ? @matching_attributes : (retrieve('boots
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__dd3a697646a716887b6a7372df6f5d38
+__c0d0324cdb78b5a04a7c4c40e68356b8
 
 meta::function('shell', <<'__a26ebb40ab143b30095bb08c79129354');
 use Term::ReadLine;
