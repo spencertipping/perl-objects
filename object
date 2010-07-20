@@ -379,7 +379,7 @@ my $state_count = scalar @{$transient{'states'}};
 __8f5cf6d01bef7e78452bf9a0e11554b0
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
-meta::function('rle', <<'__59a85ef4a54aca808f50e7b07fb54e94');
+meta::function('rle', <<'__51251ff8c3ebf5e01958d7b8f2584498');
 # Run-length encodes a string, and returns a Perl expression that will reproduce
 # the original. It detects runs of any number of characters, though there is no
 # guarantee that the run-length encoded string is either optimal or smaller than
@@ -387,13 +387,14 @@ meta::function('rle', <<'__59a85ef4a54aca808f50e7b07fb54e94');
 
 sub rle_segment {
   my ($string) = @_;
-  1 while $string =~ s/([^']+)(\1+)/'.'$1'x${\(length($2) / length($1) + 1)}.'/g;
+  1 while $string =~ s/([^']{5,})(\1+)/'.'$1'x${\(length($2) \/ length($1) + 1)} .'/g or
+          $string =~ s/([^']+?)(\1{5,})/'.'$1'x${\(length($2) \/ length($1) + 1)} .'/g;
   $string;
 }
 
 my ($data) = @_;
-join "\n", "'" . map(join("'.'", map(rle_segment($_), split /'/)), split(/\n/, $data)) . "'";
-__59a85ef4a54aca808f50e7b07fb54e94
+join "\n", map("'" . join("'.'", map(rle_segment($_), split /'/, $_)) . "'", split(/\n/, $data));
+__51251ff8c3ebf5e01958d7b8f2584498
 
 meta::function('rm', <<'__e9ba58a4f738c1082e8434c865fe405c');
 for my $to_be_deleted (@_) {
