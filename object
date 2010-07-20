@@ -98,10 +98,7 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __74115c281ce77668fcad6f14010b1478
 
-meta::meta('type::data', <<'__29845b326633c6f0bc9b197c84802724');
-meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';
-__29845b326633c6f0bc9b197c84802724
-
+meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__8d6854866c9e4b2e790f9d8cb0faefd8');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
@@ -133,22 +130,10 @@ meta::define_form 'library', sub {
 };
 __1b159400ac08a2880bb5aaec79b7c3d8
 
-meta::meta('type::message_color', <<'__34d4d244c10ce2800b696ae0a6285348');
-meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat';
-__34d4d244c10ce2800b696ae0a6285348
-
-meta::meta('type::meta', <<'__0ab5373062ad3bea1c154ce832adad74');
-meta::functor::editable 'meta', extension => '.pl', inherit => 1, default => 'edit';
-__0ab5373062ad3bea1c154ce832adad74
-
-meta::meta('type::note', <<'__31d70ad8e7a4f0409a1208500bedfb3e');
-meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';
-__31d70ad8e7a4f0409a1208500bedfb3e
-
-meta::meta('type::vim_highlighter', <<'__901a140fbc881c900779dc4085b2efe8');
-meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';
-__901a140fbc881c900779dc4085b2efe8
-
+meta::meta('type::message_color', "meta::functor::editable 'message_color', extension => '', inherit => 1, default => 'cat';");
+meta::meta('type::meta', "meta::functor::editable 'meta', extension => '.pl', inherit => 1, default => 'edit';");
+meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::bootstrap('initialization', <<'__bb61c08f3f1cb340417ab4984db3f408');
 #!/usr/bin/perl
 
@@ -193,10 +178,7 @@ meta::define_form 'meta', sub {
 
 __bb61c08f3f1cb340417ab4984db3f408
 
-meta::data('default-action', <<'__6d9df52ac01d067015f07a921b7feb16');
-shell
-__6d9df52ac01d067015f07a921b7feb16
-
+meta::data('default-action', 'shell');
 meta::data('license', <<'__f2cf09fcaa44be7888c870b09d1cfb0e');
 MIT License
 Copyright (c) 2010 Spencer Tipping
@@ -220,22 +202,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __f2cf09fcaa44be7888c870b09d1cfb0e
 
-meta::data('name', <<'__6cbbe6c441dc14dec04c4e8c91d45358');
-object
-__6cbbe6c441dc14dec04c4e8c91d45358
-
-meta::function('add-to', <<'__1b0e0b90580dc73056412630d3601450');
-my ($filename) = @_;
-my @members = grep /^implementation::/, keys %data;
-
-for (@members) {
-  my $destination_name = basename($_);
-  open my($handle), "| $filename import $destination_name" or messages::error("Attribute $_ could not be written.");
-  print $handle retrieve($_);
-  close $handle;
-}
-__1b0e0b90580dc73056412630d3601450
-
+meta::data('name', 'object');
+meta::data('quiet', '1');
 meta::function('cat', <<'__b66d44d61aab902c56d5c808464e99e0');
 my ($name) = @_;
 $data{$name};
@@ -262,16 +230,17 @@ messages::error("No such attribute $from") unless $data{$from};
 $data{$from};
 __e9a1194816a7f6c36bc518de45aa06c8
 
-meta::function('create', <<'__e5b16e800266b800b4aec9c002de3cc6');
+meta::function('create', <<'__3635039812e83a384cadd7e81bf4805b');
 my ($name, $value) = @_;
-messages::error("Attribute $name already exists.") if grep {$_ eq $name} keys %data;
-if ($value) {
+
+messages::error("Attribute $name already exists.") if grep $_ eq $name, keys %data;
+if (defined $value) {
   associate($name, $value);
 } else {
-  associate($name,'');
-  edit ($name);
+  associate($name, '');
+  edit($name);
 }
-__e5b16e800266b800b4aec9c002de3cc6
+__3635039812e83a384cadd7e81bf4805b
 
 meta::function('edit', <<'__e148f15260a169549bb9faf888b89e2e');
 my ($name, %options) = @_;
@@ -283,12 +252,7 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
 save();
 __e148f15260a169549bb9faf888b89e2e
 
-meta::function('exists', <<'__a29981f8bc269718a126bdb4ba00cdfe');
-my $name = shift;
-grep {$_ eq $name} keys %data;
-__a29981f8bc269718a126bdb4ba00cdfe
-
-meta::function('export', <<'__cc1dc35897b0119c1e7a57a87b15bbe0');
+meta::function('export', <<'__c750d5e8911eea5289c09687f0987f68');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
 
@@ -296,17 +260,12 @@ my $name = pop @_;
 my @attributes = @_;
 
 if (@attributes) {
-  my $file = join "\n", map {cat($_)} @attributes;
-  file::write ($name, $file);
+  my $file = join "\n", map cat($_), @attributes;
+  file::write($name, $file);
 } else {
-  messages::error ("Not enough arguments");
+  messages::error("Not enough arguments");
 }
-__cc1dc35897b0119c1e7a57a87b15bbe0
-
-meta::function('grab', <<'__9e9dc7c0a02379a481e2d16079e47528');
-my ($filename, @attribute_names) = @_;
-associate("implementation::$_", `$filename cat $_`) for @attribute_names;
-__9e9dc7c0a02379a481e2d16079e47528
+__c750d5e8911eea5289c09687f0987f68
 
 meta::function('hash', <<'__9a26de7e7cbb9218461779d8daf79002');
 my ($data) = @_;
@@ -346,7 +305,7 @@ my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functi
 join("\n", sort @new_lines);
 __c4d729886d9e4df48f068bfc34c57634
 
-meta::function('ls-a', <<'__6f889a409110ee888d65686816ff93e8');
+meta::function('ls-a', <<'__9b51b6802023c3f85e083b18ee0e66e8');
 my $criteria = join '|', @_;
 my @lines    = grep(/$criteria/, sort keys %data);
 my $length   = 0;
@@ -355,9 +314,9 @@ my %inverses;
 $inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
 
 $length >= length($_) or $length = length($_) for @lines;
-my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . ($inverses{$_} || ''), @lines);
+my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . sprintf('%6d  ', length(serialize_single($_))) . ($inverses{$_} || ''), @lines);
 join "\n", @new_lines;
-__6f889a409110ee888d65686816ff93e8
+__9b51b6802023c3f85e083b18ee0e66e8
 
 meta::function('mv', <<'__831188a8239540b0722a2648073d6a88');
 my ($from, $to) = @_;
@@ -419,10 +378,7 @@ my $state_count = scalar @{$transient{'states'}};
 "There are now $state_count states on the stack.";
 __8f5cf6d01bef7e78452bf9a0e11554b0
 
-meta::function('reload', <<'__8927d97fc280e7c8f2e4f30865fd9430');
-execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;
-__8927d97fc280e7c8f2e4f30865fd9430
-
+meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e9ba58a4f738c1082e8434c865fe405c');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
@@ -509,20 +465,16 @@ while (defined ($_ = $term->readline($prompt))) {
 }
 __a26ebb40ab143b30095bb08c79129354
 
-meta::function('size', <<'__6635b94868b03862a4580cb0a8b8f220');
-length(serialize());
-__6635b94868b03862a4580cb0a8b8f220
-
-meta::function('snapshot', <<'__f6d303de3a9db200ef010cb3d77df73a');
+meta::function('size', 'length(serialize());');
+meta::function('snapshot', <<'__ca1cda4868e39e9c41656c684c693a38');
 my ($name) = @_;
 file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
-__f6d303de3a9db200ef010cb3d77df73a
 
-meta::function('state', <<'__4d034648fee627b00dd6369e2a4c3c71');
-fast_hash(serialize());
-__4d034648fee627b00dd6369e2a4c3c71
+terminal::message('info', "Created snapshot at $finalname.");
+__ca1cda4868e39e9c41656c684c693a38
 
+meta::function('state', 'fast_hash(serialize());');
 meta::function('unlock', <<'__224b5b38a80ec0bef8afba786b1b876e');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
@@ -739,18 +691,18 @@ $name =~ s/::.*$//;
 $name;
 __e2799868bca51600b966845038cc7eb8
 
-meta::internal_function('retrieve', <<'__cc601f4f737cf3b087fba3743eba8e68');
-@data{@_};
-__cc601f4f737cf3b087fba3743eba8e68
-
-meta::internal_function('serialize_single', <<'__45b813708c43e9d0086f88e092d9dc80');
-my $name               = shift || $_;
+meta::internal_function('retrieve', '@data{@_};');
+meta::internal_function('serialize_single', <<'__5986516079fd47e0cb0b41c4ce8b5653');
+my $name               = $_[0] || $_;
 my $contents           = $data{$name};
 my $delimiter          = '__' . fast_hash($contents);
 my $meta_function_name = "meta::" . namespace($name);
-my $invocation_name    = basename $name;
-"$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__45b813708c43e9d0086f88e092d9dc80
+my $invocation_name    = basename($name);
+
+return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
+return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\]*$/;
+return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
+__5986516079fd47e0cb0b41c4ce8b5653
 
 meta::internal_function('state_based_filename', <<'__29845b326633c6f0bc9b197c84802724');
 my ($name) = @_;
@@ -765,7 +717,7 @@ my (undef, $temporary_filename) = tempfile("$0." . 'X' x 32, OPEN => 0);
 $temporary_filename;
 __fe8eb68ec4d017b42020e454b0dc0140
 
-meta::library('terminal', <<'__9d9a603854cf5b30814c8a7460565ec8');
+meta::library('terminal', <<'__e9356da06debb0949f6b74604d4561b0');
 # Functions for nice-looking terminal output.
 
 package terminal;
@@ -794,9 +746,11 @@ sub message {
   my ($prefix, $message) = @_;
   my $color = $color_conversions{$default_colors{$prefix}};
   my $padding = ' ' x ($longest_prefix - length $prefix);
+
+  return if ::quiet() and $default_colors{$prefix} eq 'green';
   print STDERR "${padding}[\033[${color}m$prefix\033[0;0m] $message\n";
 }
-__9d9a603854cf5b30814c8a7460565ec8
+__e9356da06debb0949f6b74604d4561b0
 
 meta::internal('runtime', <<'__1bfa2e039e12f9a859960eb496e499ca');
 my $initial_state        = state();
