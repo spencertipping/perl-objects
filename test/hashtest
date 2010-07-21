@@ -250,6 +250,14 @@ __3564ae3a8842909356fcfc289b9c6f86
 
 meta::function('battery1', "substrings('foobarbifbazbokQUUXZipBangShamWow');");
 meta::function('battery2', "substrings('FOOBARBIFBAZBOKquuxzIPbANGsHAMwOW');");
+meta::function('battery3', <<'__1e7961aa8d8f8a06cac43230d7c8232c');
+map 'a' x $_, 1 .. 1000;
+__1e7961aa8d8f8a06cac43230d7c8232c
+
+meta::function('battery4', <<'__1dc4dfefb8274cf6942cf14c93d16d18');
+map 'b' x $_, 1 .. 1000;
+__1dc4dfefb8274cf6942cf14c93d16d18
+
 meta::function('cat', <<'__c8e76a0cf10e2061e9cf9e1643922c3e');
 my ($name) = @_;
 $data{$name};
