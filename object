@@ -263,12 +263,13 @@ for (@_) {
 }
 __fec8cf43b197da97cfd5e49d75891d57
 
-meta::function('cp', <<'__df8e43e28293507a3417da43a607d8f7');
+meta::function('cp', <<'__ffba0c53d9c2d03d8d6e5f9692f496ae');
 my ($from, $to) = @_;
-$data{$to} = $data{$from} if $data{$from};
-messages::error("No such attribute $from") unless $data{$from};
-$data{$from};
-__df8e43e28293507a3417da43a607d8f7
+my $exists = exists $data{$from};
+associate($to, retrieve($from)) if $exists;
+messages::error("No such attribute $from") unless $exists;
+retrieve($from);
+__ffba0c53d9c2d03d8d6e5f9692f496ae
 
 meta::function('create', <<'__3349f4fb38464e1869a43e25af881986');
 my ($name, $value) = @_;
