@@ -491,18 +491,6 @@ meta::data('watching', <<'__5ea43e141fb1fd580bdac384db11f56c');
 0
 __5ea43e141fb1fd580bdac384db11f56c
 
-meta::function('add-to', <<'__bf60ce6cf741a178ed0bd6b8aa8ef650');
-my ($filename) = @_;
-my @members = grep /^implementation::/, keys %data;
-
-for (@members) {
-  my $destination_name = basename($_);
-  open my($handle), "| $filename import $destination_name" or messages::error("Attribute $_ could not be written.");
-  print $handle retrieve($_);
-  close $handle;
-}
-__bf60ce6cf741a178ed0bd6b8aa8ef650
-
 meta::function('cat', <<'__b63b068e09f60b1ee44ef448249db716');
 my ($name) = @_;
 $data{$name};
@@ -576,11 +564,6 @@ if (@attributes) {
   messages::error("Not enough arguments");
 }
 __0bb56278ebe10bb4852763e472ca0460
-
-meta::function('grab', <<'__b53df37650e57851e160aa30ef506f00');
-my ($filename, @attribute_names) = @_;
-associate("implementation::$_", `$filename cat $_`) for @attribute_names;
-__b53df37650e57851e160aa30ef506f00
 
 meta::function('hash', <<'__06ee0dac41d43280c5c9d2502f157634');
 my ($data) = @_;
@@ -672,38 +655,18 @@ meta::function('pop-state', <<'__7a70d9a457c4fe86d82240e0405f514b');
 reload();
 __7a70d9a457c4fe86d82240e0405f514b
 
-meta::function('preprocess', <<'__f00305ac143c0a7a0c6d0b481af46e70');
-# Implements a simple preprocessing language. Directives are functions:
-
-# = function [arguments...]
-# Each function can be supplied with one or more arguments. These are mapped straight
-# into the function's argument list.
-
-# This syntax is deliberately not very flexible. You shouldn't be using complex
-# expressions for these things. The beginning delimiter must be preceded by either
-# nothing or only whitespace. By default it is =, but that can be changed.
-
-# Template functions are defined by creating template:: attributes.
+meta::function('preprocess', <<'__72bc54789eff795c3fec73cc1ef98220');
+# Implements a simple preprocessing language.
 
 my ($string, %options) = @_;
-my $delimiter          = $options{delimiter} || '=';
+my $delimiter          = $options{delimiter} || '::';
+my $expansions         = 0;
 
-1 while $string =~ s/^\s*$delimiter\s+([^\s]+)\s*(.*)$/${\(&{"template::$1"}($2))}/omg;
-
+1 while ++$expansions < 100 and
+        $string =~ s/^\h*$delimiter \s+ (\S+) \s* (.*) $/${\(&{"template::$1"}($2))}/xm ||
+        $string =~ s/^\h*$delimiter<(\S+)> \h* (\S+) \h* (.*)$ \v ([.\v]*?) ^\h*\1$/${\(&{"template::$2"}($3, $4))}/xm;
 $string;
-__f00305ac143c0a7a0c6d0b481af46e70
-
-meta::function('pull', <<'__67098320059332aadaa18a6856fde7ba');
-my ($class_name) = @_;
-my @attributes = grep /^implementation::/, split /\n/, `$class_name ls-a`;
-
-for (@attributes) {
-  s/^\s+//;
-  s/\s+$//;
-  print STDERR "Adding $_\n";
-  associate(basename($_), `$class_name cat "$_"`);
-}
-__67098320059332aadaa18a6856fde7ba
+__72bc54789eff795c3fec73cc1ef98220
 
 meta::function('push-state', <<'__85ecf4e8faf2ffb46b66f5508139895c');
 push @{$transient{'states'} = $transient{'states'} || []}, {%data};
