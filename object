@@ -398,26 +398,18 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __3ff32a102276605c6ed0e15cb359ba60
 
-meta::function('preprocess', <<'__f00305ac143c0a7a0c6d0b481af46e70');
-# Implements a simple preprocessing language. Directives are functions:
-
-# = function [arguments...]
-# Each function can be supplied with one or more arguments. These are mapped straight
-# into the function's argument list.
-
-# This syntax is deliberately not very flexible. You shouldn't be using complex
-# expressions for these things. The beginning delimiter must be preceded by either
-# nothing or only whitespace. By default it is =, but that can be changed.
-
-# Template functions are defined by creating template:: attributes.
+meta::function('preprocess', <<'__72bc54789eff795c3fec73cc1ef98220');
+# Implements a simple preprocessing language.
 
 my ($string, %options) = @_;
-my $delimiter          = $options{delimiter} || '=';
+my $delimiter          = $options{delimiter} || '::';
+my $expansions         = 0;
 
-1 while $string =~ s/^\s*$delimiter\s+([^\s]+)\s*(.*)$/${\(&{"template::$1"}($2))}/omg;
-
+1 while ++$expansions < 100 and
+        $string =~ s/^\h*$delimiter \s+ (\S+) \s* (.*) $/${\(&{"template::$1"}($2))}/xm ||
+        $string =~ s/^\h*$delimiter<(\S+)> \h* (\S+) \h* (.*)$ \v ([.\v]*?) ^\h*\1$/${\(&{"template::$2"}($3, $4))}/xm;
 $string;
-__f00305ac143c0a7a0c6d0b481af46e70
+__72bc54789eff795c3fec73cc1ef98220
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__c4185524e75a7e7092154270089f1f90');
