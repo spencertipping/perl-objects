@@ -790,7 +790,7 @@ __8e6bd3f8004860c41987d4a8589355f0
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::note('templates', <<'__2fb7496016fce0469899f92811bdb6d8');
+meta::note('templates', <<'__a6e22f2e8d1b72e0d933bc223432279c');
 Objects need some generic solution for preprocessing. The rationale is that most objects contain some form of nonlinear text data. (Or perhaps it ends up linear, but logically has more
 structure.) Somehow that generally needs to be compiled down to just one piece. This is especially true for literate programming, which is what I seem to live for these days.
 
@@ -822,9 +822,9 @@ The other is for blocks of content:
 Obviously these are a bit different. The first case demands brevity, the second customizability (especially of the output form). Ideally the syntax for these will be somewhat uniform and use
 the same set of functions. A simple syntax like this wouldn't be bad:
 
-  :: sec1 Section title
+  :: sec1 Section title | sec:title
   Paragraph
-    :: sec2 Subsection title
+    :: sec2 Subsection title | sec:title2
     Paragraph
 
     :: c++ name=foo/bar.cc <<end
@@ -834,8 +834,30 @@ the same set of functions. A simple syntax like this wouldn't be bad:
     }
     end
 
-In this example, the <<end is what indicates that there's a second parameter. Perhaps the x=y syntax could be standardized as well, passed in as a hash or some such.
-__2fb7496016fce0469899f92811bdb6d8
+Could we get away with unadorned block identifiers?
+
+  align <<end
+    x & = y \\
+    y & = z
+  end
+
+  itemize <<end
+    item Foo bar bif \
+      baz bok
+    item Foo bar bif
+  end
+
+In this example, the <<end is what indicates that there's a second parameter. Perhaps the x=y syntax could be standardized as well, passed in as a hash paralleling the first argument or some
+such.
+
+Though if the goal is simply to arrive at an alternative syntax for TeX, there are easier ways to go about it. A custom preprocessor could be used. No, the purpose is to write simple text
+macros. Perhaps a lambda-calculus makes more sense than anything else here. Better yet is to introduce a syntax for expander definitions. Maybe use a custom version of Gnarly for macro
+processing? Alternatively, require that preprocessor directives be aligned on the left margin?
+
+OK, somehow preprocessor macros must be escaped. Either that or regular content must be.
+
+Also, how to handle emitted files? We need to designate certain sections of content.
+__a6e22f2e8d1b72e0d933bc223432279c
 
 meta::template('eval', <<'__23f16f81d35a9700596175206a4d9c31');
 my $result = eval $_[0];
