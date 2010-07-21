@@ -393,6 +393,11 @@ associate($to, retrieve($from));
 rm($from);
 __bbe687a4798e91a00205932019390780
 
+meta::function('note', <<'__c315bc22ae2041f0494dd2307b79fe10');
+# Creates a note with a given name, useful for jotting things down.
+create("note::$_[0]");
+__c315bc22ae2041f0494dd2307b79fe10
+
 meta::function('perl', <<'__3ff32a102276605c6ed0e15cb359ba60');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
