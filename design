@@ -790,7 +790,7 @@ __8e6bd3f8004860c41987d4a8589355f0
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::note('templates', <<'__a6e22f2e8d1b72e0d933bc223432279c');
+meta::note('templates', <<'__2cbacea44e6d54285001208217125e91');
 Objects need some generic solution for preprocessing. The rationale is that most objects contain some form of nonlinear text data. (Or perhaps it ends up linear, but logically has more
 structure.) Somehow that generally needs to be compiled down to just one piece. This is especially true for literate programming, which is what I seem to live for these days.
 
@@ -824,15 +824,16 @@ the same set of functions. A simple syntax like this wouldn't be bad:
 
   :: sec1 Section title | sec:title
   Paragraph
-    :: sec2 Subsection title | sec:title2
-    Paragraph
 
-    :: c++ name=foo/bar.cc <<end
-    #include <iostream>
-    int main () {
-      std::cout << "string" << std::endl;
-    }
-    end
+  :: sec2 Subsection title | sec:title2
+  Paragraph
+
+  :: c++ name=foo/bar.cc <<end
+  #include <iostream>
+  int main () {
+    std::cout << "string" << std::endl;
+  }
+  end
 
 Could we get away with unadorned block identifiers?
 
@@ -857,7 +858,12 @@ processing? Alternatively, require that preprocessor directives be aligned on th
 OK, somehow preprocessor macros must be escaped. Either that or regular content must be.
 
 Also, how to handle emitted files? We need to designate certain sections of content.
-__a6e22f2e8d1b72e0d933bc223432279c
+
+What is really being described is a way to indicate that certain pieces of a file mean different things. A sectioning scheme, perhaps, and ideally one that isn't too intrusive when it isn't
+being used.
+
+OK, crazy idea. What about using some scheme based on visual alignment? This has been attempted.
+__2cbacea44e6d54285001208217125e91
 
 meta::template('eval', <<'__23f16f81d35a9700596175206a4d9c31');
 my $result = eval $_[0];
