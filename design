@@ -241,7 +241,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __7031937c58246e2c8a03d320be4aab7b
 
-meta::data('name', 'object');
+meta::data('name', 'design');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', <<'__b63b068e09f60b1ee44ef448249db716');
