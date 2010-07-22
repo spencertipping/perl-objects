@@ -404,18 +404,44 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
 
-meta::function('preprocess', <<'__35d9aceabda1fda76e1f4a0ee056c21f');
+meta::function('preprocess', <<'__bd35be3110d5af130cc6c402e2cf6795');
 # Implements a simple preprocessing language.
 
 my ($string, %options) = @_;
-my $delimiter          = $options{delimiter} || '::';
 my $expansions         = 0;
+my $did_something      = 1;
+my $limit              = $options{expansion_limit} || 100;
+my @pieces             = ();
 
-1 while ++$expansions < 100 and
-        $string =~ s/^\h*$delimiter \s+ (\S+) \s* (.*) $/${\(&{"template::$1"}($2))}/xm ||
-        $string =~ s/^\h*$delimiter<(\S+)> \h* (\S+) \h* (.*)$ \v ([.\v]*?) ^\h*\1$/${\(&{"template::$2"}($3, $4))}/xm;
+sub adjust_spaces {
+  my ($spaces, $string) = @_;
+  $string =~ s/^$spaces- //mg;
+  $string;
+}
+
+while ($did_something and $expansions++ < $limit) {
+  $did_something = 0;
+
+  if ((my @pieces = split /^(\h*- \S+\h+.*)$/o, $string) > 1) {
+    for (0 .. @pieces >> 1) {
+      $pieces[1 + $_ << 1] = &{"template::$1"}($2) if $pieces[1 + $_ << 1] =~ /^\h*- (\S+)\h+(.*)$/o && $externalized_functions{"template::$1"};
+    }
+    $string = join '', @pieces;
+    $did_something = 1;
+  }
+
+  if ((my @pieces = split /^(\h*-\h\S+\h+.*<<(\w+))$ \n[.\n]*?^\h*- \2$/xo, $string) > 1) {
+    for (0 .. @pieces >> 1) {
+      $pieces[1 + $_ << 1] = &{"template::$2"}($3, adjust_spaces($1, $5)) if
+        $pieces[1 + $_ << 1] =~ /^(\h*)-\h(\S+)\h+(.*)<<(\w+)$ \n([.\n]*?) ^\1- \4$/xo && $externalized_functions{"template::$1"};
+    }
+    $string = join '', @pieces;
+    $did_something = 1;
+  }
+}
+
 $string;
-__35d9aceabda1fda76e1f4a0ee056c21f
+__bd35be3110d5af130cc6c402e2cf6795
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
