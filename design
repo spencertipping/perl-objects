@@ -791,7 +791,7 @@ __6ac64319df3f331f76b5213634f2af51
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::note('templates', <<'__b39c326c35b235dd2c442cac6c60f0a4');
+meta::note('templates', <<'__8a8de80bae6ac69e7e629f70ccb9abb2');
 Objects need some generic solution for preprocessing. The rationale is that most objects contain some form of nonlinear text data. (Or perhaps it ends up linear, but logically has more
 structure.) Somehow that generally needs to be compiled down to just one piece. This is especially true for literate programming, which is what I seem to live for these days.
 
@@ -864,7 +864,43 @@ What is really being described is a way to indicate that certain pieces of a fil
 being used.
 
 OK, crazy idea. What about using some scheme based on visual alignment? This has been attempted.
-__b39c326c35b235dd2c442cac6c60f0a4
+
+One requirement is that it should be obvious when we're calling something. Nothing too implicit or that blends in too easily.
+
+  - title  Something Awesome
+  - author Someone Famous
+  - begin
+
+  - alias s1 section
+  - alias s2 subsection
+
+  - s1 Requirements of the syntax | syntax-reqs
+    This section is about syntactic requirements.
+
+    - s2 Annotations | syntax-annotations
+      How to mark macroexpansions?
+
+  - include section::bar
+  - include section::foo
+
+  - itemize <<end
+    + item 1
+    + item 2
+    + item 3
+  - end
+
+  - align <<end
+    x & = y \\
+    y & = z
+  - end
+
+  - c++ name=foo/bar.cc <<end
+    #include <iostream>
+    int main () {
+      std::cout << "Hello!" << std::endl;
+    }
+  - end
+__8a8de80bae6ac69e7e629f70ccb9abb2
 
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
