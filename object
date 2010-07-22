@@ -404,8 +404,19 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
 
-meta::function('preprocess', <<'__ac9feb2710d5af13d5eadafca45bb47f');
+meta::function('preprocess', <<'__1c1fd62fe768ff36022265b46afdaf20');
 # Implements a simple preprocessing language.
+# Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
+# but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
+# arguments and a block of lines. The line parameters are passed in verbatim, and the block is
+# indentation-adjusted and then passed in as a second parameter. (Indentation is adjusted to align
+# with the name of the command.)
+#
+# Here are the forms:
+#
+# - line arguments to function
+# - block line arguments << eof
+# - eof
 
 my ($string, %options) = @_;
 my $expansions         = 0;
@@ -422,6 +433,15 @@ sub adjust_spaces {
 while ($did_something and $expansions++ < $limit) {
   $did_something = 0;
 
+  if ((my @pieces = split /^(\h*-\h\S+\h+.*<<\h?(\w+)$ \n[.\n]*?^\h*- \2)$/xo, $string) > 1) {
+    for (0 .. @pieces >> 1) {
+      $pieces[1 + $_ << 1] = &{"template::$2"}($3, adjust_spaces($1, $5)) if
+        $pieces[1 + $_ << 1] =~ /^(\h*)-\h(\S+)\h+(.*)<<\h?(\w+)$ \n([.\n]*?) ^\1- \4$/xo && $externalized_functions{"template::$1"};
+    }
+    $string = join '', @pieces;
+    $did_something = 1;
+  }
+
   if ((my @pieces = split /^(\h*- \S+\h+.*)$/o, $string) > 1) {
     for (0 .. @pieces >> 1) {
       $pieces[1 + $_ << 1] = &{"template::$1"}($2) if $pieces[1 + $_ << 1] =~ /^\h*- (\S+)\h+(.*)$/o && $externalized_functions{"template::$1"};
@@ -429,19 +449,10 @@ while ($did_something and $expansions++ < $limit) {
     $string = join '', @pieces;
     $did_something = 1;
   }
-
-  if ((my @pieces = split /^(\h*-\h\S+\h+.*<<(\w+)$ \n[.\n]*?^\h*- \2)$/xo, $string) > 1) {
-    for (0 .. @pieces >> 1) {
-      $pieces[1 + $_ << 1] = &{"template::$2"}($3, adjust_spaces($1, $5)) if
-        $pieces[1 + $_ << 1] =~ /^(\h*)-\h(\S+)\h+(.*)<<(\w+)$ \n([.\n]*?) ^\1- \4$/xo && $externalized_functions{"template::$1"};
-    }
-    $string = join '', @pieces;
-    $did_something = 1;
-  }
 }
 
 $string;
-__ac9feb2710d5af13d5eadafca45bb47f
+__1c1fd62fe768ff36022265b46afdaf20
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
