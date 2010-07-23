@@ -271,17 +271,18 @@ messages::error("No such attribute $from") unless $exists;
 retrieve($from);
 __ffba0c53d9c2d03d8d6e5f9692f496ae
 
-meta::function('create', <<'__3349f4fb38464e1869a43e25af881986');
+meta::function('create', <<'__97e5444422f5f6087371f59ddc3e1b8c');
 my ($name, $value) = @_;
 
-messages::error("Attribute $name already exists.") if grep $_ eq $name, keys %data;
+return edit($name) if exists $data{$name};
+
 if (defined $value) {
   associate($name, $value);
 } else {
   associate($name, '');
   edit($name);
 }
-__3349f4fb38464e1869a43e25af881986
+__97e5444422f5f6087371f59ddc3e1b8c
 
 meta::function('current-state', <<'__0d932bd14547669ffbc86fde3ae9d050');
 my @valid_keys   = grep ! /^internal::runtime$/ && ! /^state::/, sort keys %data;
