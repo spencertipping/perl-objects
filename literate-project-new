@@ -86,22 +86,6 @@ sub meta::functor::editable {
 }
 __23cd7b7dc81d5cebd632c7543a30af99
 
-meta::meta('functor::filter', <<'__2b90212a796dd5cb190694c1b3fa77e7');
-# Creates a filter type. These are stored in their own namespaces, but are enumerable
-# by their attribute names (which match their function names, conveniently).
-
-sub meta::functor::filter {
-  my ($typename) = @_;
-
-  meta::configure $typename, extension => '.pl', inherit => 1;
-  meta::define_form $typename, sub {
-    my ($name, $value) = @_;
-    meta::externalize "${typename}::$name", "${typename}::$name", eval "sub{\n$value\n}";
-    warn $@ if $@;
-  };
-}
-__2b90212a796dd5cb190694c1b3fa77e7
-
 meta::meta('functor::section', <<'__7ec9c7e2cf5f013a9ad353743c4e715d');
 sub meta::functor::section {
   my ($typename, %options) = @_;
@@ -176,7 +160,6 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::code_filter', "meta::functor::filter 'code_filter';");
 meta::meta('type::cpp_section', "meta::functor::section 'cpp_section', extension => '.cpptex';");
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__af5dd5ecc27fe503f68b041791bee6ca');
@@ -211,7 +194,6 @@ meta::define_form 'library', sub {
 };
 __455137a61f5af29340946d69bc68d663
 
-meta::meta('type::line_filter', "meta::functor::filter 'line_filter';");
 meta::meta('type::message_color', <<'__794bf137c425293738f07636bcfb5c55');
 meta::configure 'message_color', extension => '', inherit => 1;
 meta::define_form 'message_color', sub {
@@ -251,7 +233,6 @@ meta::define_form 'template', sub {
 };
 __31e3d1be8d2d32b285ebb90645d5f37a
 
-meta::meta('type::unlit_converter', "meta::functor::filter 'unlit_converter';");
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
 meta::asm_section('asm-introduction', <<'__2d1cba5a3763bf1c481e39ac9ba7bb3a');
@@ -308,147 +289,6 @@ meta::define_form 'meta', sub {
 };
 
 __d2491ab72f79f70883bd583202562e94
-
-meta::code_filter('asm', <<'__b04e2d01bd073255a951f871935f6696');
-use File::Path 'mkpath';
-use File::Basename 'dirname';
-
-my ($line, %settings) = @_;
-
-my $settings = $settings{'name'};
-if ($settings =~ /\sasm(\s|$)/) {
-  my %properties;
-  my @keys_and_values = split /\s+/, $settings;
-  for (@keys_and_values) {
-    my ($k, $v) = split /=/;
-    $properties{$k} = $v;
-  }
-
-  if (my $filename = $properties{'name'}) {
-    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
-    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
-    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
-    close $fh;
-
-    return "\\lstset{caption=$filename}\n\\begin{asmcode}" if $settings{'begin'};
-  } else {
-    return '\begin{asmcode}' if $settings{'begin'};
-  }
-
-  return '\end{asmcode}' if $settings{'end'};
-}
-
-return $line;
-__b04e2d01bd073255a951f871935f6696
-
-meta::code_filter('cpp', <<'__40a06c5c992c42ae0fb1b8376f2598ee');
-use File::Path 'mkpath';
-use File::Basename 'dirname';
-
-my ($line, %settings) = @_;
-
-my $settings = $settings{'name'};
-if ($settings =~ /\scpp(\s|$)/) {
-  my %properties;
-  my @keys_and_values = split /\s+/, $settings;
-  for (@keys_and_values) {
-    my ($k, $v) = split /=/;
-    $properties{$k} = $v;
-  }
-
-  if (my $filename = $properties{'name'}) {
-    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
-    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
-    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
-    close $fh;
-
-    return "\\lstset{caption=$filename}\n\\begin{cppcode}" if $settings{'begin'};
-  } else {
-    return '\begin{cppcode}' if $settings{'begin'};
-  }
-
-  return '\end{cppcode}' if $settings{'end'};
-}
-
-return $line;
-__40a06c5c992c42ae0fb1b8376f2598ee
-
-meta::code_filter('java', <<'__8461fc00a8f9516e26889b9108eb3dbc');
-use File::Path 'mkpath';
-
-my ($line, %settings) = @_;
-
-my $settings = $settings{'name'};
-if ($settings =~ /\sjava(\s|$)/) {
-  my %properties;
-  my @keys_and_values = split /\s+/, $settings;
-  for (@keys_and_values) {
-    my ($k, $v) = split /=/;
-    $properties{$k} = $v;
-  }
-
-  if ($properties{'class'}) {
-    my $classname         = $properties{'class'};
-    my $package_directory = $properties{'package'};
-    $package_directory =~ tr[.][/];
-
-    mkpath(my $directory = &{'source-directory'}() . '/' . $package_directory);
-    open my $fh, $settings{'begin'} ? '>' : '>>', "$directory/${classname}.java";
-    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
-    close $fh;
-
-    return "\\lstset{caption=$properties{package}.$properties{class}}\n\\begin{javacode}" if $settings{'begin'};
-  }
-
-  return '\begin{javacode}' if $settings{'begin'};
-  return '\end{javacode}'   if $settings{'end'};
-}
-
-return $line;
-__8461fc00a8f9516e26889b9108eb3dbc
-
-meta::code_filter('resource', <<'__a8f830678fa158a19c0e174a2d8e1211');
-use File::Path 'mkpath';
-use File::Basename 'dirname';
-
-my ($line, %settings) = @_;
-
-my $settings = $settings{'name'};
-if ($settings =~ /\sresource(\s|$)/) {
-  my %properties;
-  my @keys_and_values = split /\s+/, $settings;
-  for (@keys_and_values) {
-    my ($k, $v) = split /=/;
-    $properties{$k} = $v;
-  }
-
-  if (my $filename = $properties{'name'}) {
-    mkpath(dirname(my $path = &{'source-directory'}() . "/$filename"));
-    open my $fh, $settings{'begin'} ? '>' : '>>', $path;
-    print $fh "$line\n" unless $settings{'begin'} || $settings{'end'};
-    close $fh;
-
-    return "\\lstset{caption=$filename}\n\\begin{resource}" if $settings{'begin'};
-  } else {
-    return '\begin{resource}' if $settings{'begin'};
-  }
-
-  return '\end{resource}' if $settings{'end'};
-}
-
-return $line;
-__a8f830678fa158a19c0e174a2d8e1211
-
-meta::code_filter('verbatim', <<'__88f0d576a60ba40fe951bfce0677aa4f');
-my ($line, %settings) = @_;
-
-unless ($settings{'name'}) {
-  return '\begin{verbatim}' if $settings{'begin'};
-  return '\end{verbatim}'   if $settings{'end'};
-}
-
-return $line;
-__88f0d576a60ba40fe951bfce0677aa4f
 
 meta::cpp_section('cpp-introduction', <<'__bdb0ea7cecc426699b7a476dace9232c');
 - Introduction to C++ Literate Coding
@@ -1200,65 +1040,6 @@ sub message {
 }
 __6ac64319df3f331f76b5213634f2af51
 
-meta::line_filter('convert_header_info', <<'__d9b9a880b0761b87e53e4e6b02487030');
-my ($line) = @_;
-
-$line =~ s/^= (.*)$/\\title{$1}/;
-$line =~ s/^a (.*)$/\\author{$1}/;
-$line =~ s/^d (.*)$/\\date{$1}/;
-
-my $document_header = '\begin{document}\maketitle';
-$document_header .= '\tableofcontents' if &{'table-of-contents'}();
-
-$line =~ s/^begin$/$document_header/;
-
-$line;
-__d9b9a880b0761b87e53e4e6b02487030
-
-meta::line_filter('convert_itemized_environments', <<'__4fa1a20b30da869cb74ee0ec45b03657');
-my ($line) = @_;
-
-$line =~ s/^\s*\+ /\\item /;
-$line =~ s/^\s*\+\[([^\]]*)\] /\\item[\1] /;
-
-$line =~ s/^\s*e\[$/\\begin{enumerate}/;
-$line =~ s/^\s*i\[$/\\begin{itemize}/;
-$line =~ s/^\s*d\[$/\\begin{description}/;
-
-$line =~ s/^\s*a\[$/\\begin{align*}/;
-
-$line =~ s/^\s*\]e$/\\end{enumerate}/;
-$line =~ s/^\s*\]i$/\\end{itemize}/;
-$line =~ s/^\s*\]d$/\\end{description}/;
-
-$line =~ s/^\s*\]a$/\\end{align*}/;
-
-$line;
-__4fa1a20b30da869cb74ee0ec45b03657
-
-meta::line_filter('convert_sections', <<'__992b5cb95920c73e9ddb83a77e2e305e');
-my ($line) = @_;
-
-my %indentation_levels = (
-  0 => '\section',
-  2 => '\subsection',
-  4 => '\subsubsection',
-  6 => '\paragraph',
-  8 => '\subparagraph');
-
-if ($line =~ /^(\s*)- (.*)$/) {
-  my $section = $indentation_levels{length($1)} || die "Invalid indentation level:\n$_";
-  my $section_name = $2;
-  my $label_name   = lc $section_name;
-
-  $label_name =~ s/[^A-Za-z0-9.]/-/g;
-
-  "${section} {$section_name} \\label{sec:$label_name}";
-} else {
-  $line;
-}
-__992b5cb95920c73e9ddb83a77e2e305e
-
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
@@ -1330,69 +1111,6 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::unlit_converter('create_sections', <<'__24f98c796defbb136930caf99470e6f6');
-my ($document) = @_;
-1 while $document =~ s/^\s*%section\(([^)]+)\)\s*$/\n$data{$1}\n/omg;
-$document;
-__24f98c796defbb136930caf99470e6f6
-
-meta::unlit_converter('main', <<'__47d2b6ff6cf4966d2afcecb0885ffedb');
-my ($document) = @_;
-
-my $sections_already_encountered = 0;
-my $inside_code_block            = 0;
-my $code_block_indentation       = 0;
-my $code_section_name            = '';
-my $result                       = '';
-
-for (split /\n/, $document) {
-  # Handle code blocks.
-  if (/^(\s*):\.$/) {
-    $inside_code_block = $code_block_indentation = 0;
-
-    for my $filter_name (grep /^code_filter::/, sort keys %data) {
-      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation, end => 1);
-    }
-  }
-
-  if ($inside_code_block) {
-    my $spaces_to_delete = ' ' x $code_block_indentation;
-    s/^$spaces_to_delete//;
-    for my $filter_name (grep /^code_filter::/, sort keys %data) {
-      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation);
-    }
-  } else {
-    for my $filter_name (grep /^line_filter::/, sort keys %data) {
-      $_ = &$filter_name($_);
-    }
-  }
-
-  if (/^(\s*)::(\s.*)?$/) {
-    $inside_code_block      = 1;
-    $code_block_indentation = length($1);
-    $code_section_name      = $2;
-
-    for my $filter_name (grep /^code_filter::/, sort keys %data) {
-      $_ = &$filter_name($_, name => $code_section_name, indentation => $code_block_indentation, begin => 1);
-    }
-  }
-
-  $result .= "$_\n";
-}
-
-$result;
-__47d2b6ff6cf4966d2afcecb0885ffedb
-
-meta::unlit_converter('zz_append_footer', <<'__c0c373358bc6f21231a02e9642758e14');
-my ($document) = @_;
-"$document\n\\end{document}";
-__c0c373358bc6f21231a02e9642758e14
-
-meta::unlit_converter('zz_prepend_header', <<'__07b4a814f2fc777741b399e9adcd93e4');
-my ($document) = @_;
-header() . "\n$document";
-__07b4a814f2fc777741b399e9adcd93e4
-
 meta::vim_highlighter('asmtex', <<'__c0e112849aa77ed93f0e940810436757');
 " TeX with Assembly
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
@@ -1415,7 +1133,7 @@ hi link asmtexComment Comment
 let b:current_syntax = "asmtex"
 __c0e112849aa77ed93f0e940810436757
 
-meta::vim_highlighter('cltex', <<'__ad1f7e68795321f73fc58a572ef69a37');
+meta::vim_highlighter('cltex', <<'__e01700f77f7e6d6e9f63f07ccd364865');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX)
@@ -1428,17 +1146,16 @@ endif
 
 runtime! syntax/tex.vim
 
-syn match   cltLine    /^\s*- .*$/ contains=cltKeywords
-syn match   cltBlock   /^\s*- .*<<\s*\(\w\+\)[\n.]*^\s*- \1$/ contains=cltKeywords
+syn match   cltLine    /^\s*- .*$/ contains=cltKeywords,cltEofMarker
 syn keyword cltKeyword include title author abstract maketitle align verbatim contained
+syn match   cltEofMarker /<<\s*\w\+/ contained
 
-hi link cltLine    Special
-hi link cltKeyword String
-
-hi link cltBlock   String
+hi link cltLine      Special
+hi link cltKeyword   String
+hi link cltEofMarker String
 
 let b:current_syntax = "cltex"
-__ad1f7e68795321f73fc58a572ef69a37
+__e01700f77f7e6d6e9f63f07ccd364865
 
 meta::vim_highlighter('cpptex', <<'__bcd26a0f8e5967889360b634ca12af99');
 " TeX with C++
