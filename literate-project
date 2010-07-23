@@ -80,7 +80,7 @@ sub meta::externalize_template {
 }
 __1e90e7ccb5fea1d498bbaaa6e7e43851
 
-meta::meta('functor::code-templates', <<'__ae780c22d7ac5473de89fb52821afee3');
+meta::meta('functor::code-templates', <<'__36f996eb1bbe493de30271000aaf4ce4');
 package code;
 
 # Templates for generating named source files.
@@ -91,12 +91,12 @@ sub template {
 
     $line =~ s/\s+.*$//og;
     file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1);
-    "\\lstset{caption=$line}\\begin{${name}code}\n$block \\end{${name}code}\n";
+    "\\lstset{caption=$line}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
-__ae780c22d7ac5473de89fb52821afee3
+__36f996eb1bbe493de30271000aaf4ce4
 
 meta::meta('functor::editable', <<'__e97984f7c34d9f06173be574e28c3f91');
 # An editable type. This creates a type whose default action is to open an editor
@@ -124,7 +124,7 @@ sub meta::functor::editable {
 }
 __e97984f7c34d9f06173be574e28c3f91
 
-meta::meta('functor::tex-templates', <<'__1521662601068bcabc7387a4ed4abac2');
+meta::meta('functor::tex-templates', <<'__34a5da8558897a4388fc22ed4b0c3c6b');
 package tex;
 
 # A wrapper for TeX templates. The idea is always the same, so I'm abstracting out the
@@ -149,7 +149,7 @@ sub id {
 # transfer into TeX with no preprocessing.
 *template = template_for {
   my ($name, $line, $block) = @_;
-  $block ? "\\begin{$name}\n$block\n\\end{$name}\n" : "\\$name\{$line\}\n";
+  $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$line\}";
 };
 
 # Creates a labeled one-line template. This is just like normal TeX, but assumes the
@@ -157,9 +157,9 @@ sub id {
 *labeled_template = template_for {
   my ($name, $line, undef) = @_;
   my ($real_stuff, $label) = split /\h*\|\h*/, $line;
-  "\\$name\{$real_stuff\}\n" . ($label && "\\label{$label}\n");
+  "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
 };
-__1521662601068bcabc7387a4ed4abac2
+__34a5da8558897a4388fc22ed4b0c3c6b
 
 meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
 meta::configure 'internal', extension => '.pl', inherit => 1;
