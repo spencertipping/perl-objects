@@ -39,7 +39,7 @@ sub meta::eval_in {
   my ($what, $where) = @_;
 
   # Obtain next eval-number and alias it to the designated location
-  $locations{eval('__FILE__ + 1') =~ /\(eval (\d+)\)/} = $where;
+  @locations{eval('__FILE__') =~ /\(eval (\d+)\)/} = ($where);
 
   my $result = eval $what;
   $@ =~ s/\(eval \d+\)/$where/ if $@;
@@ -181,7 +181,7 @@ __25f4d6eafb1d3eea6d5d3d9a71a5623e
 
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
-meta::bootstrap('initialization', <<'__f9bea2f58150ac8debd3ba3ed1f3a644');
+meta::bootstrap('initialization', <<'__baa43e5e8e6e1cd76d4e2de828ceaa4d');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
@@ -223,7 +223,7 @@ sub meta::eval_in {
   my ($what, $where) = @_;
 
   # Obtain next eval-number and alias it to the designated location
-  $locations{eval('__FILE__ + 1') =~ /\(eval (\d+)\)/} = $where;
+  @locations{eval('__FILE__') =~ /\(eval (\d+)\)/} = ($where);
 
   my $result = eval $what;
   $@ =~ s/\(eval \d+\)/$where/ if $@;
@@ -236,7 +236,7 @@ meta::define_form 'meta', sub {
   meta::eval_in($value, "meta::$name");
 };
 
-__f9bea2f58150ac8debd3ba3ed1f3a644
+__baa43e5e8e6e1cd76d4e2de828ceaa4d
 
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
@@ -831,11 +831,11 @@ my (undef, $temporary_filename) = tempfile("$0." . 'X' x 4, OPEN => 0);
 $temporary_filename;
 __0fb1402061581b69822f913631b4a9d9
 
-meta::internal_function('translate_backtrace', <<'__ba66e7d869d64cc87568ab15a1851c8a');
+meta::internal_function('translate_backtrace', <<'__06fad3d85833a6484e426401b95e0206');
 my ($trace) = @_;
-$trace =~ s/\(eval (\d+)\)/$locations{$1}/g;
+$trace =~ s/\(eval (\d+)\)/$locations{$1 - 1}/g;
 $trace;
-__ba66e7d869d64cc87568ab15a1851c8a
+__06fad3d85833a6484e426401b95e0206
 
 meta::library('terminal', <<'__6999988eaf441c9b1282e03e1db427b5');
 # Functions for nice-looking terminal output.
