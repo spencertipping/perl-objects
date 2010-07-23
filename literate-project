@@ -332,7 +332,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.7cc0af25a464c7eb104e48f07c7582cd/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.a5cfbb17a6e5d44b15deedf1c0dc6fd1/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -608,6 +608,12 @@ my $state_count = scalar @{$transient{'states'}};
 __ba601ddf7dce874ce79dd37a936ffdcc
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
+meta::function('render', <<'__ccb26db43115329651cc3c0527a3e849');
+use File::Copy 'copy';
+compile();
+copy(&{'pdf-output-file'}(), &{'source-directory'}() . '/' . name() . '.pdf') or die "Copy failed: $!";
+__ccb26db43115329651cc3c0527a3e849
+
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
