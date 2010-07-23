@@ -331,7 +331,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.9e7b146250ca56ae9e4b78f64faf08cf/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.7cc0af25a464c7eb104e48f07c7582cd/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1057,9 +1057,9 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::section('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::section('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__3fea4de5dfbc69ebaba7f15dc46f69bb');
+meta::section('introduction', <<'__9a48b7d115494692f7c0c383bdd003e6');
 - s1 Introduction | sec:introduction
-  This Perl object gives you a way to integrate documentation, code, and tests into one linearized format.
+  This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
 
 - s2 Code | sec:introduction-code
   Code is entered in literate form. For example:
@@ -1091,7 +1091,7 @@ meta::section('introduction', <<'__3fea4de5dfbc69ebaba7f15dc46f69bb');
     mov $1, %eax
     ret
 - eof
-__3fea4de5dfbc69ebaba7f15dc46f69bb
+__9a48b7d115494692f7c0c383bdd003e6
 
 meta::section('main', <<'__c1c22c06cd9028faaa0c3cdbedbc8531');
 - include section::header
