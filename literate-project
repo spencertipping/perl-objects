@@ -166,7 +166,7 @@ meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
-meta::meta('template::code', 'code::template $_ for qw/java cpp asm resource/;');
+meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
 meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/));');
 meta::meta('template::math', "tex::template align => 'align*', nalign => 'align';");
 meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
@@ -225,6 +225,7 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::resource', "meta::functor::editable 'resource', extension => '.cltex', inherit => 1, default => 'edit';");
 meta::meta('type::section', "meta::functor::editable 'section', extension => '.cltex', inherit => 0, default => 'edit';");
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
@@ -331,7 +332,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.92115cd0bbcfad7d839a6735039653d5/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.20ac846cfc59c8d45405aa0e91bc6f4f/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1025,24 +1026,15 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::section('header', <<'__74f69f9016acbbb4111d278f44109c11');
-- documentclass article
+meta::resource('header-languages', <<'__637a18cf607b727dec3feab552be05e2');
+\lstnewenvironment{asmcode}       {}{}
+\lstnewenvironment{cppcode}       {\lstset{language=c++}}{}
+\lstnewenvironment{javacode}      {\lstset{language=java}}{}
+\lstnewenvironment{javascriptcode}{}{}
+\lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
+__637a18cf607b727dec3feab552be05e2
 
-- include section::header-packages
-- include section::header-listings
-
-- include section::header-refs
-
-- include section::header-asm
-- include section::header-cpp
-- include section::header-java
-- include section::header-resource
-__74f69f9016acbbb4111d278f44109c11
-
-meta::section('header-asm', '\lstnewenvironment{asmcode} {}{}');
-meta::section('header-cpp', '\lstnewenvironment{cppcode} {\lstset{language=c++}} {}');
-meta::section('header-java', '\lstnewenvironment{javacode}{\lstset{language=java}}{}');
-meta::section('header-listings', <<'__747e2e3bc83de0d564ec96e91395fa84');
+meta::resource('header-listings', <<'__747e2e3bc83de0d564ec96e91395fa84');
 \definecolor{gray}{rgb}{0.6,0.6,0.6}
 
 \usepackage{caption}
@@ -1052,15 +1044,27 @@ meta::section('header-listings', <<'__747e2e3bc83de0d564ec96e91395fa84');
 \lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
 __747e2e3bc83de0d564ec96e91395fa84
 
-meta::section('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
+meta::resource('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,pxfonts,listings,color}
 \usepackage[colorlinks]{hyperref}
 __f69baadb1d3ce11744003b174c91b34b
 
-meta::section('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
-meta::section('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__d1ecb9af2848f4d46979cd282b0efc90');
+meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
+meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
+meta::section('header', <<'__ae65778dfd59478a4ca16db0ce0ca55c');
+- documentclass article
+
+- include resource::header-packages
+- include resource::header-listings
+
+- include resource::header-refs
+
+- include resource::header-languages
+- include resource::header-resource
+__ae65778dfd59478a4ca16db0ce0ca55c
+
+meta::section('introduction', <<'__9ee97c9024007bc500a826b6b73c22be');
 - s1 Introduction | sec:introduction
   This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
 
@@ -1089,12 +1093,26 @@ meta::section('introduction', <<'__d1ecb9af2848f4d46979cd282b0efc90');
     }
   - end
 
+  - javascript hello.js << end
+    document.getElementById ('hi').appendChild (
+      document.createTextNode ('Hi there!'));
+  - end
+
+  - html hello.html << end
+    <html>
+      <body>
+        <div id='hi'></div>
+        <script src='hello.js'></script>
+      </body>
+    </html>
+  - end
+
   - asm false.s << end
     main:
       mov $1, %eax
       ret
   - end
-__d1ecb9af2848f4d46979cd282b0efc90
+__9ee97c9024007bc500a826b6b73c22be
 
 meta::section('main', <<'__c1c22c06cd9028faaa0c3cdbedbc8531');
 - include section::header
@@ -1129,7 +1147,7 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::vim_highlighter('cltex', <<'__d86f4e98a7148c08b53563f124e78714');
+meta::vim_highlighter('cltex', <<'__10c051872325bda001b9653451009c65');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
@@ -1140,35 +1158,36 @@ elseif exists("b:current_syntax")
   finish
 endif
 
-syn match   cltEofMarker /<<\s*\w\+/ contained
-syn match   cltLine      /^\s*- .*$/ contains=cltKeywords,cltEofMarker
-syn keyword cltKeyword   include title author abstract maketitle align verbatim contained
+syn match   cltEofMarker  /<<\s*\w\+/ contained
+syn match   cltLine       /^\s*- .*$/ contains=cltEofMarker
 
-syn include @cpp         syntax/cpp.vim  | unlet b:current_syntax
-syn include @java        syntax/java.vim | unlet b:current_syntax
-syn include @asm         syntax/asm.vim  | unlet b:current_syntax
+syn include @cpp          syntax/cpp.vim        | unlet b:current_syntax
+syn include @java         syntax/java.vim       | unlet b:current_syntax
+syn include @asm          syntax/asm.vim        | unlet b:current_syntax
+syn include @javascript   syntax/javascript.vim | unlet b:current_syntax
+syn include @html         syntax/html.vim       | unlet b:current_syntax
 
-syn region  cltCpp       matchgroup=cltCode start=/^\s*- cpp .*<<\s*\z(\w\+\)$/  end=/^\s*- \z1$/ contains=@cpp
-syn region  cltJava      matchgroup=cltCode start=/^\s*- java .*<<\s*\z(\w\+\)$/ end=/^\s*- \z1$/ contains=@java
-syn region  cltAsm       matchgroup=cltCode start=/^\s*- asm .*<<\s*\z(\w\+\)$/  end=/^\s*- \z1$/ contains=@asm
+syn region  cltCpp        matchgroup=cltCode start=/^\s*- cpp .*<<\s*\z(\w\+\)$/        end=/^\s*- \z1$/ contains=@cpp
+syn region  cltJava       matchgroup=cltCode start=/^\s*- java .*<<\s*\z(\w\+\)$/       end=/^\s*- \z1$/ contains=@java
+syn region  cltAsm        matchgroup=cltCode start=/^\s*- asm .*<<\s*\z(\w\+\)$/        end=/^\s*- \z1$/ contains=@asm
+syn region  cltJavascript matchgroup=cltCode start=/^\s*- javascript .*<<\s*\z(\w\+\)$/ end=/^\s*- \z1$/ contains=@javascript
+syn region  cltHtml       matchgroup=cltCode start=/^\s*- html .*<<\s*\z(\w\+\)$/       end=/^\s*- \z1$/ contains=@html
 
-syn region  cltResource  matchgroup=cltCode start=/^\s*- resource .*<<\s*\z(\w\+\)$/  end=/^\s*- \z1$/
+syn region  cltResource   matchgroup=cltCode start=/^\s*- resource .*<<\s*\z(\w\+\)$/   end=/^\s*- \z1$/
 
-syn cluster cltStuff     add=cltCpp,cltJava,cltAsm,cltResource,cltVerbatim,cltLine
+syn cluster cltStuff      add=cltCpp,cltJava,cltAsm,cltJavascript,cltHtml,cltResource,cltVerbatim,cltLine
 
-syn region  cltDocument  start=/\%^/ end=/\%$/ contains=@cltStuff
+syn region  cltDocument   start=/\%^/ end=/\%$/ contains=@cltStuff
 
-hi link cltLine      Special
-hi link cltKeyword   String
-hi link cltEofMarker String
+hi link cltLine           Special
+hi link cltKeyword        String
+hi link cltResource       String
 
-hi link cltResource  String
-
-hi link cltCode      Special
-hi link cltDocument  Comment
+hi link cltCode           Special
+hi link cltDocument       Comment
 
 let b:current_syntax = "cltex"
-__d86f4e98a7148c08b53563f124e78714
+__10c051872325bda001b9653451009c65
 
 meta::internal('runtime', <<'__487b99b3af6056d1d1c0e00dd4aef707');
 my $initial_state        = state();
