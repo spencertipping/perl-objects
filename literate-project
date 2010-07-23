@@ -176,7 +176,6 @@ __0172b18c9b9311477d2f6b8c16bb44c2
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm resource/;');
 meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass/));');
 meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
-meta::meta('type::asm_section', "meta::functor::section 'asm_section', extension => '.asmtex';");
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -187,7 +186,6 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::cpp_section', "meta::functor::section 'cpp_section', extension => '.cpptex';");
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
 meta::configure 'function', extension => '.pl', inherit => 1;
@@ -205,7 +203,6 @@ meta::define_form 'internal_function', sub {
 };
 __34abb44c67c7e282569e28ef6f4d62ab
 
-meta::meta('type::java_section', "meta::functor::section 'java_section', extension => '.javatex';");
 meta::meta('type::library', <<'__a9c0193f297bbc96a78eb5e27727fd30');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
@@ -1129,28 +1126,6 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::vim_highlighter('asmtex', <<'__c0e112849aa77ed93f0e940810436757');
-" TeX with Assembly
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   TeX with Assembly in it
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn region asmtexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<asm\>.*$/ contains=asmtexSection
-syn match  asmtexSection /^\s*- .*$/ contained
-
-runtime! syntax/asm.vim
-
-hi link asmtexSection Special
-hi link asmtexComment Comment
-
-let b:current_syntax = "asmtex"
-__c0e112849aa77ed93f0e940810436757
-
 meta::vim_highlighter('cltex', <<'__e56e2efed2c72118214dd4957c59d3e8');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
@@ -1188,53 +1163,6 @@ hi link cltCode      Special
 
 let b:current_syntax = "cltex"
 __e56e2efed2c72118214dd4957c59d3e8
-
-meta::vim_highlighter('cpptex', <<'__bcd26a0f8e5967889360b634ca12af99');
-" TeX with C++
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   TeX with C++ in it
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn region cpptexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<cpp\>.*$/ contains=cpptexSection
-syn match  cpptexSection /^\s*- .*$/ contained
-
-runtime! syntax/cpp.vim
-
-syn match  cpptexInclude /#include\s\+\(\w\|[_()]\)\+/
-
-hi link cpptexSection Special
-hi link cpptexComment Comment
-hi link cpptexInclude PreProc
-
-let b:current_syntax = "cpptex"
-__bcd26a0f8e5967889360b634ca12af99
-
-meta::vim_highlighter('javatex', <<'__31fa5b969d4d736c596e4d3c767396a9');
-" TeX with Java
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   TeX with Java in it
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn region javatexComment start=/\%^\|^\s*:.$/ end=/\%$\|^\s*::.*\<java\>.*$/ contains=javatexSection
-syn match  javatexSection /^\s*- .*$/           contained
-
-runtime! syntax/java.vim
-
-hi link javatexSection Special
-hi link javatexComment Comment
-
-let b:current_syntax = "javatex"
-__31fa5b969d4d736c596e4d3c767396a9
 
 meta::internal('runtime', <<'__487b99b3af6056d1d1c0e00dd4aef707');
 my $initial_state        = state();
