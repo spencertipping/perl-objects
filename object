@@ -585,7 +585,7 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __b1bdb7eb224487f5bfd439ebb997c823
 
-meta::function('update-from', <<'__c9570d6953ba16e3abaa217b0b202b3e');
+meta::function('update-from', <<'__0b818ed9847d1238b8eaaea8e8c4e581');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
@@ -606,18 +606,18 @@ terminal::message('warning', $@) if $@;
 reload();
 
 if (verify()) {
-  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-backup' to undo this change.");
+  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.");
 } elsif (grep /^--force$/o || /^-f$/o, @options) {
   terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
   terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
-  terminal::message('info',    'Run "load-state before-backup" to undo the update and return to a working state.');
+  terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.');
 } else {
   terminal::message('error', 'Verification failed after the upgrade was complete.');
   terminal::message('info',  "$0 has been reverted to its pre-upgrade state.");
   terminal::message('info',  "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
   &{'load-state'}('before-update');
 }
-__c9570d6953ba16e3abaa217b0b202b3e
+__0b818ed9847d1238b8eaaea8e8c4e581
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
