@@ -147,7 +147,7 @@ meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
-meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract/));');
+meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass/));');
 meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
 meta::meta('type::asm_section', "meta::functor::section 'asm_section', extension => '.asmtex';");
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
@@ -305,7 +305,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project-new.29433a8840aff1045f202095afed1305/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project-new.a0410349e69d9e243662c44f0fce7e02/document.pdf');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
 meta::data('table-of-contents', '1');
@@ -521,7 +521,7 @@ meta::function('pop-state', <<'__90a6d3599a269ca0bef8126df7aba8e0');
 reload();
 __90a6d3599a269ca0bef8126df7aba8e0
 
-meta::function('preprocess', <<'__5490aa94527756b14ac589937f717611');
+meta::function('preprocess', <<'__d6b4dac414a1f6097a55ae7d1741c55f');
 # Implements a simple preprocessing language.
 # Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
 # but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
@@ -554,8 +554,8 @@ sub adjust_spaces {
 while ($did_something and $expansions++ < $limit) {
   $did_something = 0;
 
-  if ((my @pieces = split  /^(\h* -\h \S+ \h+ \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
-    $pieces[1 + $_ * 3] =~ /^(\h*)-\h(\S+)\h+(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
+  if ((my @pieces = split  /^(\h* -\h \S+ \h* \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
+    $pieces[1 + $_ * 3] =~ /^(\h*)-\h(\S+)\h*(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
       $pieces[1 + $_ * 3] = &{"template::$2"}($3, adjust_spaces($1, $5))
       for 0 .. $#pieces / 3;
 
@@ -564,8 +564,8 @@ while ($did_something and $expansions++ < $limit) {
     $did_something = 1;
   }
 
-  if ((my @pieces = split     /^(\h*-\h \S+ \h+ .*)$/xom, $string) > 1) {
-    $pieces[1 + ($_ << 1)] =~ /^ \h*-\h(\S+)\h+(.*)$/xom && $externalized_functions{"template::$1"} and
+  if ((my @pieces = split     /^(\h*-\h \S+ \h* .*)$/xom, $string) > 1) {
+    $pieces[1 + ($_ << 1)] =~ /^ \h*-\h(\S+)\h*(.*)$/xom && $externalized_functions{"template::$1"} and
       $pieces[1 + ($_ << 1)] = &{"template::$1"}($2)
       for 0 .. $#pieces >> 1;
 
@@ -575,7 +575,7 @@ while ($did_something and $expansions++ < $limit) {
 }
 
 $string;
-__5490aa94527756b14ac589937f717611
+__d6b4dac414a1f6097a55ae7d1741c55f
 
 meta::function('push-state', <<'__ba601ddf7dce874ce79dd37a936ffdcc');
 push @{$transient{'states'} = $transient{'states'} || []}, {%data};
@@ -975,6 +975,21 @@ __6ac64319df3f331f76b5213634f2af51
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::section('header', <<'__ee86ac9c260b2d11dd417736a458b1a0');
+- documentclass article
+
+- include section::header-packages
+- include section::header-listings
+
+- include section::header-proof
+- include section::header-refs
+
+- include section::header-asm
+- include section::header-cpp
+- include section::header-java
+- include section::header-resource
+__ee86ac9c260b2d11dd417736a458b1a0
+
 meta::section('header-asm', '\lstnewenvironment{asmcode} {}{}');
 meta::section('header-cpp', '\lstnewenvironment{cppcode} {\lstset{language=c++}} {}');
 meta::section('header-java', '\lstnewenvironment{javacode}{\lstset{language=java}}{}');
@@ -994,22 +1009,9 @@ meta::section('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
 \usepackage[colorlinks]{hyperref}
 __f69baadb1d3ce11744003b174c91b34b
 
-meta::section('header-proof', '\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}');
+meta::section('header-proof', '\newenvironmemnt{proof}[1][Proof]{\par\noindent\textbf{Proof.}}{\hfill$\square$}');
 meta::section('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::section('header-resource', '\lstnewenvironment{resource}{}{}');
-meta::section('headers', <<'__2af1bd6e1070320807691804633b8e9c');
-- include section::header-packages
-- include section::header-listings
-
-- include section::header-proof
-- include section::header-refs
-
-- include section::header-asm
-- include section::header-cpp
-- include section::header-java
-- include section::header-resource
-__2af1bd6e1070320807691804633b8e9c
-
 meta::section('main', <<'__85757f517cd4aadebc4802cd00f67509');
 - include section::header
 
