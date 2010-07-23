@@ -147,18 +147,9 @@ meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
-meta::meta('template::document', <<'__9082fba49e49ea9dff09ce3b14a2040c');
-tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract/));
-__9082fba49e49ea9dff09ce3b14a2040c
-
-meta::meta('template::sections', <<'__03e886dfb47351527420168c4b8eaeb5');
-tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
-__03e886dfb47351527420168c4b8eaeb5
-
-meta::meta('type::asm_section', <<'__8148e66be6f3817d532b6e9eefff8fdc');
-meta::functor::section 'asm_section', extension => '.asmtex';
-__8148e66be6f3817d532b6e9eefff8fdc
-
+meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract/));');
+meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
+meta::meta('type::asm_section', "meta::functor::section 'asm_section', extension => '.asmtex';");
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -169,14 +160,8 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::cpp_section', <<'__d7334e147c03395ca4fde89c2fc319ca');
-meta::functor::section 'cpp_section', extension => '.cpptex';
-__d7334e147c03395ca4fde89c2fc319ca
-
-meta::meta('type::data', <<'__58d8027f20099b28a159eaac67314051');
-meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';
-__58d8027f20099b28a159eaac67314051
-
+meta::meta('type::cpp_section', "meta::functor::section 'cpp_section', extension => '.cpptex';");
+meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__af5dd5ecc27fe503f68b041791bee6ca');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
@@ -195,10 +180,7 @@ meta::define_form 'internal_function', sub {
 };
 __cb453a81adfa24b238c9b69e0b372ec8
 
-meta::meta('type::java_section', <<'__71571ca8dcfe5aca392fc772c6008897');
-meta::functor::section 'java_section', extension => '.javatex';
-__71571ca8dcfe5aca392fc772c6008897
-
+meta::meta('type::java_section', "meta::functor::section 'java_section', extension => '.javatex';");
 meta::meta('type::library', <<'__455137a61f5af29340946d69bc68d663');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
@@ -228,14 +210,8 @@ meta::meta('type::meta', <<'__640f25635ce2365b0648962918cf9932');
 meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
-meta::meta('type::note', <<'__08f3bf50999ba8de0702a6a95fdfc7ff');
-meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';
-__08f3bf50999ba8de0702a6a95fdfc7ff
-
-meta::meta('type::section', <<'__a393d88693f2bb6471a46c7e300e6920');
-meta::functor::section 'section', extension => '.cltex';
-__a393d88693f2bb6471a46c7e300e6920
-
+meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::section', "meta::functor::section 'section', extension => '.cltex';");
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
@@ -257,25 +233,8 @@ meta::define_form 'template', sub {
 };
 __31e3d1be8d2d32b285ebb90645d5f37a
 
-meta::meta('type::vim_highlighter', <<'__d6ea5b59c918d4e2cfebf5c880f43be8');
-meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';
-__d6ea5b59c918d4e2cfebf5c880f43be8
-
-meta::meta('type::watch', <<'__8e208e776f55ef2c4825deb888a41590');
-meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';
-__8e208e776f55ef2c4825deb888a41590
-
-meta::asm_section('asm-introduction', <<'__2d1cba5a3763bf1c481e39ac9ba7bb3a');
-- Introduction to Assembly Literate Coding
-  Assembly-language snippets are specified in much the same way as C++ snippets. The only difference is that the \verb|asm| marker is used instead of \verb|cpp|.
-
-  :: asm name=test.s
-  main:
-    movl $1, %eax
-    ret
-  :.
-__2d1cba5a3763bf1c481e39ac9ba7bb3a
-
+meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
+meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
 meta::bootstrap('initialization', <<'__d2491ab72f79f70883bd583202562e94');
 #!/usr/bin/perl
 
@@ -320,23 +279,7 @@ meta::define_form 'meta', sub {
 
 __d2491ab72f79f70883bd583202562e94
 
-meta::cpp_section('cpp-introduction', <<'__bdb0ea7cecc426699b7a476dace9232c');
-- Introduction to C++ Literate Coding
-  The C++ literate code interface is much like the Java one, except that code sections use the \verb|name=x| attribute rather than \verb|class=| and \verb|package=|. The name is expected to
-  include an extension, so for example \verb|:: cpp name=src/foo.h| is a correct heading.
-
-  :: cpp name=hello.cc
-  #include<iostream>
-  int main () {
-    std::cout << "Hello world!" << std::endl;
-  }
-  :.
-__bdb0ea7cecc426699b7a476dace9232c
-
-meta::data('default-action', <<'__53508551b72484e92f7acb844808db7b');
-shell
-__53508551b72484e92f7acb844808db7b
-
+meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License
 Copyright (c) 2010 Spencer Tipping
@@ -360,38 +303,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', <<'__175b00ca688a0edde91d499786cb437b');
-literate-project
-__175b00ca688a0edde91d499786cb437b
-
-meta::data('output-dir', <<'__f21d437505e3b6c2b76e95184489c474');
-/tmp
-__f21d437505e3b6c2b76e95184489c474
-
-meta::data('pdf-output-file', <<'__b04cefeaf3e283ac6dfa39ba546e7659');
-/tmp/literate-project-new.29433a8840aff1045f202095afed1305/document.pdf
-__b04cefeaf3e283ac6dfa39ba546e7659
-
-meta::data('pdftex-command', <<'__60c892e812eb2ce144e8ead6d15d13f4');
-pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
-__60c892e812eb2ce144e8ead6d15d13f4
-
-meta::data('quiet', <<'__9ce6820642996915d3434b56a7a09ded');
-1
-__9ce6820642996915d3434b56a7a09ded
-
-meta::data('table-of-contents', <<'__9ce6820642996915d3434b56a7a09ded');
-1
-__9ce6820642996915d3434b56a7a09ded
-
-meta::data('tex-command', <<'__b5bba1a6a2ba72395858169f4a418d89');
-latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
-__b5bba1a6a2ba72395858169f4a418d89
-
-meta::data('watching', <<'__9ce6820642996915d3434b56a7a09ded');
-0
-__9ce6820642996915d3434b56a7a09ded
-
+meta::data('name', 'literate-project');
+meta::data('output-dir', '/tmp');
+meta::data('pdf-output-file', '/tmp/literate-project-new.29433a8840aff1045f202095afed1305/document.pdf');
+meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('quiet', '1');
+meta::data('table-of-contents', '1');
+meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('watching', '0');
 meta::function('cat', <<'__c8e76a0cf10e2061e9cf9e1643922c3e');
 my ($name) = @_;
 $data{$name};
@@ -664,10 +583,7 @@ my $state_count = scalar @{$transient{'states'}};
 "There are now $state_count states on the stack.";
 __ba601ddf7dce874ce79dd37a936ffdcc
 
-meta::function('reload', <<'__5208dbe97a0fd49e9ef075f33cbada53');
-execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;
-__5208dbe97a0fd49e9ef075f33cbada53
-
+meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
@@ -766,10 +682,7 @@ while (defined ($_ = $term->readline($prompt))) {
 }
 __364c77a8a88ef137c00350b27d2d2a5e
 
-meta::function('size', <<'__ed32c644d604fdc61dda48bd3fbe5559');
-length(serialize());
-__ed32c644d604fdc61dda48bd3fbe5559
-
+meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__ccb6335f4837338be1d73ccc5f81973d');
 my ($name) = @_;
 file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
@@ -1009,19 +922,7 @@ $name =~ s/::.*$//;
 $name;
 __93213d60cafb9627e0736b48cd1f0760
 
-meta::internal_function('retrieve', <<'__7c96ec5935b22f2766064ea54f1e868a');
-@data{@_};
-__7c96ec5935b22f2766064ea54f1e868a
-
-meta::internal_function('serialize_single', <<'__5ad359e62adc135871d39fcb7f4c2a93');
-my $name               = shift || $_;
-my $contents           = $data{$name};
-my $delimiter          = '__' . fast_hash($contents);
-my $meta_function_name = "meta::" . namespace($name);
-my $invocation_name    = basename $name;
-"$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__5ad359e62adc135871d39fcb7f4c2a93
-
+meta::internal_function('retrieve', '@data{@_};');
 meta::internal_function('state_based_filename', <<'__218815c285975367ae0324bf5c3f5409');
 my ($name) = @_;
 my $noise  = $name || state();
@@ -1034,41 +935,6 @@ use File::Temp 'tempfile';
 my (undef, $temporary_filename) = tempfile("$0." . 'X' x 4, OPEN => 0);
 $temporary_filename;
 __0fb1402061581b69822f913631b4a9d9
-
-meta::java_section('java-introduction', <<'__e47faa697ea1f1cc04710f2adbf0d0ba');
-- Introduction to Java Literate Coding
-  Literate coding allows you to write \TeX{} primarily, but insert Java code snippets where appropriate.\footnote{Take a look at {\tt java\_section::java-introduction} to see the how to set
-  the language and options for code sections.} For example:
-
-  :: java class=test
-  public class test {
-    public static void main (String[] args) {
-      System.out.println ("This is a test class");
-    }
-  }
-  :.
-
-  :: java class=test package=com.spencertipping
-  package com.spencertipping;
-  public class test {
-    public static void main (String[] args) {
-      System.out.println ("This is in package com.spencertipping.");
-    }
-  }
-  :.
-
-  Compiling the system is also simple:
-
-  ::
-  $ ./my-project compile
-  :.
-
-  This generates all of the Java source files in a directory, usually {\tt /tmp/src/}. The output directory can be changed like this:
-
-  ::
-  $ ./my-project source-directory = src/
-  :.
-__e47faa697ea1f1cc04710f2adbf0d0ba
 
 meta::library('terminal', <<'__6ac64319df3f331f76b5213634f2af51');
 # Functions for nice-looking terminal output.
@@ -1106,30 +972,12 @@ sub message {
 }
 __6ac64319df3f331f76b5213634f2af51
 
-meta::message_color('state', <<'__14e993fdf2c62df353613c243dc9053b');
-purple
-__14e993fdf2c62df353613c243dc9053b
-
-meta::message_color('states', <<'__152a940086f7cee6110528a09af7dd78');
-yellow
-__152a940086f7cee6110528a09af7dd78
-
-meta::message_color('watch', <<'__d292ea8fe6dcc812d29610a5a5c09e67');
-blue
-__d292ea8fe6dcc812d29610a5a5c09e67
-
-meta::section('header-asm', <<'__70388b84ae0ba098cafb4592e3500ac7');
-\lstnewenvironment{asmcode} {}{}
-__70388b84ae0ba098cafb4592e3500ac7
-
-meta::section('header-cpp', <<'__213aa045c64289eb1ae1128afc284bd7');
-\lstnewenvironment{cppcode} {\lstset{language=c++}} {}
-__213aa045c64289eb1ae1128afc284bd7
-
-meta::section('header-java', <<'__801fbfea4a00fdfe830a432101d8ed2b');
-\lstnewenvironment{javacode}{\lstset{language=java}}{}
-__801fbfea4a00fdfe830a432101d8ed2b
-
+meta::message_color('state', 'purple');
+meta::message_color('states', 'yellow');
+meta::message_color('watch', 'blue');
+meta::section('header-asm', '\lstnewenvironment{asmcode} {}{}');
+meta::section('header-cpp', '\lstnewenvironment{cppcode} {\lstset{language=c++}} {}');
+meta::section('header-java', '\lstnewenvironment{javacode}{\lstset{language=java}}{}');
 meta::section('header-listings', <<'__747e2e3bc83de0d564ec96e91395fa84');
 \definecolor{gray}{rgb}{0.6,0.6,0.6}
 
@@ -1146,18 +994,9 @@ meta::section('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
 \usepackage[colorlinks]{hyperref}
 __f69baadb1d3ce11744003b174c91b34b
 
-meta::section('header-proof', <<'__ac0f7e79e2127ec3ced94bac981b0db7');
-\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}
-__ac0f7e79e2127ec3ced94bac981b0db7
-
-meta::section('header-refs', <<'__f9c09aef11577a7f9f33af4fffecec89');
-\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
-__f9c09aef11577a7f9f33af4fffecec89
-
-meta::section('header-resource', <<'__88678a72c4dfefea8608eab673b009e6');
-\lstnewenvironment{resource}{}{}
-__88678a72c4dfefea8608eab673b009e6
-
+meta::section('header-proof', '\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}');
+meta::section('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
+meta::section('header-resource', '\lstnewenvironment{resource}{}{}');
 meta::section('headers', <<'__2af1bd6e1070320807691804633b8e9c');
 - include section::header-packages
 - include section::header-listings
