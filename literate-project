@@ -80,7 +80,7 @@ sub meta::externalize_template {
 }
 __1e90e7ccb5fea1d498bbaaa6e7e43851
 
-meta::meta('functor::code-templates', <<'__15c06c55a32b6ea66f7be4bfcb4ea53c');
+meta::meta('functor::code-templates', <<'__d7c4de4adf3c7606453a118f75e73fd1');
 package code;
 
 # Templates for generating named source files.
@@ -88,16 +88,16 @@ sub template {
   my ($name, $implementation) = @_;
   $implementation ||= sub {
     my ($line, $block) = @_;
+    my $append         = $line =~ s/^\h*>>\h*//o;
 
-    $line =~ s/\s+.*$//og;
-    my $append = $line =~ s/^\h*>>\h*//;
-    file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1, append => $append);
+    $line =~ s/\s+.*$//o;
+    file::write(&{'::source-directory'}() . "/$line", ($append && "\n") . $block, mkpath => 1, append => $append);
     "\\lstset{caption=$line}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
-__15c06c55a32b6ea66f7be4bfcb4ea53c
+__d7c4de4adf3c7606453a118f75e73fd1
 
 meta::meta('functor::editable', <<'__e97984f7c34d9f06173be574e28c3f91');
 # An editable type. This creates a type whose default action is to open an editor
@@ -1067,7 +1067,7 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__9ee97c9024007bc500a826b6b73c22be');
+meta::section('introduction', <<'__488e61a2ab561070908a4f14c4209a22');
 - s1 Introduction | sec:introduction
   This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
 
@@ -1115,7 +1115,11 @@ meta::section('introduction', <<'__9ee97c9024007bc500a826b6b73c22be');
       mov $1, %eax
       ret
   - end
-__9ee97c9024007bc500a826b6b73c22be
+
+  - resource >> build << end
+    g++ false.s -o false
+  - end
+__488e61a2ab561070908a4f14c4209a22
 
 meta::section('main', <<'__28a5934deb22216a2f1c03a90ac1d2d0');
 - documentclass article
