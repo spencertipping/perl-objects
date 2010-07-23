@@ -37,9 +37,9 @@ sub meta::define_form {
 
 sub meta::eval_in {
   my ($what, $where) = @_;
-  
-  # Obtain current eval number:
-  $locations{(eval('__FILE__') =~ /\(eval (\d+)\)/)[0] + 1} = $where;
+
+  # Obtain next eval-number and alias it to the designated location
+  $locations{eval('__FILE__ + 1') =~ /\(eval (\d+)\)/} = $where;
 
   my $result = eval $what;
   $@ =~ s/\(eval \d+\)/$where/ if $@;
@@ -181,7 +181,7 @@ __25f4d6eafb1d3eea6d5d3d9a71a5623e
 
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
-meta::bootstrap('initialization', <<'__8e3ad12430fc673bd78036e5a0a79ae2');
+meta::bootstrap('initialization', <<'__f9bea2f58150ac8debd3ba3ed1f3a644');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
@@ -221,9 +221,9 @@ sub meta::define_form {
 
 sub meta::eval_in {
   my ($what, $where) = @_;
-  
-  # Obtain current eval number:
-  $locations{(eval('__FILE__') =~ /\(eval (\d+)\)/)[0] + 1} = $where;
+
+  # Obtain next eval-number and alias it to the designated location
+  $locations{eval('__FILE__ + 1') =~ /\(eval (\d+)\)/} = $where;
 
   my $result = eval $what;
   $@ =~ s/\(eval \d+\)/$where/ if $@;
@@ -236,7 +236,7 @@ meta::define_form 'meta', sub {
   meta::eval_in($value, "meta::$name");
 };
 
-__8e3ad12430fc673bd78036e5a0a79ae2
+__f9bea2f58150ac8debd3ba3ed1f3a644
 
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
