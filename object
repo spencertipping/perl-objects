@@ -724,13 +724,18 @@ close $handle;
 $result;
 __186bbcef8f6f0dd8b72ba0fdeb1de040
 
-meta::internal_function('file::write', <<'__d05a3256f22a7a49afb85e8db507ab50');
+meta::internal_function('file::write', <<'__5787fce743ff32c28487759870245e16');
+use File::Path 'mkpath';
+use File::Basename 'dirname';
+
 my ($name, $contents, %options) = @_;
 die "Choosing not to overwrite file $name" if $options{'noclobber'} && -f $name;
+mkpath(dirname($name)) if $options{mkpath};
+
 open my($handle), ">", $name or die "Can't open $name for writing";
 print $handle $contents;
 close $handle;
-__d05a3256f22a7a49afb85e8db507ab50
+__5787fce743ff32c28487759870245e16
 
 meta::internal_function('fnv_hash', <<'__8d001a3a7988631bab21a41cee559758');
 # A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
