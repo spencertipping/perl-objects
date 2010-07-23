@@ -1132,7 +1132,7 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::vim_highlighter('cltex', <<'__498a8b8e7ba0b96c7dc72fa26236954d');
+meta::vim_highlighter('cltex', <<'__3450061df690af79f9599066b2fb3131');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
@@ -1158,7 +1158,12 @@ syn region  cltAsm       matchgroup=cltCode start=/^\s*- asm .*<<\z(\w\+\)$/  en
 syn region  cltResource  matchgroup=cltCode start=/^\s*- resource .*<<\z(\w\+\)$/  end=/^\s*- \z1$/
 syn region  cltVerbatim  matchgroup=cltCode start=/^\s*- verbatim .*<<\z(\w\+\)$/  end=/^\s*- \z1$/
 
-runtime! syntax/tex.vim
+syn include @tex         syntax/tex.vim
+
+syn cluster cltStuff     add=cltCpp,cltJava,cltAsm,cltResource,cltVerbatim,cltLine
+syn cluster cltStuff     add=@tex
+
+syn region  cltDocument  start=/\%^/ end=/\%$/ contains=@cltStuff
 
 hi link cltLine      Special
 hi link cltKeyword   String
@@ -1168,9 +1173,10 @@ hi link cltResource  String
 hi link cltVerbatim  String
 
 hi link cltCode      Special
+hi link cltDocument  Comment
 
 let b:current_syntax = "cltex"
-__498a8b8e7ba0b96c7dc72fa26236954d
+__3450061df690af79f9599066b2fb3131
 
 meta::internal('runtime', <<'__487b99b3af6056d1d1c0e00dd4aef707');
 my $initial_state        = state();
