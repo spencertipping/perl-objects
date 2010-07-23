@@ -100,7 +100,7 @@ sub meta::functor::section {
 }
 __7ec9c7e2cf5f013a9ad353743c4e715d
 
-meta::meta('functor::tex-templates', <<'__5a0a225622e898da6cc8fa819aaf8236');
+meta::meta('functor::tex-templates', <<'__2de21298b1b8f9b28e67103e2c479ba3');
 sub meta::externalize_template {
   my ($name, $implementation) = @_;
   meta::externalize "template::$name", "template::$name", $implementation;
@@ -130,7 +130,7 @@ sub id {
 # transfer into TeX with no preprocessing.
 *template = template_for {
   my ($name, $line, $block) = @_;
-  $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$block\}";
+  $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$line\}";
 };
 
 # Creates a labeled one-line template. This is just like normal TeX, but assumes the
@@ -140,7 +140,7 @@ sub id {
   my ($real_stuff, $label) = split /\h*\|\h*/, $line;
   "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
 };
-__5a0a225622e898da6cc8fa819aaf8236
+__2de21298b1b8f9b28e67103e2c479ba3
 
 meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
 meta::configure 'internal', extension => '.pl', inherit => 1;
