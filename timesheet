@@ -33,10 +33,17 @@ sub meta::define_form {
   };
 }
 
+sub meta::eval_in {
+  my ($what, $where) = @_;
+  my $result = eval $what;
+  $@ =~ s/\(eval \d+\)/$where/ if $@;
+  warn $@ if $@;
+  $result;
+}
+
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
-  eval $value;
-  warn $@ if $@;
+  meta::eval_in($value, $name);
 };
 
 meta::meta('configure', <<'__25976e07665878d3fae18f050160343f');
@@ -60,7 +67,7 @@ sub meta::externalize {
 }
 __9141b4e8752515391385516ae94b23b5
 
-meta::meta('functor::editable', <<'__23cd7b7dc81d5cebd632c7543a30af99');
+meta::meta('functor::editable', <<'__6f3d11b4f691803b1b53bb9f99e31aac');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
 
@@ -79,12 +86,12 @@ sub meta::functor::editable {
 
       return edit($attribute)                                                              if $command eq 'edit'                      or $options{default} eq 'edit'   and not defined $command;
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
-      return preprocess(retrieve($attribute))                                              if $options{preprocess};
+      return preprocess(retrieve($attribute))                                              if $command eq 'compile'                   or $options{preprocess}          and not defined $command;
       return retrieve($attribute);
     };
   };
 }
-__23cd7b7dc81d5cebd632c7543a30af99
+__6f3d11b4f691803b1b53bb9f99e31aac
 
 meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
 meta::configure 'internal', extension => '.pl', inherit => 1;
@@ -102,36 +109,32 @@ meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
-meta::meta('type::function', <<'__af5dd5ecc27fe503f68b041791bee6ca');
+meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
   my ($name, $value) = @_;
-  meta::externalize $name, "function::$name", eval("sub {\n$value\n}");
-  warn $@ if $@;
+  meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
 };
-__af5dd5ecc27fe503f68b041791bee6ca
+__d93b3cc15693707dac518e3d6b1f5648
 
-meta::meta('type::internal_function', <<'__cb453a81adfa24b238c9b69e0b372ec8');
+meta::meta('type::internal_function', <<'__34abb44c67c7e282569e28ef6f4d62ab');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
   my ($name, $value) = @_;
-  *{$name} = eval "sub {\n$value\n}";
-  warn $@ if $@;
+  *{$name} = meta::eval_in("sub {\n$value\n}", "internal_function::$name");
 };
-__cb453a81adfa24b238c9b69e0b372ec8
+__34abb44c67c7e282569e28ef6f4d62ab
 
-meta::meta('type::library', <<'__455137a61f5af29340946d69bc68d663');
+meta::meta('type::library', <<'__a9c0193f297bbc96a78eb5e27727fd30');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
   my ($name, $value) = @_;
-  eval $value;
-  warn $@ if $@;
-
+  meta::eval_in($value, "library::$name");
   meta::externalize $name, "library::$name", sub {
     edit("library::$name");
   };
 };
-__455137a61f5af29340946d69bc68d663
+__a9c0193f297bbc96a78eb5e27727fd30
 
 meta::meta('type::message_color', <<'__794bf137c425293738f07636bcfb5c55');
 meta::configure 'message_color', extension => '', inherit => 1;
@@ -162,18 +165,17 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
-meta::meta('type::template', <<'__31e3d1be8d2d32b285ebb90645d5f37a');
+meta::meta('type::template', <<'__25f4d6eafb1d3eea6d5d3d9a71a5623e');
 meta::configure 'template', extension => '.pl', inherit => 1;
 meta::define_form 'template', sub {
   my ($name, $value) = @_;
-  meta::externalize "template::$name", "template::$name", eval("sub {\n$value\n}");
-  warn $@ if $@;
+  meta::externalize "template::$name", "template::$name", meta::eval_in("sub {\n$value\n}", "template::$name");
 };
-__31e3d1be8d2d32b285ebb90645d5f37a
+__25f4d6eafb1d3eea6d5d3d9a71a5623e
 
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
-meta::bootstrap('initialization', <<'__d2491ab72f79f70883bd583202562e94');
+meta::bootstrap('initialization', <<'__c2170a5a7f8ad15665e581f7fa0aafee');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
@@ -209,13 +211,20 @@ sub meta::define_form {
   };
 }
 
+sub meta::eval_in {
+  my ($what, $where) = @_;
+  my $result = eval $what;
+  $@ =~ s/\(eval \d+\)/$where/ if $@;
+  warn $@ if $@;
+  $result;
+}
+
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
-  eval $value;
-  warn $@ if $@;
+  meta::eval_in($value, $name);
 };
 
-__d2491ab72f79f70883bd583202562e94
+__c2170a5a7f8ad15665e581f7fa0aafee
 
 meta::data('default-action', 'edit-times');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
@@ -290,17 +299,18 @@ messages::error("No such attribute $from") unless $exists;
 retrieve($from);
 __ffba0c53d9c2d03d8d6e5f9692f496ae
 
-meta::function('create', <<'__3349f4fb38464e1869a43e25af881986');
+meta::function('create', <<'__97e5444422f5f6087371f59ddc3e1b8c');
 my ($name, $value) = @_;
 
-messages::error("Attribute $name already exists.") if grep $_ eq $name, keys %data;
+return edit($name) if exists $data{$name};
+
 if (defined $value) {
   associate($name, $value);
 } else {
   associate($name, '');
   edit($name);
 }
-__3349f4fb38464e1869a43e25af881986
+__97e5444422f5f6087371f59ddc3e1b8c
 
 meta::function('csv', <<'__465eb739f70fe3eb34f78bd26f658364');
 my $times = retrieve('data::times');
@@ -410,28 +420,23 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__d900070fd20c5c0ae08280b0f354666f');
-my $criteria = join '|', @_;
-my @lines = grep /$criteria/ && defined $data{$externalized_functions{$_}}, sort keys %externalized_functions;
-my $length = 0;
-$length >= length($_) or $length = length($_) for @lines;
+meta::function('ls', <<'__8d3569c87d97e719a870c88c8c069ac4');
+my $criteria   = join '|', @_;
+my @external   = sort grep /$criteria/, sort keys %externalized_functions;
+my @defined_by = map $externalized_functions{$_}, @external;
+my @shadows    = grep ! defined $data{$externalized_functions{$_}}, @external;
 
-my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
-join("\n", sort @new_lines);
-__d900070fd20c5c0ae08280b0f354666f
+table_display([@external, @shadows], [@defined_by, map('< shadow >', @shadows)]);
+__8d3569c87d97e719a870c88c8c069ac4
 
-meta::function('ls-a', <<'__f2fdfdd82d77a876b485332dbd1446fa');
-my $criteria = join '|', @_;
-my @lines    = grep(/$criteria/, sort keys %data);
-my $length   = 0;
+meta::function('ls-a', <<'__f7f3e6ea4f8f642a7aa1f3695d70e57b');
+my $criteria   = join '|', @_;
+my @attributes = grep(/$criteria/, sort keys %data);
+my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
 
-my %inverses;
-$inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
-
-$length >= length($_) or $length = length($_) for @lines;
-my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . sprintf('%6d  ', length(serialize_single($_))) . ($inverses{$_} || ''), @lines);
-join "\n", @new_lines;
-__f2fdfdd82d77a876b485332dbd1446fa
+table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
+                                                               [map sprintf('%6d', length(retrieve($_))),         @attributes]);
+__f7f3e6ea4f8f642a7aa1f3695d70e57b
 
 meta::function('mv', <<'__994133604ac769fe978c4c127fd5011c');
 my ($from, $to) = @_;
@@ -454,7 +459,7 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
 
-meta::function('preprocess', <<'__5490aa94527756b14ac589937f717611');
+meta::function('preprocess', <<'__cf358f41a3b097b67e370f239f4356ea');
 # Implements a simple preprocessing language.
 # Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
 # but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
@@ -474,41 +479,40 @@ meta::function('preprocess', <<'__5490aa94527756b14ac589937f717611');
 
 my ($string, %options) = @_;
 my $expansions         = 0;
-my $did_something      = 1;
-my $limit              = $options{expansion_limit} || 10;
+my $old_string         = '';
+my $limit              = $options{expansion_limit} || 100;
 my @pieces             = ();
 
 sub adjust_spaces {
   my ($spaces, $string) = @_;
   $string =~ s/^$spaces  //mg;
+  chomp $string;
   $string;
 }
 
-while ($did_something and $expansions++ < $limit) {
-  $did_something = 0;
+while ($old_string ne $string and $expansions++ < $limit) {
+  $old_string = $string;
 
-  if ((my @pieces = split  /^(\h* -\h \S+ \h+ \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
-    $pieces[1 + $_ * 3] =~ /^(\h*)-\h(\S+)\h+(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
+  while ((my @pieces = split /^(\h* -\h \S+ \h* \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1 and $expansions++ < $limit) {
+    $pieces[1 + $_ * 3] =~   /^(\h*)-\h(\S+)\h*(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
       $pieces[1 + $_ * 3] = &{"template::$2"}($3, adjust_spaces($1, $5))
       for 0 .. $#pieces / 3;
 
     $pieces[2 + $_ * 3] = '' for 0 .. $#pieces / 3;
     $string = join '', @pieces;
-    $did_something = 1;
   }
 
-  if ((my @pieces = split     /^(\h*-\h \S+ \h+ .*)$/xom, $string) > 1) {
-    $pieces[1 + ($_ << 1)] =~ /^ \h*-\h(\S+)\h+(.*)$/xom && $externalized_functions{"template::$1"} and
+  if ((my @pieces = split     /^(\h*-\h \S+ \h* .*)$/xom, $string) > 1) {
+    $pieces[1 + ($_ << 1)] =~ /^ \h*-\h(\S+)\h*(.*)$/xom && $externalized_functions{"template::$1"} and
       $pieces[1 + ($_ << 1)] = &{"template::$1"}($2)
       for 0 .. $#pieces >> 1;
 
     $string = join '', @pieces;
-    $did_something = 1;
   }
 }
 
 $string;
-__5490aa94527756b14ac589937f717611
+__cf358f41a3b097b67e370f239f4356ea
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
@@ -567,7 +571,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
 __91663f820a05ff4029a200fbfd7285bc
 
-meta::function('shell', <<'__364c77a8a88ef137c00350b27d2d2a5e');
+meta::function('shell', <<'__1e47b70678d1618ec18aebc990e3d765');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -599,15 +603,15 @@ while (defined ($_ = $term->readline($prompt))) {
   }
 
   if (watching()) {
-    for my $watch (map retrieve($_), grep /^watch::/, sort keys %data) {
-      terminal::message('watch',   "$watch => " . eval($watch));
-      terminal::message('warning', "Error evaluating watched expression $watch: $@") if $@;
+    for (grep /^watch::/, sort keys %data) {
+      my $watch = retrieve($_);
+      terminal::message('watch', "$_ => " . meta::eval_in($watch, $_));
     }
   }
 
   $prompt = name() . '$ ';
 }
-__364c77a8a88ef137c00350b27d2d2a5e
+__1e47b70678d1618ec18aebc990e3d765
 
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__ccb6335f4837338be1d73ccc5f81973d');
@@ -631,7 +635,7 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __b1bdb7eb224487f5bfd439ebb997c823
 
-meta::function('update-from', <<'__c9570d6953ba16e3abaa217b0b202b3e');
+meta::function('update-from', <<'__0b818ed9847d1238b8eaaea8e8c4e581');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
@@ -652,18 +656,18 @@ terminal::message('warning', $@) if $@;
 reload();
 
 if (verify()) {
-  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-backup' to undo this change.");
+  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.");
 } elsif (grep /^--force$/o || /^-f$/o, @options) {
   terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
   terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
-  terminal::message('info',    'Run "load-state before-backup" to undo the update and return to a working state.');
+  terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.');
 } else {
   terminal::message('error', 'Verification failed after the upgrade was complete.');
   terminal::message('info',  "$0 has been reverted to its pre-upgrade state.");
   terminal::message('info',  "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
   &{'load-state'}('before-update');
 }
-__c9570d6953ba16e3abaa217b0b202b3e
+__0b818ed9847d1238b8eaaea8e8c4e581
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
@@ -779,13 +783,18 @@ close $handle;
 $result;
 __186bbcef8f6f0dd8b72ba0fdeb1de040
 
-meta::internal_function('file::write', <<'__d05a3256f22a7a49afb85e8db507ab50');
+meta::internal_function('file::write', <<'__5787fce743ff32c28487759870245e16');
+use File::Path 'mkpath';
+use File::Basename 'dirname';
+
 my ($name, $contents, %options) = @_;
 die "Choosing not to overwrite file $name" if $options{'noclobber'} && -f $name;
+mkpath(dirname($name)) if $options{mkpath};
+
 open my($handle), ">", $name or die "Can't open $name for writing";
 print $handle $contents;
 close $handle;
-__d05a3256f22a7a49afb85e8db507ab50
+__5787fce743ff32c28487759870245e16
 
 meta::internal_function('fnv_hash', <<'__8d001a3a7988631bab21a41cee559758');
 # A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
@@ -843,6 +852,24 @@ my $noise  = $name || state();
 $noise =~ s/\//-/g;
 "$0.$noise";
 __218815c285975367ae0324bf5c3f5409
+
+meta::internal_function('table_display', <<'__a00cceb4dcab4051a071b0d84e9aca72');
+# Displays an array of arrays as a table; that is, with alignment. Arrays are
+# expected to be in column-major order.
+
+sub maximum_length_in {
+  my $maximum = 0;
+  $maximum = length($_) > $maximum ? length($_) : $maximum for @_;
+  $maximum;
+}
+
+my @arrays    = @_;
+my @lengths   = map maximum_length_in(@$_), @arrays;
+my @row_major = map {my $i = $_; [map $$_[$i], @arrays]} 0 .. $#{$arrays[0]};
+my $format    = join '  ', map "%-${_}s", @lengths;
+
+join "\n", map sprintf($format, @$_), @row_major;
+__a00cceb4dcab4051a071b0d84e9aca72
 
 meta::internal_function('temporary_name', <<'__0fb1402061581b69822f913631b4a9d9');
 use File::Temp 'tempfile';
