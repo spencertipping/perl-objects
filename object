@@ -382,23 +382,23 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__30b87f534629156cce3b1eebb4c9a4c0');
-my $criteria   = join '|', @_;
+meta::function('ls', <<'__b9d8eab31beedc7e20616be1a37a3c96');
+my $criteria   = join('|', @_) || '.';
 my @external   = grep /$criteria/, sort keys %externalized_functions;
 my @defined_by = map $externalized_functions{$_}, @external;
 my @shadows    = grep ! defined $data{$externalized_functions{$_}}, @external;
 
 table_display([@external, @shadows], [@defined_by, map('< shadow >', @shadows)]);
-__30b87f534629156cce3b1eebb4c9a4c0
+__b9d8eab31beedc7e20616be1a37a3c96
 
-meta::function('ls-a', <<'__f7f3e6ea4f8f642a7aa1f3695d70e57b');
-my $criteria   = join '|', @_;
+meta::function('ls-a', <<'__15542def52b2c692c8fdb90278493dc2');
+my $criteria   = join('|', @_) || '.';
 my @attributes = grep(/$criteria/, sort keys %data);
 my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
 
 table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
                                                                [map sprintf('%6d', length(retrieve($_))),         @attributes]);
-__f7f3e6ea4f8f642a7aa1f3695d70e57b
+__15542def52b2c692c8fdb90278493dc2
 
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
