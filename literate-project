@@ -546,7 +546,7 @@ meta::function('pop-state', <<'__90a6d3599a269ca0bef8126df7aba8e0');
 reload();
 __90a6d3599a269ca0bef8126df7aba8e0
 
-meta::function('preprocess', <<'__df9daa6418aeb4d8a90282c9628fd267');
+meta::function('preprocess', <<'__cf358f41a3b097b67e370f239f4356ea');
 # Implements a simple preprocessing language.
 # Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
 # but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
@@ -573,6 +573,7 @@ my @pieces             = ();
 sub adjust_spaces {
   my ($spaces, $string) = @_;
   $string =~ s/^$spaces  //mg;
+  chomp $string;
   $string;
 }
 
@@ -598,7 +599,7 @@ while ($old_string ne $string and $expansions++ < $limit) {
 }
 
 $string;
-__df9daa6418aeb4d8a90282c9628fd267
+__cf358f41a3b097b67e370f239f4356ea
 
 meta::function('push-state', <<'__ba601ddf7dce874ce79dd37a936ffdcc');
 push @{$transient{'states'} = $transient{'states'} || []}, {%data};
