@@ -33,10 +33,17 @@ sub meta::define_form {
   };
 }
 
+sub meta::eval_in {
+  my ($what, $where) = @_;
+  my $result = eval $what;
+  $@ =~ s/\(eval \d+\)/$where/ if $@;
+  warn $@ if $@;
+  $result;
+}
+
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
-  eval $value;
-  warn $@ if $@;
+  meta::eval_in($value, $name);
 };
 
 meta::meta('configure', <<'__25976e07665878d3fae18f050160343f');
@@ -60,26 +67,31 @@ sub meta::externalize {
 }
 __9141b4e8752515391385516ae94b23b5
 
-meta::meta('functor::code-templates', <<'__94f101ae8bd87fb3f16b96e3c0a9f0b5');
+meta::meta('externalize_template', <<'__1e90e7ccb5fea1d498bbaaa6e7e43851');
+sub meta::externalize_template {
+  my ($name, $implementation) = @_;
+  meta::externalize "template::$name", "template::$name", $implementation;
+}
+__1e90e7ccb5fea1d498bbaaa6e7e43851
+
+meta::meta('functor::code-templates', <<'__b3b9479d2bd9412ff2b6fbf16d63ba87');
 package code;
 
 # Templates for generating named source files.
 sub template {
-  my %implementations = @_;
-  for my $name (keys %implementations) {
-    my $implementation = $implementations{$name} || sub {
-      my ($line, $block) = @_;
-      $line =~ s/\s+.*$//og;
-      file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1);
-      "\\lstset{caption=$line}\\begin{${name}code} $block \\end{${name}code}";
-    };
+  my ($name, $implementation) = @_;
+  $implementation ||= sub {
+    my ($line, $block) = @_;
+    $line =~ s/\s+.*$//og;
+    file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1);
+    "\\lstset{caption=$line}\\begin{${name}code} $block \\end{${name}code}";
+  };
 
-    meta::externalize_template $name, $implementation;
-  }
+  meta::externalize_template $name, $implementation;
 }
-__94f101ae8bd87fb3f16b96e3c0a9f0b5
+__b3b9479d2bd9412ff2b6fbf16d63ba87
 
-meta::meta('functor::editable', <<'__23cd7b7dc81d5cebd632c7543a30af99');
+meta::meta('functor::editable', <<'__6f3d11b4f691803b1b53bb9f99e31aac');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
 
@@ -98,12 +110,12 @@ sub meta::functor::editable {
 
       return edit($attribute)                                                              if $command eq 'edit'                      or $options{default} eq 'edit'   and not defined $command;
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
-      return preprocess(retrieve($attribute))                                              if $options{preprocess};
+      return preprocess(retrieve($attribute))                                              if $command eq 'compile'                   or $options{preprocess}          and not defined $command;
       return retrieve($attribute);
     };
   };
 }
-__23cd7b7dc81d5cebd632c7543a30af99
+__6f3d11b4f691803b1b53bb9f99e31aac
 
 meta::meta('functor::section', <<'__7ec9c7e2cf5f013a9ad353743c4e715d');
 sub meta::functor::section {
@@ -118,13 +130,6 @@ sub meta::functor::section {
   };
 }
 __7ec9c7e2cf5f013a9ad353743c4e715d
-
-meta::meta('functor::templates', <<'__1e90e7ccb5fea1d498bbaaa6e7e43851');
-sub meta::externalize_template {
-  my ($name, $implementation) = @_;
-  meta::externalize "template::$name", "template::$name", $implementation;
-}
-__1e90e7ccb5fea1d498bbaaa6e7e43851
 
 meta::meta('functor::tex-templates', <<'__34a5da8558897a4388fc22ed4b0c3c6b');
 package tex;
@@ -168,7 +173,7 @@ meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
-meta::meta('template::code', 'code::template java => 0, cpp => 0, asm => 0, resource => 0;');
+meta::meta('template::code', 'code::template $_ for qw/java cpp asm resource/;');
 meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass/));');
 meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
 meta::meta('type::asm_section', "meta::functor::section 'asm_section', extension => '.asmtex';");
@@ -184,37 +189,33 @@ __297d03fb32df03b46ea418469fc4e49e
 
 meta::meta('type::cpp_section', "meta::functor::section 'cpp_section', extension => '.cpptex';");
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
-meta::meta('type::function', <<'__af5dd5ecc27fe503f68b041791bee6ca');
+meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
   my ($name, $value) = @_;
-  meta::externalize $name, "function::$name", eval("sub {\n$value\n}");
-  warn $@ if $@;
+  meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
 };
-__af5dd5ecc27fe503f68b041791bee6ca
+__d93b3cc15693707dac518e3d6b1f5648
 
-meta::meta('type::internal_function', <<'__cb453a81adfa24b238c9b69e0b372ec8');
+meta::meta('type::internal_function', <<'__34abb44c67c7e282569e28ef6f4d62ab');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
   my ($name, $value) = @_;
-  *{$name} = eval "sub {\n$value\n}";
-  warn $@ if $@;
+  *{$name} = meta::eval_in("sub {\n$value\n}", "internal_function::$name");
 };
-__cb453a81adfa24b238c9b69e0b372ec8
+__34abb44c67c7e282569e28ef6f4d62ab
 
 meta::meta('type::java_section', "meta::functor::section 'java_section', extension => '.javatex';");
-meta::meta('type::library', <<'__455137a61f5af29340946d69bc68d663');
+meta::meta('type::library', <<'__a9c0193f297bbc96a78eb5e27727fd30');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
   my ($name, $value) = @_;
-  eval $value;
-  warn $@ if $@;
-
+  meta::eval_in($value, "library::$name");
   meta::externalize $name, "library::$name", sub {
     edit("library::$name");
   };
 };
-__455137a61f5af29340946d69bc68d663
+__a9c0193f297bbc96a78eb5e27727fd30
 
 meta::meta('type::message_color', <<'__794bf137c425293738f07636bcfb5c55');
 meta::configure 'message_color', extension => '', inherit => 1;
@@ -246,18 +247,17 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
-meta::meta('type::template', <<'__31e3d1be8d2d32b285ebb90645d5f37a');
+meta::meta('type::template', <<'__25f4d6eafb1d3eea6d5d3d9a71a5623e');
 meta::configure 'template', extension => '.pl', inherit => 1;
 meta::define_form 'template', sub {
   my ($name, $value) = @_;
-  meta::externalize "template::$name", "template::$name", eval("sub {\n$value\n}");
-  warn $@ if $@;
+  meta::externalize "template::$name", "template::$name", meta::eval_in("sub {\n$value\n}", "template::$name");
 };
-__31e3d1be8d2d32b285ebb90645d5f37a
+__25f4d6eafb1d3eea6d5d3d9a71a5623e
 
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
-meta::bootstrap('initialization', <<'__d2491ab72f79f70883bd583202562e94');
+meta::bootstrap('initialization', <<'__c2170a5a7f8ad15665e581f7fa0aafee');
 #!/usr/bin/perl
 
 =head1 Self-modifying Perl script
@@ -293,13 +293,20 @@ sub meta::define_form {
   };
 }
 
+sub meta::eval_in {
+  my ($what, $where) = @_;
+  my $result = eval $what;
+  $@ =~ s/\(eval \d+\)/$where/ if $@;
+  warn $@ if $@;
+  $result;
+}
+
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
-  eval $value;
-  warn $@ if $@;
+  meta::eval_in($value, $name);
 };
 
-__d2491ab72f79f70883bd583202562e94
+__c2170a5a7f8ad15665e581f7fa0aafee
 
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
@@ -660,7 +667,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
 __91663f820a05ff4029a200fbfd7285bc
 
-meta::function('shell', <<'__364c77a8a88ef137c00350b27d2d2a5e');
+meta::function('shell', <<'__1e47b70678d1618ec18aebc990e3d765');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -692,15 +699,15 @@ while (defined ($_ = $term->readline($prompt))) {
   }
 
   if (watching()) {
-    for my $watch (map retrieve($_), grep /^watch::/, sort keys %data) {
-      terminal::message('watch',   "$watch => " . eval($watch));
-      terminal::message('warning', "Error evaluating watched expression $watch: $@") if $@;
+    for (grep /^watch::/, sort keys %data) {
+      my $watch = retrieve($_);
+      terminal::message('watch', "$_ => " . meta::eval_in($watch, $_));
     }
   }
 
   $prompt = name() . '$ ';
 }
-__364c77a8a88ef137c00350b27d2d2a5e
+__1e47b70678d1618ec18aebc990e3d765
 
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__ccb6335f4837338be1d73ccc5f81973d');
@@ -1074,19 +1081,19 @@ meta::section('introduction', <<'__431052d08303c7a52dec0ecab7190439');
 - eof
 __431052d08303c7a52dec0ecab7190439
 
-meta::section('main', <<'__5d2f69eda9c9e3aacb0c6840c23dd099');
+meta::section('main', <<'__c1c22c06cd9028faaa0c3cdbedbc8531');
 - include section::header
 
 - title  Literate Project
 - author Spencer Tipping
 
-- document <<end
+- document << end
   - maketitle
   - tableofcontents
   
   - include section::introduction
 - end
-__5d2f69eda9c9e3aacb0c6840c23dd099
+__c1c22c06cd9028faaa0c3cdbedbc8531
 
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
