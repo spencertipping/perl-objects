@@ -545,7 +545,7 @@ meta::function('pop-state', <<'__90a6d3599a269ca0bef8126df7aba8e0');
 reload();
 __90a6d3599a269ca0bef8126df7aba8e0
 
-meta::function('preprocess', <<'__f22511d6bf34879dd3e8d3f96e4cc2ca');
+meta::function('preprocess', <<'__df9daa6418aeb4d8a90282c9628fd267');
 # Implements a simple preprocessing language.
 # Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
 # but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
@@ -565,8 +565,8 @@ meta::function('preprocess', <<'__f22511d6bf34879dd3e8d3f96e4cc2ca');
 
 my ($string, %options) = @_;
 my $expansions         = 0;
-my $did_something      = 1;
-my $limit              = $options{expansion_limit} || 10;
+my $old_string         = '';
+my $limit              = $options{expansion_limit} || 100;
 my @pieces             = ();
 
 sub adjust_spaces {
@@ -575,17 +575,16 @@ sub adjust_spaces {
   $string;
 }
 
-while ($did_something and $expansions++ < $limit) {
-  $did_something = 0;
+while ($old_string ne $string and $expansions++ < $limit) {
+  $old_string = $string;
 
-  while ((my @pieces = split /^(\h* -\h \S+ \h* \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
+  while ((my @pieces = split /^(\h* -\h \S+ \h* \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1 and $expansions++ < $limit) {
     $pieces[1 + $_ * 3] =~   /^(\h*)-\h(\S+)\h*(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
       $pieces[1 + $_ * 3] = &{"template::$2"}($3, adjust_spaces($1, $5))
       for 0 .. $#pieces / 3;
 
     $pieces[2 + $_ * 3] = '' for 0 .. $#pieces / 3;
     $string = join '', @pieces;
-    $did_something = 1;
   }
 
   if ((my @pieces = split     /^(\h*-\h \S+ \h* .*)$/xom, $string) > 1) {
@@ -594,12 +593,11 @@ while ($did_something and $expansions++ < $limit) {
       for 0 .. $#pieces >> 1;
 
     $string = join '', @pieces;
-    $did_something = 1;
   }
 }
 
 $string;
-__f22511d6bf34879dd3e8d3f96e4cc2ca
+__df9daa6418aeb4d8a90282c9628fd267
 
 meta::function('push-state', <<'__ba601ddf7dce874ce79dd37a936ffdcc');
 push @{$transient{'states'} = $transient{'states'} || []}, {%data};
