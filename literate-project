@@ -74,7 +74,7 @@ sub meta::externalize_template {
 }
 __1e90e7ccb5fea1d498bbaaa6e7e43851
 
-meta::meta('functor::code-templates', <<'__b3b9479d2bd9412ff2b6fbf16d63ba87');
+meta::meta('functor::code-templates', <<'__84f7cbe81ef5d0075a364c6e15c224b0');
 package code;
 
 # Templates for generating named source files.
@@ -84,12 +84,12 @@ sub template {
     my ($line, $block) = @_;
     $line =~ s/\s+.*$//og;
     file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1);
-    "\\lstset{caption=$line}\\begin{${name}code} $block \\end{${name}code}";
+    "\\lstset{caption=$line}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
-__b3b9479d2bd9412ff2b6fbf16d63ba87
+__84f7cbe81ef5d0075a364c6e15c224b0
 
 meta::meta('functor::editable', <<'__6f3d11b4f691803b1b53bb9f99e31aac');
 # An editable type. This creates a type whose default action is to open an editor
@@ -334,7 +334,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project-new.18c1b30bd7ecbb9186f56bbe8daa523c/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.9e7b146250ca56ae9e4b78f64faf08cf/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1060,7 +1060,7 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::section('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::section('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__431052d08303c7a52dec0ecab7190439');
+meta::section('introduction', <<'__3fea4de5dfbc69ebaba7f15dc46f69bb');
 - s1 Introduction | sec:introduction
   This Perl object gives you a way to integrate documentation, code, and tests into one linearized format.
 
@@ -1070,6 +1070,7 @@ meta::section('introduction', <<'__431052d08303c7a52dec0ecab7190439');
 - resource build <<eof
   #!/bin/bash
   g++ hello.cc -o hello
+  javac Hello.java
 - eof
 
 - cpp hello.cc <<eof
@@ -1079,7 +1080,21 @@ meta::section('introduction', <<'__431052d08303c7a52dec0ecab7190439');
     return 0;
   }
 - eof
-__431052d08303c7a52dec0ecab7190439
+
+- java Hello.java <<eof
+  public class Hello {
+    public static void main (final String[] args) {
+      System.out.println ("Hello world");
+    }
+  }
+- eof
+
+- asm false.s <<eof
+  main:
+    mov $1, %eax
+    ret
+- eof
+__3fea4de5dfbc69ebaba7f15dc46f69bb
 
 meta::section('main', <<'__c1c22c06cd9028faaa0c3cdbedbc8531');
 - include section::header
@@ -1136,10 +1151,10 @@ hi link asmtexComment Comment
 let b:current_syntax = "asmtex"
 __c0e112849aa77ed93f0e940810436757
 
-meta::vim_highlighter('cltex', <<'__e01700f77f7e6d6e9f63f07ccd364865');
+meta::vim_highlighter('cltex', <<'__e56e2efed2c72118214dd4957c59d3e8');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   Cleaner TeX (a variant of LaTeX)
+" Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
 
 if version < 600
   syntax clear
@@ -1147,18 +1162,32 @@ elseif exists("b:current_syntax")
   finish
 endif
 
-runtime! syntax/tex.vim
-
-syn match   cltLine    /^\s*- .*$/ contains=cltKeywords,cltEofMarker
-syn keyword cltKeyword include title author abstract maketitle align verbatim contained
 syn match   cltEofMarker /<<\s*\w\+/ contained
+syn match   cltLine      /^\s*- .*$/ contains=cltKeywords,cltEofMarker
+syn keyword cltKeyword   include title author abstract maketitle align verbatim contained
+
+syn include @cpp         syntax/cpp.vim  | unlet b:current_syntax
+syn include @java        syntax/java.vim | unlet b:current_syntax
+syn include @asm         syntax/asm.vim  | unlet b:current_syntax
+
+syn region  cltCpp       matchgroup=cltCode start=/^\s*- cpp .*<<\z(\w\+\)$/  end=/^\s*- \z1$/ contains=@cpp
+syn region  cltJava      matchgroup=cltCode start=/^\s*- java .*<<\z(\w\+\)$/ end=/^\s*- \z1$/ contains=@java
+syn region  cltAsm       matchgroup=cltCode start=/^\s*- asm .*<<\z(\w\+\)$/  end=/^\s*- \z1$/ contains=@asm
+
+syn region  cltResource  matchgroup=cltCode start=/^\s*- resource .*<<\z(\w\+\)$/  end=/^\s*- \z1$/
+
+runtime! syntax/tex.vim
 
 hi link cltLine      Special
 hi link cltKeyword   String
 hi link cltEofMarker String
 
+hi link cltResource  String
+
+hi link cltCode      Special
+
 let b:current_syntax = "cltex"
-__e01700f77f7e6d6e9f63f07ccd364865
+__e56e2efed2c72118214dd4957c59d3e8
 
 meta::vim_highlighter('cpptex', <<'__bcd26a0f8e5967889360b634ca12af99');
 " TeX with C++
