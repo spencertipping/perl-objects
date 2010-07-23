@@ -80,7 +80,7 @@ sub meta::externalize_template {
 }
 __1e90e7ccb5fea1d498bbaaa6e7e43851
 
-meta::meta('functor::code-templates', <<'__36f996eb1bbe493de30271000aaf4ce4');
+meta::meta('functor::code-templates', <<'__15c06c55a32b6ea66f7be4bfcb4ea53c');
 package code;
 
 # Templates for generating named source files.
@@ -90,13 +90,14 @@ sub template {
     my ($line, $block) = @_;
 
     $line =~ s/\s+.*$//og;
-    file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1);
+    my $append = $line =~ s/^\h*>>\h*//;
+    file::write(&{'::source-directory'} . "/$line", $block, mkpath => 1, append => $append);
     "\\lstset{caption=$line}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
-__36f996eb1bbe493de30271000aaf4ce4
+__15c06c55a32b6ea66f7be4bfcb4ea53c
 
 meta::meta('functor::editable', <<'__e97984f7c34d9f06173be574e28c3f91');
 # An editable type. This creates a type whose default action is to open an editor
@@ -897,18 +898,18 @@ close $handle;
 $result;
 __186bbcef8f6f0dd8b72ba0fdeb1de040
 
-meta::internal_function('file::write', <<'__5787fce743ff32c28487759870245e16');
+meta::internal_function('file::write', <<'__2bb0595e24631c2cace8ee5ec8194285');
 use File::Path 'mkpath';
 use File::Basename 'dirname';
 
 my ($name, $contents, %options) = @_;
-die "Choosing not to overwrite file $name" if $options{'noclobber'} && -f $name;
+die "Choosing not to overwrite file $name" if $options{noclobber} && -f $name;
 mkpath(dirname($name)) if $options{mkpath};
 
-open my($handle), ">", $name or die "Can't open $name for writing";
+open my($handle), $options{append} ? '>>' : '>', $name or die "Can't open $name for writing";
 print $handle $contents;
 close $handle;
-__5787fce743ff32c28487759870245e16
+__2bb0595e24631c2cace8ee5ec8194285
 
 meta::internal_function('fnv_hash', <<'__8d001a3a7988631bab21a41cee559758');
 # A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
