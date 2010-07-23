@@ -517,9 +517,25 @@ meta::data('name', <<'__175b00ca688a0edde91d499786cb437b');
 literate-project
 __175b00ca688a0edde91d499786cb437b
 
+meta::data('output-dir', <<'__f21d437505e3b6c2b76e95184489c474');
+/tmp
+__f21d437505e3b6c2b76e95184489c474
+
+meta::data('pdf-output-file', <<'__8b8990eb4719bd5386adbd956730d529');
+/tmp/literate-project.gcL4xXz8M52mcTkIxG4tEAezgsttH-GvdVZkYdil844/document.pdf
+__8b8990eb4719bd5386adbd956730d529
+
+meta::data('pdftex', <<'__60c892e812eb2ce144e8ead6d15d13f4');
+pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
+__60c892e812eb2ce144e8ead6d15d13f4
+
 meta::data('quiet', <<'__9ce6820642996915d3434b56a7a09ded');
 1
 __9ce6820642996915d3434b56a7a09ded
+
+meta::data('tex', <<'__b5bba1a6a2ba72395858169f4a418d89');
+latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
+__b5bba1a6a2ba72395858169f4a418d89
 
 meta::data('watching', <<'__9ce6820642996915d3434b56a7a09ded');
 0
@@ -529,6 +545,13 @@ meta::function('cat', <<'__c8e76a0cf10e2061e9cf9e1643922c3e');
 my ($name) = @_;
 $data{$name};
 __c8e76a0cf10e2061e9cf9e1643922c3e
+
+meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
+my $output_directory = &{'pdf-output-file'}();
+$output_directory =~ s+/.*++g;
+unlink <$output_directory/*>;
+rmdir $output_directory;
+__1269c1a312062a1598dcde16eb6134e2
 
 meta::function('clone', <<'__fec8cf43b197da97cfd5e49d75891d57');
 for (@_) {
@@ -543,6 +566,40 @@ for (@_) {
   }
 }
 __fec8cf43b197da97cfd5e49d75891d57
+
+meta::function('compile', <<'__1e60166ac9dd38a2ab6e7eb5ac0126b6');
+my $tex_command         = tex();
+my $pdftex_command      = pdftex();
+my $filename            = 'document';
+
+my $contents            = &{'compile-to-tex'}();
+my $output_directory    = &{'output-dir'}();
+chomp $output_directory;
+
+my $temporary_directory = state_based_filename();
+$temporary_directory =~ s+^.*/++;
+$temporary_directory = "$output_directory/$temporary_directory";
+
+$tex_command    =~ s/__TEMPORARY_DIRECTORY__/$temporary_directory/g;
+$tex_command    =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
+
+$pdftex_command =~ s/__TEMPORARY_DIRECTORY__/$temporary_directory/g;
+$pdftex_command =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
+
+mkdir $temporary_directory;
+file::write("$temporary_directory/$filename.tex", $contents);
+
+my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_command) || system($pdftex_command) : system($pdftex_command);
+
+associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
+$result;
+__1e60166ac9dd38a2ab6e7eb5ac0126b6
+
+meta::function('compile-to-tex', <<'__b8d1f3d4aa4e1df5d0461116b2e0a2cc');
+my ($document) = document();
+$document = &$_($document) for (grep /^unlit_converter::/, sort keys %data);
+$document;
+__b8d1f3d4aa4e1df5d0461116b2e0a2cc
 
 meta::function('cp', <<'__ffba0c53d9c2d03d8d6e5f9692f496ae');
 my ($from, $to) = @_;
@@ -668,6 +725,11 @@ $length >= length($_) or $length = length($_) for @lines;
 my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . sprintf('%6d  ', length(serialize_single($_))) . ($inverses{$_} || ''), @lines);
 join "\n", @new_lines;
 __f2fdfdd82d77a876b485332dbd1446fa
+
+meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
+compile() || view();
+clean();
+__9a3d7e3c7e0017f4c9b239f3858aaf03
 
 meta::function('mv', <<'__994133604ac769fe978c4c127fd5011c');
 my ($from, $to) = @_;
@@ -942,6 +1004,13 @@ terminal::message('error', "Verification failed; '$observed_state' (produced by 
 
 $result;
 __e8ff828f42cdc7d759b70bb81721ddb6
+
+meta::function('view', <<'__72064117780244bd9dd38659573b9f2c');
+my $pdf_reader      = &{'pdf-reader'}();
+my $pdf_output_file = &{'pdf-output-file'}();
+chomp $pdf_reader;
+system("$pdf_reader '$pdf_output_file'");
+__72064117780244bd9dd38659573b9f2c
 
 meta::function('vim', <<'__bd231af998c353790253bc6660be0b90');
 # Installs VIM highlighters.
