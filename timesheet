@@ -454,18 +454,61 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
 
-meta::function('preprocess', <<'__35d9aceabda1fda76e1f4a0ee056c21f');
+meta::function('preprocess', <<'__5490aa94527756b14ac589937f717611');
 # Implements a simple preprocessing language.
+# Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
+# but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
+# arguments and a block of lines. The line parameters are passed in verbatim, and the block is
+# indentation-adjusted and then passed in as a second parameter. (Indentation is adjusted to align
+# with the name of the command.)
+#
+# Here are the forms:
+#
+# - line arguments to function
+#
+# - block line arguments << eof
+#   block contents
+#   block contents
+#   ...
+# - eof
 
 my ($string, %options) = @_;
-my $delimiter          = $options{delimiter} || '::';
 my $expansions         = 0;
+my $did_something      = 1;
+my $limit              = $options{expansion_limit} || 10;
+my @pieces             = ();
 
-1 while ++$expansions < 100 and
-        $string =~ s/^\h*$delimiter \s+ (\S+) \s* (.*) $/${\(&{"template::$1"}($2))}/xm ||
-        $string =~ s/^\h*$delimiter<(\S+)> \h* (\S+) \h* (.*)$ \v ([.\v]*?) ^\h*\1$/${\(&{"template::$2"}($3, $4))}/xm;
+sub adjust_spaces {
+  my ($spaces, $string) = @_;
+  $string =~ s/^$spaces  //mg;
+  $string;
+}
+
+while ($did_something and $expansions++ < $limit) {
+  $did_something = 0;
+
+  if ((my @pieces = split  /^(\h* -\h \S+ \h+ \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
+    $pieces[1 + $_ * 3] =~ /^(\h*)-\h(\S+)\h+(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
+      $pieces[1 + $_ * 3] = &{"template::$2"}($3, adjust_spaces($1, $5))
+      for 0 .. $#pieces / 3;
+
+    $pieces[2 + $_ * 3] = '' for 0 .. $#pieces / 3;
+    $string = join '', @pieces;
+    $did_something = 1;
+  }
+
+  if ((my @pieces = split     /^(\h*-\h \S+ \h+ .*)$/xom, $string) > 1) {
+    $pieces[1 + ($_ << 1)] =~ /^ \h*-\h(\S+)\h+(.*)$/xom && $externalized_functions{"template::$1"} and
+      $pieces[1 + ($_ << 1)] = &{"template::$1"}($2)
+      for 0 .. $#pieces >> 1;
+
+    $string = join '', @pieces;
+    $did_something = 1;
+  }
+}
+
 $string;
-__35d9aceabda1fda76e1f4a0ee056c21f
+__5490aa94527756b14ac589937f717611
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
@@ -700,6 +743,11 @@ if ($line =~ / /) {
   match ($text, @functions);
 }
 __f14ae2337c0653b6bb6fd02bb6493646
+
+meta::internal_function('debug_trace', <<'__f887289259890731458a66398b628cdc');
+quiet() or terminal::message('debug', join ', ', @_);
+wantarray ? @_ : $_[0];
+__f887289259890731458a66398b628cdc
 
 meta::internal_function('execute', <<'__2d5b6f18c13943d6a0de15e9c348d428');
 my ($name, %options) = @_;
