@@ -116,49 +116,56 @@ sub meta::functor::section {
 }
 __7ec9c7e2cf5f013a9ad353743c4e715d
 
-meta::meta('functor::tex-templates', <<'__8dbec77b5a63736e0ad92ac0d823a3d6');
+meta::meta('functor::tex-templates', <<'__dc68ce7666f8a5825567925a758d5f68');
+sub meta::externalize_template {
+  my ($name, $implementation) = @_;
+  meta::externalize "template::$name", "template::$name", $implementation;
+}
+
+package tex;
+
 # A wrapper for TeX templates. The idea is always the same, so I'm abstracting out the
 # common externalization logic here.
-sub tex_template_for(&) {
-  my $implementation = $_[0];
+sub template_for(&) {
+  my ($implementation) = @_;
   sub {
-    for my $name (@_) {
-      meta::externalize "template::$name", "template::$name", sub {
-        &$implementation($name, @_);
+    my %names = @_;
+    for my $name (keys %names) {
+      ::meta::externalize_template $name, sub {
+        &$implementation($names{$name}, @_);
       };
     }
   };
 }
 
+sub id {
+  map $_ => $_, @_;
+}
+
 # Creates a one-line or multiline template based on normal TeX syntax. It's a straight
 # transfer into TeX with no preprocessing.
-*tex_template = tex_template_for {
+*template = template_for {
   my ($name, $line, $block) = @_;
   $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$block\}";
 };
 
 # Creates a labeled one-line template. This is just like normal TeX, but assumes the
 # specification of a label name after a pipe character.
-*labeled_tex_template = tex_template_for {
+*labeled_template = template_for {
   my ($name, $line, undef) = @_;
   my ($real_stuff, $label) = split /\h*\|\h*/, $line;
-  "\\$name\{$real_stuff\} \\label{$label}";
+  "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
 };
-__8dbec77b5a63736e0ad92ac0d823a3d6
+__dc68ce7666f8a5825567925a758d5f68
 
 meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
 meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
-meta::meta('template::sections', <<'__96d2bd7ea0dbce93abfcfbbe9ca49b50');
-tex_template(qw(title author date abstract));
-__96d2bd7ea0dbce93abfcfbbe9ca49b50
-
-meta::meta('type::asm_section', <<'__8148e66be6f3817d532b6e9eefff8fdc');
-meta::functor::section 'asm_section', extension => '.asmtex';
-__8148e66be6f3817d532b6e9eefff8fdc
-
+meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents title author date abstract maketitle/));');
+meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
+meta::meta('type::asm_section', "meta::functor::section 'asm_section', extension => '.asmtex';");
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -169,18 +176,9 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::code_filter', <<'__fe8409ace442357793b70c5e4b09541f');
-meta::functor::filter 'code_filter';
-__fe8409ace442357793b70c5e4b09541f
-
-meta::meta('type::cpp_section', <<'__d7334e147c03395ca4fde89c2fc319ca');
-meta::functor::section 'cpp_section', extension => '.cpptex';
-__d7334e147c03395ca4fde89c2fc319ca
-
-meta::meta('type::data', <<'__58d8027f20099b28a159eaac67314051');
-meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';
-__58d8027f20099b28a159eaac67314051
-
+meta::meta('type::code_filter', "meta::functor::filter 'code_filter';");
+meta::meta('type::cpp_section', "meta::functor::section 'cpp_section', extension => '.cpptex';");
+meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__af5dd5ecc27fe503f68b041791bee6ca');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
@@ -199,10 +197,7 @@ meta::define_form 'internal_function', sub {
 };
 __cb453a81adfa24b238c9b69e0b372ec8
 
-meta::meta('type::java_section', <<'__71571ca8dcfe5aca392fc772c6008897');
-meta::functor::section 'java_section', extension => '.javatex';
-__71571ca8dcfe5aca392fc772c6008897
-
+meta::meta('type::java_section', "meta::functor::section 'java_section', extension => '.javatex';");
 meta::meta('type::library', <<'__455137a61f5af29340946d69bc68d663');
 meta::configure 'library', extension => '.pl', inherit => 1;
 meta::define_form 'library', sub {
@@ -216,10 +211,7 @@ meta::define_form 'library', sub {
 };
 __455137a61f5af29340946d69bc68d663
 
-meta::meta('type::line_filter', <<'__d2bdb3ece44235778ec7402481d95582');
-meta::functor::filter 'line_filter';
-__d2bdb3ece44235778ec7402481d95582
-
+meta::meta('type::line_filter', "meta::functor::filter 'line_filter';");
 meta::meta('type::message_color', <<'__794bf137c425293738f07636bcfb5c55');
 meta::configure 'message_color', extension => '', inherit => 1;
 meta::define_form 'message_color', sub {
@@ -236,14 +228,8 @@ meta::meta('type::meta', <<'__640f25635ce2365b0648962918cf9932');
 meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
-meta::meta('type::note', <<'__08f3bf50999ba8de0702a6a95fdfc7ff');
-meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';
-__08f3bf50999ba8de0702a6a95fdfc7ff
-
-meta::meta('type::section', <<'__a393d88693f2bb6471a46c7e300e6920');
-meta::functor::section 'section', extension => '.cltex';
-__a393d88693f2bb6471a46c7e300e6920
-
+meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::section', "meta::functor::section 'section', extension => '.cltex';");
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
@@ -265,18 +251,9 @@ meta::define_form 'template', sub {
 };
 __31e3d1be8d2d32b285ebb90645d5f37a
 
-meta::meta('type::unlit_converter', <<'__f9f6134ac8b62ac44bd8556451562a42');
-meta::functor::filter 'unlit_converter';
-__f9f6134ac8b62ac44bd8556451562a42
-
-meta::meta('type::vim_highlighter', <<'__d6ea5b59c918d4e2cfebf5c880f43be8');
-meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';
-__d6ea5b59c918d4e2cfebf5c880f43be8
-
-meta::meta('type::watch', <<'__8e208e776f55ef2c4825deb888a41590');
-meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';
-__8e208e776f55ef2c4825deb888a41590
-
+meta::meta('type::unlit_converter', "meta::functor::filter 'unlit_converter';");
+meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
+meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
 meta::asm_section('asm-introduction', <<'__2d1cba5a3763bf1c481e39ac9ba7bb3a');
 - Introduction to Assembly Literate Coding
   Assembly-language snippets are specified in much the same way as C++ snippets. The only difference is that the \verb|asm| marker is used instead of \verb|cpp|.
@@ -486,10 +463,7 @@ meta::cpp_section('cpp-introduction', <<'__bdb0ea7cecc426699b7a476dace9232c');
   :.
 __bdb0ea7cecc426699b7a476dace9232c
 
-meta::data('default-action', <<'__53508551b72484e92f7acb844808db7b');
-shell
-__53508551b72484e92f7acb844808db7b
-
+meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License
 Copyright (c) 2010 Spencer Tipping
@@ -513,34 +487,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', <<'__175b00ca688a0edde91d499786cb437b');
-literate-project
-__175b00ca688a0edde91d499786cb437b
-
-meta::data('output-dir', <<'__f21d437505e3b6c2b76e95184489c474');
-/tmp
-__f21d437505e3b6c2b76e95184489c474
-
-meta::data('pdf-output-file', <<'__8b8990eb4719bd5386adbd956730d529');
-/tmp/literate-project.gcL4xXz8M52mcTkIxG4tEAezgsttH-GvdVZkYdil844/document.pdf
-__8b8990eb4719bd5386adbd956730d529
-
-meta::data('pdftex', <<'__60c892e812eb2ce144e8ead6d15d13f4');
-pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
-__60c892e812eb2ce144e8ead6d15d13f4
-
-meta::data('quiet', <<'__9ce6820642996915d3434b56a7a09ded');
-1
-__9ce6820642996915d3434b56a7a09ded
-
-meta::data('tex', <<'__b5bba1a6a2ba72395858169f4a418d89');
-latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__
-__b5bba1a6a2ba72395858169f4a418d89
-
-meta::data('watching', <<'__9ce6820642996915d3434b56a7a09ded');
-0
-__9ce6820642996915d3434b56a7a09ded
-
+meta::data('name', 'literate-project');
+meta::data('output-dir', '/tmp');
+meta::data('pdf-output-file', '/tmp/literate-project-new.29433a8840aff1045f202095afed1305/document.pdf');
+meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('quiet', '1');
+meta::data('table-of-contents', '1');
+meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('watching', '0');
 meta::function('cat', <<'__c8e76a0cf10e2061e9cf9e1643922c3e');
 my ($name) = @_;
 $data{$name};
@@ -567,12 +521,12 @@ for (@_) {
 }
 __fec8cf43b197da97cfd5e49d75891d57
 
-meta::function('compile', <<'__1e60166ac9dd38a2ab6e7eb5ac0126b6');
-my $tex_command         = tex();
-my $pdftex_command      = pdftex();
+meta::function('compile', <<'__8de64ff7f4823d92f3258e211608d9bb');
+my $tex_command         = &{'tex-command'}();
+my $pdftex_command      = &{'pdftex-command'}();
 my $filename            = 'document';
 
-my $contents            = &{'compile-to-tex'}();
+my $contents            = tex();
 my $output_directory    = &{'output-dir'}();
 chomp $output_directory;
 
@@ -593,13 +547,7 @@ my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_comm
 
 associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
 $result;
-__1e60166ac9dd38a2ab6e7eb5ac0126b6
-
-meta::function('compile-to-tex', <<'__b8d1f3d4aa4e1df5d0461116b2e0a2cc');
-my ($document) = document();
-$document = &$_($document) for (grep /^unlit_converter::/, sort keys %data);
-$document;
-__b8d1f3d4aa4e1df5d0461116b2e0a2cc
+__8de64ff7f4823d92f3258e211608d9bb
 
 meta::function('cp', <<'__ffba0c53d9c2d03d8d6e5f9692f496ae');
 my ($from, $to) = @_;
@@ -819,10 +767,7 @@ my $state_count = scalar @{$transient{'states'}};
 "There are now $state_count states on the stack.";
 __ba601ddf7dce874ce79dd37a936ffdcc
 
-meta::function('reload', <<'__5208dbe97a0fd49e9ef075f33cbada53');
-execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;
-__5208dbe97a0fd49e9ef075f33cbada53
-
+meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
 for my $to_be_deleted (@_) {
   messages::warning("$to_be_deleted does not exist") unless grep {$_ eq $to_be_deleted} keys %data;
@@ -921,10 +866,7 @@ while (defined ($_ = $term->readline($prompt))) {
 }
 __364c77a8a88ef137c00350b27d2d2a5e
 
-meta::function('size', <<'__ed32c644d604fdc61dda48bd3fbe5559');
-length(serialize());
-__ed32c644d604fdc61dda48bd3fbe5559
-
+meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__ccb6335f4837338be1d73ccc5f81973d');
 my ($name) = @_;
 file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
@@ -940,6 +882,12 @@ $hash = fast_hash($hash . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
+
+meta::function('tex', <<'__5bb8bf491e1b442858096acf711135f9');
+my ($document) = @_;
+$document ||= 'main';
+preprocess(retrieve("section::$document"));
+__5bb8bf491e1b442858096acf711135f9
 
 meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
 my (undef, undef, $mode) = stat $0;
@@ -1158,10 +1106,7 @@ $name =~ s/::.*$//;
 $name;
 __93213d60cafb9627e0736b48cd1f0760
 
-meta::internal_function('retrieve', <<'__7c96ec5935b22f2766064ea54f1e868a');
-@data{@_};
-__7c96ec5935b22f2766064ea54f1e868a
-
+meta::internal_function('retrieve', '@data{@_};');
 meta::internal_function('serialize_single', <<'__5ad359e62adc135871d39fcb7f4c2a93');
 my $name               = shift || $_;
 my $contents           = $data{$name};
@@ -1314,30 +1259,12 @@ if ($line =~ /^(\s*)- (.*)$/) {
 }
 __992b5cb95920c73e9ddb83a77e2e305e
 
-meta::message_color('state', <<'__14e993fdf2c62df353613c243dc9053b');
-purple
-__14e993fdf2c62df353613c243dc9053b
-
-meta::message_color('states', <<'__152a940086f7cee6110528a09af7dd78');
-yellow
-__152a940086f7cee6110528a09af7dd78
-
-meta::message_color('watch', <<'__d292ea8fe6dcc812d29610a5a5c09e67');
-blue
-__d292ea8fe6dcc812d29610a5a5c09e67
-
-meta::section('header-asm', <<'__70388b84ae0ba098cafb4592e3500ac7');
-\lstnewenvironment{asmcode} {}{}
-__70388b84ae0ba098cafb4592e3500ac7
-
-meta::section('header-cpp', <<'__213aa045c64289eb1ae1128afc284bd7');
-\lstnewenvironment{cppcode} {\lstset{language=c++}} {}
-__213aa045c64289eb1ae1128afc284bd7
-
-meta::section('header-java', <<'__801fbfea4a00fdfe830a432101d8ed2b');
-\lstnewenvironment{javacode}{\lstset{language=java}}{}
-__801fbfea4a00fdfe830a432101d8ed2b
-
+meta::message_color('state', 'purple');
+meta::message_color('states', 'yellow');
+meta::message_color('watch', 'blue');
+meta::section('header-asm', '\lstnewenvironment{asmcode} {}{}');
+meta::section('header-cpp', '\lstnewenvironment{cppcode} {\lstset{language=c++}} {}');
+meta::section('header-java', '\lstnewenvironment{javacode}{\lstset{language=java}}{}');
 meta::section('header-listings', <<'__747e2e3bc83de0d564ec96e91395fa84');
 \definecolor{gray}{rgb}{0.6,0.6,0.6}
 
@@ -1354,18 +1281,9 @@ meta::section('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
 \usepackage[colorlinks]{hyperref}
 __f69baadb1d3ce11744003b174c91b34b
 
-meta::section('header-proof', <<'__ac0f7e79e2127ec3ced94bac981b0db7');
-\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}
-__ac0f7e79e2127ec3ced94bac981b0db7
-
-meta::section('header-refs', <<'__f9c09aef11577a7f9f33af4fffecec89');
-\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
-__f9c09aef11577a7f9f33af4fffecec89
-
-meta::section('header-resource', <<'__88678a72c4dfefea8608eab673b009e6');
-\lstnewenvironment{resource}{}{}
-__88678a72c4dfefea8608eab673b009e6
-
+meta::section('header-proof', '\newenvironmemnt{proof}{\par\noindent\textbf{Proof.}}{\hfill$\square$}');
+meta::section('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
+meta::section('header-resource', '\lstnewenvironment{resource}{}{}');
 meta::section('headers', <<'__2af1bd6e1070320807691804633b8e9c');
 - include section::header-packages
 - include section::header-listings
@@ -1378,6 +1296,20 @@ meta::section('headers', <<'__2af1bd6e1070320807691804633b8e9c');
 - include section::header-java
 - include section::header-resource
 __2af1bd6e1070320807691804633b8e9c
+
+meta::section('main', <<'__3a7955ede812aebfbc2c3835dfd9ae4d');
+- include section::header
+
+- title  Literate Project
+- author Spencer Tipping
+
+- document <<end
+  - maketitle
+  
+  - s1 Introduction
+    This Perl object gives you a way to integrate documentation, code, and tests into one linearized format.
+- end
+__3a7955ede812aebfbc2c3835dfd9ae4d
 
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
@@ -1483,7 +1415,7 @@ hi link asmtexComment Comment
 let b:current_syntax = "asmtex"
 __c0e112849aa77ed93f0e940810436757
 
-meta::vim_highlighter('cltex', <<'__a1260eac19a1d7f207a3e1cd4fb6f8dc');
+meta::vim_highlighter('cltex', <<'__ad1f7e68795321f73fc58a572ef69a37');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX)
@@ -1496,11 +1428,17 @@ endif
 
 runtime! syntax/tex.vim
 
-syn match cltInclude /^\s*- include.*$/
-hi link cltInclude Special
+syn match   cltLine    /^\s*- .*$/ contains=cltKeywords
+syn match   cltBlock   /^\s*- .*<<\s*\(\w\+\)[\n.]*^\s*- \1$/ contains=cltKeywords
+syn keyword cltKeyword include title author abstract maketitle align verbatim contained
+
+hi link cltLine    Special
+hi link cltKeyword String
+
+hi link cltBlock   String
 
 let b:current_syntax = "cltex"
-__a1260eac19a1d7f207a3e1cd4fb6f8dc
+__ad1f7e68795321f73fc58a572ef69a37
 
 meta::vim_highlighter('cpptex', <<'__bcd26a0f8e5967889360b634ca12af99');
 " TeX with C++
