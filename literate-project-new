@@ -116,10 +116,44 @@ sub meta::functor::section {
 }
 __7ec9c7e2cf5f013a9ad353743c4e715d
 
+meta::meta('functor::tex-templates', <<'__8dbec77b5a63736e0ad92ac0d823a3d6');
+# A wrapper for TeX templates. The idea is always the same, so I'm abstracting out the
+# common externalization logic here.
+sub tex_template_for(&) {
+  my $implementation = $_[0];
+  sub {
+    for my $name (@_) {
+      meta::externalize "template::$name", "template::$name", sub {
+        &$implementation($name, @_);
+      };
+    }
+  };
+}
+
+# Creates a one-line or multiline template based on normal TeX syntax. It's a straight
+# transfer into TeX with no preprocessing.
+*tex_template = tex_template_for {
+  my ($name, $line, $block) = @_;
+  $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$block\}";
+};
+
+# Creates a labeled one-line template. This is just like normal TeX, but assumes the
+# specification of a label name after a pipe character.
+*labeled_tex_template = tex_template_for {
+  my ($name, $line, undef) = @_;
+  my ($real_stuff, $label) = split /\h*\|\h*/, $line;
+  "\\$name\{$real_stuff\} \\label{$label}";
+};
+__8dbec77b5a63736e0ad92ac0d823a3d6
+
 meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
 meta::configure 'internal', extension => '.pl', inherit => 1;
 meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
+
+meta::meta('template::sections', <<'__96d2bd7ea0dbce93abfcfbbe9ca49b50');
+tex_template(qw(title author date abstract));
+__96d2bd7ea0dbce93abfcfbbe9ca49b50
 
 meta::meta('type::asm_section', <<'__8148e66be6f3817d532b6e9eefff8fdc');
 meta::functor::section 'asm_section', extension => '.asmtex';
@@ -1263,6 +1297,19 @@ meta::section('header-resource', <<'__88678a72c4dfefea8608eab673b009e6');
 \lstnewenvironment{resource}{}{}
 __88678a72c4dfefea8608eab673b009e6
 
+meta::section('headers', <<'__2af1bd6e1070320807691804633b8e9c');
+- include section::header-packages
+- include section::header-listings
+
+- include section::header-proof
+- include section::header-refs
+
+- include section::header-asm
+- include section::header-cpp
+- include section::header-java
+- include section::header-resource
+__2af1bd6e1070320807691804633b8e9c
+
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
 terminal::message('warning', "Error during template evaluation: $@") if $@;
@@ -1367,7 +1414,7 @@ hi link asmtexComment Comment
 let b:current_syntax = "asmtex"
 __c0e112849aa77ed93f0e940810436757
 
-meta::vim_highlighter('cltex', <<'__5c6f9e956d9180b8426c07922fec85c1');
+meta::vim_highlighter('cltex', <<'__a1260eac19a1d7f207a3e1cd4fb6f8dc');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX)
@@ -1378,38 +1425,13 @@ elseif exists("b:current_syntax")
   finish
 endif
 
-syn match  cltTitle   /^= .*$/
-syn match  cltAuthor  /^a .*$/
-syn match  cltDate    /^d .*$/
-syn match  cltBegin   /^begin$/
-syn match  cltSection /^\s*- .*$/
-syn region cltVerbatim start=/^\s*::$/ end=/^\s*:\.$/
-
-syn match  cltEnumeratedThing /^\s*[eid]\[/
-syn match  cltEnumeratedThing /^\s*\][eid]/
-syn match  cltItem            /^\s*+\s/
-syn match  cltQuantifiedItem  /^\s*+\[[^\]]*\]\s/
-
 runtime! syntax/tex.vim
 
-syn match  cltInclude /^\s*%section([^)]\+)$/
-
-hi link cltBegin    Keyword
-hi link cltTitle    Identifier
-hi link cltAuthor   Identifier
-hi link cltDate     Identifier
-
-hi link cltEnumeratedThing Special
-hi link cltItem            Special
-hi link cltQuantifiedItem  Special
-hi link cltInclude         Special
-
-hi link cltSection  Type
-
-hi link cltVerbatim String
+syn match cltInclude /^\s*- include.*$/
+hi link cltInclude Special
 
 let b:current_syntax = "cltex"
-__5c6f9e956d9180b8426c07922fec85c1
+__a1260eac19a1d7f207a3e1cd4fb6f8dc
 
 meta::vim_highlighter('cpptex', <<'__bcd26a0f8e5967889360b634ca12af99');
 " TeX with C++
