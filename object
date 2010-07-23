@@ -400,7 +400,7 @@ my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
 
-meta::function('preprocess', <<'__d6b4dac414a1f6097a55ae7d1741c55f');
+meta::function('preprocess', <<'__f22511d6bf34879dd3e8d3f96e4cc2ca');
 # Implements a simple preprocessing language.
 # Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
 # but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
@@ -433,8 +433,8 @@ sub adjust_spaces {
 while ($did_something and $expansions++ < $limit) {
   $did_something = 0;
 
-  if ((my @pieces = split  /^(\h* -\h \S+ \h* \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
-    $pieces[1 + $_ * 3] =~ /^(\h*)-\h(\S+)\h*(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
+  while ((my @pieces = split /^(\h* -\h \S+ \h* \V*? <<\h*(\w+)$ \n .*?  ^\h*-\h\2)$/xms, $string) > 1) {
+    $pieces[1 + $_ * 3] =~   /^(\h*)-\h(\S+)\h*(\V*?)<<\h*(\w+)$ \n(.*?) ^\1 -\h\4 $/xms && $externalized_functions{"template::$2"} and
       $pieces[1 + $_ * 3] = &{"template::$2"}($3, adjust_spaces($1, $5))
       for 0 .. $#pieces / 3;
 
@@ -454,7 +454,7 @@ while ($did_something and $expansions++ < $limit) {
 }
 
 $string;
-__d6b4dac414a1f6097a55ae7d1741c55f
+__f22511d6bf34879dd3e8d3f96e4cc2ca
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__e3c840f6c0b12ec504df30595b5bb94d');
