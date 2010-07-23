@@ -332,7 +332,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.20ac846cfc59c8d45405aa0e91bc6f4f/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.4af1b0628d2071422f387deeeaee4205/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1026,6 +1026,16 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
+- include resource::header-packages
+- include resource::header-listings
+
+- include resource::header-refs
+
+- include resource::header-languages
+- include resource::header-resource
+__efe6254be4f73fb4170ab1980a1888d5
+
 meta::resource('header-languages', <<'__637a18cf607b727dec3feab552be05e2');
 \lstnewenvironment{asmcode}       {}{}
 \lstnewenvironment{cppcode}       {\lstset{language=c++}}{}
@@ -1052,18 +1062,6 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('header', <<'__ae65778dfd59478a4ca16db0ce0ca55c');
-- documentclass article
-
-- include resource::header-packages
-- include resource::header-listings
-
-- include resource::header-refs
-
-- include resource::header-languages
-- include resource::header-resource
-__ae65778dfd59478a4ca16db0ce0ca55c
-
 meta::section('introduction', <<'__9ee97c9024007bc500a826b6b73c22be');
 - s1 Introduction | sec:introduction
   This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
@@ -1114,8 +1112,9 @@ meta::section('introduction', <<'__9ee97c9024007bc500a826b6b73c22be');
   - end
 __9ee97c9024007bc500a826b6b73c22be
 
-meta::section('main', <<'__c1c22c06cd9028faaa0c3cdbedbc8531');
-- include section::header
+meta::section('main', <<'__28a5934deb22216a2f1c03a90ac1d2d0');
+- documentclass article
+- include resource::header
 
 - title  Literate Project
 - author Spencer Tipping
@@ -1126,7 +1125,7 @@ meta::section('main', <<'__c1c22c06cd9028faaa0c3cdbedbc8531');
   
   - include section::introduction
 - end
-__c1c22c06cd9028faaa0c3cdbedbc8531
+__28a5934deb22216a2f1c03a90ac1d2d0
 
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
