@@ -174,7 +174,7 @@ meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm resource/;');
-meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass/));');
+meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/));');
 meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
@@ -1126,7 +1126,7 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::vim_highlighter('cltex', <<'__e56e2efed2c72118214dd4957c59d3e8');
+meta::vim_highlighter('cltex', <<'__498a8b8e7ba0b96c7dc72fa26236954d');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
@@ -1150,6 +1150,7 @@ syn region  cltJava      matchgroup=cltCode start=/^\s*- java .*<<\z(\w\+\)$/ en
 syn region  cltAsm       matchgroup=cltCode start=/^\s*- asm .*<<\z(\w\+\)$/  end=/^\s*- \z1$/ contains=@asm
 
 syn region  cltResource  matchgroup=cltCode start=/^\s*- resource .*<<\z(\w\+\)$/  end=/^\s*- \z1$/
+syn region  cltVerbatim  matchgroup=cltCode start=/^\s*- verbatim .*<<\z(\w\+\)$/  end=/^\s*- \z1$/
 
 runtime! syntax/tex.vim
 
@@ -1158,11 +1159,12 @@ hi link cltKeyword   String
 hi link cltEofMarker String
 
 hi link cltResource  String
+hi link cltVerbatim  String
 
 hi link cltCode      Special
 
 let b:current_syntax = "cltex"
-__e56e2efed2c72118214dd4957c59d3e8
+__498a8b8e7ba0b96c7dc72fa26236954d
 
 meta::internal('runtime', <<'__487b99b3af6056d1d1c0e00dd4aef707');
 my $initial_state        = state();
