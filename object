@@ -360,28 +360,23 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__d900070fd20c5c0ae08280b0f354666f');
-my $criteria = join '|', @_;
-my @lines = grep /$criteria/ && defined $data{$externalized_functions{$_}}, sort keys %externalized_functions;
-my $length = 0;
-$length >= length($_) or $length = length($_) for @lines;
+meta::function('ls', <<'__8d3569c87d97e719a870c88c8c069ac4');
+my $criteria   = join '|', @_;
+my @external   = sort grep /$criteria/, sort keys %externalized_functions;
+my @defined_by = map $externalized_functions{$_}, @external;
+my @shadows    = grep ! defined $data{$externalized_functions{$_}}, @external;
 
-my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . $externalized_functions{$_}, @lines);
-join("\n", sort @new_lines);
-__d900070fd20c5c0ae08280b0f354666f
+table_display([@external, @shadows], [@defined_by, map('< shadow >', @shadows)]);
+__8d3569c87d97e719a870c88c8c069ac4
 
-meta::function('ls-a', <<'__f2fdfdd82d77a876b485332dbd1446fa');
-my $criteria = join '|', @_;
-my @lines    = grep(/$criteria/, sort keys %data);
-my $length   = 0;
+meta::function('ls-a', <<'__f7f3e6ea4f8f642a7aa1f3695d70e57b');
+my $criteria   = join '|', @_;
+my @attributes = grep(/$criteria/, sort keys %data);
+my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
 
-my %inverses;
-$inverses{$externalized_functions{$_}} = $_ for keys %externalized_functions;
-
-$length >= length($_) or $length = length($_) for @lines;
-my @new_lines = map($_ . ' ' x ($length + 2 - length($_)) . sprintf('%6d  ', length(serialize_single($_))) . ($inverses{$_} || ''), @lines);
-join "\n", @new_lines;
-__f2fdfdd82d77a876b485332dbd1446fa
+table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
+                                                               [map sprintf('%6d', length(retrieve($_))),         @attributes]);
+__f7f3e6ea4f8f642a7aa1f3695d70e57b
 
 meta::function('mv', <<'__994133604ac769fe978c4c127fd5011c');
 my ($from, $to) = @_;
@@ -793,6 +788,24 @@ my $noise  = $name || state();
 $noise =~ s/\//-/g;
 "$0.$noise";
 __218815c285975367ae0324bf5c3f5409
+
+meta::internal_function('table_display', <<'__a00cceb4dcab4051a071b0d84e9aca72');
+# Displays an array of arrays as a table; that is, with alignment. Arrays are
+# expected to be in column-major order.
+
+sub maximum_length_in {
+  my $maximum = 0;
+  $maximum = length($_) > $maximum ? length($_) : $maximum for @_;
+  $maximum;
+}
+
+my @arrays    = @_;
+my @lengths   = map maximum_length_in(@$_), @arrays;
+my @row_major = map {my $i = $_; [map $$_[$i], @arrays]} 0 .. $#{$arrays[0]};
+my $format    = join '  ', map "%-${_}s", @lengths;
+
+join "\n", map sprintf($format, @$_), @row_major;
+__a00cceb4dcab4051a071b0d84e9aca72
 
 meta::internal_function('temporary_name', <<'__0fb1402061581b69822f913631b4a9d9');
 use File::Temp 'tempfile';
