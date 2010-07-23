@@ -175,7 +175,7 @@ __0172b18c9b9311477d2f6b8c16bb44c2
 
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm resource/;');
 meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/));');
-meta::meta('template::math', "tex::template align => 'align*';");
+meta::meta('template::math', "tex::template align => 'align*', nalign => 'align';");
 meta::meta('template::sections', "tex::labeled_template(s0 => 'part', s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');");
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
