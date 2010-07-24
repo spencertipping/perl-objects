@@ -80,7 +80,7 @@ sub meta::externalize_template {
 }
 __1e90e7ccb5fea1d498bbaaa6e7e43851
 
-meta::meta('functor::code-templates', <<'__d7c4de4adf3c7606453a118f75e73fd1');
+meta::meta('functor::code-templates', <<'__6bc13f3504ee617e2bc66153d4112ce5');
 package code;
 
 # Templates for generating named source files.
@@ -92,12 +92,12 @@ sub template {
 
     $line =~ s/\s+.*$//o;
     file::write(&{'::source-directory'}() . "/$line", ($append && "\n") . $block, mkpath => 1, append => $append);
-    "\\lstset{caption=$line}\\begin{${name}code}\n$block \\end{${name}code}";
+    "\\lstset{caption={$line},name={$line}}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
-__d7c4de4adf3c7606453a118f75e73fd1
+__6bc13f3504ee617e2bc66153d4112ce5
 
 meta::meta('functor::editable', <<'__e97984f7c34d9f06173be574e28c3f91');
 # An editable type. This creates a type whose default action is to open an editor
@@ -337,7 +337,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.4af1b0628d2071422f387deeeaee4205/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.4353264bb68c2f5eb34c5a11164de3e3/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1054,15 +1054,15 @@ meta::resource('header-languages', <<'__637a18cf607b727dec3feab552be05e2');
 \lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
 __637a18cf607b727dec3feab552be05e2
 
-meta::resource('header-listings', <<'__747e2e3bc83de0d564ec96e91395fa84');
+meta::resource('header-listings', <<'__4caf6ff3ff152cce49ad5d1775ad0703');
 \definecolor{gray}{rgb}{0.6,0.6,0.6}
 
 \usepackage{caption}
 \DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
 \captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
 
-\lstset{columns=fixed,basicstyle={\tt},numbers=left,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
-__747e2e3bc83de0d564ec96e91395fa84
+\lstset{columns=fixed,basicstyle={\tt},numbers=left,firstnumber=auto,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
+__4caf6ff3ff152cce49ad5d1775ad0703
 
 meta::resource('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
 \usepackage[utf8]{inputenc}
