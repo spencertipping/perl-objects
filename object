@@ -590,6 +590,7 @@ $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
 
+meta::function('trim', 'wantarray ? map /^\s*(.*?)\s*$/o, @_ : ($_[0] =~ /^\s*(.*?)\s*$/o)[0];');
 meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
