@@ -898,18 +898,18 @@ close $handle;
 $result;
 __186bbcef8f6f0dd8b72ba0fdeb1de040
 
-meta::internal_function('file::write', <<'__2bb0595e24631c2cace8ee5ec8194285');
-use File::Path 'mkpath';
+meta::internal_function('file::write', <<'__eb7b1efebe0db73378b0cce46681788d');
+use File::Path     'mkpath';
 use File::Basename 'dirname';
 
 my ($name, $contents, %options) = @_;
-die "Choosing not to overwrite file $name" if $options{noclobber} && -f $name;
+die "Choosing not to overwrite file $name" if $options{noclobber} and -f $name;
 mkpath(dirname($name)) if $options{mkpath};
 
 open my($handle), $options{append} ? '>>' : '>', $name or die "Can't open $name for writing";
 print $handle $contents;
 close $handle;
-__2bb0595e24631c2cace8ee5ec8194285
+__eb7b1efebe0db73378b0cce46681788d
 
 meta::internal_function('fnv_hash', <<'__8d001a3a7988631bab21a41cee559758');
 # A rough approximation to the Fowler-No Voll hash. It's been 32-bit vectorized
@@ -960,7 +960,11 @@ $name =~ s/::.*$//;
 $name;
 __93213d60cafb9627e0736b48cd1f0760
 
-meta::internal_function('retrieve', '@data{@_};');
+meta::internal_function('retrieve', <<'__0e9c1ae91f6cf6020cf1a05db7d51d72');
+my @results = map defined $data{$_} ? $data{$_} : file::read($_), @_;
+wantarray ? @results : $results[0];
+__0e9c1ae91f6cf6020cf1a05db7d51d72
+
 meta::internal_function('state_based_filename', <<'__218815c285975367ae0324bf5c3f5409');
 my ($name) = @_;
 my $noise  = $name || state();
