@@ -80,7 +80,7 @@ sub meta::externalize_template {
 }
 __1e90e7ccb5fea1d498bbaaa6e7e43851
 
-meta::meta('functor::code-templates', <<'__6bc13f3504ee617e2bc66153d4112ce5');
+meta::meta('functor::code-templates', <<'__8438e73e45c87188c8b46d0c43eb4971');
 package code;
 
 # Templates for generating named source files.
@@ -92,12 +92,12 @@ sub template {
 
     $line =~ s/\s+.*$//o;
     file::write(&{'::source-directory'}() . "/$line", ($append && "\n") . $block, mkpath => 1, append => $append);
-    "\\lstset{caption={$line},name={$line}}\\begin{${name}code}\n$block \\end{${name}code}";
+    "\\lstset{caption={$line" . ($append && ' (continued)') . "},name={$line}}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
-__6bc13f3504ee617e2bc66153d4112ce5
+__8438e73e45c87188c8b46d0c43eb4971
 
 meta::meta('functor::editable', <<'__e97984f7c34d9f06173be574e28c3f91');
 # An editable type. This creates a type whose default action is to open an editor
@@ -337,7 +337,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.4353264bb68c2f5eb34c5a11164de3e3/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.0bce008065f901e9d67f7e02fc97777b/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
