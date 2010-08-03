@@ -168,7 +168,8 @@ meta::define_form 'internal', \&meta::meta::implementation;
 __0172b18c9b9311477d2f6b8c16bb44c2
 
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
-meta::meta('template::document', 'tex::template(tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/));');
+meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
+meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize item/);');
 meta::meta('template::math', "tex::template align => 'align*', nalign => 'align';");
 meta::meta('template::sections', <<'__0bf14cbc6a0e77d9b82dd185d8d8a9a0');
 tex::labeled_template(s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
@@ -337,7 +338,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.fc005d2e24bd28d3873ffc72fb355c39/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.3d25d18aa19d37f890ec00c55eaecabc/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1072,9 +1073,24 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__488e61a2ab561070908a4f14c4209a22');
+meta::section('introduction', <<'__da922cd923eedb4306efb6920b9ebc91');
 - s1 Introduction | sec:introduction
   This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
+
+  Here are some features:
+
+  - itemize << end
+    - item Impossible to use
+    - item Unfathomably complex to maintain
+  - end
+
+  And the costs associated with using this technology are:
+
+  - enumerate << end
+    - item Developers must know self-modifying Perl.
+           This is very rare!
+    - item If something breaks, you are sunk.
+  - end
 
   - s2 Code | sec:introduction-code
     Code is entered in literate form. For example:
@@ -1124,7 +1140,7 @@ meta::section('introduction', <<'__488e61a2ab561070908a4f14c4209a22');
   - resource >> build << end
     g++ false.s -o false
   - end
-__488e61a2ab561070908a4f14c4209a22
+__da922cd923eedb4306efb6920b9ebc91
 
 meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
 - documentclass article
