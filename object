@@ -266,11 +266,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 meta::data('name', 'object');
 meta::data('quiet', '1');
 meta::data('watching', '1');
-meta::function('cat', <<'__c8e76a0cf10e2061e9cf9e1643922c3e');
-my ($name) = @_;
-$data{$name};
-__c8e76a0cf10e2061e9cf9e1643922c3e
-
+meta::function('cat', 'join "\n", retrieve(@_);');
 meta::function('clone', <<'__fec8cf43b197da97cfd5e49d75891d57');
 for (@_) {
   if ($_) {
