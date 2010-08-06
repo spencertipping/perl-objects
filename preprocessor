@@ -407,10 +407,10 @@ rm($from);
 __09f350db8406303ade06d229477d79ad
 
 meta::function('parents', 'join "\n", grep s/^parent:://o, sort keys %data;');
-meta::function('perl', <<'__d8818fd77e9e7ce68811e0947dfcc206');
-my $result = eval($_[0]);
-$@ ? $@ : $result;
-__d8818fd77e9e7ce68811e0947dfcc206
+meta::function('perl', <<'__f2b57dd342923797e8e2287c3095803f');
+my $result = eval(join ' ', @_);
+$@ ? terminal::message('error', $@) : $result;
+__f2b57dd342923797e8e2287c3095803f
 
 meta::function('preprocess', <<'__66e539d29e9afa903569efad0eb7c886');
 # Implements a simple preprocessing language.
