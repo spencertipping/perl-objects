@@ -100,11 +100,6 @@ sub meta::functor::editable {
 }
 __56ad8e3c4ccb4892d4901a7cd44f249d
 
-meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
-meta::configure 'internal', extension => '.pl', inherit => 1;
-meta::define_form 'internal', \&meta::meta::implementation;
-__0172b18c9b9311477d2f6b8c16bb44c2
-
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -407,6 +402,19 @@ table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@si
 __4bcdf3d1fb399288437d5c78937b8b63
 
 meta::function('ls-a', "ls('-adz');");
+meta::function('main', <<'__ddc2374bf4b3e4a80eaf61ab0c6ebaee');
+my $initial_state        = state();
+chomp(my $default_action = retrieve('data::default-action'));
+
+my $function_name = shift(@ARGV) || $default_action || 'usage';
+terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+
+chomp(my $result = &$function_name(@ARGV));
+print "$result\n" if $result;
+
+save() unless $initial_state eq state();
+__ddc2374bf4b3e4a80eaf61ab0c6ebaee
+
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
@@ -509,7 +517,7 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__640e48356ea3a27eb6f9ff5dd1407763');
+meta::function('serialize', <<'__7e56808c56c0015826a437dbc0f406eb');
 my ($options, @criteria)    = separate_options(@_);
 my ($inheritable, $partial) = @options{qw(-i -p)};
 
@@ -517,17 +525,15 @@ $partial ||= @criteria;
 
 my $criteria               = join '|', @criteria;
 my @matching_keys          = grep length && (! $criteria || m/$criteria/) && (! $inheritable || $transient{inherit}{namespace($_)}), sort keys %data;
-my @keys_without_internals = grep ! /^internal::/, @matching_keys;
 
-my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
-                                                       grep(! /^meta::/,   @keys_without_internals),
-                                                       grep(/^internal::/, @matching_keys);
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/,   @matching_keys),
+                                                       grep(! /^meta::/, @matching_keys);
 
-my @final_array            = $partial ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+my @final_array            = $partial ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, 'main();', '__END__');
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__640e48356ea3a27eb6f9ff5dd1407763
+__7e56808c56c0015826a437dbc0f406eb
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
@@ -951,20 +957,5 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::internal('runtime', <<'__e004ac791211dc56cb8241175a107328');
-my $initial_state        = state();
-chomp(my $default_action = retrieve('data::default-action'));
-
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
-
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
-
-END {
-  save() unless $initial_state eq state();
-}
-
-__e004ac791211dc56cb8241175a107328
-
+main();
 __END__
