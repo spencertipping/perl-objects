@@ -411,11 +411,12 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__29ece8f57db8406502690b6703995e60');
+meta::function('ls', <<'__ffe7609f16d647b7eb9ed9693dd12c23');
 my ($options, @criteria) = separate_options(@_);
 
-my ($all, $shadows, $dereference, $sizes) = @$options{qw(-a -s -d -z)};
-$all ||= $dereference;
+my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
+$all   ||= $dereference;
+$sizes ||= $flags;
 
 return table_display([grep ! defined $data{$externalized_functions{$_}}, sort keys %externalized_functions]) if $shadows;
 
@@ -426,8 +427,12 @@ my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_funct
 my @externals = map $inverses{$_}, @definitions;
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @definitions if $sizes;
 
-join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (), $sizes ? ([@sizes]) : ());
-__29ece8f57db8406502690b6703995e60
+my %flag_hashes = map {$_ => {map {$_ => 1} select_keys("-$_" => 1)}} qw(m u i) if $flags;
+my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-', sort keys %flag_hashes)} @definitions if $flags;
+
+join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
+                                                    $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
+__ffe7609f16d647b7eb9ed9693dd12c23
 
 meta::function('ls-a', "ls('-ad');");
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');

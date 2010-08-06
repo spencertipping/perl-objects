@@ -529,11 +529,12 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__29ece8f57db8406502690b6703995e60');
+meta::function('ls', <<'__ffe7609f16d647b7eb9ed9693dd12c23');
 my ($options, @criteria) = separate_options(@_);
 
-my ($all, $shadows, $dereference, $sizes) = @$options{qw(-a -s -d -z)};
-$all ||= $dereference;
+my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
+$all   ||= $dereference;
+$sizes ||= $flags;
 
 return table_display([grep ! defined $data{$externalized_functions{$_}}, sort keys %externalized_functions]) if $shadows;
 
@@ -544,8 +545,12 @@ my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_funct
 my @externals = map $inverses{$_}, @definitions;
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @definitions if $sizes;
 
-join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (), $sizes ? ([@sizes]) : ());
-__29ece8f57db8406502690b6703995e60
+my %flag_hashes = map {$_ => {map {$_ => 1} select_keys("-$_" => 1)}} qw(m u i) if $flags;
+my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-', sort keys %flag_hashes)} @definitions if $flags;
+
+join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
+                                                    $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
+__ffe7609f16d647b7eb9ed9693dd12c23
 
 meta::function('ls-a', "ls('-ad');");
 meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
@@ -1133,7 +1138,7 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__3acfa9b2cc71ab5f5ca254ef095102c5');
+meta::parent('object', <<'__eb4a7afe9184e221dde366fac3e805b7');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1142,6 +1147,7 @@ function::create
 function::current-state
 function::edit
 function::export
+function::grep
 function::hash
 function::import
 function::import-bundle
@@ -1203,7 +1209,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__3acfa9b2cc71ab5f5ca254ef095102c5
+__eb4a7afe9184e221dde366fac3e805b7
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess
