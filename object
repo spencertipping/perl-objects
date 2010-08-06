@@ -607,16 +607,16 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__1289a15033d6376f807f662456d20fe9');
+meta::function('update-from', <<'__06dfd77d0851d3672a26cc8411ea7116');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-my ($options, $targets) = separate_options(@_);
+my ($options, @targets) = separate_options(@_);
 
 my %options = %$options;
-my @targets = @$targets or die 'Must specify another script to pull data from.';
+@targets or die 'Must specify at least one target to update from';
 
 my $save_state = ! ($options{'-n'} || $options{'--no-save'});
 my $no_parents =    $options{'-P'} || $options{'--no-parent'} || $options{'--no-parents'};
@@ -654,7 +654,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__1289a15033d6376f807f662456d20fe9
+__06dfd77d0851d3672a26cc8411ea7116
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
