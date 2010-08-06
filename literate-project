@@ -336,9 +336,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', 'object');
+meta::data('name', 'literate-project');
+meta::data('output-dir', '/tmp');
+meta::data('pdf-output-file', '/tmp/literate-project.5Pnb/document.pdf');
+meta::data('pdf-reader', '/usr/bin/evince');
+meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
-meta::data('watching', '1');
+meta::data('source-directory', '/tmp/src');
+meta::data('table-of-contents', '1');
+meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('watching', '0');
 meta::function('cat', 'join "\n", retrieve(@_);');
 meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
 my $output_directory = &{'pdf-output-file'}();
@@ -361,7 +368,7 @@ for (@_) {
 }
 __fec8cf43b197da97cfd5e49d75891d57
 
-meta::function('compile', <<'__8de64ff7f4823d92f3258e211608d9bb');
+meta::function('compile', <<'__59d02438dafea67f3f12c2b74f4a8bfb');
 my $tex_command         = &{'tex-command'}();
 my $pdftex_command      = &{'pdftex-command'}();
 my $filename            = 'document';
@@ -370,7 +377,7 @@ my $contents            = tex();
 my $output_directory    = &{'output-dir'}();
 chomp $output_directory;
 
-my $temporary_directory = state_based_filename();
+my $temporary_directory = temporary_name();
 $temporary_directory =~ s+^.*/++;
 $temporary_directory = "$output_directory/$temporary_directory";
 
@@ -387,7 +394,7 @@ my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_comm
 
 associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
 $result;
-__8de64ff7f4823d92f3258e211608d9bb
+__59d02438dafea67f3f12c2b74f4a8bfb
 
 meta::function('cp', <<'__d33fe9aa270eeee6dcc3ee445447a6a7');
 my ($from, $to) = @_;
@@ -1212,6 +1219,106 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
+meta::section('introduction', <<'__da922cd923eedb4306efb6920b9ebc91');
+- s1 Introduction | sec:introduction
+  This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
+
+  Here are some features:
+
+  - itemize << end
+    - item Impossible to use
+    - item Unfathomably complex to maintain
+  - end
+
+  And the costs associated with using this technology are:
+
+  - enumerate << end
+    - item Developers must know self-modifying Perl.
+           This is very rare!
+    - item If something breaks, you are sunk.
+  - end
+
+  - s2 Code | sec:introduction-code
+    Code is entered in literate form. For example:
+
+  - resource build << end
+    #!/bin/bash
+    g++ hello.cc -o hello
+    javac Hello.java
+  - end
+
+  - cpp hello.cc << end
+    #include <iostream>
+    int main () {
+      std::cout << "Hello world" << std::endl;
+      return 0;
+    }
+  - end
+
+  - java Hello.java << end
+    public class Hello {
+      public static void main (final String[] args) {
+        System.out.println ("Hello world");
+      }
+    }
+  - end
+
+  - javascript hello.js << end
+    document.getElementById ('hi').appendChild (
+      document.createTextNode ('Hi there!'));
+  - end
+
+  - html hello.html << end
+    <html>
+      <body>
+        <div id='hi'></div>
+        <script src='hello.js'></script>
+      </body>
+    </html>
+  - end
+
+  - asm false.s << end
+    main:
+      mov $1, %eax
+      ret
+  - end
+
+  - resource >> build << end
+    g++ false.s -o false
+  - end
+__da922cd923eedb4306efb6920b9ebc91
+
+meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
+- documentclass article
+- include resource::header
+
+- title  Literate Project
+- author Spencer Tipping
+
+- document << end
+  - maketitle
+  - tableofcontents
+
+  - comment This is a line comment that will not appear in the TeX source.
+  - comment Block comment syntax is shown below:
+
+  - comment << end
+    This text will not appear in the TeX source either.
+
+    - comment << end
+      Nor will this text, and comments are nestable as long as either the
+      EOF markers or indentation levels differ.
+    - end
+
+  - comment << eof
+    Same indentation level, different EOF marker.
+  - eof
+  - end
+  
+  - include section::introduction
+- end
+__589811f7266bdf4ec8b030aeb648dddc
+
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
