@@ -712,13 +712,13 @@ while (defined ($_ = $term->readline($prompt))) {
 __c6ef6c31734c0b330f6076543fef8f1f
 
 meta::function('size', 'length(serialize());');
-meta::function('snapshot', <<'__ccb6335f4837338be1d73ccc5f81973d');
+meta::function('snapshot', <<'__787158a5844d36cbfd29e5b74c9167e1');
 my ($name) = @_;
-file::write(my $finalname = state_based_filename($name), serialize(), noclobber => 1);
+file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 
 terminal::message('state', "Created snapshot at $finalname.");
-__ccb6335f4837338be1d73ccc5f81973d
+__787158a5844d36cbfd29e5b74c9167e1
 
 meta::function('state', <<'__e17520e3a5d81d788ae995fd8ac47cb9');
 my @keys = sort keys %data;
@@ -1031,13 +1031,6 @@ my %options;
 ({%options}, @others, @_);
 __d47e8ee23fe55e27bb523c9fcb2f5ca1
 
-meta::internal_function('state_based_filename', <<'__218815c285975367ae0324bf5c3f5409');
-my ($name) = @_;
-my $noise  = $name || state();
-$noise =~ s/\//-/g;
-"$0.$noise";
-__218815c285975367ae0324bf5c3f5409
-
 meta::internal_function('strip', 'wantarray ? map {s/^\s*|\s*$//g; $_} @_ : $_[0] =~ /^\s*(.*?)\s*$/ && $1;');
 meta::internal_function('table_display', <<'__4ac28dc593ac17fd17b6573c07b43e4e');
 # Displays an array of arrays as a table; that is, with alignment. Arrays are
@@ -1102,7 +1095,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__d51b291c2ffd83578746dcdd7caea94c');
+meta::parent('object', <<'__1104012b382ce55ec1bad822b1ff2d35');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1137,7 +1130,6 @@ function::update
 function::update-from
 function::usage
 function::verify
-function::vim
 internal_function::associate
 internal_function::basename
 internal_function::complete
@@ -1152,7 +1144,6 @@ internal_function::invoke_editor_on
 internal_function::namespace
 internal_function::retrieve
 internal_function::separate_options
-internal_function::state_based_filename
 internal_function::strip
 internal_function::table_display
 internal_function::temporary_name
@@ -1174,11 +1165,10 @@ meta::type::meta
 meta::type::note
 meta::type::parent
 meta::type::state
-meta::type::vim_highlighter
 meta::type::watch
-__d51b291c2ffd83578746dcdd7caea94c
+__1104012b382ce55ec1bad822b1ff2d35
 
-meta::parent('preprocessor', <<'__9731b233da1196809b51c617f6cbba67');
+meta::parent('preprocessor', <<'__914bb00eeda94a8a7d2daf91c2fb31e2');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1214,7 +1204,6 @@ function::update
 function::update-from
 function::usage
 function::verify
-function::vim
 internal_function::associate
 internal_function::basename
 internal_function::complete
@@ -1229,7 +1218,6 @@ internal_function::invoke_editor_on
 internal_function::namespace
 internal_function::retrieve
 internal_function::separate_options
-internal_function::state_based_filename
 internal_function::strip
 internal_function::table_display
 internal_function::temporary_name
@@ -1252,15 +1240,14 @@ meta::type::note
 meta::type::parent
 meta::type::state
 meta::type::template
-meta::type::vim_highlighter
 meta::type::watch
 template::comment
 template::eval
 template::failing_conditional
 template::include
-__9731b233da1196809b51c617f6cbba67
+__914bb00eeda94a8a7d2daf91c2fb31e2
 
-meta::parent('vim-highlighters', <<'__d51b291c2ffd83578746dcdd7caea94c');
+meta::parent('vim-highlighters', <<'__f56ab89bb3f0a97f12477cf6b50eb5a0');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1310,7 +1297,6 @@ internal_function::invoke_editor_on
 internal_function::namespace
 internal_function::retrieve
 internal_function::separate_options
-internal_function::state_based_filename
 internal_function::strip
 internal_function::table_display
 internal_function::temporary_name
@@ -1334,7 +1320,7 @@ meta::type::parent
 meta::type::state
 meta::type::vim_highlighter
 meta::type::watch
-__d51b291c2ffd83578746dcdd7caea94c
+__f56ab89bb3f0a97f12477cf6b50eb5a0
 
 meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
 - include resource::header-packages
