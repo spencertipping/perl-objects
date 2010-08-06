@@ -100,11 +100,6 @@ sub meta::functor::editable {
 }
 __56ad8e3c4ccb4892d4901a7cd44f249d
 
-meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
-meta::configure 'internal', extension => '.pl', inherit => 1;
-meta::define_form 'internal', \&meta::meta::implementation;
-__0172b18c9b9311477d2f6b8c16bb44c2
-
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -559,21 +554,28 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__d7b3affaece3a36d5cfc051b88a5b76e');
-my $criteria               = join '|', @_;
+meta::function('serialize', <<'__6c57d1effb201bef69d42a81dbc0dfa7');
+my ($options, @criteria)             = separate_options(@_);
+my ($inheritable, $partial, $unique) = @$options{qw(-i -p -u)};
 
-my @matching_keys          = grep length && (! $criteria || m/$criteria/), sort keys %data;
-my @keys_without_internals = grep ! /^internal::/, @matching_keys;
+$partial ||= @criteria || $unique;
 
-my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
-                                                       grep(! /^meta::/,   @keys_without_internals),
-                                                       grep(/^internal::/, @matching_keys);
+my %non_unique;
+++$non_unique{$_} for split /\n/, map(retrieve($_), grep /^parent::/, sort keys %data);
 
-my @final_array            = $criteria ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+my $criteria               = join '|', @criteria;
+my @matching_keys          = grep length && (! $criteria    || m/$criteria/) &&
+                                            (! $inheritable || $transient{inherit}{namespace($_)}) &&
+                                            (! $unique      || ! $non_unique{$_}), sort keys %data;
+
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/,   @matching_keys),
+                                                       grep(! /^meta::/, @matching_keys);
+
+my @final_array            = $partial ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, 'main();', '__END__');
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__d7b3affaece3a36d5cfc051b88a5b76e
+__6c57d1effb201bef69d42a81dbc0dfa7
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
@@ -657,7 +659,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__af357a46b0a806f63c44a08f711dc7a4');
+meta::function('update-from', <<'__3f35ee3717fefc1f125e0b18bb7cabf3');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -680,13 +682,12 @@ for my $target (@targets) {
   associate("parent::$target", join '', qx($target ls -i)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
-  eval qx($target serialize '^meta::');
+  eval qx($target serialize -m);
   terminal::message('warning', $@) if $@;
   terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
 
   terminal::message('info', 'Updating non-meta attributes...');
-  my $combined_pattern = join '|', map "^${_}::", grep ! (/^meta$/ || /^internal$/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}};
-  eval qx($target serialize '$combined_pattern');
+  eval qx($target serialize -iM);
   terminal::message('warning', $@) if $@;
   reload();
 
@@ -704,14 +705,14 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__af357a46b0a806f63c44a08f711dc7a4
+__3f35ee3717fefc1f125e0b18bb7cabf3
 
-meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
-<<"EOD" . ls ();
+meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
+<<"EOD" . ls ('-d');
 Usage: $0 action [arguments]
 Defined actions (and the attribute that defines them):
 EOD
-__234b1da5bb4e34d72a932ab68aad5052
+__25615bcd877fcf7e5c823dec475f0a31
 
 meta::function('verify', <<'__e8ff828f42cdc7d759b70bb81721ddb6');
 my $serialized_data = serialize();
@@ -865,11 +866,23 @@ unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
 
-meta::internal_function('messages::error', <<'__5af9120535afe26fa6828f477abe833c');
-my ($message) = @_;
-terminal::message('error', $message);
-die;
-__5af9120535afe26fa6828f477abe833c
+meta::internal_function('main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
+$SIG{'INT'} = sub {
+  snapshot();
+  exit 1;
+};
+
+my $initial_state        = state();
+chomp(my $default_action = retrieve('data::default-action'));
+
+my $function_name = shift(@ARGV) || $default_action || 'usage';
+terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+
+chomp(my $result = &$function_name(@ARGV));
+print "$result\n" if $result;
+
+save() unless $initial_state eq state();
+__cb63fed16dd9ee83dcbd15aa72643d74
 
 meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
 my ($message) = @_;
@@ -983,89 +996,6 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__e743a718056c9b7375c1fd096f82d5bd');
-bootstrap::initialization              
-function::cat                          
-function::clone                        
-function::cp                           
-function::create                       
-function::current-state                
-function::edit                         
-function::export                       
-function::hash                         
-function::import                       
-function::import-bundle                
-function::load-state                   
-function::lock                         
-function::ls                           
-function::ls-a                         
-function::mv                           
-function::note                         
-function::perl                         
-function::preprocess                   
-function::reload                       
-function::rm                           
-function::save                         
-function::save-state                   
-function::serialize                    
-function::serialize_single             
-function::shell                        
-function::size                         
-function::snapshot                     
-function::state                        
-function::trim                         
-function::unlock                       
-function::update                       
-function::update-from                  
-function::usage                        
-function::verify                       
-function::vim                          
-internal::runtime                      
-internal_function::associate           
-internal_function::basename            
-internal_function::complete            
-internal_function::debug_trace         
-internal_function::execute             
-internal_function::fast_hash           
-internal_function::file::read          
-internal_function::file::write         
-internal_function::fnv_hash            
-internal_function::invoke_editor_on    
-internal_function::messages::warning   
-internal_function::namespace           
-internal_function::retrieve            
-internal_function::separate_options    
-internal_function::state_based_filename
-internal_function::table_display       
-internal_function::temporary_name      
-internal_function::translate_backtrace 
-library::terminal                      
-message_color::state                   
-message_color::states                  
-message_color::watch                   
-meta::configure                        
-meta::externalize                      
-meta::functor::editable                
-meta::internal::runtime                
-meta::type::bootstrap                  
-meta::type::data                       
-meta::type::function                   
-meta::type::internal_function          
-meta::type::library                    
-meta::type::message_color              
-meta::type::meta                       
-meta::type::note                       
-meta::type::parent                     
-meta::type::state                      
-meta::type::template                   
-meta::type::vim_highlighter            
-meta::type::watch                      
-template::comment                      
-template::eval                         
-template::failing_conditional          
-template::include                      
-__e743a718056c9b7375c1fd096f82d5bd
-
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
@@ -1086,20 +1016,5 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::internal('runtime', <<'__570c9329c63822a15749384cb355d653');
-my $initial_state        = state();
-chomp(my $default_action = retrieve('data::default-action'));
-
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-messages::warning("Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
-
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
-
-END {
-  save() unless $initial_state eq state();
-}
-
-__570c9329c63822a15749384cb355d653
-
+main();
 __END__
