@@ -1102,7 +1102,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__6de507bf1036312c57ccae5e19c89bc4');
+meta::parent('object', <<'__171fde01b0a5bb10aa21f103c0946524');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1121,7 +1121,6 @@ function::ls-a
 function::mv
 function::note
 function::perl
-function::preprocess
 function::reload
 function::rm
 function::save
@@ -1175,14 +1174,9 @@ meta::type::meta
 meta::type::note
 meta::type::parent
 meta::type::state
-meta::type::template
 meta::type::vim_highlighter
 meta::type::watch
-template::comment
-template::eval
-template::failing_conditional
-template::include
-__6de507bf1036312c57ccae5e19c89bc4
+__171fde01b0a5bb10aa21f103c0946524
 
 meta::parent('preprocessor', <<'__6de507bf1036312c57ccae5e19c89bc4');
 bootstrap::initialization

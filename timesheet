@@ -342,11 +342,11 @@ my $formatted_minutes = sprintf '%02d', $minute_total;
 (join "\n", @new_lines) . "\n\"Total\",\"\",\"\",\"$hour_total:$formatted_minutes\"";
 __465eb739f70fe3eb34f78bd26f658364
 
-meta::function('current-state', <<'__0d932bd14547669ffbc86fde3ae9d050');
-my @valid_keys   = grep ! /^internal::runtime$/ && ! /^state::/, sort keys %data;
+meta::function('current-state', <<'__d83ae43551c0f58d1d0ce576402a315a');
+my @valid_keys   = grep ! /^state::/, sort keys %data;
 my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys));
 join "\n", map serialize_single($_), @ordered_keys;
-__0d932bd14547669ffbc86fde3ae9d050
+__d83ae43551c0f58d1d0ce576402a315a
 
 meta::function('edit', <<'__6912fb43aad413e79cbf45e134866b6e');
 my ($name, %options) = @_;
