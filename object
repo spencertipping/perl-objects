@@ -504,14 +504,19 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__7e56808c56c0015826a437dbc0f406eb');
-my ($options, @criteria)    = separate_options(@_);
-my ($inheritable, $partial) = @options{qw(-i -p)};
+meta::function('serialize', <<'__6c57d1effb201bef69d42a81dbc0dfa7');
+my ($options, @criteria)             = separate_options(@_);
+my ($inheritable, $partial, $unique) = @$options{qw(-i -p -u)};
 
-$partial ||= @criteria;
+$partial ||= @criteria || $unique;
+
+my %non_unique;
+++$non_unique{$_} for split /\n/, map(retrieve($_), grep /^parent::/, sort keys %data);
 
 my $criteria               = join '|', @criteria;
-my @matching_keys          = grep length && (! $criteria || m/$criteria/) && (! $inheritable || $transient{inherit}{namespace($_)}), sort keys %data;
+my @matching_keys          = grep length && (! $criteria    || m/$criteria/) &&
+                                            (! $inheritable || $transient{inherit}{namespace($_)}) &&
+                                            (! $unique      || ! $non_unique{$_}), sort keys %data;
 
 my @matching_attributes    = map serialize_single($_), grep(/^meta::/,   @matching_keys),
                                                        grep(! /^meta::/, @matching_keys);
@@ -520,7 +525,7 @@ my @final_array            = $partial ? @matching_attributes : (retrieve('bootst
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__7e56808c56c0015826a437dbc0f406eb
+__6c57d1effb201bef69d42a81dbc0dfa7
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
