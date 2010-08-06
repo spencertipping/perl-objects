@@ -402,19 +402,6 @@ table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@si
 __4bcdf3d1fb399288437d5c78937b8b63
 
 meta::function('ls-a', "ls('-adz');");
-meta::function('main', <<'__ddc2374bf4b3e4a80eaf61ab0c6ebaee');
-my $initial_state        = state();
-chomp(my $default_action = retrieve('data::default-action'));
-
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
-
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
-
-save() unless $initial_state eq state();
-__ddc2374bf4b3e4a80eaf61ab0c6ebaee
-
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
@@ -823,6 +810,24 @@ my $result = file::read($filename);
 unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
+
+meta::internal_function('main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
+$SIG{'INT'} = sub {
+  snapshot();
+  exit 1;
+};
+
+my $initial_state        = state();
+chomp(my $default_action = retrieve('data::default-action'));
+
+my $function_name = shift(@ARGV) || $default_action || 'usage';
+terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+
+chomp(my $result = &$function_name(@ARGV));
+print "$result\n" if $result;
+
+save() unless $initial_state eq state();
+__cb63fed16dd9ee83dcbd15aa72643d74
 
 meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
 my ($message) = @_;
