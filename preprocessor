@@ -600,7 +600,6 @@ $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
 
-meta::function('trim', 'wantarray ? map /^\s*(.*?)\s*$/o, @_ : ($_[0] =~ /^\s*(.*?)\s*$/o)[0];');
 meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
@@ -944,7 +943,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__171fde01b0a5bb10aa21f103c0946524');
+meta::parent('object', <<'__ed1d9b666c6be18fadec8e874212ecc9');
 bootstrap::initialization
 function::cat
 function::clone
@@ -973,7 +972,6 @@ function::shell
 function::size
 function::snapshot
 function::state
-function::trim
 function::unlock
 function::update
 function::update-from
@@ -1018,7 +1016,7 @@ meta::type::parent
 meta::type::state
 meta::type::vim_highlighter
 meta::type::watch
-__171fde01b0a5bb10aa21f103c0946524
+__ed1d9b666c6be18fadec8e874212ecc9
 
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');

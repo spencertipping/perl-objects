@@ -417,11 +417,11 @@ if (defined $value) {
 }
 __97e5444422f5f6087371f59ddc3e1b8c
 
-meta::function('current-state', <<'__0d932bd14547669ffbc86fde3ae9d050');
-my @valid_keys   = grep ! /^internal::runtime$/ && ! /^state::/, sort keys %data;
+meta::function('current-state', <<'__d83ae43551c0f58d1d0ce576402a315a');
+my @valid_keys   = grep ! /^state::/, sort keys %data;
 my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys));
 join "\n", map serialize_single($_), @ordered_keys;
-__0d932bd14547669ffbc86fde3ae9d050
+__d83ae43551c0f58d1d0ce576402a315a
 
 meta::function('edit', <<'__6912fb43aad413e79cbf45e134866b6e');
 my ($name, %options) = @_;
@@ -1102,7 +1102,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__171fde01b0a5bb10aa21f103c0946524');
+meta::parent('object', <<'__ed1d9b666c6be18fadec8e874212ecc9');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1131,7 +1131,6 @@ function::shell
 function::size
 function::snapshot
 function::state
-function::trim
 function::unlock
 function::update
 function::update-from
@@ -1176,7 +1175,7 @@ meta::type::parent
 meta::type::state
 meta::type::vim_highlighter
 meta::type::watch
-__171fde01b0a5bb10aa21f103c0946524
+__ed1d9b666c6be18fadec8e874212ecc9
 
 meta::parent('preprocessor', <<'__6de507bf1036312c57ccae5e19c89bc4');
 bootstrap::initialization
