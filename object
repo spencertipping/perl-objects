@@ -160,6 +160,10 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::parent', <<'__9baea730377d6d44e7a1f10dcc0f21b9');
+meta::functor::editable 'parent', extension => '', inherit => 0, default => sub {&{'::update-from'}($_[0], '-n')};
+__9baea730377d6d44e7a1f10dcc0f21b9
+
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
@@ -593,7 +597,12 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __b1bdb7eb224487f5bfd439ebb997c823
 
-meta::function('update-from', <<'__a0566c58c2d9f7db526459b6b32edc69');
+meta::function('update', <<'__1b7184c02d845898266385577d826226');
+$_->() for grep s/^parent:://o, sort keys %data;
+rm('state::before-update') if grep /^-n$/ || /^--no-save$/, @_;
+__1b7184c02d845898266385577d826226
+
+meta::function('update-from', <<'__502611b9ef1a671db25f273ed9095d54');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 
@@ -617,7 +626,7 @@ terminal::message('warning', $@) if $@;
 reload();
 
 if (verify()) {
-  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.");
+  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state;
 } elsif (grep /^--force$/o || /^-f$/o, @options) {
   terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
   terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
@@ -629,7 +638,7 @@ if (verify()) {
   terminal::message('info',    "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
   &{'load-state'}('before-update') if $save_state;
 }
-__a0566c58c2d9f7db526459b6b32edc69
+__502611b9ef1a671db25f273ed9095d54
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
