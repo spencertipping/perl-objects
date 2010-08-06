@@ -336,16 +336,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', 'literate-project');
-meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.3d25d18aa19d37f890ec00c55eaecabc/document.pdf');
-meta::data('pdf-reader', '/usr/bin/evince');
-meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('name', 'object');
 meta::data('quiet', '1');
-meta::data('source-directory', '/tmp/src');
-meta::data('table-of-contents', '1');
-meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
-meta::data('watching', '0');
+meta::data('watching', '1');
 meta::function('cat', 'join "\n", retrieve(@_);');
 meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
 my $output_directory = &{'pdf-output-file'}();
@@ -494,30 +487,25 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__c52c50c47c8ebafae036df8da52d6d9f');
+meta::function('ls', <<'__29ece8f57db8406502690b6703995e60');
 my ($options, @criteria) = separate_options(@_);
 
-my ($all, $shadows, $dereference, $sizes, $inheritable, $noninheritable) = @$options{qw(-a -s -d -z -i -I)};
-
-$all ||= $inheritable || $noninheritable;
-
-terminal::message('warning', 'Specifying -i and -I is silly.') if $inheritable and $noninheritable;
+my ($all, $shadows, $dereference, $sizes) = @$options{qw(-a -s -d -z)};
+$all ||= $dereference;
 
 return table_display([grep ! defined $data{$externalized_functions{$_}}, sort keys %externalized_functions]) if $shadows;
 
-my $criteria    = join('|', @criteria) || '.';
-my @definitions = grep /$criteria/ && (! $inheritable || $transient{inherit}{namespace($_)}) &&
-                                      (! $noninheritable || ! $transient{inherit}{namespace($_)}),
-                  sort keys %{$all ? \%data : \%externalized_functions};
+my $criteria    = join('|', @criteria);
+my @definitions = select_keys('--criteria' => $criteria, %$options);
 
-my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_functions                                              if $all;
-my @alternate = $all ? map($inverses{$_}, @definitions) : map($externalized_functions{$_}, @definitions);
-my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@alternate} if $sizes;
+my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_functions;
+my @externals = map $inverses{$_}, @definitions;
+my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @definitions if $sizes;
 
-join "\n", map strip($_), split /\n/, table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@sizes]) : ());
-__c52c50c47c8ebafae036df8da52d6d9f
+join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (), $sizes ? ([@sizes]) : ());
+__29ece8f57db8406502690b6703995e60
 
-meta::function('ls-a', "ls('-adz');");
+meta::function('ls-a', "ls('-ad');");
 meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
 compile() || view();
 clean();
@@ -632,29 +620,15 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__6bfaa5db04b2bd3f698fd63a3aa15082');
-my ($options, @criteria)                              = separate_options(@_);
-my ($inheritable, $partial, $unique, $meta, $nonmeta) = @$options{qw(-i -p -u -m -M)};
+meta::function('serialize', <<'__34d0c254c0bc2112971c5115646682e5');
+my ($options, @criteria) = separate_options(@_);
+my $partial              = $$options{'-p'};
+my $criteria             = join '|', @criteria;
+my @attributes           = map serialize_single($_), select_keys(%$options, '-m' => 1), select_keys(%$options, '-M' => 1);
+my @final_array          = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__END__']};
 
-$partial ||= @criteria || $unique || $meta || $nonmeta;
-
-my %inherited = map {strip($_) => 1} split(/\n/, join("\n", retrieve(grep /^parent::/, keys %data)));
-
-my $criteria               = join '|', @criteria;
-my @matching_keys          = grep length && (! $criteria    || m/$criteria/) &&
-                                            (! $inheritable || $transient{inherit}{namespace($_)}) &&
-                                            (! $unique      || ! $inherited{$_}) &&
-                                            (! $meta        || /^meta::/o) &&
-                                            (! $nonmeta     || ! /^meta::/o), sort keys %data;
-
-my @matching_attributes    = map serialize_single($_), grep(/^meta::/o,   @matching_keys),
-                                                       grep(! /^meta::/o, @matching_keys);
-
-my @final_array            = @{$partial ? \@matching_attributes : [retrieve('bootstrap::initialization'), @matching_attributes, 'internal::main();', '', '__END__']};
-
-terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__6bfaa5db04b2bd3f698fd63a3aa15082
+__34d0c254c0bc2112971c5115646682e5
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
@@ -743,7 +717,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__c96702e68ad12a1144e02f213de12c10');
+meta::function('update-from', <<'__3dd901fc7c45e66ff4a6c57b5386d409');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -759,7 +733,7 @@ my $no_parents =    $options{'-P'} || $options{'--no-parent'} || $options{'--no-
 my $force      =    $options{'-f'} || $options{'--force'};
 my $unique     =    $options{'-u'} || $options{'--unique'};
 
-my $unique_option = $unique ? 'u' : '';
+my $unique_option = $unique ? '-u' : '';
 
 &{'save-state'}('before-update') if $save_state;
 terminal::message('warning', 'Not saving state, as requested; to save it, omit the -n option.') unless $save_state;
@@ -768,14 +742,14 @@ for my $target (@targets) {
   terminal::message('info', "Updating from $target");
 
   rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
-  associate("parent::$target", join '', qx($target ls -i)) unless $no_parents;
+  associate("parent::$target", join '', qx(perl $target ls -aiu)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
-  eval qx($target serialize -m$unique_option);
+  eval qx(perl $target serialize -mp $unique_option);
   terminal::message('warning', $@) if $@;
 
   terminal::message('info', 'Updating non-meta attributes...');
-  eval qx($target serialize -iM$unique_option);
+  eval qx(perl $target serialize -ipM $unique_option);
   terminal::message('warning', $@) if $@;
   reload();
 
@@ -787,13 +761,12 @@ for my $target (@targets) {
     terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state;
   } else {
     terminal::message('error',   'Verification failed after the upgrade was complete.');
-    terminal::message('warning', "Because there is no backup available, you should probably fix this object before exiting the shell.");
     terminal::message('info',    "$0 has been reverted to its pre-upgrade state.") if $save_state;
     terminal::message('info',    "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__c96702e68ad12a1144e02f213de12c10
+__3dd901fc7c45e66ff4a6c57b5386d409
 
 meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
 <<"EOD" . ls ('-d');
@@ -1008,6 +981,20 @@ my @results = map defined $data{$_} ? $data{$_} : file::read($_), @_;
 wantarray ? @results : $results[0];
 __0e9c1ae91f6cf6020cf1a05db7d51d72
 
+meta::internal_function('select_keys', <<'__9f1f6ed4c1df5aa5f62cfd0ded8e6ae6');
+my %options   = @_;
+my %inherited = map {$_ => 1} split /\n/o, join "\n", retrieve(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
+my $criteria  = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
+
+grep /$criteria/ && (! $options{'-u'} || ! $inherited{$_}) &&
+                    (! $options{'-U'} ||   $inherited{$_}) &&
+                    (! $options{'-i'} ||   $transient{inherit}{namespace($_)}) &&
+                    (! $options{'-I'} || ! $transient{inherit}{namespace($_)}) &&
+                    (! $options{'-S'} || ! /^state::/o) &&
+                    (! $options{'-m'} ||   /^meta::/o) &&
+                    (! $options{'-M'} || ! /^meta::/o), sort keys %data;
+__9f1f6ed4c1df5aa5f62cfd0ded8e6ae6
+
 meta::internal_function('separate_options', <<'__d47e8ee23fe55e27bb523c9fcb2f5ca1');
 # Things with one dash are short-form options, two dashes are long-form.
 # Characters after short-form are combined; so -auv4 becomes -a -u -v -4.
@@ -1098,7 +1085,12 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('notes', <<'__1104012b382ce55ec1bad822b1ff2d35');
+meta::parent('notes', <<'__3962da435656dcac2a0d79dff7c9198b');
+function::note
+meta::type::note
+__3962da435656dcac2a0d79dff7c9198b
+
+meta::parent('object', <<'__3acfa9b2cc71ab5f5ca254ef095102c5');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1115,7 +1107,6 @@ function::lock
 function::ls
 function::ls-a
 function::mv
-function::note
 function::parents
 function::perl
 function::reload
@@ -1146,6 +1137,7 @@ internal_function::internal::main
 internal_function::invoke_editor_on
 internal_function::namespace
 internal_function::retrieve
+internal_function::select_keys
 internal_function::separate_options
 internal_function::strip
 internal_function::table_display
@@ -1165,238 +1157,24 @@ meta::type::internal_function
 meta::type::library
 meta::type::message_color
 meta::type::meta
-meta::type::note
 meta::type::parent
 meta::type::state
 meta::type::watch
-__1104012b382ce55ec1bad822b1ff2d35
+__3acfa9b2cc71ab5f5ca254ef095102c5
 
-meta::parent('object', <<'__1104012b382ce55ec1bad822b1ff2d35');
-bootstrap::initialization
-function::cat
-function::clone
-function::cp
-function::create
-function::current-state
-function::edit
-function::export
-function::hash
-function::import
-function::import-bundle
-function::load-state
-function::lock
-function::ls
-function::ls-a
-function::mv
-function::note
-function::parents
-function::perl
-function::reload
-function::rm
-function::save
-function::save-state
-function::serialize
-function::serialize_single
-function::shell
-function::size
-function::snapshot
-function::state
-function::unlock
-function::update
-function::update-from
-function::usage
-function::verify
-internal_function::associate
-internal_function::basename
-internal_function::complete
-internal_function::debug_trace
-internal_function::execute
-internal_function::fast_hash
-internal_function::file::read
-internal_function::file::write
-internal_function::fnv_hash
-internal_function::internal::main
-internal_function::invoke_editor_on
-internal_function::namespace
-internal_function::retrieve
-internal_function::separate_options
-internal_function::strip
-internal_function::table_display
-internal_function::temporary_name
-internal_function::translate_backtrace
-library::terminal
-message_color::state
-message_color::states
-message_color::watch
-meta::configure
-meta::externalize
-meta::functor::editable
-meta::type::bootstrap
-meta::type::data
-meta::type::function
-meta::type::internal_function
-meta::type::library
-meta::type::message_color
-meta::type::meta
-meta::type::note
-meta::type::parent
-meta::type::state
-meta::type::watch
-__1104012b382ce55ec1bad822b1ff2d35
-
-meta::parent('preprocessor', <<'__914bb00eeda94a8a7d2daf91c2fb31e2');
-bootstrap::initialization
-function::cat
-function::clone
-function::cp
-function::create
-function::current-state
-function::edit
-function::export
-function::hash
-function::import
-function::import-bundle
-function::load-state
-function::lock
-function::ls
-function::ls-a
-function::mv
-function::note
-function::parents
-function::perl
+meta::parent('preprocessor', <<'__e19c99f9ca62a67c6a13abdab2eba4f3');
 function::preprocess
-function::reload
-function::rm
-function::save
-function::save-state
-function::serialize
-function::serialize_single
-function::shell
-function::size
-function::snapshot
-function::state
-function::unlock
-function::update
-function::update-from
-function::usage
-function::verify
-internal_function::associate
-internal_function::basename
-internal_function::complete
-internal_function::debug_trace
-internal_function::execute
-internal_function::fast_hash
-internal_function::file::read
-internal_function::file::write
-internal_function::fnv_hash
-internal_function::internal::main
-internal_function::invoke_editor_on
-internal_function::namespace
-internal_function::retrieve
-internal_function::separate_options
-internal_function::strip
-internal_function::table_display
-internal_function::temporary_name
-internal_function::translate_backtrace
-library::terminal
-message_color::state
-message_color::states
-message_color::watch
-meta::configure
-meta::externalize
-meta::functor::editable
-meta::type::bootstrap
-meta::type::data
-meta::type::function
-meta::type::internal_function
-meta::type::library
-meta::type::message_color
-meta::type::meta
-meta::type::note
-meta::type::parent
-meta::type::state
 meta::type::template
-meta::type::watch
 template::comment
 template::eval
 template::failing_conditional
 template::include
-__914bb00eeda94a8a7d2daf91c2fb31e2
+__e19c99f9ca62a67c6a13abdab2eba4f3
 
-meta::parent('vim-highlighters', <<'__f56ab89bb3f0a97f12477cf6b50eb5a0');
-bootstrap::initialization
-function::cat
-function::clone
-function::cp
-function::create
-function::current-state
-function::edit
-function::export
-function::hash
-function::import
-function::import-bundle
-function::load-state
-function::lock
-function::ls
-function::ls-a
-function::mv
-function::note
-function::parents
-function::perl
-function::reload
-function::rm
-function::save
-function::save-state
-function::serialize
-function::serialize_single
-function::shell
-function::size
-function::snapshot
-function::state
-function::unlock
-function::update
-function::update-from
-function::usage
-function::verify
+meta::parent('vim-highlighters', <<'__2907026c3f150a05139fd813637de9ba');
 function::vim
-internal_function::associate
-internal_function::basename
-internal_function::complete
-internal_function::debug_trace
-internal_function::execute
-internal_function::fast_hash
-internal_function::file::read
-internal_function::file::write
-internal_function::fnv_hash
-internal_function::internal::main
-internal_function::invoke_editor_on
-internal_function::namespace
-internal_function::retrieve
-internal_function::separate_options
-internal_function::strip
-internal_function::table_display
-internal_function::temporary_name
-internal_function::translate_backtrace
-library::terminal
-message_color::state
-message_color::states
-message_color::watch
-meta::configure
-meta::externalize
-meta::functor::editable
-meta::type::bootstrap
-meta::type::data
-meta::type::function
-meta::type::internal_function
-meta::type::library
-meta::type::message_color
-meta::type::meta
-meta::type::note
-meta::type::parent
-meta::type::state
 meta::type::vim_highlighter
-meta::type::watch
-__f56ab89bb3f0a97f12477cf6b50eb5a0
+__2907026c3f150a05139fd813637de9ba
 
 meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
 - include resource::header-packages
@@ -1434,106 +1212,6 @@ __f69baadb1d3ce11744003b174c91b34b
 
 meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__da922cd923eedb4306efb6920b9ebc91');
-- s1 Introduction | sec:introduction
-  This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
-
-  Here are some features:
-
-  - itemize << end
-    - item Impossible to use
-    - item Unfathomably complex to maintain
-  - end
-
-  And the costs associated with using this technology are:
-
-  - enumerate << end
-    - item Developers must know self-modifying Perl.
-           This is very rare!
-    - item If something breaks, you are sunk.
-  - end
-
-  - s2 Code | sec:introduction-code
-    Code is entered in literate form. For example:
-
-  - resource build << end
-    #!/bin/bash
-    g++ hello.cc -o hello
-    javac Hello.java
-  - end
-
-  - cpp hello.cc << end
-    #include <iostream>
-    int main () {
-      std::cout << "Hello world" << std::endl;
-      return 0;
-    }
-  - end
-
-  - java Hello.java << end
-    public class Hello {
-      public static void main (final String[] args) {
-        System.out.println ("Hello world");
-      }
-    }
-  - end
-
-  - javascript hello.js << end
-    document.getElementById ('hi').appendChild (
-      document.createTextNode ('Hi there!'));
-  - end
-
-  - html hello.html << end
-    <html>
-      <body>
-        <div id='hi'></div>
-        <script src='hello.js'></script>
-      </body>
-    </html>
-  - end
-
-  - asm false.s << end
-    main:
-      mov $1, %eax
-      ret
-  - end
-
-  - resource >> build << end
-    g++ false.s -o false
-  - end
-__da922cd923eedb4306efb6920b9ebc91
-
-meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
-- documentclass article
-- include resource::header
-
-- title  Literate Project
-- author Spencer Tipping
-
-- document << end
-  - maketitle
-  - tableofcontents
-
-  - comment This is a line comment that will not appear in the TeX source.
-  - comment Block comment syntax is shown below:
-
-  - comment << end
-    This text will not appear in the TeX source either.
-
-    - comment << end
-      Nor will this text, and comments are nestable as long as either the
-      EOF markers or indentation levels differ.
-    - end
-
-  - comment << eof
-    Same indentation level, different EOF marker.
-  - eof
-  - end
-  
-  - include section::introduction
-- end
-__589811f7266bdf4ec8b030aeb648dddc
-
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
