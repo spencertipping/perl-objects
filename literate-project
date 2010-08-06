@@ -743,7 +743,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__bc255cf51be58fc8ce2261cb04337f45');
+meta::function('update-from', <<'__c96702e68ad12a1144e02f213de12c10');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -757,6 +757,9 @@ my %options = %$options;
 my $save_state = ! ($options{'-n'} || $options{'--no-save'});
 my $no_parents =    $options{'-P'} || $options{'--no-parent'} || $options{'--no-parents'};
 my $force      =    $options{'-f'} || $options{'--force'};
+my $unique     =    $options{'-u'} || $options{'--unique'};
+
+my $unique_option = $unique ? 'u' : '';
 
 &{'save-state'}('before-update') if $save_state;
 terminal::message('warning', 'Not saving state, as requested; to save it, omit the -n option.') unless $save_state;
@@ -768,11 +771,11 @@ for my $target (@targets) {
   associate("parent::$target", join '', qx($target ls -i)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
-  eval qx($target serialize -m);
+  eval qx($target serialize -m$unique_option);
   terminal::message('warning', $@) if $@;
 
   terminal::message('info', 'Updating non-meta attributes...');
-  eval qx($target serialize -iM);
+  eval qx($target serialize -iM$unique_option);
   terminal::message('warning', $@) if $@;
   reload();
 
@@ -790,7 +793,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__bc255cf51be58fc8ce2261cb04337f45
+__c96702e68ad12a1144e02f213de12c10
 
 meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
 <<"EOD" . ls ('-d');
@@ -1095,6 +1098,79 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::parent('notes', <<'__1104012b382ce55ec1bad822b1ff2d35');
+bootstrap::initialization
+function::cat
+function::clone
+function::cp
+function::create
+function::current-state
+function::edit
+function::export
+function::hash
+function::import
+function::import-bundle
+function::load-state
+function::lock
+function::ls
+function::ls-a
+function::mv
+function::note
+function::parents
+function::perl
+function::reload
+function::rm
+function::save
+function::save-state
+function::serialize
+function::serialize_single
+function::shell
+function::size
+function::snapshot
+function::state
+function::unlock
+function::update
+function::update-from
+function::usage
+function::verify
+internal_function::associate
+internal_function::basename
+internal_function::complete
+internal_function::debug_trace
+internal_function::execute
+internal_function::fast_hash
+internal_function::file::read
+internal_function::file::write
+internal_function::fnv_hash
+internal_function::internal::main
+internal_function::invoke_editor_on
+internal_function::namespace
+internal_function::retrieve
+internal_function::separate_options
+internal_function::strip
+internal_function::table_display
+internal_function::temporary_name
+internal_function::translate_backtrace
+library::terminal
+message_color::state
+message_color::states
+message_color::watch
+meta::configure
+meta::externalize
+meta::functor::editable
+meta::type::bootstrap
+meta::type::data
+meta::type::function
+meta::type::internal_function
+meta::type::library
+meta::type::message_color
+meta::type::meta
+meta::type::note
+meta::type::parent
+meta::type::state
+meta::type::watch
+__1104012b382ce55ec1bad822b1ff2d35
+
 meta::parent('object', <<'__1104012b382ce55ec1bad822b1ff2d35');
 bootstrap::initialization
 function::cat
