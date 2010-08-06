@@ -323,6 +323,40 @@ if (@attributes) {
 }
 __6c445eea603f9863df0f8db445fd708e
 
+meta::function('grep', <<'__ccbc55153c3f45db829686632273b93b');
+# Looks through attributes for a pattern. Usage is grep pattern [options], where
+# [options] is the format as provided to select_keys.
+
+my $pattern              = shift @_ or die 'Must specify a pattern to search for';
+my ($options, @criteria) = separate_options(@_);
+my @attributes           = select_keys(%$options, '--criteria' => join('|', @criteria));
+my $color                = $$options{'-c'};
+
+my @matching_attributes;
+my @matching_line_numbers;
+my @matching_lines;
+
+for my $k (@attributes) {
+  my @lines = split /\n/, retrieve($k);
+  for (0 .. $#lines) {
+    next unless $lines[$_] =~ /$pattern/;
+
+    $lines[$_] =~ s/($pattern)/\033[1;31m\1\033[0;0m/g if $color;
+
+    push @matching_attributes,   $k;
+    push @matching_line_numbers, $_ + 1;
+    push @matching_lines,        $lines[$_];
+  }
+}
+
+if ($color) {
+  s/^/\033[1;34m/o                    for @matching_attributes;
+  s/^/\033[1;32m/o && s/$/\033[0;0m/o for @matching_line_numbers;
+}
+
+table_display([@matching_attributes], [@matching_line_numbers], [@matching_lines]);
+__ccbc55153c3f45db829686632273b93b
+
 meta::function('hash', <<'__7c4145cf6e97dfb9ab04a613866751d3');
 my ($data) = @_;
 fast_hash($data);
