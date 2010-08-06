@@ -383,34 +383,23 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__740b0de3c98b32fb9e67dbc515cedb75');
-my ($options, $criteria) = separate_options(@_);
+meta::function('ls', <<'__c375dcded92f48c45989aad581aa562c');
+my ($options, @criteria) = separate_options(@_);
 
-my $criteria   = join('|', @_) || '.';
-my @external   = grep /$criteria/, sort keys %externalized_functions;
-my @defined_by = map $externalized_functions{$_}, @external;
-my @shadows    = grep ! defined $data{$externalized_functions{$_}}, @external;
+my ($all, $shadows, $dereference, $sizes) = @$options{qw(-a -s -d -z)};
 
-table_display([@external, @shadows], [@defined_by, map('< shadow >', @shadows)]);
+return table_display([grep ! defined $data{$externalized_functions{$_}}, sort keys %externalized_functions]) if $shadows;
 
+my $criteria    = join('|', @criteria) || '.';
+my @definitions = grep /$criteria/, sort keys %{$all ? \%data : \%externalized_functions};
+my %inverses    = map {$externalized_functions{$_} => $_} keys %externalized_functions                                              if $all;
+my @alternate   = $all ? map($inverses{$_}, @definitions) : map($externalized_functions{$_}, @definitions);
+my @sizes       = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@alternate} if $sizes;
 
-my $criteria   = join('|', @_) || '.';
-my @attributes = grep /$criteria/, sort keys %data;
-my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
+table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@sizes]) : ());
+__c375dcded92f48c45989aad581aa562c
 
-table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
-                                                               [map sprintf('%6d', length(retrieve($_))),         @attributes]);
-__740b0de3c98b32fb9e67dbc515cedb75
-
-meta::function('ls-a', <<'__6fc6ec32a094a508b48e54e25af6357a');
-my $criteria   = join('|', @_) || '.';
-my @attributes = grep /$criteria/, sort keys %data;
-my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
-
-table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
-                                                               [map sprintf('%6d', length(retrieve($_))),         @attributes]);
-__6fc6ec32a094a508b48e54e25af6357a
-
+meta::function('ls-a', "ls('-adz');");
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
