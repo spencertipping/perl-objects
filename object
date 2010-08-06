@@ -383,23 +383,33 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__b9d8eab31beedc7e20616be1a37a3c96');
+meta::function('ls', <<'__740b0de3c98b32fb9e67dbc515cedb75');
+my ($options, $criteria) = separate_options(@_);
+
 my $criteria   = join('|', @_) || '.';
 my @external   = grep /$criteria/, sort keys %externalized_functions;
 my @defined_by = map $externalized_functions{$_}, @external;
 my @shadows    = grep ! defined $data{$externalized_functions{$_}}, @external;
 
 table_display([@external, @shadows], [@defined_by, map('< shadow >', @shadows)]);
-__b9d8eab31beedc7e20616be1a37a3c96
 
-meta::function('ls-a', <<'__15542def52b2c692c8fdb90278493dc2');
+
 my $criteria   = join('|', @_) || '.';
-my @attributes = grep(/$criteria/, sort keys %data);
+my @attributes = grep /$criteria/, sort keys %data;
 my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
 
 table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
                                                                [map sprintf('%6d', length(retrieve($_))),         @attributes]);
-__15542def52b2c692c8fdb90278493dc2
+__740b0de3c98b32fb9e67dbc515cedb75
+
+meta::function('ls-a', <<'__6fc6ec32a094a508b48e54e25af6357a');
+my $criteria   = join('|', @_) || '.';
+my @attributes = grep /$criteria/, sort keys %data;
+my %inverses   = map {$externalized_functions{$_} => $_} keys %externalized_functions;
+
+table_display([@attributes], [map $inverses{$_}, @attributes], [map sprintf('%6d', length(serialize_single($_))), @attributes],
+                                                               [map sprintf('%6d', length(retrieve($_))),         @attributes]);
+__6fc6ec32a094a508b48e54e25af6357a
 
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
@@ -601,17 +611,20 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__0a3220be0252f0a0044b2f7f7b0e44b0');
+meta::function('update-from', <<'__d644fd0814cab2ae8e66f7c5ce131031');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-my @options = grep   /^-/, @_;
-my @targets = grep ! /^-/, @_ or die 'Must specify another script to pull data from.';
+my ($options, $targets) = separate_options(@_);
 
-my $save_state = ! grep /^-n$/ || /^--no-save$/, @options;
-my $no_parents =   grep /^-P$/ || /^--no-parents?$/, @options;
+my %options = %$options;
+my @targets = @$targets or die 'Must specify another script to pull data from.';
+
+my $save_state = ! ($options{'-n'} || $options{'--no-save'});
+my $no_parents =    $options{'-P'} || $options{'--no-parent'} || $options{'--no-parents'};
+my $force      =    $options{'-f'} || $options{'--force'};
 
 &{'save-state'}('before-update') if $save_state;
 terminal::message('warning', 'Not saving state, as requested; to save it, omit the -n option.') unless $save_state;
@@ -633,7 +646,7 @@ for my $target (@targets) {
 
   if (verify()) {
     terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state;
-  } elsif (grep /^--force$/o || /^-f$/o, @options) {
+  } elsif ($force) {
     terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
     terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
     terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state;
@@ -645,7 +658,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__0a3220be0252f0a0044b2f7f7b0e44b0
+__d644fd0814cab2ae8e66f7c5ce131031
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
@@ -821,6 +834,32 @@ meta::internal_function('retrieve', <<'__0e9c1ae91f6cf6020cf1a05db7d51d72');
 my @results = map defined $data{$_} ? $data{$_} : file::read($_), @_;
 wantarray ? @results : $results[0];
 __0e9c1ae91f6cf6020cf1a05db7d51d72
+
+meta::internal_function('separate_options', <<'__d47e8ee23fe55e27bb523c9fcb2f5ca1');
+# Things with one dash are short-form options, two dashes are long-form.
+# Characters after short-form are combined; so -auv4 becomes -a -u -v -4.
+# Also finds equivalences; so --foo=bar separates into $$options{'--foo'} eq 'bar'.
+# Stops processing at the -- option, and removes it. Everything after that
+# is considered to be an 'other' argument.
+
+# The only form not supported by this function is the short-form with argument.
+# To pass keyed arguments, you need to use long-form options.
+
+my @parseable;
+push @parseable, shift @_ until ! @_ or $_[0] eq '--';
+
+my @singles = grep /^-[^-]/, @parseable;
+my @longs   = grep /^--/,    @parseable;
+my @others  = grep ! /^-/,   @parseable;
+
+my @singles = map /-(.{2,})/ ? map("-$_", split(//, $1)) : $_, @singles;
+
+my %options;
+  $options{$1} = $2 for grep /^([^=]+)=(.*)$/, @longs;
+++$options{$_}      for grep ! /=/, @singles, @longs;
+
+({%options}, @others, @_);
+__d47e8ee23fe55e27bb523c9fcb2f5ca1
 
 meta::internal_function('state_based_filename', <<'__218815c285975367ae0324bf5c3f5409');
 my ($name) = @_;
