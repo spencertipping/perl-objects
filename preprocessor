@@ -493,15 +493,15 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__34d0c254c0bc2112971c5115646682e5');
+meta::function('serialize', <<'__023436ac07471e2f2cf016e2172c8d73');
 my ($options, @criteria) = separate_options(@_);
 my $partial              = $$options{'-p'};
 my $criteria             = join '|', @criteria;
-my @attributes           = map serialize_single($_), select_keys(%$options, '-m' => 1), select_keys(%$options, '-M' => 1);
+my @attributes           = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
 my @final_array          = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__END__']};
 
 join "\n", @final_array;
-__34d0c254c0bc2112971c5115646682e5
+__023436ac07471e2f2cf016e2172c8d73
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
