@@ -99,7 +99,7 @@ sub template {
 }
 __8438e73e45c87188c8b46d0c43eb4971
 
-meta::meta('functor::editable', <<'__56ad8e3c4ccb4892d4901a7cd44f249d');
+meta::meta('functor::editable', <<'__bbfdc65c8d51695de1cd6050232555bd');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
 
@@ -119,12 +119,11 @@ sub meta::functor::editable {
       return &{$options{default}}(retrieve($attribute))                                    if ref $options{default} eq 'CODE'                                          and not defined $command;
       return edit($attribute)                                                              if $command eq 'edit'                      or $options{default} eq 'edit'   and not defined $command;
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
-      return preprocess(retrieve($attribute))                                              if $command eq 'compile'                   or $options{preprocess}          and not defined $command;
       return retrieve($attribute);
     };
   };
 }
-__56ad8e3c4ccb4892d4901a7cd44f249d
+__bbfdc65c8d51695de1cd6050232555bd
 
 meta::meta('functor::tex-templates', <<'__34a5da8558897a4388fc22ed4b0c3c6b');
 package tex;
