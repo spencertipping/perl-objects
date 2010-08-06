@@ -428,7 +428,7 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__4bcdf3d1fb399288437d5c78937b8b63');
+meta::function('ls', <<'__c52c50c47c8ebafae036df8da52d6d9f');
 my ($options, @criteria) = separate_options(@_);
 
 my ($all, $shadows, $dereference, $sizes, $inheritable, $noninheritable) = @$options{qw(-a -s -d -z -i -I)};
@@ -448,8 +448,8 @@ my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_funct
 my @alternate = $all ? map($inverses{$_}, @definitions) : map($externalized_functions{$_}, @definitions);
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@alternate} if $sizes;
 
-table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@sizes]) : ());
-__4bcdf3d1fb399288437d5c78937b8b63
+join "\n", map strip($_), split /\n/, table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@sizes]) : ());
+__c52c50c47c8ebafae036df8da52d6d9f
 
 meta::function('ls-a', "ls('-adz');");
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
@@ -554,28 +554,29 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__6c57d1effb201bef69d42a81dbc0dfa7');
-my ($options, @criteria)             = separate_options(@_);
-my ($inheritable, $partial, $unique) = @$options{qw(-i -p -u)};
+meta::function('serialize', <<'__3c59009946ce3bb4e8e81614eaf3190b');
+my ($options, @criteria)                              = separate_options(@_);
+my ($inheritable, $partial, $unique, $meta, $nonmeta) = @$options{qw(-i -p -u -m -M)};
 
-$partial ||= @criteria || $unique;
+$partial ||= @criteria || $unique || $meta || $nonmeta;
 
-my %non_unique;
-++$non_unique{$_} for split /\n/, map(retrieve($_), grep /^parent::/, sort keys %data);
+my %inherited = map {strip($_) => 1} split(/\n/, join("\n", retrieve(grep /^parent::/, keys %data)));
 
 my $criteria               = join '|', @criteria;
 my @matching_keys          = grep length && (! $criteria    || m/$criteria/) &&
                                             (! $inheritable || $transient{inherit}{namespace($_)}) &&
-                                            (! $unique      || ! $non_unique{$_}), sort keys %data;
+                                            (! $unique      || ! $inherited{$_}) &&
+                                            (! $meta        || /^meta::/o) &&
+                                            (! $nonmeta     || ! /^meta::/o), sort keys %data;
 
-my @matching_attributes    = map serialize_single($_), grep(/^meta::/,   @matching_keys),
-                                                       grep(! /^meta::/, @matching_keys);
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/o,   @matching_keys),
+                                                       grep(! /^meta::/o, @matching_keys);
 
-my @final_array            = $partial ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, 'main();', '__END__');
+my @final_array            = @{$partial ? \@matching_attributes : [retrieve('bootstrap::initialization'), @matching_attributes, 'main();', '', '__END__']};
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__6c57d1effb201bef69d42a81dbc0dfa7
+__3c59009946ce3bb4e8e81614eaf3190b
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
@@ -933,6 +934,7 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __218815c285975367ae0324bf5c3f5409
 
+meta::internal_function('strip', 'wantarray ? map {s/^\s*|\s*$//g; $_} @_ : $_[0] =~ /^\s*(.*?)\s*$/ && $1;');
 meta::internal_function('table_display', <<'__4ac28dc593ac17fd17b6573c07b43e4e');
 # Displays an array of arrays as a table; that is, with alignment. Arrays are
 # expected to be in column-major order.
@@ -996,6 +998,89 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::parent('object', <<'__f8586b93ce9fbca32b2b723da6fc0f7d');
+bootstrap::initialization
+function::cat
+function::clone
+function::cp
+function::create
+function::current-state
+function::edit
+function::export
+function::hash
+function::import
+function::import-bundle
+function::load-state
+function::lock
+function::ls
+function::ls-a
+function::mv
+function::note
+function::perl
+function::preprocess
+function::reload
+function::rm
+function::save
+function::save-state
+function::serialize
+function::serialize_single
+function::shell
+function::size
+function::snapshot
+function::state
+function::trim
+function::unlock
+function::update
+function::update-from
+function::usage
+function::verify
+function::vim
+internal_function::associate
+internal_function::basename
+internal_function::complete
+internal_function::debug_trace
+internal_function::execute
+internal_function::fast_hash
+internal_function::file::read
+internal_function::file::write
+internal_function::fnv_hash
+internal_function::invoke_editor_on
+internal_function::main
+internal_function::messages::warning
+internal_function::namespace
+internal_function::retrieve
+internal_function::separate_options
+internal_function::state_based_filename
+internal_function::strip
+internal_function::table_display
+internal_function::temporary_name
+internal_function::translate_backtrace
+library::terminal
+message_color::state
+message_color::states
+message_color::watch
+meta::configure
+meta::externalize
+meta::functor::editable
+meta::type::bootstrap
+meta::type::data
+meta::type::function
+meta::type::internal_function
+meta::type::library
+meta::type::message_color
+meta::type::meta
+meta::type::note
+meta::type::parent
+meta::type::state
+meta::type::template
+meta::type::vim_highlighter
+meta::type::watch
+template::comment
+template::eval
+template::failing_conditional
+template::include
+__f8586b93ce9fbca32b2b723da6fc0f7d
+
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
@@ -1017,4 +1102,5 @@ join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
 main();
+
 __END__
