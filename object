@@ -657,12 +657,12 @@ for my $target (@targets) {
 }
 __eea68c9f698694440bd8f6f5ef9930fb
 
-meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
-<<"EOD" . ls ();
+meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
+<<"EOD" . ls ('-d');
 Usage: $0 action [arguments]
 Defined actions (and the attribute that defines them):
 EOD
-__234b1da5bb4e34d72a932ab68aad5052
+__25615bcd877fcf7e5c823dec475f0a31
 
 meta::function('verify', <<'__e8ff828f42cdc7d759b70bb81721ddb6');
 my $serialized_data = serialize();
