@@ -154,9 +154,10 @@ meta::meta('type::meta', <<'__640f25635ce2365b0648962918cf9932');
 meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
-meta::meta('type::parent', <<'__912d86897a0468a50d8332fa8197fc2d');
-meta::functor::editable 'parent', extension => '', inherit => 0, default => sub {&{'::update-from'}($_[0])};
-__912d86897a0468a50d8332fa8197fc2d
+meta::meta('type::parent', <<'__607e9931309b1b595424bedcee5dfa45');
+meta::define_form 'parent', \&meta::bootstrap::implementation;
+meta::configure 'parent', extension => '', inherit => 1;
+__607e9931309b1b595424bedcee5dfa45
 
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
