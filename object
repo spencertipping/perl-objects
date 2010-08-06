@@ -171,7 +171,6 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
-meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
 meta::bootstrap('initialization', <<'__baa43e5e8e6e1cd76d4e2de828ceaa4d');
 #!/usr/bin/perl
@@ -620,11 +619,6 @@ terminal::message('error', "Verification failed; '$observed_state' (produced by 
 
 $result;
 __e8ff828f42cdc7d759b70bb81721ddb6
-
-meta::function('vim', <<'__bd231af998c353790253bc6660be0b90');
-# Installs VIM highlighters.
-file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for grep s/^vim_highlighter:://o, keys %data;
-__bd231af998c353790253bc6660be0b90
 
 meta::internal_function('associate', <<'__80f0728190bf3b0d4c94807cfdc12a22');
 my ($name, $value, %options) = @_;
