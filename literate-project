@@ -994,11 +994,6 @@ print "$result\n" if $result;
 save() unless $initial_state eq state();
 __cb63fed16dd9ee83dcbd15aa72643d74
 
-meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
-my ($message) = @_;
-terminal::message('warning', $message);
-__2877a0b67326120f9d43089368e6c4f3
-
 meta::internal_function('namespace', <<'__93213d60cafb9627e0736b48cd1f0760');
 my ($name) = @_;
 $name =~ s/::.*$//;
