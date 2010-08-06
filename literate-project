@@ -73,32 +73,6 @@ sub meta::externalize {
 }
 __9141b4e8752515391385516ae94b23b5
 
-meta::meta('externalize_template', <<'__1e90e7ccb5fea1d498bbaaa6e7e43851');
-sub meta::externalize_template {
-  my ($name, $implementation) = @_;
-  meta::externalize "template::$name", "template::$name", $implementation;
-}
-__1e90e7ccb5fea1d498bbaaa6e7e43851
-
-meta::meta('functor::code-templates', <<'__8438e73e45c87188c8b46d0c43eb4971');
-package code;
-
-# Templates for generating named source files.
-sub template {
-  my ($name, $implementation) = @_;
-  $implementation ||= sub {
-    my ($line, $block) = @_;
-    my $append         = $line =~ s/^\h*>>\h*//o;
-
-    $line =~ s/\s+.*$//o;
-    file::write(&{'::source-directory'}() . "/$line", ($append && "\n") . $block, mkpath => 1, append => $append);
-    "\\lstset{caption={$line" . ($append && ' (continued)') . "},name={$line}}\\begin{${name}code}\n$block \\end{${name}code}";
-  };
-
-  meta::externalize_template $name, $implementation;
-}
-__8438e73e45c87188c8b46d0c43eb4971
-
 meta::meta('functor::editable', <<'__56ad8e3c4ccb4892d4901a7cd44f249d');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
@@ -125,57 +99,6 @@ sub meta::functor::editable {
   };
 }
 __56ad8e3c4ccb4892d4901a7cd44f249d
-
-meta::meta('functor::tex-templates', <<'__34a5da8558897a4388fc22ed4b0c3c6b');
-package tex;
-
-# A wrapper for TeX templates. The idea is always the same, so I'm abstracting out the
-# common externalization logic here.
-sub template_for(&) {
-  my ($implementation) = @_;
-  sub {
-    my %names = @_;
-    for my $name (keys %names) {
-      ::meta::externalize_template $name, sub {
-        &$implementation($names{$name}, @_);
-      };
-    }
-  };
-}
-
-sub id {
-  map {$_ => $_} @_;
-}
-
-# Creates a one-line or multiline template based on normal TeX syntax. It's a straight
-# transfer into TeX with no preprocessing.
-*template = template_for {
-  my ($name, $line, $block) = @_;
-  $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$line\}";
-};
-
-# Creates a labeled one-line template. This is just like normal TeX, but assumes the
-# specification of a label name after a pipe character.
-*labeled_template = template_for {
-  my ($name, $line, undef) = @_;
-  my ($real_stuff, $label) = split /\h*\|\h*/, $line;
-  "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
-};
-__34a5da8558897a4388fc22ed4b0c3c6b
-
-meta::meta('internal::runtime', <<'__0172b18c9b9311477d2f6b8c16bb44c2');
-meta::configure 'internal', extension => '.pl', inherit => 1;
-meta::define_form 'internal', \&meta::meta::implementation;
-__0172b18c9b9311477d2f6b8c16bb44c2
-
-meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
-meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
-meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize item/);');
-meta::meta('template::math', "tex::template align => 'align*', nalign => 'align';");
-meta::meta('template::sections', <<'__0bf14cbc6a0e77d9b82dd185d8d8a9a0');
-tex::labeled_template(s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
-tex::labeled_template(sc => 'chapter', sp => 'part');
-__0bf14cbc6a0e77d9b82dd185d8d8a9a0
 
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
@@ -236,8 +159,6 @@ meta::meta('type::parent', <<'__912d86897a0468a50d8332fa8197fc2d');
 meta::functor::editable 'parent', extension => '', inherit => 0, default => sub {&{'::update-from'}($_[0])};
 __912d86897a0468a50d8332fa8197fc2d
 
-meta::meta('type::resource', "meta::functor::editable 'resource', extension => '.cltex', inherit => 1, default => 'edit';");
-meta::meta('type::section', "meta::functor::editable 'section', extension => '.cltex', inherit => 0, default => 'edit';");
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
@@ -341,24 +262,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', 'literate-project');
-meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.3d25d18aa19d37f890ec00c55eaecabc/document.pdf');
-meta::data('pdf-reader', '/usr/bin/evince');
-meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('name', 'object');
 meta::data('quiet', '1');
-meta::data('source-directory', '/tmp/src');
-meta::data('table-of-contents', '1');
-meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
-meta::data('watching', '0');
+meta::data('watching', '1');
 meta::function('cat', 'join "\n", retrieve(@_);');
-meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
-my $output_directory = &{'pdf-output-file'}();
-$output_directory =~ s+/.*++g;
-unlink <$output_directory/*>;
-rmdir $output_directory;
-__1269c1a312062a1598dcde16eb6134e2
-
 meta::function('clone', <<'__fec8cf43b197da97cfd5e49d75891d57');
 for (@_) {
   if ($_) {
@@ -372,34 +279,6 @@ for (@_) {
   }
 }
 __fec8cf43b197da97cfd5e49d75891d57
-
-meta::function('compile', <<'__8de64ff7f4823d92f3258e211608d9bb');
-my $tex_command         = &{'tex-command'}();
-my $pdftex_command      = &{'pdftex-command'}();
-my $filename            = 'document';
-
-my $contents            = tex();
-my $output_directory    = &{'output-dir'}();
-chomp $output_directory;
-
-my $temporary_directory = state_based_filename();
-$temporary_directory =~ s+^.*/++;
-$temporary_directory = "$output_directory/$temporary_directory";
-
-$tex_command    =~ s/__TEMPORARY_DIRECTORY__/$temporary_directory/g;
-$tex_command    =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
-
-$pdftex_command =~ s/__TEMPORARY_DIRECTORY__/$temporary_directory/g;
-$pdftex_command =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
-
-mkdir $temporary_directory;
-file::write("$temporary_directory/$filename.tex", $contents);
-
-my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_command) || system($pdftex_command) : system($pdftex_command);
-
-associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
-$result;
-__8de64ff7f4823d92f3258e211608d9bb
 
 meta::function('cp', <<'__d33fe9aa270eeee6dcc3ee445447a6a7');
 my ($from, $to) = @_;
@@ -437,11 +316,6 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
           execute => $name !~ /^internal::/ && $name !~ /^bootstrap::/);
 save();
 __6912fb43aad413e79cbf45e134866b6e
-
-meta::function('exists', <<'__3c6aa32026f04564ec4861c77a8e6465');
-my $name = shift;
-grep {$_ eq $name} keys %data;
-__3c6aa32026f04564ec4861c77a8e6465
 
 meta::function('export', <<'__6c445eea603f9863df0f8db445fd708e');
 # Exports data into a text file.
@@ -504,7 +378,7 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode & 0555, $0;
 __d94992bf224487f5bfd439eb822db309
 
-meta::function('ls', <<'__4bcdf3d1fb399288437d5c78937b8b63');
+meta::function('ls', <<'__c52c50c47c8ebafae036df8da52d6d9f');
 my ($options, @criteria) = separate_options(@_);
 
 my ($all, $shadows, $dereference, $sizes, $inheritable, $noninheritable) = @$options{qw(-a -s -d -z -i -I)};
@@ -524,15 +398,10 @@ my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_funct
 my @alternate = $all ? map($inverses{$_}, @definitions) : map($externalized_functions{$_}, @definitions);
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@alternate} if $sizes;
 
-table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@sizes]) : ());
-__4bcdf3d1fb399288437d5c78937b8b63
+join "\n", map strip($_), split /\n/, table_display([@definitions], $dereference ? ([@alternate]) : (), $sizes ? ([@sizes]) : ());
+__c52c50c47c8ebafae036df8da52d6d9f
 
 meta::function('ls-a', "ls('-adz');");
-meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
-compile() || view();
-clean();
-__9a3d7e3c7e0017f4c9b239f3858aaf03
-
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
@@ -553,11 +422,6 @@ meta::function('perl', <<'__d8818fd77e9e7ce68811e0947dfcc206');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
-
-meta::function('pop-state', <<'__90a6d3599a269ca0bef8126df7aba8e0');
-%data = %{pop @{$transient{'states'}}} if @{$transient{'states'}};
-reload();
-__90a6d3599a269ca0bef8126df7aba8e0
 
 meta::function('preprocess', <<'__66e539d29e9afa903569efad0eb7c886');
 # Implements a simple preprocessing language.
@@ -614,19 +478,7 @@ while ($old_string ne $string and $expansions++ < $limit) {
 $string;
 __66e539d29e9afa903569efad0eb7c886
 
-meta::function('push-state', <<'__ba601ddf7dce874ce79dd37a936ffdcc');
-push @{$transient{'states'} = $transient{'states'} || []}, {%data};
-my $state_count = scalar @{$transient{'states'}};
-"There are now $state_count states on the stack.";
-__ba601ddf7dce874ce79dd37a936ffdcc
-
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
-meta::function('render', <<'__ccb26db43115329651cc3c0527a3e849');
-use File::Copy 'copy';
-compile();
-copy(&{'pdf-output-file'}(), &{'source-directory'}() . '/' . name() . '.pdf') or die "Copy failed: $!";
-__ccb26db43115329651cc3c0527a3e849
-
 meta::function('rm', <<'__963fdd3d9f6a0ba279b001b1f5679a38');
 for my $to_be_deleted (@_) {
   terminal::message('warning', "$to_be_deleted does not exist") unless exists $data{$to_be_deleted};
@@ -652,21 +504,29 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__d7b3affaece3a36d5cfc051b88a5b76e');
-my $criteria               = join '|', @_;
+meta::function('serialize', <<'__3c59009946ce3bb4e8e81614eaf3190b');
+my ($options, @criteria)                              = separate_options(@_);
+my ($inheritable, $partial, $unique, $meta, $nonmeta) = @$options{qw(-i -p -u -m -M)};
 
-my @matching_keys          = grep length && (! $criteria || m/$criteria/), sort keys %data;
-my @keys_without_internals = grep ! /^internal::/, @matching_keys;
+$partial ||= @criteria || $unique || $meta || $nonmeta;
 
-my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
-                                                       grep(! /^meta::/,   @keys_without_internals),
-                                                       grep(/^internal::/, @matching_keys);
+my %inherited = map {strip($_) => 1} split(/\n/, join("\n", retrieve(grep /^parent::/, keys %data)));
 
-my @final_array            = $criteria ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+my $criteria               = join '|', @criteria;
+my @matching_keys          = grep length && (! $criteria    || m/$criteria/) &&
+                                            (! $inheritable || $transient{inherit}{namespace($_)}) &&
+                                            (! $unique      || ! $inherited{$_}) &&
+                                            (! $meta        || /^meta::/o) &&
+                                            (! $nonmeta     || ! /^meta::/o), sort keys %data;
+
+my @matching_attributes    = map serialize_single($_), grep(/^meta::/o,   @matching_keys),
+                                                       grep(! /^meta::/o, @matching_keys);
+
+my @final_array            = @{$partial ? \@matching_attributes : [retrieve('bootstrap::initialization'), @matching_attributes, 'main();', '', '__END__']};
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__d7b3affaece3a36d5cfc051b88a5b76e
+__3c59009946ce3bb4e8e81614eaf3190b
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
@@ -740,12 +600,6 @@ $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
 
-meta::function('tex', <<'__5bb8bf491e1b442858096acf711135f9');
-my ($document) = @_;
-$document ||= 'main';
-preprocess(retrieve("section::$document"));
-__5bb8bf491e1b442858096acf711135f9
-
 meta::function('trim', 'wantarray ? map /^\s*(.*?)\s*$/o, @_ : ($_[0] =~ /^\s*(.*?)\s*$/o)[0];');
 meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
 my (undef, undef, $mode) = stat $0;
@@ -756,7 +610,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__af357a46b0a806f63c44a08f711dc7a4');
+meta::function('update-from', <<'__3f35ee3717fefc1f125e0b18bb7cabf3');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -779,13 +633,12 @@ for my $target (@targets) {
   associate("parent::$target", join '', qx($target ls -i)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
-  eval qx($target serialize '^meta::');
+  eval qx($target serialize -m);
   terminal::message('warning', $@) if $@;
   terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
 
   terminal::message('info', 'Updating non-meta attributes...');
-  my $combined_pattern = join '|', map "^${_}::", grep ! (/^meta$/ || /^internal$/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}};
-  eval qx($target serialize '$combined_pattern');
+  eval qx($target serialize -iM);
   terminal::message('warning', $@) if $@;
   reload();
 
@@ -803,14 +656,14 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__af357a46b0a806f63c44a08f711dc7a4
+__3f35ee3717fefc1f125e0b18bb7cabf3
 
-meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
-<<"EOD" . ls ();
+meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
+<<"EOD" . ls ('-d');
 Usage: $0 action [arguments]
 Defined actions (and the attribute that defines them):
 EOD
-__234b1da5bb4e34d72a932ab68aad5052
+__25615bcd877fcf7e5c823dec475f0a31
 
 meta::function('verify', <<'__e8ff828f42cdc7d759b70bb81721ddb6');
 my $serialized_data = serialize();
@@ -829,13 +682,6 @@ terminal::message('error', "Verification failed; '$observed_state' (produced by 
 
 $result;
 __e8ff828f42cdc7d759b70bb81721ddb6
-
-meta::function('view', <<'__72064117780244bd9dd38659573b9f2c');
-my $pdf_reader      = &{'pdf-reader'}();
-my $pdf_output_file = &{'pdf-output-file'}();
-chomp $pdf_reader;
-system("$pdf_reader '$pdf_output_file'");
-__72064117780244bd9dd38659573b9f2c
 
 meta::function('vim', <<'__bd231af998c353790253bc6660be0b90');
 # Installs VIM highlighters.
@@ -971,11 +817,23 @@ unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
 
-meta::internal_function('messages::error', <<'__5af9120535afe26fa6828f477abe833c');
-my ($message) = @_;
-terminal::message('error', $message);
-die;
-__5af9120535afe26fa6828f477abe833c
+meta::internal_function('main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
+$SIG{'INT'} = sub {
+  snapshot();
+  exit 1;
+};
+
+my $initial_state        = state();
+chomp(my $default_action = retrieve('data::default-action'));
+
+my $function_name = shift(@ARGV) || $default_action || 'usage';
+terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+
+chomp(my $result = &$function_name(@ARGV));
+print "$result\n" if $result;
+
+save() unless $initial_state eq state();
+__cb63fed16dd9ee83dcbd15aa72643d74
 
 meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
 my ($message) = @_;
@@ -1026,6 +884,7 @@ $noise =~ s/\//-/g;
 "$0.$noise";
 __218815c285975367ae0324bf5c3f5409
 
+meta::internal_function('strip', 'wantarray ? map {s/^\s*|\s*$//g; $_} @_ : $_[0] =~ /^\s*(.*?)\s*$/ && $1;');
 meta::internal_function('table_display', <<'__4ac28dc593ac17fd17b6573c07b43e4e');
 # Displays an array of arrays as a table; that is, with alignment. Arrays are
 # expected to be in column-major order.
@@ -1089,225 +948,6 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__e743a718056c9b7375c1fd096f82d5bd');
-bootstrap::initialization              
-function::cat                          
-function::clone                        
-function::cp                           
-function::create                       
-function::current-state                
-function::edit                         
-function::export                       
-function::hash                         
-function::import                       
-function::import-bundle                
-function::load-state                   
-function::lock                         
-function::ls                           
-function::ls-a                         
-function::mv                           
-function::note                         
-function::perl                         
-function::preprocess                   
-function::reload                       
-function::rm                           
-function::save                         
-function::save-state                   
-function::serialize                    
-function::serialize_single             
-function::shell                        
-function::size                         
-function::snapshot                     
-function::state                        
-function::trim                         
-function::unlock                       
-function::update                       
-function::update-from                  
-function::usage                        
-function::verify                       
-function::vim                          
-internal::runtime                      
-internal_function::associate           
-internal_function::basename            
-internal_function::complete            
-internal_function::debug_trace         
-internal_function::execute             
-internal_function::fast_hash           
-internal_function::file::read          
-internal_function::file::write         
-internal_function::fnv_hash            
-internal_function::invoke_editor_on    
-internal_function::messages::warning   
-internal_function::namespace           
-internal_function::retrieve            
-internal_function::separate_options    
-internal_function::state_based_filename
-internal_function::table_display       
-internal_function::temporary_name      
-internal_function::translate_backtrace 
-library::terminal                      
-message_color::state                   
-message_color::states                  
-message_color::watch                   
-meta::configure                        
-meta::externalize                      
-meta::functor::editable                
-meta::internal::runtime                
-meta::type::bootstrap                  
-meta::type::data                       
-meta::type::function                   
-meta::type::internal_function          
-meta::type::library                    
-meta::type::message_color              
-meta::type::meta                       
-meta::type::note                       
-meta::type::parent                     
-meta::type::state                      
-meta::type::template                   
-meta::type::vim_highlighter            
-meta::type::watch                      
-template::comment                      
-template::eval                         
-template::failing_conditional          
-template::include                      
-__e743a718056c9b7375c1fd096f82d5bd
-
-meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
-- include resource::header-packages
-- include resource::header-listings
-
-- include resource::header-refs
-
-- include resource::header-languages
-- include resource::header-resource
-__efe6254be4f73fb4170ab1980a1888d5
-
-meta::resource('header-languages', <<'__637a18cf607b727dec3feab552be05e2');
-\lstnewenvironment{asmcode}       {}{}
-\lstnewenvironment{cppcode}       {\lstset{language=c++}}{}
-\lstnewenvironment{javacode}      {\lstset{language=java}}{}
-\lstnewenvironment{javascriptcode}{}{}
-\lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
-__637a18cf607b727dec3feab552be05e2
-
-meta::resource('header-listings', <<'__4caf6ff3ff152cce49ad5d1775ad0703');
-\definecolor{gray}{rgb}{0.6,0.6,0.6}
-
-\usepackage{caption}
-\DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
-\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
-
-\lstset{columns=fixed,basicstyle={\tt},numbers=left,firstnumber=auto,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
-__4caf6ff3ff152cce49ad5d1775ad0703
-
-meta::resource('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,pxfonts,listings,color}
-\usepackage[colorlinks]{hyperref}
-__f69baadb1d3ce11744003b174c91b34b
-
-meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
-meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__da922cd923eedb4306efb6920b9ebc91');
-- s1 Introduction | sec:introduction
-  This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
-
-  Here are some features:
-
-  - itemize << end
-    - item Impossible to use
-    - item Unfathomably complex to maintain
-  - end
-
-  And the costs associated with using this technology are:
-
-  - enumerate << end
-    - item Developers must know self-modifying Perl.
-           This is very rare!
-    - item If something breaks, you are sunk.
-  - end
-
-  - s2 Code | sec:introduction-code
-    Code is entered in literate form. For example:
-
-  - resource build << end
-    #!/bin/bash
-    g++ hello.cc -o hello
-    javac Hello.java
-  - end
-
-  - cpp hello.cc << end
-    #include <iostream>
-    int main () {
-      std::cout << "Hello world" << std::endl;
-      return 0;
-    }
-  - end
-
-  - java Hello.java << end
-    public class Hello {
-      public static void main (final String[] args) {
-        System.out.println ("Hello world");
-      }
-    }
-  - end
-
-  - javascript hello.js << end
-    document.getElementById ('hi').appendChild (
-      document.createTextNode ('Hi there!'));
-  - end
-
-  - html hello.html << end
-    <html>
-      <body>
-        <div id='hi'></div>
-        <script src='hello.js'></script>
-      </body>
-    </html>
-  - end
-
-  - asm false.s << end
-    main:
-      mov $1, %eax
-      ret
-  - end
-
-  - resource >> build << end
-    g++ false.s -o false
-  - end
-__da922cd923eedb4306efb6920b9ebc91
-
-meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
-- documentclass article
-- include resource::header
-
-- title  Literate Project
-- author Spencer Tipping
-
-- document << end
-  - maketitle
-  - tableofcontents
-
-  - comment This is a line comment that will not appear in the TeX source.
-  - comment Block comment syntax is shown below:
-
-  - comment << end
-    This text will not appear in the TeX source either.
-
-    - comment << end
-      Nor will this text, and comments are nestable as long as either the
-      EOF markers or indentation levels differ.
-    - end
-
-  - comment << eof
-    Same indentation level, different EOF marker.
-  - eof
-  - end
-  
-  - include section::introduction
-- end
-__589811f7266bdf4ec8b030aeb648dddc
-
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
@@ -1328,66 +968,6 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-meta::vim_highlighter('cltex', <<'__5bfc80e1a2ad3bb7cb4f57ff906d71b0');
-" Cleaner TeX
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn match   cltEofMarker   /<<\s*\w\+/ contained
-syn region  cltLineComment matchgroup=cltCode start=/^\s*- comment / end=/$/ contained
-syn match   cltLine        /^\s*- .*$/ contains=cltEofMarker,cltLineComment
-
-syn include @cpp           syntax/cpp.vim        | unlet b:current_syntax
-syn include @java          syntax/java.vim       | unlet b:current_syntax
-syn include @asm           syntax/asm.vim        | unlet b:current_syntax
-syn include @javascript    syntax/javascript.vim | unlet b:current_syntax
-syn include @html          syntax/html.vim       | unlet b:current_syntax
-
-syn region  cltCpp         matchgroup=cltCode start=/^\z(\s*\)- cpp .*<<\s*\z(\w\+\)$/        end=/^\z1- \z2$/ contains=@cpp
-syn region  cltJava        matchgroup=cltCode start=/^\z(\s*\)- java .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@java
-syn region  cltAsm         matchgroup=cltCode start=/^\z(\s*\)- asm .*<<\s*\z(\w\+\)$/        end=/^\z1- \z2$/ contains=@asm
-syn region  cltJavascript  matchgroup=cltCode start=/^\z(\s*\)- javascript .*<<\s*\z(\w\+\)$/ end=/^\z1- \z2$/ contains=@javascript
-syn region  cltHtml        matchgroup=cltCode start=/^\z(\s*\)- html .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@html
-syn region  cltResource    matchgroup=cltCode start=/^\z(\s*\)- resource .*<<\s*\z(\w\+\)$/   end=/^\z1- \z2$/
-syn region  cltComment     matchgroup=cltCode start=/^\z(\s*\)- comment .*<<\s*\z(\w\+\)$/    end=/^\z1- \z2$/
-
-syn cluster cltStuff       add=cltCpp,cltJava,cltAsm,cltJavascript,cltHtml,cltResource,cltComment,cltLine
-
-syn region  cltDocument    start=/\%^/ end=/\%$/ contains=@cltStuff
-
-hi link cltLine            Special
-hi link cltKeyword         String
-hi link cltResource        String
-hi link cltEofMarker       String
-
-hi link cltCode            Special
-hi link cltDocument        Comment
-hi link cltComment         Type
-hi link cltLineComment     Type
-
-let b:current_syntax = "cltex"
-__5bfc80e1a2ad3bb7cb4f57ff906d71b0
-
-meta::internal('runtime', <<'__487b99b3af6056d1d1c0e00dd4aef707');
-my $initial_state        = state();
-chomp(my $default_action = retrieve('data::default-action'));
-
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-$function_name = 'usage' unless $externalized_functions{$function_name};
-
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
-
-END {
-  save() unless $initial_state eq state();
-}
-
-__487b99b3af6056d1d1c0e00dd4aef707
+main();
 
 __END__
