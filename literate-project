@@ -539,6 +539,7 @@ meta::function('note', <<'__bcbfeac6dd2112f47296265444570a6e');
 create("note::$_[0]");
 __bcbfeac6dd2112f47296265444570a6e
 
+meta::function('parents', 'join "\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__d8818fd77e9e7ce68811e0947dfcc206');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
@@ -733,7 +734,6 @@ $document ||= 'main';
 preprocess(retrieve("section::$document"));
 __5bb8bf491e1b442858096acf711135f9
 
-meta::function('trim', 'wantarray ? map /^\s*(.*?)\s*$/o, @_ : ($_[0] =~ /^\s*(.*?)\s*$/o)[0];');
 meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
@@ -1102,7 +1102,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__ed1d9b666c6be18fadec8e874212ecc9');
+meta::parent('object', <<'__d51b291c2ffd83578746dcdd7caea94c');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1120,6 +1120,7 @@ function::ls
 function::ls-a
 function::mv
 function::note
+function::parents
 function::perl
 function::reload
 function::rm
@@ -1175,9 +1176,9 @@ meta::type::parent
 meta::type::state
 meta::type::vim_highlighter
 meta::type::watch
-__ed1d9b666c6be18fadec8e874212ecc9
+__d51b291c2ffd83578746dcdd7caea94c
 
-meta::parent('preprocessor', <<'__6de507bf1036312c57ccae5e19c89bc4');
+meta::parent('preprocessor', <<'__9731b233da1196809b51c617f6cbba67');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1195,6 +1196,7 @@ function::ls
 function::ls-a
 function::mv
 function::note
+function::parents
 function::perl
 function::preprocess
 function::reload
@@ -1207,7 +1209,6 @@ function::shell
 function::size
 function::snapshot
 function::state
-function::trim
 function::unlock
 function::update
 function::update-from
@@ -1257,7 +1258,7 @@ template::comment
 template::eval
 template::failing_conditional
 template::include
-__6de507bf1036312c57ccae5e19c89bc4
+__9731b233da1196809b51c617f6cbba67
 
 meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
 - include resource::header-packages

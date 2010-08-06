@@ -418,6 +418,7 @@ meta::function('note', <<'__bcbfeac6dd2112f47296265444570a6e');
 create("note::$_[0]");
 __bcbfeac6dd2112f47296265444570a6e
 
+meta::function('parents', 'join "\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__d8818fd77e9e7ce68811e0947dfcc206');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
@@ -943,7 +944,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__ed1d9b666c6be18fadec8e874212ecc9');
+meta::parent('object', <<'__d51b291c2ffd83578746dcdd7caea94c');
 bootstrap::initialization
 function::cat
 function::clone
@@ -961,6 +962,7 @@ function::ls
 function::ls-a
 function::mv
 function::note
+function::parents
 function::perl
 function::reload
 function::rm
@@ -1016,7 +1018,7 @@ meta::type::parent
 meta::type::state
 meta::type::vim_highlighter
 meta::type::watch
-__ed1d9b666c6be18fadec8e874212ecc9
+__d51b291c2ffd83578746dcdd7caea94c
 
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
