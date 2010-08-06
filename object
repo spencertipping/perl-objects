@@ -836,11 +836,6 @@ unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
 
-meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
-my ($message) = @_;
-terminal::message('warning', $message);
-__2877a0b67326120f9d43089368e6c4f3
-
 meta::internal_function('namespace', <<'__93213d60cafb9627e0736b48cd1f0760');
 my ($name) = @_;
 $name =~ s/::.*$//;

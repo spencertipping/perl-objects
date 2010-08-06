@@ -886,11 +886,6 @@ unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
 
-meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
-my ($message) = @_;
-terminal::message('warning', $message);
-__2877a0b67326120f9d43089368e6c4f3
-
 meta::internal_function('namespace', <<'__93213d60cafb9627e0736b48cd1f0760');
 my ($name) = @_;
 $name =~ s/::.*$//;
@@ -999,7 +994,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__816dab100fa5b404230114d997dba1a2');
+meta::parent('object', <<'__47cf34ac512ecb47033f62ac5971f932');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1047,7 +1042,6 @@ internal_function::file::read
 internal_function::file::write
 internal_function::fnv_hash
 internal_function::invoke_editor_on
-internal_function::messages::warning
 internal_function::namespace
 internal_function::retrieve
 internal_function::separate_options
@@ -1080,7 +1074,7 @@ template::comment
 template::eval
 template::failing_conditional
 template::include
-__816dab100fa5b404230114d997dba1a2
+__47cf34ac512ecb47033f62ac5971f932
 
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
