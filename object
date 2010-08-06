@@ -504,7 +504,7 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__3c59009946ce3bb4e8e81614eaf3190b');
+meta::function('serialize', <<'__cf3cb25026e0182ae9f16160a797907e');
 my ($options, @criteria)                              = separate_options(@_);
 my ($inheritable, $partial, $unique, $meta, $nonmeta) = @$options{qw(-i -p -u -m -M)};
 
@@ -522,11 +522,11 @@ my @matching_keys          = grep length && (! $criteria    || m/$criteria/) &&
 my @matching_attributes    = map serialize_single($_), grep(/^meta::/o,   @matching_keys),
                                                        grep(! /^meta::/o, @matching_keys);
 
-my @final_array            = @{$partial ? \@matching_attributes : [retrieve('bootstrap::initialization'), @matching_attributes, 'main();', '', '__END__']};
+my @final_array            = @{$partial ? \@matching_attributes : [retrieve('bootstrap::initialization'), @matching_attributes, '__main__();', '', '__END__']};
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__3c59009946ce3bb4e8e81614eaf3190b
+__cf3cb25026e0182ae9f16160a797907e
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
@@ -610,7 +610,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__3f35ee3717fefc1f125e0b18bb7cabf3');
+meta::function('update-from', <<'__bc255cf51be58fc8ce2261cb04337f45');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -630,12 +630,13 @@ terminal::message('warning', 'Not saving state, as requested; to save it, omit t
 
 for my $target (@targets) {
   terminal::message('info', "Updating from $target");
+
+  rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
   associate("parent::$target", join '', qx($target ls -i)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
   eval qx($target serialize -m);
   terminal::message('warning', $@) if $@;
-  terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
 
   terminal::message('info', 'Updating non-meta attributes...');
   eval qx($target serialize -iM);
@@ -656,7 +657,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__3f35ee3717fefc1f125e0b18bb7cabf3
+__bc255cf51be58fc8ce2261cb04337f45
 
 meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
 <<"EOD" . ls ('-d');
@@ -687,6 +688,24 @@ meta::function('vim', <<'__bd231af998c353790253bc6660be0b90');
 # Installs VIM highlighters.
 file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for grep s/^vim_highlighter:://o, keys %data;
 __bd231af998c353790253bc6660be0b90
+
+meta::internal_function('__main__', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
+$SIG{'INT'} = sub {
+  snapshot();
+  exit 1;
+};
+
+my $initial_state        = state();
+chomp(my $default_action = retrieve('data::default-action'));
+
+my $function_name = shift(@ARGV) || $default_action || 'usage';
+terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+
+chomp(my $result = &$function_name(@ARGV));
+print "$result\n" if $result;
+
+save() unless $initial_state eq state();
+__cb63fed16dd9ee83dcbd15aa72643d74
 
 meta::internal_function('associate', <<'__80f0728190bf3b0d4c94807cfdc12a22');
 my ($name, $value, %options) = @_;
@@ -816,24 +835,6 @@ my $result = file::read($filename);
 unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
-
-meta::internal_function('main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
-$SIG{'INT'} = sub {
-  snapshot();
-  exit 1;
-};
-
-my $initial_state        = state();
-chomp(my $default_action = retrieve('data::default-action'));
-
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
-
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
-
-save() unless $initial_state eq state();
-__cb63fed16dd9ee83dcbd15aa72643d74
 
 meta::internal_function('messages::warning', <<'__2877a0b67326120f9d43089368e6c4f3');
 my ($message) = @_;
@@ -968,6 +969,6 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
-main();
+__main__();
 
 __END__
