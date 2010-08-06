@@ -617,7 +617,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__af357a46b0a806f63c44a08f711dc7a4');
+meta::function('update-from', <<'__eea68c9f698694440bd8f6f5ef9930fb');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -645,8 +645,7 @@ for my $target (@targets) {
   terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
 
   terminal::message('info', 'Updating non-meta attributes...');
-  my $combined_pattern = join '|', map "^${_}::", grep ! (/^meta$/ || /^internal$/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}};
-  eval qx($target serialize '$combined_pattern');
+  eval qx($target serialize -i);
   terminal::message('warning', $@) if $@;
   reload();
 
@@ -664,7 +663,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__af357a46b0a806f63c44a08f711dc7a4
+__eea68c9f698694440bd8f6f5ef9930fb
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
