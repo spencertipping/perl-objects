@@ -601,7 +601,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__f8b697e81970620aa078b42e3bd74b11');
+meta::function('update-from', <<'__0a3220be0252f0a0044b2f7f7b0e44b0');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -618,7 +618,7 @@ terminal::message('warning', 'Not saving state, as requested; to save it, omit t
 
 for my $target (@targets) {
   terminal::message('info', "Updating from $target");
-  associate("parent::$target", join '', grep s/\S\s.*$//o, qx($target ls-a)) unless $no_parents;
+  associate("parent::$target", join '', grep s/\s.*$//o, qx($target ls-a)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
   eval qx($target serialize '^meta::');
@@ -645,7 +645,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__f8b697e81970620aa078b42e3bd74b11
+__0a3220be0252f0a0044b2f7f7b0e44b0
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
