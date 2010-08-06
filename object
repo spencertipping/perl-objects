@@ -509,21 +509,25 @@ my ($state_name) = @_;
 associate("state::$state_name", &{'current-state'}(), execute => 1);
 __5c5b586331e25951140ced6442d9fe2b
 
-meta::function('serialize', <<'__d7b3affaece3a36d5cfc051b88a5b76e');
-my $criteria               = join '|', @_;
+meta::function('serialize', <<'__640e48356ea3a27eb6f9ff5dd1407763');
+my ($options, @criteria)    = separate_options(@_);
+my ($inheritable, $partial) = @options{qw(-i -p)};
 
-my @matching_keys          = grep length && (! $criteria || m/$criteria/), sort keys %data;
+$partial ||= @criteria;
+
+my $criteria               = join '|', @criteria;
+my @matching_keys          = grep length && (! $criteria || m/$criteria/) && (! $inheritable || $transient{inherit}{namespace($_)}), sort keys %data;
 my @keys_without_internals = grep ! /^internal::/, @matching_keys;
 
 my @matching_attributes    = map serialize_single($_), grep(/^meta::/,     @keys_without_internals),
                                                        grep(! /^meta::/,   @keys_without_internals),
                                                        grep(/^internal::/, @matching_keys);
 
-my @final_array            = $criteria ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
+my @final_array            = $partial ? @matching_attributes : (retrieve('bootstrap::initialization'), @matching_attributes, '__END__');
 
 terminal::message('info', "No attributes matched $criteria") unless @final_array;
 join "\n", @final_array;
-__d7b3affaece3a36d5cfc051b88a5b76e
+__640e48356ea3a27eb6f9ff5dd1407763
 
 meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
 # Serializes a single attribute and optimizes for content.
