@@ -750,7 +750,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__f8b697e81970620aa078b42e3bd74b11');
+meta::function('update-from', <<'__0a3220be0252f0a0044b2f7f7b0e44b0');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -767,7 +767,7 @@ terminal::message('warning', 'Not saving state, as requested; to save it, omit t
 
 for my $target (@targets) {
   terminal::message('info', "Updating from $target");
-  associate("parent::$target", join '', grep s/\S\s.*$//o, qx($target ls-a)) unless $no_parents;
+  associate("parent::$target", join '', grep s/\s.*$//o, qx($target ls-a)) unless $no_parents;
 
   terminal::message('info', 'Updating meta attributes...');
   eval qx($target serialize '^meta::');
@@ -794,7 +794,7 @@ for my $target (@targets) {
     return &{'load-state'}('before-update') if $save_state;
   }
 }
-__f8b697e81970620aa078b42e3bd74b11
+__0a3220be0252f0a0044b2f7f7b0e44b0
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
@@ -1054,6 +1054,93 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::parent('object', <<'__1302d929660de58a64b901331ac2cb41');
+bootstrap::initialization
+data::default-action
+data::license
+data::name
+data::quiet
+data::watching
+function::cat
+function::clone
+function::cp
+function::create
+function::current-state
+function::edit
+function::export
+function::hash
+function::import
+function::import-bundle
+function::load-state
+function::lock
+function::ls
+function::ls-a
+function::mv
+function::note
+function::perl
+function::preprocess
+function::reload
+function::rm
+function::save
+function::save-state
+function::serialize
+function::serialize_single
+function::shell
+function::size
+function::snapshot
+function::state
+function::trim
+function::unlock
+function::update
+function::update-from
+function::usage
+function::verify
+function::vim
+internal::runtime
+internal_function::associate
+internal_function::basename
+internal_function::complete
+internal_function::debug_trace
+internal_function::execute
+internal_function::fast_hash
+internal_function::file::read
+internal_function::file::write
+internal_function::fnv_hash
+internal_function::invoke_editor_on
+internal_function::messages::warning
+internal_function::namespace
+internal_function::retrieve
+internal_function::state_based_filename
+internal_function::table_display
+internal_function::temporary_name
+internal_function::translate_backtrace
+library::terminal
+message_color::state
+message_color::states
+message_color::watch
+meta::configure
+meta::externalize
+meta::functor::editable
+meta::internal::runtime
+meta::type::bootstrap
+meta::type::data
+meta::type::function
+meta::type::internal_function
+meta::type::library
+meta::type::message_color
+meta::type::meta
+meta::type::note
+meta::type::parent
+meta::type::state
+meta::type::template
+meta::type::vim_highlighter
+meta::type::watch
+template::comment
+template::eval
+template::failing_conditional
+template::include
+__1302d929660de58a64b901331ac2cb41
+
 meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
 - include resource::header-packages
 - include resource::header-listings
