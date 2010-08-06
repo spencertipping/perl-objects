@@ -232,6 +232,10 @@ meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
 meta::meta('type::note', "meta::functor::editable 'note', extension => '', inherit => 0, default => 'edit';");
+meta::meta('type::parent', <<'__912d86897a0468a50d8332fa8197fc2d');
+meta::functor::editable 'parent', extension => '', inherit => 0, default => sub {&{'::update-from'}($_[0])};
+__912d86897a0468a50d8332fa8197fc2d
+
 meta::meta('type::resource', "meta::functor::editable 'resource', extension => '.cltex', inherit => 1, default => 'edit';");
 meta::meta('type::section', "meta::functor::editable 'section', extension => '.cltex', inherit => 0, default => 'edit';");
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
@@ -742,43 +746,55 @@ my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
 __b1bdb7eb224487f5bfd439ebb997c823
 
-meta::function('update-from', <<'__a0566c58c2d9f7db526459b6b32edc69');
+meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
+&{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
+__4de1a6a4085836590a3b1ef997f9d5ea
+
+meta::function('update-from', <<'__f8b697e81970620aa078b42e3bd74b11');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
+#
+# Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-my $target  = $_[0] or die 'Must specify another script to pull data from.';
-my @options = grep /^-/, @_;
+my @options = grep   /^-/, @_;
+my @targets = grep ! /^-/, @_ or die 'Must specify another script to pull data from.';
 
 my $save_state = ! grep /^-n$/ || /^--no-save$/, @options;
+my $no_parents =   grep /^-P$/ || /^--no-parents?$/, @options;
 
 &{'save-state'}('before-update') if $save_state;
-terminal::message('warning', 'Not saving state, as requested; to save it, omit the -n option') unless $save_state;
+terminal::message('warning', 'Not saving state, as requested; to save it, omit the -n option.') unless $save_state;
 
-terminal::message('info', 'Updating meta attributes...');
-eval qx($target serialize '^meta::');
-terminal::message('warning', $@) if $@;
-terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
+for my $target (@targets) {
+  terminal::message('info', "Updating from $target");
+  associate("parent::$target", join '', grep s/\S\s.*$//o, qx($target ls-a)) unless $no_parents;
 
-terminal::message('info', 'Updating non-meta attributes...');
-my $combined_pattern = join '|', map "^${_}::", grep ! (/^meta$/ || /^internal$/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}};
-eval qx($target serialize '$combined_pattern');
-terminal::message('warning', $@) if $@;
-reload();
+  terminal::message('info', 'Updating meta attributes...');
+  eval qx($target serialize '^meta::');
+  terminal::message('warning', $@) if $@;
+  terminal::message('warning', 'One of the meta-attributes triggered a verification failure.') unless verify();
 
-if (verify()) {
-  terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.");
-} elsif (grep /^--force$/o || /^-f$/o, @options) {
-  terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
-  terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
-  terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state;
-} else {
-  terminal::message('error',   'Verification failed after the upgrade was complete.');
-  terminal::message('warning', "Because there is no backup available, you should probably fix this object before exiting the shell.");
-  terminal::message('info',    "$0 has been reverted to its pre-upgrade state.") if $save_state;
-  terminal::message('info',    "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-  &{'load-state'}('before-update') if $save_state;
+  terminal::message('info', 'Updating non-meta attributes...');
+  my $combined_pattern = join '|', map "^${_}::", grep ! (/^meta$/ || /^internal$/) && $transient{inherit}{$_}, sort keys %{$transient{inherit}};
+  eval qx($target serialize '$combined_pattern');
+  terminal::message('warning', $@) if $@;
+  reload();
+
+  if (verify()) {
+    terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state;
+  } elsif (grep /^--force$/o || /^-f$/o, @options) {
+    terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
+    terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
+    terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state;
+  } else {
+    terminal::message('error',   'Verification failed after the upgrade was complete.');
+    terminal::message('warning', "Because there is no backup available, you should probably fix this object before exiting the shell.");
+    terminal::message('info',    "$0 has been reverted to its pre-upgrade state.") if $save_state;
+    terminal::message('info',    "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
+    return &{'load-state'}('before-update') if $save_state;
+  }
 }
-__a0566c58c2d9f7db526459b6b32edc69
+__f8b697e81970620aa078b42e3bd74b11
 
 meta::function('usage', <<'__234b1da5bb4e34d72a932ab68aad5052');
 <<"EOD" . ls ();
