@@ -336,9 +336,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', 'object');
+meta::data('name', 'literate-project');
+meta::data('output-dir', '/tmp');
+meta::data('pdf-output-file', '/tmp/literate-project.3d25d18aa19d37f890ec00c55eaecabc/document.pdf');
+meta::data('pdf-reader', '/usr/bin/evince');
+meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
-meta::data('watching', '1');
+meta::data('source-directory', '/tmp/src');
+meta::data('table-of-contents', '1');
+meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('watching', '0');
 meta::function('cat', 'join "\n", retrieve(@_);');
 meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
 my $output_directory = &{'pdf-output-file'}();
