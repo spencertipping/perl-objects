@@ -171,14 +171,6 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
-meta::meta('type::template', <<'__25f4d6eafb1d3eea6d5d3d9a71a5623e');
-meta::configure 'template', extension => '.pl', inherit => 1;
-meta::define_form 'template', sub {
-  my ($name, $value) = @_;
-  meta::externalize "template::$name", "template::$name", meta::eval_in("sub {\n$value\n}", "template::$name");
-};
-__25f4d6eafb1d3eea6d5d3d9a71a5623e
-
 meta::meta('type::vim_highlighter', "meta::functor::editable 'vim_highlighter', extension => '.vim', inherit => 1, default => 'edit';");
 meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
 meta::bootstrap('initialization', <<'__baa43e5e8e6e1cd76d4e2de828ceaa4d');
@@ -472,61 +464,6 @@ meta::function('perl', <<'__d8818fd77e9e7ce68811e0947dfcc206');
 my $result = eval($_[0]);
 $@ ? $@ : $result;
 __d8818fd77e9e7ce68811e0947dfcc206
-
-meta::function('preprocess', <<'__66e539d29e9afa903569efad0eb7c886');
-# Implements a simple preprocessing language.
-# Syntax follows two forms. One is the 'line form', which gives you a way to specify arguments inline
-# but not spanning multiple lines. The other is 'block form', which gives you access to both one-line
-# arguments and a block of lines. The line parameters are passed in verbatim, and the block is
-# indentation-adjusted and then passed in as a second parameter. (Indentation is adjusted to align
-# with the name of the command.)
-#
-# Here are the forms:
-#
-# - line arguments to function
-#
-# - block line arguments << eof
-#   block contents
-#   block contents
-#   ...
-# - eof
-
-my ($string, %options) = @_;
-my $expansions         = 0;
-my $old_string         = '';
-my $limit              = $options{expansion_limit} || 100;
-my @pieces             = ();
-
-sub adjust_spaces {
-  my ($spaces, $string) = @_;
-  $string =~ s/^$spaces  //mg;
-  chomp $string;
-  $string;
-}
-
-while ($old_string ne $string and $expansions++ < $limit) {
-  $old_string = $string;
-
-  while ((my @pieces = split  /(^(\h*)-\h \S+ \h* \V* <<\h*(\w+)$ \n .*?  ^\2-\h\3$)/xms, $string) > 1 and $expansions++ < $limit) {
-    $pieces[1 + ($_ << 2)] =~ /^ (\h*)-\h(\S+)\h*(\V*)<<\h*(\w+)$ \n(.*?) ^\1-\h\4 $/xms && $externalized_functions{"template::$2"} and
-      $pieces[1 + ($_ << 2)] = &{"template::$2"}($3, adjust_spaces($1, $5))
-      for 0 .. $#pieces / 4;
-
-    @pieces[2 + ($_ << 2), 3 + ($_ << 2)] = '' for 0 .. $#pieces / 4;
-    $string = join '', @pieces;
-  }
-
-  if ((my @pieces = split     /^(\h*-\h \S+ \h* .*)$/xom, $string) > 1) {
-    $pieces[1 + ($_ << 1)] =~ /^ \h*-\h(\S+)\h*(.*)$/xom && $externalized_functions{"template::$1"} and
-      $pieces[1 + ($_ << 1)] = &{"template::$1"}($2)
-      for 0 .. $#pieces >> 1;
-
-    $string = join '', @pieces;
-  }
-}
-
-$string;
-__66e539d29e9afa903569efad0eb7c886
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
 meta::function('rm', <<'__963fdd3d9f6a0ba279b001b1f5679a38');
@@ -994,7 +931,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__6de507bf1036312c57ccae5e19c89bc4');
+meta::parent('object', <<'__171fde01b0a5bb10aa21f103c0946524');
 bootstrap::initialization
 function::cat
 function::clone
@@ -1013,7 +950,6 @@ function::ls-a
 function::mv
 function::note
 function::perl
-function::preprocess
 function::reload
 function::rm
 function::save
@@ -1067,34 +1003,9 @@ meta::type::meta
 meta::type::note
 meta::type::parent
 meta::type::state
-meta::type::template
 meta::type::vim_highlighter
 meta::type::watch
-template::comment
-template::eval
-template::failing_conditional
-template::include
-__6de507bf1036312c57ccae5e19c89bc4
-
-meta::template('comment', "'';     # A mechanism for line or block comments.");
-meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
-my $result = eval $_[0];
-terminal::message('warning', "Error during template evaluation: $@") if $@;
-$result;
-__7be1d470a07a06c58e971bc7fc24c048
-
-meta::template('failing_conditional', <<'__b49f2ffe1cfefb36b1eabd7abd7b3bb6');
-my ($commands)    = @_;
-my $should_return = $commands =~ / if (.*)$/ && ! eval $1;
-terminal::message('warning', "eval of template condition failed: $@") if $@;
-$should_return;
-__b49f2ffe1cfefb36b1eabd7abd7b3bb6
-
-meta::template('include', <<'__e0624844a65ae41e0217dd871fc0dbfb');
-my ($commands) = @_;
-return '' if template::failing_conditional($commands);
-join "\n", map retrieve($_), split /\s+/, $commands;
-__e0624844a65ae41e0217dd871fc0dbfb
+__171fde01b0a5bb10aa21f103c0946524
 
 internal::main();
 
