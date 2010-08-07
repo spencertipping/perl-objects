@@ -1068,7 +1068,7 @@ my %options;
 __d47e8ee23fe55e27bb523c9fcb2f5ca1
 
 meta::internal_function('strip', 'wantarray ? map {s/^\s*|\s*$//g; $_} @_ : $_[0] =~ /^\s*(.*?)\s*$/ && $1;');
-meta::internal_function('table_display', <<'__4ac28dc593ac17fd17b6573c07b43e4e');
+meta::internal_function('table_display', <<'__8a6897e093f36bf05477a3889b84a61d');
 # Displays an array of arrays as a table; that is, with alignment. Arrays are
 # expected to be in column-major order.
 
@@ -1083,8 +1083,8 @@ my @lengths   = map maximum_length_in(@$_), @arrays;
 my @row_major = map {my $i = $_; [map $$_[$i], @arrays]} 0 .. $#{$arrays[0]};
 my $format    = join '  ', map "%-${_}s", @lengths;
 
-join "\n", map sprintf($format, @$_), @row_major;
-__4ac28dc593ac17fd17b6573c07b43e4e
+join "\n", map strip(sprintf($format, @$_)), @row_major;
+__8a6897e093f36bf05477a3889b84a61d
 
 meta::internal_function('temporary_name', <<'__0fb1402061581b69822f913631b4a9d9');
 use File::Temp 'tempfile';
