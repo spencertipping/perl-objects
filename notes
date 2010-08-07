@@ -257,19 +257,25 @@ meta::data('name', 'notes');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', 'join "\n", retrieve(@_);');
-meta::function('clone', <<'__fec8cf43b197da97cfd5e49d75891d57');
-for (@_) {
-  if ($_) {
-    eval {
-      file::write($_, serialize(), noclobber => 1);
-      chmod(0700, $_);
-      print "File $_ cloned successfully.\n";
-    };
+meta::function('child', <<'__dfe18526ee81481b6c62a8cd9a1fa567');
+my ($child_name) = @_;
 
-    print "$@\n" if $@;
-  }
+# Make the child inherit from this object. The easiest way to do that is to
+# grab $0, which is presumably executable, and have the child update from it.
+hypothetically(sub {
+  associate('data::name', $child_name);
+  clone($child_name);
+});
+
+qx($child_name update-from $0 -nu);
+__dfe18526ee81481b6c62a8cd9a1fa567
+
+meta::function('clone', <<'__5a30a4ba6293e250ed22884d609e4781');
+for (grep length, @_) {
+  file::write($_, serialize(), noclobber => 1);
+  chmod(0700, $_);
 }
-__fec8cf43b197da97cfd5e49d75891d57
+__5a30a4ba6293e250ed22884d609e4781
 
 meta::function('cp', <<'__d33fe9aa270eeee6dcc3ee445447a6a7');
 my ($from, $to) = @_;
@@ -753,6 +759,20 @@ $hash = ($hash ^ ($_ & 0xffff) ^ ($_ >> 16)) * $fnv_prime % $modulus for unpack 
 $hash;
 __8d001a3a7988631bab21a41cee559758
 
+meta::internal_function('hypothetically', <<'__33ee2e1595d3877bd1d9accaa72305c8');
+# Applies a temporary state and returns a serialized representation.
+# The original state is restored after this, regardless of whether the
+# temporary state was successful.
+
+my %data_backup   = %data;
+my ($side_effect) = @_;
+my $return_value  = eval {&$side_effect()};
+%data = %data_backup;
+
+die $@ if $@;
+$return_value;
+__33ee2e1595d3877bd1d9accaa72305c8
+
 meta::internal_function('internal::main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
 $SIG{'INT'} = sub {
   snapshot();
@@ -904,9 +924,10 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__eb4a7afe9184e221dde366fac3e805b7');
+meta::parent('object', <<'__6048aa00adc61ec01549cc013eae44ad');
 bootstrap::initialization
 function::cat
+function::child
 function::clone
 function::cp
 function::create
@@ -948,6 +969,7 @@ internal_function::fast_hash
 internal_function::file::read
 internal_function::file::write
 internal_function::fnv_hash
+internal_function::hypothetically
 internal_function::internal::main
 internal_function::invoke_editor_on
 internal_function::namespace
@@ -975,7 +997,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__eb4a7afe9184e221dde366fac3e805b7
+__6048aa00adc61ec01549cc013eae44ad
 
 internal::main();
 

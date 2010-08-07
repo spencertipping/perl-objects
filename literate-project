@@ -347,6 +347,19 @@ meta::data('table-of-contents', '1');
 meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('watching', '0');
 meta::function('cat', 'join "\n", retrieve(@_);');
+meta::function('child', <<'__dfe18526ee81481b6c62a8cd9a1fa567');
+my ($child_name) = @_;
+
+# Make the child inherit from this object. The easiest way to do that is to
+# grab $0, which is presumably executable, and have the child update from it.
+hypothetically(sub {
+  associate('data::name', $child_name);
+  clone($child_name);
+});
+
+qx($child_name update-from $0 -nu);
+__dfe18526ee81481b6c62a8cd9a1fa567
+
 meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
 my $output_directory = &{'pdf-output-file'}();
 $output_directory =~ s+/.*++g;
@@ -354,19 +367,12 @@ unlink <$output_directory/*>;
 rmdir $output_directory;
 __1269c1a312062a1598dcde16eb6134e2
 
-meta::function('clone', <<'__fec8cf43b197da97cfd5e49d75891d57');
-for (@_) {
-  if ($_) {
-    eval {
-      file::write($_, serialize(), noclobber => 1);
-      chmod(0700, $_);
-      print "File $_ cloned successfully.\n";
-    };
-
-    print "$@\n" if $@;
-  }
+meta::function('clone', <<'__5a30a4ba6293e250ed22884d609e4781');
+for (grep length, @_) {
+  file::write($_, serialize(), noclobber => 1);
+  chmod(0700, $_);
 }
-__fec8cf43b197da97cfd5e49d75891d57
+__5a30a4ba6293e250ed22884d609e4781
 
 meta::function('compile', <<'__59d02438dafea67f3f12c2b74f4a8bfb');
 my $tex_command         = &{'tex-command'}();
@@ -962,6 +968,20 @@ $hash = ($hash ^ ($_ & 0xffff) ^ ($_ >> 16)) * $fnv_prime % $modulus for unpack 
 $hash;
 __8d001a3a7988631bab21a41cee559758
 
+meta::internal_function('hypothetically', <<'__33ee2e1595d3877bd1d9accaa72305c8');
+# Applies a temporary state and returns a serialized representation.
+# The original state is restored after this, regardless of whether the
+# temporary state was successful.
+
+my %data_backup   = %data;
+my ($side_effect) = @_;
+my $return_value  = eval {&$side_effect()};
+%data = %data_backup;
+
+die $@ if $@;
+$return_value;
+__33ee2e1595d3877bd1d9accaa72305c8
+
 meta::internal_function('internal::main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
 $SIG{'INT'} = sub {
   snapshot();
@@ -1131,11 +1151,13 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('development', <<'__0e0a735b31c0a04070af3203430bb11d');
+meta::parent('development', <<'__975f5046370616dcb32d76a6e8ad38d6');
+function::child
+internal_function::hypothetically
 parent::notes
 parent::preprocessor
 parent::vim-highlighters
-__0e0a735b31c0a04070af3203430bb11d
+__975f5046370616dcb32d76a6e8ad38d6
 
 meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
 function::note
