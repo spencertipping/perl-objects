@@ -313,6 +313,7 @@ my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys)
 join "\n", map serialize_single($_), @ordered_keys;
 __d83ae43551c0f58d1d0ce576402a315a
 
+meta::function('disable', 'chmod_self(sub {$_[0] & 0666});');
 meta::function('edit', <<'__6912fb43aad413e79cbf45e134866b6e');
 my ($name, %options) = @_;
 my $extension = $transient{extension}{namespace($name)} || '';
@@ -323,6 +324,7 @@ associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options,
 save();
 __6912fb43aad413e79cbf45e134866b6e
 
+meta::function('enable', 'chmod_self(sub {$_[0] | $_[0] >> 2});');
 meta::function('export', <<'__6c445eea603f9863df0f8db445fd708e');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
@@ -413,11 +415,7 @@ reload();
 verify();
 __878f141333993ead4d272027ad301eee
 
-meta::function('lock', <<'__d94992bf224487f5bfd439eb822db309');
-my (undef, undef, $mode) = stat $0;
-chmod $mode & 0555, $0;
-__d94992bf224487f5bfd439eb822db309
-
+meta::function('lock', 'chmod_self(sub {$_[0] & 0555});');
 meta::function('ls', <<'__ffe7609f16d647b7eb9ed9693dd12c23');
 my ($options, @criteria) = separate_options(@_);
 
@@ -627,11 +625,7 @@ $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
 
-meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
-my (undef, undef, $mode) = stat $0;
-chmod $mode | 0200, $0;
-__b1bdb7eb224487f5bfd439ebb997c823
-
+meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
 meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
@@ -730,6 +724,12 @@ my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
 __62efb9f22157835940af1d5feae98d98
+
+meta::internal_function('chmod_self', <<'__b13487447c65f2dc790bd6b21dde89dd');
+my ($mode_function)      = @_;
+my (undef, undef, $mode) = stat $0;
+chmod &$mode_function($mode), $0;
+__b13487447c65f2dc790bd6b21dde89dd
 
 meta::internal_function('complete', <<'__f14ae2337c0653b6bb6fd02bb6493646');
 my @functions  = sort keys %externalized_functions;
@@ -842,7 +842,9 @@ die $@ if $@;
 $return_value;
 __33ee2e1595d3877bd1d9accaa72305c8
 
-meta::internal_function('internal::main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
+meta::internal_function('internal::main', <<'__acb38ec5971c89f794f486f1c30900e6');
+disable();
+
 $SIG{'INT'} = sub {
   snapshot();
   exit 1;
@@ -858,7 +860,11 @@ chomp(my $result = &$function_name(@ARGV));
 print "$result\n" if $result;
 
 save() unless $initial_state eq state();
-__cb63fed16dd9ee83dcbd15aa72643d74
+
+END {
+  enable();
+}
+__acb38ec5971c89f794f486f1c30900e6
 
 meta::internal_function('invoke_editor_on', <<'__7c798760d79429e5b52d9fa934e889d8');
 my ($data, %options) = @_;
@@ -999,9 +1005,10 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__eb4a7afe9184e221dde366fac3e805b7');
+meta::parent('object', <<'__6048aa00adc61ec01549cc013eae44ad');
 bootstrap::initialization
 function::cat
+function::child
 function::clone
 function::cp
 function::create
@@ -1043,6 +1050,7 @@ internal_function::fast_hash
 internal_function::file::read
 internal_function::file::write
 internal_function::fnv_hash
+internal_function::hypothetically
 internal_function::internal::main
 internal_function::invoke_editor_on
 internal_function::namespace
@@ -1070,7 +1078,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__eb4a7afe9184e221dde366fac3e805b7
+__6048aa00adc61ec01549cc013eae44ad
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess
