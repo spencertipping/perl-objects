@@ -73,32 +73,6 @@ sub meta::externalize {
 }
 __9141b4e8752515391385516ae94b23b5
 
-meta::meta('externalize_template', <<'__1e90e7ccb5fea1d498bbaaa6e7e43851');
-sub meta::externalize_template {
-  my ($name, $implementation) = @_;
-  meta::externalize "template::$name", "template::$name", $implementation;
-}
-__1e90e7ccb5fea1d498bbaaa6e7e43851
-
-meta::meta('functor::code-templates', <<'__8438e73e45c87188c8b46d0c43eb4971');
-package code;
-
-# Templates for generating named source files.
-sub template {
-  my ($name, $implementation) = @_;
-  $implementation ||= sub {
-    my ($line, $block) = @_;
-    my $append         = $line =~ s/^\h*>>\h*//o;
-
-    $line =~ s/\s+.*$//o;
-    file::write(&{'::source-directory'}() . "/$line", ($append && "\n") . $block, mkpath => 1, append => $append);
-    "\\lstset{caption={$line" . ($append && ' (continued)') . "},name={$line}}\\begin{${name}code}\n$block \\end{${name}code}";
-  };
-
-  meta::externalize_template $name, $implementation;
-}
-__8438e73e45c87188c8b46d0c43eb4971
-
 meta::meta('functor::editable', <<'__bbfdc65c8d51695de1cd6050232555bd');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
@@ -124,52 +98,6 @@ sub meta::functor::editable {
   };
 }
 __bbfdc65c8d51695de1cd6050232555bd
-
-meta::meta('functor::tex-templates', <<'__34a5da8558897a4388fc22ed4b0c3c6b');
-package tex;
-
-# A wrapper for TeX templates. The idea is always the same, so I'm abstracting out the
-# common externalization logic here.
-sub template_for(&) {
-  my ($implementation) = @_;
-  sub {
-    my %names = @_;
-    for my $name (keys %names) {
-      ::meta::externalize_template $name, sub {
-        &$implementation($names{$name}, @_);
-      };
-    }
-  };
-}
-
-sub id {
-  map {$_ => $_} @_;
-}
-
-# Creates a one-line or multiline template based on normal TeX syntax. It's a straight
-# transfer into TeX with no preprocessing.
-*template = template_for {
-  my ($name, $line, $block) = @_;
-  $block ? "\\begin{$name}\n$block\n\\end{$name}" : "\\$name\{$line\}";
-};
-
-# Creates a labeled one-line template. This is just like normal TeX, but assumes the
-# specification of a label name after a pipe character.
-*labeled_template = template_for {
-  my ($name, $line, undef) = @_;
-  my ($real_stuff, $label) = split /\h*\|\h*/, $line;
-  "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
-};
-__34a5da8558897a4388fc22ed4b0c3c6b
-
-meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
-meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
-meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize item/);');
-meta::meta('template::math', "tex::template align => 'align*', nalign => 'align';");
-meta::meta('template::sections', <<'__0bf14cbc6a0e77d9b82dd185d8d8a9a0');
-tex::labeled_template(s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
-tex::labeled_template(sc => 'chapter', sp => 'part');
-__0bf14cbc6a0e77d9b82dd185d8d8a9a0
 
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
@@ -231,8 +159,6 @@ meta::define_form 'parent', \&meta::bootstrap::implementation;
 meta::configure 'parent', extension => '', inherit => 1;
 __607e9931309b1b595424bedcee5dfa45
 
-meta::meta('type::resource', "meta::functor::editable 'resource', extension => '.cltex', inherit => 1, default => 'edit';");
-meta::meta('type::section', "meta::functor::editable 'section', extension => '.cltex', inherit => 0, default => 'edit';");
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
@@ -336,24 +262,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 
-meta::data('name', 'literate-project');
-meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.5Pnb/document.pdf');
-meta::data('pdf-reader', '/usr/bin/evince');
-meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
+meta::data('name', 'dev');
 meta::data('quiet', '1');
-meta::data('source-directory', '/tmp/src');
-meta::data('table-of-contents', '1');
-meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
-meta::data('watching', '0');
+meta::data('watching', '1');
 meta::function('cat', 'join "\n", retrieve(@_);');
-meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
-my $output_directory = &{'pdf-output-file'}();
-$output_directory =~ s+/.*++g;
-unlink <$output_directory/*>;
-rmdir $output_directory;
-__1269c1a312062a1598dcde16eb6134e2
-
 meta::function('clone', <<'__fec8cf43b197da97cfd5e49d75891d57');
 for (@_) {
   if ($_) {
@@ -367,34 +279,6 @@ for (@_) {
   }
 }
 __fec8cf43b197da97cfd5e49d75891d57
-
-meta::function('compile', <<'__59d02438dafea67f3f12c2b74f4a8bfb');
-my $tex_command         = &{'tex-command'}();
-my $pdftex_command      = &{'pdftex-command'}();
-my $filename            = 'document';
-
-my $contents            = tex();
-my $output_directory    = &{'output-dir'}();
-chomp $output_directory;
-
-my $temporary_directory = temporary_name();
-$temporary_directory =~ s+^.*/++;
-$temporary_directory = "$output_directory/$temporary_directory";
-
-$tex_command    =~ s/__TEMPORARY_DIRECTORY__/$temporary_directory/g;
-$tex_command    =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
-
-$pdftex_command =~ s/__TEMPORARY_DIRECTORY__/$temporary_directory/g;
-$pdftex_command =~ s+__INPUT_FILE__+$temporary_directory/$filename.tex+g;
-
-mkdir $temporary_directory;
-file::write("$temporary_directory/$filename.tex", $contents);
-
-my $result = &{'table-of-contents'}() ? system($tex_command) || system($tex_command) || system($pdftex_command) : system($pdftex_command);
-
-associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
-$result;
-__59d02438dafea67f3f12c2b74f4a8bfb
 
 meta::function('cp', <<'__d33fe9aa270eeee6dcc3ee445447a6a7');
 my ($from, $to) = @_;
@@ -552,11 +436,6 @@ join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [gre
 __ffe7609f16d647b7eb9ed9693dd12c23
 
 meta::function('ls-a', "ls('-ad');");
-meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
-compile() || view();
-clean();
-__9a3d7e3c7e0017f4c9b239f3858aaf03
-
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
@@ -635,12 +514,6 @@ $string;
 __66e539d29e9afa903569efad0eb7c886
 
 meta::function('reload', 'execute($_) for grep ! (/^internal::/ || /^bootstrap::/), keys %data;');
-meta::function('render', <<'__ccb26db43115329651cc3c0527a3e849');
-use File::Copy 'copy';
-compile();
-copy(&{'pdf-output-file'}(), &{'source-directory'}() . '/' . name() . '.pdf') or die "Copy failed: $!";
-__ccb26db43115329651cc3c0527a3e849
-
 meta::function('rm', <<'__963fdd3d9f6a0ba279b001b1f5679a38');
 for my $to_be_deleted (@_) {
   terminal::message('warning', "$to_be_deleted does not exist") unless exists $data{$to_be_deleted};
@@ -748,12 +621,6 @@ $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
 
-meta::function('tex', <<'__5bb8bf491e1b442858096acf711135f9');
-my ($document) = @_;
-$document ||= 'main';
-preprocess(retrieve("section::$document"));
-__5bb8bf491e1b442858096acf711135f9
-
 meta::function('unlock', <<'__b1bdb7eb224487f5bfd439ebb997c823');
 my (undef, undef, $mode) = stat $0;
 chmod $mode | 0200, $0;
@@ -838,13 +705,6 @@ terminal::message('error', "Verification failed; '$observed_state' (produced by 
 
 $result;
 __e8ff828f42cdc7d759b70bb81721ddb6
-
-meta::function('view', <<'__72064117780244bd9dd38659573b9f2c');
-my $pdf_reader      = &{'pdf-reader'}();
-my $pdf_output_file = &{'pdf-output-file'}();
-chomp $pdf_reader;
-system("$pdf_reader '$pdf_output_file'");
-__72064117780244bd9dd38659573b9f2c
 
 meta::function('vim', <<'__bd231af998c353790253bc6660be0b90');
 # Installs VIM highlighters.
@@ -998,24 +858,6 @@ unlink $filename;
 $result;
 __7c798760d79429e5b52d9fa934e889d8
 
-meta::internal_function('main', <<'__cb63fed16dd9ee83dcbd15aa72643d74');
-$SIG{'INT'} = sub {
-  snapshot();
-  exit 1;
-};
-
-my $initial_state        = state();
-chomp(my $default_action = retrieve('data::default-action'));
-
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
-
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
-
-save() unless $initial_state eq state();
-__cb63fed16dd9ee83dcbd15aa72643d74
-
 meta::internal_function('namespace', <<'__93213d60cafb9627e0736b48cd1f0760');
 my ($name) = @_;
 $name =~ s/::.*$//;
@@ -1131,12 +973,6 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('dev', <<'__0e0a735b31c0a04070af3203430bb11d');
-parent::notes
-parent::preprocessor
-parent::vim-highlighters
-__0e0a735b31c0a04070af3203430bb11d
-
 meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
 function::note
 meta::type::note
@@ -1232,142 +1068,6 @@ meta::type::vim_highlighter
 parent::object
 __1258d5867978f2068c8efd130c2066f7
 
-meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
-- include resource::header-packages
-- include resource::header-listings
-
-- include resource::header-refs
-
-- include resource::header-languages
-- include resource::header-resource
-__efe6254be4f73fb4170ab1980a1888d5
-
-meta::resource('header-languages', <<'__637a18cf607b727dec3feab552be05e2');
-\lstnewenvironment{asmcode}       {}{}
-\lstnewenvironment{cppcode}       {\lstset{language=c++}}{}
-\lstnewenvironment{javacode}      {\lstset{language=java}}{}
-\lstnewenvironment{javascriptcode}{}{}
-\lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
-__637a18cf607b727dec3feab552be05e2
-
-meta::resource('header-listings', <<'__4caf6ff3ff152cce49ad5d1775ad0703');
-\definecolor{gray}{rgb}{0.6,0.6,0.6}
-
-\usepackage{caption}
-\DeclareCaptionFormat{listing}{\llap{\color{gray}#1\hspace{10pt}}\tt{}#3}
-\captionsetup[lstlisting]{format=listing, singlelinecheck=false, margin=0pt, font={bf}}
-
-\lstset{columns=fixed,basicstyle={\tt},numbers=left,firstnumber=auto,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
-__4caf6ff3ff152cce49ad5d1775ad0703
-
-meta::resource('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,pxfonts,listings,color}
-\usepackage[colorlinks]{hyperref}
-__f69baadb1d3ce11744003b174c91b34b
-
-meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
-meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
-meta::section('introduction', <<'__da922cd923eedb4306efb6920b9ebc91');
-- s1 Introduction | sec:introduction
-  This Perl object gives you a way to integrate documentation, code, and tests into one linearized format. \Ref{Section}{sec:introduction-code} goes over this in more detail.
-
-  Here are some features:
-
-  - itemize << end
-    - item Impossible to use
-    - item Unfathomably complex to maintain
-  - end
-
-  And the costs associated with using this technology are:
-
-  - enumerate << end
-    - item Developers must know self-modifying Perl.
-           This is very rare!
-    - item If something breaks, you are sunk.
-  - end
-
-  - s2 Code | sec:introduction-code
-    Code is entered in literate form. For example:
-
-  - resource build << end
-    #!/bin/bash
-    g++ hello.cc -o hello
-    javac Hello.java
-  - end
-
-  - cpp hello.cc << end
-    #include <iostream>
-    int main () {
-      std::cout << "Hello world" << std::endl;
-      return 0;
-    }
-  - end
-
-  - java Hello.java << end
-    public class Hello {
-      public static void main (final String[] args) {
-        System.out.println ("Hello world");
-      }
-    }
-  - end
-
-  - javascript hello.js << end
-    document.getElementById ('hi').appendChild (
-      document.createTextNode ('Hi there!'));
-  - end
-
-  - html hello.html << end
-    <html>
-      <body>
-        <div id='hi'></div>
-        <script src='hello.js'></script>
-      </body>
-    </html>
-  - end
-
-  - asm false.s << end
-    main:
-      mov $1, %eax
-      ret
-  - end
-
-  - resource >> build << end
-    g++ false.s -o false
-  - end
-__da922cd923eedb4306efb6920b9ebc91
-
-meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
-- documentclass article
-- include resource::header
-
-- title  Literate Project
-- author Spencer Tipping
-
-- document << end
-  - maketitle
-  - tableofcontents
-
-  - comment This is a line comment that will not appear in the TeX source.
-  - comment Block comment syntax is shown below:
-
-  - comment << end
-    This text will not appear in the TeX source either.
-
-    - comment << end
-      Nor will this text, and comments are nestable as long as either the
-      EOF markers or indentation levels differ.
-    - end
-
-  - comment << eof
-    Same indentation level, different EOF marker.
-  - eof
-  - end
-  
-  - include section::introduction
-- end
-__589811f7266bdf4ec8b030aeb648dddc
-
 meta::template('comment', "'';     # A mechanism for line or block comments.");
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');
 my $result = eval $_[0];
@@ -1387,52 +1087,6 @@ my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
-
-meta::vim_highlighter('cltex', <<'__5bfc80e1a2ad3bb7cb4f57ff906d71b0');
-" Cleaner TeX
-" Maintainer: Spencer Tipping <spencer@spencertipping.com>
-" Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
-
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
-syn match   cltEofMarker   /<<\s*\w\+/ contained
-syn region  cltLineComment matchgroup=cltCode start=/^\s*- comment / end=/$/ contained
-syn match   cltLine        /^\s*- .*$/ contains=cltEofMarker,cltLineComment
-
-syn include @cpp           syntax/cpp.vim        | unlet b:current_syntax
-syn include @java          syntax/java.vim       | unlet b:current_syntax
-syn include @asm           syntax/asm.vim        | unlet b:current_syntax
-syn include @javascript    syntax/javascript.vim | unlet b:current_syntax
-syn include @html          syntax/html.vim       | unlet b:current_syntax
-
-syn region  cltCpp         matchgroup=cltCode start=/^\z(\s*\)- cpp .*<<\s*\z(\w\+\)$/        end=/^\z1- \z2$/ contains=@cpp
-syn region  cltJava        matchgroup=cltCode start=/^\z(\s*\)- java .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@java
-syn region  cltAsm         matchgroup=cltCode start=/^\z(\s*\)- asm .*<<\s*\z(\w\+\)$/        end=/^\z1- \z2$/ contains=@asm
-syn region  cltJavascript  matchgroup=cltCode start=/^\z(\s*\)- javascript .*<<\s*\z(\w\+\)$/ end=/^\z1- \z2$/ contains=@javascript
-syn region  cltHtml        matchgroup=cltCode start=/^\z(\s*\)- html .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@html
-syn region  cltResource    matchgroup=cltCode start=/^\z(\s*\)- resource .*<<\s*\z(\w\+\)$/   end=/^\z1- \z2$/
-syn region  cltComment     matchgroup=cltCode start=/^\z(\s*\)- comment .*<<\s*\z(\w\+\)$/    end=/^\z1- \z2$/
-
-syn cluster cltStuff       add=cltCpp,cltJava,cltAsm,cltJavascript,cltHtml,cltResource,cltComment,cltLine
-
-syn region  cltDocument    start=/\%^/ end=/\%$/ contains=@cltStuff
-
-hi link cltLine            Special
-hi link cltKeyword         String
-hi link cltResource        String
-hi link cltEofMarker       String
-
-hi link cltCode            Special
-hi link cltDocument        Comment
-hi link cltComment         Type
-hi link cltLineComment     Type
-
-let b:current_syntax = "cltex"
-__5bfc80e1a2ad3bb7cb4f57ff906d71b0
 
 internal::main();
 
