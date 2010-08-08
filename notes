@@ -566,7 +566,7 @@ meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
 &{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
 __4de1a6a4085836590a3b1ef997f9d5ea
 
-meta::function('update-from', <<'__9b6b0553bd251a8c65a433d699337d01');
+meta::function('update-from', <<'__f927cc6b2e1c93ce2e969845e01ba839');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -590,32 +590,37 @@ terminal::message('warning', 'Not saving state, as requested; to save it, omit t
 for my $target (@targets) {
   terminal::message('info', "Updating from $target");
 
-  rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
-  associate("parent::$target", join '', qx($target ls -aiu)) unless $no_parents;
+  my $attributes = join '', qx($target ls -aiu);
+  terminal::message('warning', "Skipping unreachable object $target") unless $attributes;
 
-  terminal::message('info', 'Updating meta attributes...');
-  eval qx($target serialize -ipm $unique_option);
-  terminal::message('warning', $@) if $@;
+  if ($attributes) {
+    rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
+    associate("parent::$target", $attributes) unless $no_parents;
 
-  terminal::message('info', 'Updating non-meta attributes...');
-  eval qx($target serialize -ipM $unique_option);
-  terminal::message('warning', $@) if $@;
-  reload();
+    terminal::message('info', 'Updating meta attributes...');
+    eval qx($target serialize -ipm $unique_option);
+    terminal::message('warning', $@) if $@;
 
-  if (verify()) {
-    terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state;
-  } elsif ($force) {
-    terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
-    terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
-    terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state;
-  } else {
-    terminal::message('error',   'Verification failed after the upgrade was complete.');
-    terminal::message('info',    "$0 has been reverted to its pre-upgrade state.") if $save_state;
-    terminal::message('info',    "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-    return &{'load-state'}('before-update') if $save_state;
+    terminal::message('info', 'Updating non-meta attributes...');
+    eval qx($target serialize -ipM $unique_option);
+    terminal::message('warning', $@) if $@;
+    reload();
+
+    if (verify()) {
+      terminal::message('info', "Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state;
+    } elsif ($force) {
+      terminal::message('warning', 'The object failed verification, but the failure state has been kept because --force was specified.');
+      terminal::message('warning', 'At this point your object will not save properly, though backup copies will be created.');
+      terminal::message('info',    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state;
+    } else {
+      terminal::message('error',   'Verification failed after the upgrade was complete.');
+      terminal::message('info',    "$0 has been reverted to its pre-upgrade state.") if $save_state;
+      terminal::message('info',    "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
+      return &{'load-state'}('before-update') if $save_state;
+    }
   }
 }
-__9b6b0553bd251a8c65a433d699337d01
+__f927cc6b2e1c93ce2e969845e01ba839
 
 meta::function('usage', <<'__25615bcd877fcf7e5c823dec475f0a31');
 <<"EOD" . ls ('-d');
