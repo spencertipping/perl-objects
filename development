@@ -439,7 +439,10 @@ join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [gre
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
 __ffe7609f16d647b7eb9ed9693dd12c23
 
-meta::function('ls-a', "ls('-ad');");
+meta::function('ls-a', <<'__87c7c2aabf4dee78f646c5542608af56');
+ls('-ad', @_);
+__87c7c2aabf4dee78f646c5542608af56
+
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
