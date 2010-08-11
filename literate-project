@@ -165,7 +165,11 @@ __34a5da8558897a4388fc22ed4b0c3c6b
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
 meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize item/);');
-meta::meta('template::math', "tex::template align => 'align*', nalign => 'align';");
+meta::meta('template::math', <<'__2ea173a12f781eec97f4a0d3bfe80f75');
+tex::template align => 'align*', nalign => 'align';
+tex::template tex::id(qw/theorem proof lemma corollary conjecture definition proposition/);
+__2ea173a12f781eec97f4a0d3bfe80f75
+
 meta::meta('template::sections', <<'__0bf14cbc6a0e77d9b82dd185d8d8a9a0');
 tex::labeled_template(s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
 tex::labeled_template(sc => 'chapter', sp => 'part');
@@ -338,7 +342,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 
 meta::data('name', 'literate-project');
 meta::data('output-dir', '/tmp');
-meta::data('pdf-output-file', '/tmp/literate-project.5Pnb/document.pdf');
+meta::data('pdf-output-file', '/tmp/literate-project.nWsn/document.pdf');
 meta::data('pdf-reader', '/usr/bin/evince');
 meta::data('pdftex-command', 'pdflatex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('quiet', '1');
@@ -1299,11 +1303,11 @@ meta::resource('header-listings', <<'__4caf6ff3ff152cce49ad5d1775ad0703');
 \lstset{columns=fixed,basicstyle={\tt},numbers=left,firstnumber=auto,basewidth=0.5em,showstringspaces=false,numberstyle={\color{gray}\scriptsize}}
 __4caf6ff3ff152cce49ad5d1775ad0703
 
-meta::resource('header-packages', <<'__f69baadb1d3ce11744003b174c91b34b');
+meta::resource('header-packages', <<'__5a7e0bd196996326e6278b6dc308371c');
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,pxfonts,listings,color}
+\usepackage{amsmath,amssymb,amsthm,pxfonts,listings,color}
 \usepackage[colorlinks]{hyperref}
-__f69baadb1d3ce11744003b174c91b34b
+__5a7e0bd196996326e6278b6dc308371c
 
 meta::resource('header-refs', '\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}');
 meta::resource('header-resource', '\lstnewenvironment{resourcecode}{}{}');
