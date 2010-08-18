@@ -351,7 +351,7 @@ meta::data('table-of-contents', '1');
 meta::data('tex-command', 'latex -output-directory=__TEMPORARY_DIRECTORY__ __INPUT_FILE__');
 meta::data('watching', '0');
 meta::function('cat', 'join "\n", retrieve(@_);');
-meta::function('child', <<'__dfe18526ee81481b6c62a8cd9a1fa567');
+meta::function('child', <<'__3eeb4b4fd37a502b53f0008e7835b5de');
 my ($child_name) = @_;
 
 # Make the child inherit from this object. The easiest way to do that is to
@@ -361,8 +361,10 @@ hypothetically(sub {
   clone($child_name);
 });
 
+enable();
 qx($child_name update-from $0 -nu);
-__dfe18526ee81481b6c62a8cd9a1fa567
+disable();
+__3eeb4b4fd37a502b53f0008e7835b5de
 
 meta::function('clean', <<'__1269c1a312062a1598dcde16eb6134e2');
 my $output_directory = &{'pdf-output-file'}();

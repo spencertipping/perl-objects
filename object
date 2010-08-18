@@ -256,7 +256,7 @@ meta::data('name', 'object');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', 'join "\n", retrieve(@_);');
-meta::function('child', <<'__dfe18526ee81481b6c62a8cd9a1fa567');
+meta::function('child', <<'__3eeb4b4fd37a502b53f0008e7835b5de');
 my ($child_name) = @_;
 
 # Make the child inherit from this object. The easiest way to do that is to
@@ -266,8 +266,10 @@ hypothetically(sub {
   clone($child_name);
 });
 
+enable();
 qx($child_name update-from $0 -nu);
-__dfe18526ee81481b6c62a8cd9a1fa567
+disable();
+__3eeb4b4fd37a502b53f0008e7835b5de
 
 meta::function('clone', <<'__5a30a4ba6293e250ed22884d609e4781');
 for (grep length, @_) {
