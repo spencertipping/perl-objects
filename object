@@ -118,6 +118,24 @@ meta::define_form 'function', sub {
 };
 __d93b3cc15693707dac518e3d6b1f5648
 
+meta::meta('type::inc', <<'__5ed584814f1bd9c9cf6cc71c7fb3fee0');
+meta::define_form 'inc', sub {
+  use File::Path 'mkpath';
+  use File::Basename qw/fileparse dirname/;
+  my ($name, $value) = @_;
+  my $filename = "/tmp/$0/$name";
+
+  push @INC, "/tmp/$0" unless grep /^\/tmp\/$0$/, @INC;
+
+  mkpath(dirname($filename));
+  if (! -e $filename) {
+    open my $fh, '>', $filename;
+    print $fh $value;
+    close $fh;
+  }
+};
+__5ed584814f1bd9c9cf6cc71c7fb3fee0
+
 meta::meta('type::internal_function', <<'__34abb44c67c7e282569e28ef6f4d62ab');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {

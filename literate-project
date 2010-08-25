@@ -194,6 +194,24 @@ meta::define_form 'function', sub {
 };
 __d93b3cc15693707dac518e3d6b1f5648
 
+meta::meta('type::inc', <<'__5ed584814f1bd9c9cf6cc71c7fb3fee0');
+meta::define_form 'inc', sub {
+  use File::Path 'mkpath';
+  use File::Basename qw/fileparse dirname/;
+  my ($name, $value) = @_;
+  my $filename = "/tmp/$0/$name";
+
+  push @INC, "/tmp/$0" unless grep /^\/tmp\/$0$/, @INC;
+
+  mkpath(dirname($filename));
+  if (! -e $filename) {
+    open my $fh, '>', $filename;
+    print $fh $value;
+    close $fh;
+  }
+};
+__5ed584814f1bd9c9cf6cc71c7fb3fee0
+
 meta::meta('type::internal_function', <<'__34abb44c67c7e282569e28ef6f4d62ab');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
@@ -1184,7 +1202,7 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__aafadb76a9eec5d50fcd15a72d1343c7');
+meta::parent('object', <<'__d63533a4bd9f34163550d6d65df79603');
 bootstrap::initialization
 function::cat
 function::child
@@ -1254,6 +1272,7 @@ meta::functor::editable
 meta::type::bootstrap
 meta::type::data
 meta::type::function
+meta::type::inc
 meta::type::internal_function
 meta::type::library
 meta::type::message_color
@@ -1261,7 +1280,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__aafadb76a9eec5d50fcd15a72d1343c7
+__d63533a4bd9f34163550d6d65df79603
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess
