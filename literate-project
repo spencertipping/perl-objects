@@ -462,7 +462,7 @@ if (@attributes) {
 }
 __6c445eea603f9863df0f8db445fd708e
 
-meta::function('extern', '&{shift}(retrieve(@_));');
+meta::function('extern', '&{$_[0]}(retrieve(@_[1 .. $#_]));');
 meta::function('grep', <<'__ccbc55153c3f45db829686632273b93b');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
@@ -1172,12 +1172,11 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('development', <<'__329d49d834686176461094084fe5ed9d');
-function::extern
+meta::parent('development', <<'__0e0a735b31c0a04070af3203430bb11d');
 parent::notes
 parent::preprocessor
 parent::vim-highlighters
-__329d49d834686176461094084fe5ed9d
+__0e0a735b31c0a04070af3203430bb11d
 
 meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
 function::note
@@ -1185,7 +1184,7 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__807c9ded448a39ff69812260e1c10c35');
+meta::parent('object', <<'__aafadb76a9eec5d50fcd15a72d1343c7');
 bootstrap::initialization
 function::cat
 function::child
@@ -1197,6 +1196,7 @@ function::disable
 function::edit
 function::enable
 function::export
+function::extern
 function::grep
 function::hash
 function::import
@@ -1261,7 +1261,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__807c9ded448a39ff69812260e1c10c35
+__aafadb76a9eec5d50fcd15a72d1343c7
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess
