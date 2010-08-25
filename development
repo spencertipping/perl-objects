@@ -342,6 +342,7 @@ if (@attributes) {
 }
 __6c445eea603f9863df0f8db445fd708e
 
+meta::function('extern', '&{shift}(retrieve(@_));');
 meta::function('grep', <<'__ccbc55153c3f45db829686632273b93b');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
