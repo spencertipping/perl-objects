@@ -118,24 +118,26 @@ meta::define_form 'function', sub {
 };
 __d93b3cc15693707dac518e3d6b1f5648
 
-meta::meta('type::inc', <<'__d9bd222aa98dfee8bdd0fb4888726298');
+meta::meta('type::inc', <<'__c95915391b969734305f2f492d5ca8e3');
 meta::configure 'inc', inherit => 1, extension => '.pl';
 meta::define_form 'inc', sub {
   use File::Path 'mkpath';
-  use File::Basename qw/dirname/;
-  my ($name, $value) = @_;
-  my $filename = "/tmp/$0/$name";
+  use File::Basename qw/basename dirname/;
 
-  push @INC, "/tmp/$0" unless grep /^\/tmp\/$0$/, @INC;
+  my ($name, $value) = @_;
+  my $tmpdir   = basename($0) . '-' . $$;
+  my $filename = "/tmp/$tmpdir/$name";
+
+  push @INC, "/tmp/$tmpdir" unless grep /^\/tmp\/$tmpdir$/, @INC;
 
   mkpath(dirname($filename));
-  if (! -e $filename) {
+  unless (-e $filename) {
     open my $fh, '>', $filename;
     print $fh $value;
     close $fh;
   }
 };
-__d9bd222aa98dfee8bdd0fb4888726298
+__c95915391b969734305f2f492d5ca8e3
 
 meta::meta('type::internal_function', <<'__34abb44c67c7e282569e28ef6f4d62ab');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
