@@ -1191,11 +1191,17 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('development', <<'__0e0a735b31c0a04070af3203430bb11d');
+meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
+meta::type::configuration
+parent::/home/spencertipping/bin/object
+__511208c99d8bc2caa3067db9f1824163
+
+meta::parent('development', <<'__4ad4d4e680cfb5934a6e72241f8dd17c');
+parent::configuration
 parent::notes
 parent::preprocessor
 parent::vim-highlighters
-__0e0a735b31c0a04070af3203430bb11d
+__4ad4d4e680cfb5934a6e72241f8dd17c
 
 meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
 function::note
