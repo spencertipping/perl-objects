@@ -109,8 +109,8 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::configuration', <<'__f0ecd426d6b25f9270b2095f99680ee7');
-meta::functor::editable 'configuration', inherit => 0, extension => 'conf', default => sub {
+meta::meta('type::configuration', <<'__9d9f24e95e63d151b6dda2e01a8a2a21');
+meta::functor::editable 'configuration', inherit => 0, extension => '.conf', default => sub {
   # Any lines starting with #, with or without leading whitespace, are treated as comments.
   # Comments are not parsed in option text; that is, you could specify an option that contained
   # a # and the # and following text would be considered part of that option.
@@ -120,7 +120,7 @@ meta::functor::editable 'configuration', inherit => 0, extension => 'conf', defa
   $key_values[$_ << 1] = lc $key_values[$_ << 1] for 0 .. $#key_values >> 1;
   @key_values;
 };
-__f0ecd426d6b25f9270b2095f99680ee7
+__9d9f24e95e63d151b6dda2e01a8a2a21
 
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
