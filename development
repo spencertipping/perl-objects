@@ -109,6 +109,16 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
+meta::meta('type::configuration', <<'__ab52944d9b070f29a43d24f15ebfd5ef');
+meta::functor::editable 'configuration', inherit => 0, extension => 'conf', default => sub {
+  # Any lines starting with #, with or without leading whitespace, are treated as comments.
+  # Comments are not parsed in option text; that is, you could specify an option that contained
+  # a # and the # and following text would be considered part of that option.
+  my @options = grep ! /^\h*#/o && ! /^\h*$/o, split(/\V+/o, shift);
+  map(($$_[0] => $$_[1]), map([split /\s*:\s*/, $_, 2], @options));
+};
+__ab52944d9b070f29a43d24f15ebfd5ef
+
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
 meta::configure 'function', extension => '.pl', inherit => 1;
@@ -1029,6 +1039,91 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::parent('/home/spencertipping/bin/object', <<'__d63533a4bd9f34163550d6d65df79603');
+bootstrap::initialization
+function::cat
+function::child
+function::clone
+function::cp
+function::create
+function::current-state
+function::disable
+function::edit
+function::enable
+function::export
+function::extern
+function::grep
+function::hash
+function::import
+function::import-bundle
+function::load-state
+function::lock
+function::ls
+function::ls-a
+function::mv
+function::parents
+function::perl
+function::reload
+function::rm
+function::save
+function::save-state
+function::serialize
+function::serialize_single
+function::shell
+function::size
+function::snapshot
+function::state
+function::unlock
+function::update
+function::update-from
+function::usage
+function::verify
+internal_function::associate
+internal_function::basename
+internal_function::chmod_self
+internal_function::complete
+internal_function::debug_trace
+internal_function::execute
+internal_function::fast_hash
+internal_function::file::read
+internal_function::file::write
+internal_function::fnv_hash
+internal_function::hypothetically
+internal_function::internal::main
+internal_function::invoke_editor_on
+internal_function::namespace
+internal_function::retrieve
+internal_function::select_keys
+internal_function::separate_options
+internal_function::strip
+internal_function::table_display
+internal_function::temporary_name
+internal_function::translate_backtrace
+library::terminal
+message_color::state
+message_color::states
+message_color::watch
+meta::configure
+meta::externalize
+meta::functor::editable
+meta::type::bootstrap
+meta::type::data
+meta::type::function
+meta::type::inc
+meta::type::internal_function
+meta::type::library
+meta::type::message_color
+meta::type::meta
+meta::type::parent
+meta::type::state
+meta::type::watch
+__d63533a4bd9f34163550d6d65df79603
+
+meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
+meta::type::configuration
+parent::/home/spencertipping/bin/object
+__511208c99d8bc2caa3067db9f1824163
+
 meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
 function::note
 meta::type::note
