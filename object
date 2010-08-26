@@ -118,11 +118,11 @@ meta::define_form 'function', sub {
 };
 __d93b3cc15693707dac518e3d6b1f5648
 
-meta::meta('type::inc', <<'__2fed3160e11daef8f8022e0839e6d10a');
+meta::meta('type::inc', <<'__d9bd222aa98dfee8bdd0fb4888726298');
 meta::configure 'inc', inherit => 1, extension => '.pl';
 meta::define_form 'inc', sub {
   use File::Path 'mkpath';
-  use File::Basename qw/fileparse dirname/;
+  use File::Basename qw/dirname/;
   my ($name, $value) = @_;
   my $filename = "/tmp/$0/$name";
 
@@ -135,7 +135,7 @@ meta::define_form 'inc', sub {
     close $fh;
   }
 };
-__2fed3160e11daef8f8022e0839e6d10a
+__d9bd222aa98dfee8bdd0fb4888726298
 
 meta::meta('type::internal_function', <<'__34abb44c67c7e282569e28ef6f4d62ab');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
@@ -508,20 +508,20 @@ my @final_array          = @{$partial ? \@attributes : [retrieve('bootstrap::ini
 join "\n", @final_array;
 __023436ac07471e2f2cf016e2172c8d73
 
-meta::function('serialize_single', <<'__91663f820a05ff4029a200fbfd7285bc');
+meta::function('serialize_single', <<'__6292f0374819c770ce00608252aa4506');
 # Serializes a single attribute and optimizes for content.
 
 my $name               = $_[0] || $_;
 my $contents           = $data{$name};
 my $meta_function_name = 'meta::' . namespace($name);
-my $invocation_name    = basename($name);
+my $invocation_name    = attribute($name);
 
 return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
 return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\\$@%&]*$/;
 
 my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__91663f820a05ff4029a200fbfd7285bc
+__6292f0374819c770ce00608252aa4506
 
 meta::function('shell', <<'__c6ef6c31734c0b330f6076543fef8f1f');
 use Term::ReadLine;
@@ -674,7 +674,7 @@ $data{$name} = $value;
 execute($name) if $options{'execute'};
 __80f0728190bf3b0d4c94807cfdc12a22
 
-meta::internal_function('basename', <<'__62efb9f22157835940af1d5feae98d98');
+meta::internal_function('attribute', <<'__62efb9f22157835940af1d5feae98d98');
 my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
@@ -726,12 +726,12 @@ quiet() or terminal::message('debug', join ', ', @_);
 wantarray ? @_ : $_[0];
 __f887289259890731458a66398b628cdc
 
-meta::internal_function('execute', <<'__2d5b6f18c13943d6a0de15e9c348d428');
+meta::internal_function('execute', <<'__4b4efc33bc6767a7aade7f427eedf83f');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
-eval {&{"meta::$namespace"}(basename($name), retrieve($name))};
+eval {&{"meta::$namespace"}(attribute($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
-__2d5b6f18c13943d6a0de15e9c348d428
+__4b4efc33bc6767a7aade7f427eedf83f
 
 meta::internal_function('fast_hash', <<'__ac70f469e697725cfb87629833434ab1');
 my ($data)     = @_;
