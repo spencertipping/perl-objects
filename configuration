@@ -109,15 +109,18 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::configuration', <<'__ab52944d9b070f29a43d24f15ebfd5ef');
+meta::meta('type::configuration', <<'__f0ecd426d6b25f9270b2095f99680ee7');
 meta::functor::editable 'configuration', inherit => 0, extension => 'conf', default => sub {
   # Any lines starting with #, with or without leading whitespace, are treated as comments.
   # Comments are not parsed in option text; that is, you could specify an option that contained
   # a # and the # and following text would be considered part of that option.
-  my @options = grep ! /^\h*#/o && ! /^\h*$/o, split(/\V+/o, shift);
-  map(($$_[0] => $$_[1]), map([split /\s*:\s*/, $_, 2], @options));
+  my @options = grep s/^\h*//o, grep /:/o && ! /^\h*#/o && ! /^\h*$/o, split(/\V+/o, shift);
+  my @key_values = map split(/\s*:\s*/o, $_, 2), @options;
+  $key_values[$_ << 1] =~ s/\s/_/go for 0 .. $#key_values >> 1;
+  $key_values[$_ << 1] = lc $key_values[$_ << 1] for 0 .. $#key_values >> 1;
+  @key_values;
 };
-__ab52944d9b070f29a43d24f15ebfd5ef
+__f0ecd426d6b25f9270b2095f99680ee7
 
 meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
 meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
