@@ -164,7 +164,7 @@ __34a5da8558897a4388fc22ed4b0c3c6b
 
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
-meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize item/);');
+meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize description item/);');
 meta::meta('template::math', <<'__2ea173a12f781eec97f4a0d3bfe80f75');
 tex::template align => 'align*', nalign => 'align';
 tex::template tex::id(qw/theorem proof lemma corollary conjecture definition proposition/);
