@@ -109,7 +109,7 @@ meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
 
-meta::meta('type::data', "meta::functor::editable 'data', extension => '', inherit => 0, default => 'cat';");
+meta::meta('type::data', 'meta::functor::editable \'data\', extension => \'\', inherit => 0, default => \'cat\';');
 meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
@@ -191,7 +191,7 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
-meta::meta('type::watch', "meta::functor::editable 'watch', prefix => 'watch::', inherit => 1, extension => '.pl', default => 'cat';");
+meta::meta('type::watch', 'meta::functor::editable \'watch\', prefix => \'watch::\', inherit => 1, extension => \'.pl\', default => \'cat\';');
 meta::bootstrap('initialization', <<'__baa43e5e8e6e1cd76d4e2de828ceaa4d');
 #!/usr/bin/perl
 
@@ -276,7 +276,7 @@ __3c6177256de0fddb721f534c3ad8c0ee
 meta::data('name', 'object');
 meta::data('quiet', '1');
 meta::data('watching', '1');
-meta::function('cat', 'join "\n", retrieve(@_);');
+meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('child', <<'__3eeb4b4fd37a502b53f0008e7835b5de');
 my ($child_name) = @_;
 
@@ -453,10 +453,7 @@ join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [gre
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
 __ffe7609f16d647b7eb9ed9693dd12c23
 
-meta::function('ls-a', <<'__87c7c2aabf4dee78f646c5542608af56');
-ls('-ad', @_);
-__87c7c2aabf4dee78f646c5542608af56
-
+meta::function('ls-a', 'ls(\'-ad\', @_);');
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);
@@ -468,7 +465,7 @@ associate($to, retrieve($from));
 rm($from);
 __09f350db8406303ade06d229477d79ad
 
-meta::function('parents', 'join "\n", grep s/^parent:://o, sort keys %data;');
+meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__f2b57dd342923797e8e2287c3095803f');
 my $result = eval(join ' ', @_);
 $@ ? terminal::message('error', $@) : $result;
@@ -510,20 +507,22 @@ my @final_array          = @{$partial ? \@attributes : [retrieve('bootstrap::ini
 join "\n", @final_array;
 __023436ac07471e2f2cf016e2172c8d73
 
-meta::function('serialize_single', <<'__6292f0374819c770ce00608252aa4506');
+meta::function('serialize_single', <<'__48005281edde632b0df2e346c094b7bd');
 # Serializes a single attribute and optimizes for content.
 
 my $name               = $_[0] || $_;
 my $contents           = $data{$name};
 my $meta_function_name = 'meta::' . namespace($name);
 my $invocation_name    = attribute($name);
+my $escaped            = $contents;
+$escaped =~ s/\\/\\\\/go;
+$escaped =~ s/'/\\'/go;
 
-return "$meta_function_name('$invocation_name', '$contents');"   if $contents =~ /^[^\n']*$/;
-return "$meta_function_name('$invocation_name', \"$contents\");" if $contents =~ /^[^\n"\\\$@%&]*$/;
+return "$meta_function_name('$invocation_name', '$escaped');" unless $escaped =~ /\v/;
 
 my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
-__6292f0374819c770ce00608252aa4506
+__48005281edde632b0df2e346c094b7bd
 
 meta::function('shell', <<'__c6ef6c31734c0b330f6076543fef8f1f');
 use Term::ReadLine;
@@ -583,10 +582,7 @@ $hash;
 __e17520e3a5d81d788ae995fd8ac47cb9
 
 meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
-meta::function('update', <<'__4de1a6a4085836590a3b1ef997f9d5ea');
-&{'update-from'}(@_, grep s/^parent:://o, sort keys %data);
-__4de1a6a4085836590a3b1ef997f9d5ea
-
+meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
 meta::function('update-from', <<'__f927cc6b2e1c93ce2e969845e01ba839');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
@@ -892,7 +888,7 @@ my %options;
 ({%options}, @others, @_);
 __d47e8ee23fe55e27bb523c9fcb2f5ca1
 
-meta::internal_function('strip', 'wantarray ? map {s/^\s*|\s*$//g; $_} @_ : $_[0] =~ /^\s*(.*?)\s*$/ && $1;');
+meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
 meta::internal_function('table_display', <<'__8a6897e093f36bf05477a3889b84a61d');
 # Displays an array of arrays as a table; that is, with alignment. Arrays are
 # expected to be in column-major order.
