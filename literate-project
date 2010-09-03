@@ -1554,6 +1554,7 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
+meta::template('item[]', '"\\\\item[$_[0]]";');
 meta::vim_highlighter('cltex', <<'__5bfc80e1a2ad3bb7cb4f57ff906d71b0');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
