@@ -170,6 +170,7 @@ tex::template align => 'align*', nalign => 'align';
 tex::template tex::id(qw/theorem proof lemma corollary conjecture definition proposition/);
 __2ea173a12f781eec97f4a0d3bfe80f75
 
+meta::meta('template::quotations', 'tex::template tex::id(qw/quotation quote/);');
 meta::meta('template::sections', <<'__0bf14cbc6a0e77d9b82dd185d8d8a9a0');
 tex::labeled_template(s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
 tex::labeled_template(sc => 'chapter', sp => 'part');
