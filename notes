@@ -174,7 +174,7 @@ meta::meta('type::meta', <<'__640f25635ce2365b0648962918cf9932');
 meta::configure 'meta', extension => '.pl', inherit => 1;
 __640f25635ce2365b0648962918cf9932
 
-meta::meta('type::note', 'meta::functor::editable \'note\', extension => \'\', inherit => 0, default => \'edit\';');
+meta::meta('type::note', 'meta::functor::editable \'note\', extension => \'.sdoc\', inherit => 0, default => \'edit\';');
 meta::meta('type::parent', <<'__607e9931309b1b595424bedcee5dfa45');
 meta::define_form 'parent', \&meta::bootstrap::implementation;
 meta::configure 'parent', extension => '', inherit => 1;
