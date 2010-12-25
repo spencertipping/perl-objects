@@ -1414,13 +1414,14 @@ meta::resource('header', <<'__efe6254be4f73fb4170ab1980a1888d5');
 - include resource::header-resource
 __efe6254be4f73fb4170ab1980a1888d5
 
-meta::resource('header-languages', <<'__637a18cf607b727dec3feab552be05e2');
+meta::resource('header-languages', <<'__a3965f910e7c2a1aa3a9d052f7daf573');
 \lstnewenvironment{asmcode}       {}{}
 \lstnewenvironment{cppcode}       {\lstset{language=c++}}{}
 \lstnewenvironment{javacode}      {\lstset{language=java}}{}
 \lstnewenvironment{javascriptcode}{}{}
 \lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
-__637a18cf607b727dec3feab552be05e2
+\lstnewenvironment{perlcode}      {\lstset{language=perl}}{}
+__a3965f910e7c2a1aa3a9d052f7daf573
 
 meta::resource('header-listings', <<'__4caf6ff3ff152cce49ad5d1775ad0703');
 \definecolor{gray}{rgb}{0.6,0.6,0.6}
