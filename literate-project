@@ -162,7 +162,7 @@ sub id {
 };
 __34a5da8558897a4388fc22ed4b0c3c6b
 
-meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource/;');
+meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource perl/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
 meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize description item/);');
 meta::meta('template::math', <<'__2ea173a12f781eec97f4a0d3bfe80f75');
@@ -1561,7 +1561,7 @@ join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
 
 meta::template('item[]', '"\\\\item[$_[0]]";');
-meta::vim_highlighter('cltex', <<'__5bfc80e1a2ad3bb7cb4f57ff906d71b0');
+meta::vim_highlighter('cltex', <<'__428c1e08cdadbb52c32d5e49b411b0f8');
 " Cleaner TeX
 " Maintainer: Spencer Tipping <spencer@spencertipping.com>
 " Language:   Cleaner TeX (a variant of LaTeX with support for a bunch of embedded languages)
@@ -1581,12 +1581,14 @@ syn include @java          syntax/java.vim       | unlet b:current_syntax
 syn include @asm           syntax/asm.vim        | unlet b:current_syntax
 syn include @javascript    syntax/javascript.vim | unlet b:current_syntax
 syn include @html          syntax/html.vim       | unlet b:current_syntax
+syn include @perl          syntax/perl.vim       | unlet b:current_syntax
 
 syn region  cltCpp         matchgroup=cltCode start=/^\z(\s*\)- cpp .*<<\s*\z(\w\+\)$/        end=/^\z1- \z2$/ contains=@cpp
 syn region  cltJava        matchgroup=cltCode start=/^\z(\s*\)- java .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@java
 syn region  cltAsm         matchgroup=cltCode start=/^\z(\s*\)- asm .*<<\s*\z(\w\+\)$/        end=/^\z1- \z2$/ contains=@asm
 syn region  cltJavascript  matchgroup=cltCode start=/^\z(\s*\)- javascript .*<<\s*\z(\w\+\)$/ end=/^\z1- \z2$/ contains=@javascript
 syn region  cltHtml        matchgroup=cltCode start=/^\z(\s*\)- html .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@html
+syn region  cltPerl        matchgroup=cltCode start=/^\z(\s*\)- perl .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@perl
 syn region  cltResource    matchgroup=cltCode start=/^\z(\s*\)- resource .*<<\s*\z(\w\+\)$/   end=/^\z1- \z2$/
 syn region  cltComment     matchgroup=cltCode start=/^\z(\s*\)- comment .*<<\s*\z(\w\+\)$/    end=/^\z1- \z2$/
 
@@ -1605,7 +1607,7 @@ hi link cltComment         Type
 hi link cltLineComment     Type
 
 let b:current_syntax = "cltex"
-__5bfc80e1a2ad3bb7cb4f57ff906d71b0
+__428c1e08cdadbb52c32d5e49b411b0f8
 
 internal::main();
 
