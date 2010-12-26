@@ -683,11 +683,19 @@ $string;
 __66e539d29e9afa903569efad0eb7c886
 
 meta::function('reload', 'execute($_) for grep ! /^bootstrap::/, keys %data;');
-meta::function('render', <<'__ccb26db43115329651cc3c0527a3e849');
+meta::function('render', <<'__6170d9084f7c3e10efdfb523230072dd');
 use File::Copy 'copy';
 compile();
-copy(&{'pdf-output-file'}(), &{'source-directory'}() . '/' . name() . '.pdf') or die "Copy failed: $!";
-__ccb26db43115329651cc3c0527a3e849
+
+my $pdf       = &{'pdf-output-file'}();
+my $tex       = $pdf;
+my $directory = &{'source-directory'}();
+my $name      = name();
+
+$tex =~ s/\.pdf$/.tex/;
+copy($pdf, "$directory/$name.pdf") or die "Copy failed: $!";
+copy($tex, "$directory/$name.tex") or die "Copy failed: $!";
+__6170d9084f7c3e10efdfb523230072dd
 
 meta::function('rm', <<'__963fdd3d9f6a0ba279b001b1f5679a38');
 for my $to_be_deleted (@_) {
