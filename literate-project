@@ -811,7 +811,7 @@ __5bb8bf491e1b442858096acf711135f9
 
 meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__f927cc6b2e1c93ce2e969845e01ba839');
+meta::function('update-from', <<'__d0de3a29902618c0457d2e76a1828d9b');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transients{inherit}{$type}.
 #
@@ -825,9 +825,6 @@ my %options = %$options;
 my $save_state = ! ($options{'-n'} || $options{'--no-save'});
 my $no_parents =    $options{'-P'} || $options{'--no-parent'} || $options{'--no-parents'};
 my $force      =    $options{'-f'} || $options{'--force'};
-my $unique     =    $options{'-u'} || $options{'--unique'};
-
-my $unique_option = $unique ? '-u' : '';
 
 &{'save-state'}('before-update') if $save_state;
 terminal::message('warning', 'Not saving state, as requested; to save it, omit the -n option.') unless $save_state;
@@ -843,11 +840,11 @@ for my $target (@targets) {
     associate("parent::$target", $attributes) unless $no_parents;
 
     terminal::message('info', 'Updating meta attributes...');
-    eval qx($target serialize -ipm $unique_option);
+    eval qx($target serialize -ipmu);
     terminal::message('warning', $@) if $@;
 
     terminal::message('info', 'Updating non-meta attributes...');
-    eval qx($target serialize -ipM $unique_option);
+    eval qx($target serialize -ipMu);
     terminal::message('warning', $@) if $@;
     reload();
 
@@ -865,7 +862,7 @@ for my $target (@targets) {
     }
   }
 }
-__f927cc6b2e1c93ce2e969845e01ba839
+__d0de3a29902618c0457d2e76a1828d9b
 
 meta::function('usage', <<'__0d4df7beb12cee031e689cb7db19e5aa');
 <<"EOD" . ls('-u');
