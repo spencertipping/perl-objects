@@ -1,18 +1,5 @@
 #!/usr/bin/perl
-
-=head1 Self-modifying Perl script
-
-=head2 Original implementation by Spencer Tipping L<http://spencertipping.com>
-
-The prototype for this script is licensed under the terms of the MIT source code license.
-However, this script in particular may be under different licensing terms. To find out how
-this script is licensed, please contact whoever sent it to you. Alternatively, you may
-run it with the 'license' argument if they have specified a license that way.
-
-You should not edit this file directly. For information about how it was constructed, go
-to L<http://spencertipping.com/#section=self-modifying-perl>. For quick usage guidelines, run
-this script with the 'usage' argument.
-=cut
+# Run perldoc on this file for documentation.
 
 $|++;
 
@@ -207,22 +194,9 @@ meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
 meta::meta('type::watch', 'meta::functor::editable \'watch\', prefix => \'watch::\', inherit => 1, extension => \'.pl\', default => \'cat\';');
-meta::bootstrap('initialization', <<'__baa43e5e8e6e1cd76d4e2de828ceaa4d');
+meta::bootstrap('initialization', <<'__c6305378e31dd4085d047ef943b4acdc');
 #!/usr/bin/perl
-
-=head1 Self-modifying Perl script
-
-=head2 Original implementation by Spencer Tipping L<http://spencertipping.com>
-
-The prototype for this script is licensed under the terms of the MIT source code license.
-However, this script in particular may be under different licensing terms. To find out how
-this script is licensed, please contact whoever sent it to you. Alternatively, you may
-run it with the 'license' argument if they have specified a license that way.
-
-You should not edit this file directly. For information about how it was constructed, go
-to L<http://spencertipping.com/#section=self-modifying-perl>. For quick usage guidelines, run
-this script with the 'usage' argument.
-=cut
+# Run perldoc on this file for documentation.
 
 $|++;
 
@@ -262,7 +236,25 @@ meta::define_form 'meta', sub {
   meta::eval_in($value, "meta::$name");
 };
 
-__baa43e5e8e6e1cd76d4e2de828ceaa4d
+__c6305378e31dd4085d047ef943b4acdc
+
+meta::bootstrap('perldoc', <<'__c63395cbc6f7160b603befbb2d9b6700');
+=head1 Self-modifying Perl script
+
+=head2 Original implementation by Spencer Tipping L<http://spencertipping.com>
+
+The prototype for this script is licensed under the terms of the MIT source code license.
+However, this script in particular may be under different licensing terms. To find out how
+this script is licensed, please contact whoever sent it to you. Alternatively, you may
+run it with the 'license' argument if they have specified a license that way.
+
+You should not edit this file directly. For information about how it was constructed, go
+to L<http://spencertipping.com/writing-self-modifying-perl>. For quick usage guidelines,
+run this script with the 'usage' argument.
+
+=cut
+
+__c63395cbc6f7160b603befbb2d9b6700
 
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
@@ -445,9 +437,8 @@ verify();
 __91a4f89f4f1d3894d4cb122255f9c1bc
 
 meta::function('lock', 'chmod_self(sub {$_[0] & 0555});');
-meta::function('ls', <<'__ffe7609f16d647b7eb9ed9693dd12c23');
+meta::function('ls', <<'__0cb255913a5005bd062d1d5cede107fe');
 my ($options, @criteria) = separate_options(@_);
-
 my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
 $all   ||= $dereference;
 $sizes ||= $flags;
@@ -458,15 +449,16 @@ my $criteria    = join('|', @criteria);
 my @definitions = select_keys('--criteria' => $criteria, %$options);
 
 my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_functions;
-my @externals = map $inverses{$_}, @definitions;
-my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @definitions if $sizes;
+my @externals = grep length, map $inverses{$_}, @definitions;
+my @internals = grep length $inverses{$_}, @definitions;
+my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@internals} if $sizes;
 
 my %flag_hashes = map {$_ => {map {$_ => 1} select_keys("-$_" => 1)}} qw(m u i) if $flags;
 my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-', sort keys %flag_hashes)} @definitions if $flags;
 
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
-__ffe7609f16d647b7eb9ed9693dd12c23
+__0cb255913a5005bd062d1d5cede107fe
 
 meta::function('ls-a', 'ls(\'-ad\', @_);');
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
@@ -969,8 +961,9 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('/home/spencertipping/bin/object', <<'__2fa5e2565231e24d8c3ba43abc0403c4');
+meta::parent('/home/spencertipping/bin/object', <<'__274768cabc5dcef6880980c5158cefe2');
 bootstrap::initialization
+bootstrap::perldoc
 function::cat
 function::child
 function::clone
@@ -1047,7 +1040,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__2fa5e2565231e24d8c3ba43abc0403c4
+__274768cabc5dcef6880980c5158cefe2
 
 internal::main();
 
