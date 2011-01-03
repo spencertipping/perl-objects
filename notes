@@ -931,6 +931,17 @@ $trace =~ s/\(eval (\d+)\)/$locations{$1 - 1}/g;
 $trace;
 __06fad3d85833a6484e426401b95e0206
 
+meta::internal_function('with_exported', <<'__fc4f32c46d95c6deed0414364d1c7410');
+# Like exported(), but removes the file after running some function.
+# Usage is with_exported(@files, sub {...});
+my $f      = pop @_;
+my $name   = exported(@_);
+my $result = eval {&$f($name)};
+terminal::warning("$@ when running with_exported()") if $@;
+unlink $name;
+$result;
+__fc4f32c46d95c6deed0414364d1c7410
+
 meta::library('terminal', <<'__6999988eaf441c9b1282e03e1db427b5');
 # Functions for nice-looking terminal output.
 package terminal;
@@ -964,7 +975,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__af67487a4ffc6abb7f2d24e35c140573');
+meta::parent('object', <<'__d2c11649577aad680b6bad821cf826a6');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1027,6 +1038,7 @@ internal_function::strip
 internal_function::table_display
 internal_function::temporary_name
 internal_function::translate_backtrace
+internal_function::with_exported
 library::terminal
 message_color::state
 message_color::states
@@ -1045,7 +1057,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__af67487a4ffc6abb7f2d24e35c140573
+__d2c11649577aad680b6bad821cf826a6
 
 internal::main();
 

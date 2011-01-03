@@ -1015,6 +1015,17 @@ $trace =~ s/\(eval (\d+)\)/$locations{$1 - 1}/g;
 $trace;
 __06fad3d85833a6484e426401b95e0206
 
+meta::internal_function('with_exported', <<'__fc4f32c46d95c6deed0414364d1c7410');
+# Like exported(), but removes the file after running some function.
+# Usage is with_exported(@files, sub {...});
+my $f      = pop @_;
+my $name   = exported(@_);
+my $result = eval {&$f($name)};
+terminal::warning("$@ when running with_exported()") if $@;
+unlink $name;
+$result;
+__fc4f32c46d95c6deed0414364d1c7410
+
 meta::library('terminal', <<'__6999988eaf441c9b1282e03e1db427b5');
 # Functions for nice-looking terminal output.
 package terminal;
@@ -1048,7 +1059,102 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('/home/spencertipping/bin/object', <<'__af67487a4ffc6abb7f2d24e35c140573');
+meta::parent('/home/spencertipping/bin/object', <<'__d2c11649577aad680b6bad821cf826a6');
+bootstrap::initialization
+bootstrap::perldoc
+function::cat
+function::child
+function::clone
+function::cp
+function::create
+function::current-state
+function::disable
+function::edit
+function::enable
+function::export
+function::extern
+function::grep
+function::hash
+function::import
+function::import-bundle
+function::load-state
+function::lock
+function::ls
+function::ls-a
+function::mv
+function::parents
+function::perl
+function::reload
+function::rm
+function::save
+function::save-state
+function::serialize
+function::serialize_single
+function::sh
+function::shell
+function::size
+function::snapshot
+function::state
+function::unlock
+function::update
+function::update-from
+function::usage
+function::verify
+internal_function::associate
+internal_function::attribute
+internal_function::chmod_self
+internal_function::complete
+internal_function::debug_trace
+internal_function::execute
+internal_function::exported
+internal_function::fast_hash
+internal_function::file::read
+internal_function::file::write
+internal_function::fnv_hash
+internal_function::hypothetically
+internal_function::internal::main
+internal_function::invoke_editor_on
+internal_function::namespace
+internal_function::retrieve
+internal_function::select_keys
+internal_function::separate_options
+internal_function::strip
+internal_function::table_display
+internal_function::temporary_name
+internal_function::translate_backtrace
+internal_function::with_exported
+library::terminal
+message_color::state
+message_color::states
+message_color::watch
+meta::configure
+meta::externalize
+meta::functor::editable
+meta::type::bootstrap
+meta::type::data
+meta::type::function
+meta::type::inc
+meta::type::internal_function
+meta::type::library
+meta::type::message_color
+meta::type::meta
+meta::type::parent
+meta::type::state
+meta::type::watch
+__d2c11649577aad680b6bad821cf826a6
+
+meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
+meta::type::configuration
+parent::/home/spencertipping/bin/object
+__511208c99d8bc2caa3067db9f1824163
+
+meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
+function::note
+meta::type::note
+parent::object
+__320d51928ec8e2e370d67d30abe059b5
+
+meta::parent('object', <<'__af67487a4ffc6abb7f2d24e35c140573');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1130,99 +1236,6 @@ meta::type::parent
 meta::type::state
 meta::type::watch
 __af67487a4ffc6abb7f2d24e35c140573
-
-meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
-meta::type::configuration
-parent::/home/spencertipping/bin/object
-__511208c99d8bc2caa3067db9f1824163
-
-meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
-function::note
-meta::type::note
-parent::object
-__320d51928ec8e2e370d67d30abe059b5
-
-meta::parent('object', <<'__c262725cdfeb8b8c4047236def43bb01');
-bootstrap::initialization
-bootstrap::perldoc
-function::cat
-function::child
-function::clone
-function::cp
-function::create
-function::current-state
-function::disable
-function::edit
-function::enable
-function::export
-function::extern
-function::grep
-function::hash
-function::import
-function::import-bundle
-function::load-state
-function::lock
-function::ls
-function::ls-a
-function::mv
-function::parents
-function::perl
-function::reload
-function::rm
-function::save
-function::save-state
-function::serialize
-function::serialize_single
-function::sh
-function::shell
-function::size
-function::snapshot
-function::state
-function::unlock
-function::update
-function::update-from
-function::usage
-function::verify
-internal_function::associate
-internal_function::attribute
-internal_function::chmod_self
-internal_function::complete
-internal_function::debug_trace
-internal_function::execute
-internal_function::fast_hash
-internal_function::file::read
-internal_function::file::write
-internal_function::fnv_hash
-internal_function::hypothetically
-internal_function::internal::main
-internal_function::invoke_editor_on
-internal_function::namespace
-internal_function::retrieve
-internal_function::select_keys
-internal_function::separate_options
-internal_function::strip
-internal_function::table_display
-internal_function::temporary_name
-internal_function::translate_backtrace
-library::terminal
-message_color::state
-message_color::states
-message_color::watch
-meta::configure
-meta::externalize
-meta::functor::editable
-meta::type::bootstrap
-meta::type::data
-meta::type::function
-meta::type::inc
-meta::type::internal_function
-meta::type::library
-meta::type::message_color
-meta::type::meta
-meta::type::parent
-meta::type::state
-meta::type::watch
-__c262725cdfeb8b8c4047236def43bb01
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess

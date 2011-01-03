@@ -925,6 +925,17 @@ $trace =~ s/\(eval (\d+)\)/$locations{$1 - 1}/g;
 $trace;
 __06fad3d85833a6484e426401b95e0206
 
+meta::internal_function('with_exported', <<'__fc4f32c46d95c6deed0414364d1c7410');
+# Like exported(), but removes the file after running some function.
+# Usage is with_exported(@files, sub {...});
+my $f      = pop @_;
+my $name   = exported(@_);
+my $result = eval {&$f($name)};
+terminal::warning("$@ when running with_exported()") if $@;
+unlink $name;
+$result;
+__fc4f32c46d95c6deed0414364d1c7410
+
 meta::library('terminal', <<'__6999988eaf441c9b1282e03e1db427b5');
 # Functions for nice-looking terminal output.
 package terminal;
