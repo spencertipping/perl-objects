@@ -793,12 +793,13 @@ eval {&{"meta::$namespace"}(attribute($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
 __4b4efc33bc6767a7aade7f427eedf83f
 
-meta::internal_function('exported', <<'__4c3902d18fef4006cbaf0d0fd7c8d588');
+meta::internal_function('exported', <<'__27414e8f2ceeaef3555b9726e690eb0f');
 # Allocates a temporary file containing the concatenation of attributes you specify,
 # and returns the filename. The filename will be safe for deletion anytime.
 my $filename = temporary_name();
 file::write($filename, cat(@_));
-__4c3902d18fef4006cbaf0d0fd7c8d588
+$filename;
+__27414e8f2ceeaef3555b9726e690eb0f
 
 meta::internal_function('fast_hash', <<'__ac70f469e697725cfb87629833434ab1');
 my ($data)     = @_;

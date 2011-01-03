@@ -820,12 +820,13 @@ eval {&{"meta::$namespace"}(attribute($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
 __4b4efc33bc6767a7aade7f427eedf83f
 
-meta::internal_function('exported', <<'__4c3902d18fef4006cbaf0d0fd7c8d588');
+meta::internal_function('exported', <<'__27414e8f2ceeaef3555b9726e690eb0f');
 # Allocates a temporary file containing the concatenation of attributes you specify,
 # and returns the filename. The filename will be safe for deletion anytime.
 my $filename = temporary_name();
 file::write($filename, cat(@_));
-__4c3902d18fef4006cbaf0d0fd7c8d588
+$filename;
+__27414e8f2ceeaef3555b9726e690eb0f
 
 meta::internal_function('fast_hash', <<'__ac70f469e697725cfb87629833434ab1');
 my ($data)     = @_;
@@ -1154,7 +1155,7 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__af67487a4ffc6abb7f2d24e35c140573');
+meta::parent('object', <<'__d2c11649577aad680b6bad821cf826a6');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1217,6 +1218,7 @@ internal_function::strip
 internal_function::table_display
 internal_function::temporary_name
 internal_function::translate_backtrace
+internal_function::with_exported
 library::terminal
 message_color::state
 message_color::states
@@ -1235,7 +1237,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__af67487a4ffc6abb7f2d24e35c140573
+__d2c11649577aad680b6bad821cf826a6
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess
