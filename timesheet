@@ -566,6 +566,11 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
 __48005281edde632b0df2e346c094b7bd
 
+meta::function('sh', <<'__bd4fa255ba0d6c3f42ad81089ed71254');
+# Run something on the shell.
+system(@_);
+__bd4fa255ba0d6c3f42ad81089ed71254
+
 meta::function('shell', <<'__e9e0709e6ee1dd09521c683322be79e6');
 use Term::ReadLine;
 
@@ -996,7 +1001,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__274768cabc5dcef6880980c5158cefe2');
+meta::parent('object', <<'__c262725cdfeb8b8c4047236def43bb01');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1027,6 +1032,7 @@ function::save
 function::save-state
 function::serialize
 function::serialize_single
+function::sh
 function::shell
 function::size
 function::snapshot
@@ -1075,7 +1081,7 @@ meta::type::meta
 meta::type::parent
 meta::type::state
 meta::type::watch
-__274768cabc5dcef6880980c5158cefe2
+__c262725cdfeb8b8c4047236def43bb01
 
 internal::main();
 

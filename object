@@ -516,6 +516,11 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function_name('$invocation_name', <<'$delimiter');\n$contents\n$delimiter\n";
 __48005281edde632b0df2e346c094b7bd
 
+meta::function('sh', <<'__bd4fa255ba0d6c3f42ad81089ed71254');
+# Run something on the shell.
+system(@_);
+__bd4fa255ba0d6c3f42ad81089ed71254
+
 meta::function('shell', <<'__e9e0709e6ee1dd09521c683322be79e6');
 use Term::ReadLine;
 
