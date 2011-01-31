@@ -361,15 +361,15 @@ my %dependencies = dependencies();
 associate("cached_dependency::$_", LWP::Simple::get($dependencies{$_})) for keys %dependencies;
 __9eb9747ca6d4cdcb7d863ca9ed13f80a
 
-meta::function('edit', <<'__5d833e46e6b01eda4902a6ddb0903bd9');
+meta::function('edit', <<'__b878c50c3d058d5a344dcb1f52b625a3');
 my ($name, %options) = @_;
-my $extension = $transient{extension}{namespace($name)} || '';
+my $extension = extension_for($name);
 
 die "Attribute $name does not exist." unless exists $data{$name};
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
           execute => $name !~ /^bootstrap::/);
 save();
-__5d833e46e6b01eda4902a6ddb0903bd9
+__b878c50c3d058d5a344dcb1f52b625a3
 
 meta::function('enable', 'chmod_self(sub {$_[0] | $_[0] >> 2});');
 meta::function('export', <<'__6c445eea603f9863df0f8db445fd708e');
@@ -780,6 +780,12 @@ file::write($filename, cat(@_));
 $filename;
 __27414e8f2ceeaef3555b9726e690eb0f
 
+meta::internal_function('extension_for', <<'__65e48f50f20bc04aa561720b03bf494c');
+my $extension = $transient{extension}{namespace($_[0])};
+$extension = &$extension($_[0]) if ref $extension eq 'CODE';
+$extension || '';
+__65e48f50f20bc04aa561720b03bf494c
+
 meta::internal_function('fast_hash', <<'__ac70f469e697725cfb87629833434ab1');
 my ($data)     = @_;
 my $piece_size = length($data) >> 3;
@@ -1026,7 +1032,7 @@ meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
 
-meta::parent('/home/spencertipping/bin/object', <<'__b11199587338a8ab005dc98f5dad1f15');
+meta::parent('/home/spencertipping/bin/object', <<'__4d0e33987ce7bf61960b406ece50cef7');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1074,6 +1080,7 @@ internal_function::complete
 internal_function::debug_trace
 internal_function::execute
 internal_function::exported
+internal_function::extension_for
 internal_function::fast_hash
 internal_function::file::read
 internal_function::file::write
@@ -1111,7 +1118,7 @@ meta::type::retriever
 meta::type::state
 meta::type::watch
 retriever::file
-__b11199587338a8ab005dc98f5dad1f15
+__4d0e33987ce7bf61960b406ece50cef7
 
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 internal::main();
