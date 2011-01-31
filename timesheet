@@ -15,10 +15,10 @@ sub meta::define_form {
   $datatypes{$namespace} = $delegate;
   *{"meta::${namespace}::implementation"} = $delegate;
   *{"meta::$namespace"} = sub {
-    my ($name, $value) = @_;
+    my ($name, $value, %options) = @_;
     chomp $value;
-    $data{"${namespace}::$name"} = $value;
-    $delegate->($name, $value);
+    $data{"${namespace}::$name"} = $value unless $options{no_binding};
+    $delegate->($name, $value) unless $options{no_delegate};
   };
 }
 
@@ -166,6 +166,14 @@ meta::define_form 'parent', \&meta::bootstrap::implementation;
 meta::configure 'parent', extension => '', inherit => 1;
 __607e9931309b1b595424bedcee5dfa45
 
+meta::meta('type::retriever', <<'__6e847a9d205e4a5589765a3366cdd115');
+meta::configure 'retriever', extension => '.pl', inherit => 1;
+meta::define_form 'retriever', sub {
+  my ($name, $value) = @_;
+  $transient{retrievers}{$name} = meta::eval_in("sub {\n$value\n}", "retriever::$name");
+};
+__6e847a9d205e4a5589765a3366cdd115
+
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
@@ -179,7 +187,7 @@ meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 
 meta::meta('type::watch', 'meta::functor::editable \'watch\', prefix => \'watch::\', inherit => 1, extension => \'.pl\', default => \'cat\';');
-meta::bootstrap('initialization', <<'__c6305378e31dd4085d047ef943b4acdc');
+meta::bootstrap('initialization', <<'__2ee777615cfe1237872135fcc565cd54');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
 
@@ -197,10 +205,10 @@ sub meta::define_form {
   $datatypes{$namespace} = $delegate;
   *{"meta::${namespace}::implementation"} = $delegate;
   *{"meta::$namespace"} = sub {
-    my ($name, $value) = @_;
+    my ($name, $value, %options) = @_;
     chomp $value;
-    $data{"${namespace}::$name"} = $value;
-    $delegate->($name, $value);
+    $data{"${namespace}::$name"} = $value unless $options{no_binding};
+    $delegate->($name, $value) unless $options{no_delegate};
   };
 }
 
@@ -221,7 +229,7 @@ meta::define_form 'meta', sub {
   meta::eval_in($value, "meta::$name");
 };
 
-__c6305378e31dd4085d047ef943b4acdc
+__2ee777615cfe1237872135fcc565cd54
 
 meta::bootstrap('perldoc', <<'__c63395cbc6f7160b603befbb2d9b6700');
 =head1 Self-modifying Perl script
@@ -900,10 +908,19 @@ $name =~ s/::.*$//;
 $name;
 __93213d60cafb9627e0736b48cd1f0760
 
-meta::internal_function('retrieve', <<'__0e9c1ae91f6cf6020cf1a05db7d51d72');
-my @results = map defined $data{$_} ? $data{$_} : file::read($_), @_;
+meta::internal_function('retrieve', <<'__0b6f4342009684fdfa259f45ac75ae37');
+my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;
 wantarray ? @results : $results[0];
-__0e9c1ae91f6cf6020cf1a05db7d51d72
+__0b6f4342009684fdfa259f45ac75ae37
+
+meta::internal_function('retrieve_with_hooks', <<'__5186a0343624789d08d1cc2084550f3d');
+# Uses the hooks defined in $transient{retrievers}, and returns undef if none work.
+my ($attribute) = @_;
+my $result      = undef;
+
+defined($result = &$_($attribute)) and return $result for map $transient{retrievers}{$_}, sort keys %{$transient{retrievers}};
+return undef;
+__5186a0343624789d08d1cc2084550f3d
 
 meta::internal_function('select_keys', <<'__9f1f6ed4c1df5aa5f62cfd0ded8e6ae6');
 my %options   = @_;
@@ -1020,7 +1037,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__d2c11649577aad680b6bad821cf826a6');
+meta::parent('object', <<'__b11199587338a8ab005dc98f5dad1f15');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1077,6 +1094,7 @@ internal_function::internal::main
 internal_function::invoke_editor_on
 internal_function::namespace
 internal_function::retrieve
+internal_function::retrieve_with_hooks
 internal_function::select_keys
 internal_function::separate_options
 internal_function::strip
@@ -1100,10 +1118,13 @@ meta::type::library
 meta::type::message_color
 meta::type::meta
 meta::type::parent
+meta::type::retriever
 meta::type::state
 meta::type::watch
-__d2c11649577aad680b6bad821cf826a6
+retriever::file
+__b11199587338a8ab005dc98f5dad1f15
 
+meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 internal::main();
 
 __END__
