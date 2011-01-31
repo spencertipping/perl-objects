@@ -174,19 +174,11 @@ meta::define_form 'retriever', sub {
 };
 __6e847a9d205e4a5589765a3366cdd115
 
-meta::meta('type::sdoc', <<'__44502767cfa130bc39e7935ce48eb489');
-# A meta-type for other types. We assume editability and proxy to whatever type
-# would normally be invoked upon association.
-
+meta::meta('type::sdoc', <<'__dafc0d3937994c93bcc66a700ea09b82');
+# A meta-type for other types. So retrieve('js::main') will work if you have
+# the attribute 'sdoc::js::main'.
 meta::functor::editable 'sdoc', extension => '.sdoc', inherit => 1;
-meta::define_form 'sdoc', sub {
-  my ($name, $value) = @_;
-  $name =~ s/^sdoc:://o;
-  my $namespace = namespace($name);
-  $name = attribute($name);
-  &{"meta::$namespace"}($name, $value, no_binding => 1);        # Don't auto-persist into %data
-};
-__44502767cfa130bc39e7935ce48eb489
+__dafc0d3937994c93bcc66a700ea09b82
 
 meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
