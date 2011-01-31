@@ -1038,7 +1038,7 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('object', <<'__b11199587338a8ab005dc98f5dad1f15');
+meta::parent('/home/spencertipping/bin/object', <<'__b11199587338a8ab005dc98f5dad1f15');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
