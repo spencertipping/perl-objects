@@ -576,7 +576,7 @@ verify();
 __91a4f89f4f1d3894d4cb122255f9c1bc
 
 meta::function('lock', 'chmod_self(sub {$_[0] & 0555});');
-meta::function('ls', <<'__0cb255913a5005bd062d1d5cede107fe');
+meta::function('ls', <<'__ad1a9fef60ec7c9d268ede65480d96a2');
 my ($options, @criteria) = separate_options(@_);
 my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
 $all   ||= $dereference;
@@ -588,7 +588,7 @@ my $criteria    = join('|', @criteria);
 my @definitions = select_keys('--criteria' => $criteria, %$options);
 
 my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_functions;
-my @externals = grep length, map $inverses{$_}, @definitions;
+my @externals = map $inverses{$_}, grep length, @definitions;
 my @internals = grep length $inverses{$_}, @definitions;
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@internals} if $sizes;
 
@@ -597,7 +597,7 @@ my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-',
 
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
-__0cb255913a5005bd062d1d5cede107fe
+__ad1a9fef60ec7c9d268ede65480d96a2
 
 meta::function('ls-a', 'ls(\'-ad\', @_);');
 meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
@@ -1254,6 +1254,13 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
+meta::parent('./sdoc', <<'__b058828a5b55f650e5457f6b0df06301');
+function::sdoc
+meta::type::sdoc
+parent::/home/spencertipping/bin/object
+retriever::sdoc
+__b058828a5b55f650e5457f6b0df06301
+
 meta::parent('/home/spencertipping/bin/object', <<'__4d0e33987ce7bf61960b406ece50cef7');
 bootstrap::initialization
 bootstrap::perldoc
@@ -1347,12 +1354,13 @@ meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
 
-meta::parent('development', <<'__4ad4d4e680cfb5934a6e72241f8dd17c');
+meta::parent('development', <<'__96e7494250faedeba358d4a378450014');
+parent::./sdoc
 parent::configuration
 parent::notes
 parent::preprocessor
 parent::vim-highlighters
-__4ad4d4e680cfb5934a6e72241f8dd17c
+__96e7494250faedeba358d4a378450014
 
 meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
 function::note
@@ -1360,7 +1368,7 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__b11199587338a8ab005dc98f5dad1f15');
+meta::parent('object', <<'__4d0e33987ce7bf61960b406ece50cef7');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1408,6 +1416,7 @@ internal_function::complete
 internal_function::debug_trace
 internal_function::execute
 internal_function::exported
+internal_function::extension_for
 internal_function::fast_hash
 internal_function::file::read
 internal_function::file::write
@@ -1445,7 +1454,7 @@ meta::type::retriever
 meta::type::state
 meta::type::watch
 retriever::file
-__b11199587338a8ab005dc98f5dad1f15
+__4d0e33987ce7bf61960b406ece50cef7
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess

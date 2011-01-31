@@ -438,7 +438,7 @@ verify();
 __91a4f89f4f1d3894d4cb122255f9c1bc
 
 meta::function('lock', 'chmod_self(sub {$_[0] & 0555});');
-meta::function('ls', <<'__0cb255913a5005bd062d1d5cede107fe');
+meta::function('ls', <<'__ad1a9fef60ec7c9d268ede65480d96a2');
 my ($options, @criteria) = separate_options(@_);
 my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
 $all   ||= $dereference;
@@ -450,7 +450,7 @@ my $criteria    = join('|', @criteria);
 my @definitions = select_keys('--criteria' => $criteria, %$options);
 
 my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_functions;
-my @externals = grep length, map $inverses{$_}, @definitions;
+my @externals = map $inverses{$_}, grep length, @definitions;
 my @internals = grep length $inverses{$_}, @definitions;
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@internals} if $sizes;
 
@@ -459,7 +459,7 @@ my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-',
 
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
-__0cb255913a5005bd062d1d5cede107fe
+__ad1a9fef60ec7c9d268ede65480d96a2
 
 meta::function('ls-a', 'ls(\'-ad\', @_);');
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
