@@ -994,6 +994,7 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
+meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
 
 __END__

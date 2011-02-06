@@ -1137,7 +1137,7 @@ parent::/home/spencertipping/bin/object
 retriever::sdoc
 __b058828a5b55f650e5457f6b0df06301
 
-meta::parent('/home/spencertipping/bin/object', <<'__4d0e33987ce7bf61960b406ece50cef7');
+meta::parent('/home/spencertipping/bin/object', <<'__acb15f9d12c9be68c2d2596767668b21');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1223,7 +1223,8 @@ meta::type::retriever
 meta::type::state
 meta::type::watch
 retriever::file
-__4d0e33987ce7bf61960b406ece50cef7
+retriever::id
+__acb15f9d12c9be68c2d2596767668b21
 
 meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
 meta::type::configuration
@@ -1341,6 +1342,7 @@ parent::object
 __1258d5867978f2068c8efd130c2066f7
 
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
+meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('sdoc', 'exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]") : undef;');
 meta::template('comment', '\'\';     # A mechanism for line or block comments.');
 meta::template('eval', <<'__7be1d470a07a06c58e971bc7fc24c048');

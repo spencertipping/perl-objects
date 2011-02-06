@@ -1010,7 +1010,7 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__4d0e33987ce7bf61960b406ece50cef7');
+meta::parent('object', <<'__acb15f9d12c9be68c2d2596767668b21');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1096,9 +1096,11 @@ meta::type::retriever
 meta::type::state
 meta::type::watch
 retriever::file
-__4d0e33987ce7bf61960b406ece50cef7
+retriever::id
+__acb15f9d12c9be68c2d2596767668b21
 
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
+meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
 
 __END__
