@@ -463,6 +463,7 @@ join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [gre
 __0cb255913a5005bd062d1d5cede107fe
 
 meta::function('ls-a', 'ls(\'-ad\', @_);');
+meta::function('lss', '# Attribute function::lss');
 meta::function('mv', <<'__09f350db8406303ade06d229477d79ad');
 my ($from, $to) = @_;
 my $destination_namespace = namespace($to);

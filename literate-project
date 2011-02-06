@@ -614,6 +614,7 @@ join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [gre
 __ad1a9fef60ec7c9d268ede65480d96a2
 
 meta::function('ls-a', 'ls(\'-ad\', @_);');
+meta::function('lss', '# Attribute function::lss');
 meta::function('make', <<'__9a3d7e3c7e0017f4c9b239f3858aaf03');
 compile() || view();
 clean();
@@ -711,15 +712,12 @@ copy($pdf, "$directory/$name.pdf") or die "Copy failed: $!";
 copy($tex, "$directory/$name.tex") or die "Copy failed: $!";
 __6170d9084f7c3e10efdfb523230072dd
 
-meta::function('rm', <<'__963fdd3d9f6a0ba279b001b1f5679a38');
-for my $to_be_deleted (@_) {
-  terminal::message('warning', "$to_be_deleted does not exist") unless exists $data{$to_be_deleted};
-}
-
+meta::function('rm', <<'__210e6394da779d9a7255f5d646a9e4b7');
+exists $data{$_} or terminal::message('warning', "$_ does not exist") for @_;
 delete @data{@_};
-__963fdd3d9f6a0ba279b001b1f5679a38
+__210e6394da779d9a7255f5d646a9e4b7
 
-meta::function('save', <<'__ca9ab587c78ff2024ef9ad8ca634db5b');
+meta::function('save', <<'__8ee504cf511b547752405dc1f80d41dc');
 if (! verify()) {
   die "$0 has not been updated";
 } else {
@@ -727,8 +725,9 @@ if (! verify()) {
   eval {file::write($0, $serialized_data)};
   die $@ if $@;
   terminal::message('info', "$0 saved successfully.");
+  $transient{initial} = state();
 }
-__ca9ab587c78ff2024ef9ad8ca634db5b
+__8ee504cf511b547752405dc1f80d41dc
 
 meta::function('save-state', <<'__5c5b586331e25951140ced6442d9fe2b');
 # Creates a named copy of the current state and stores it.
@@ -1111,7 +1110,7 @@ die $@ if $@;
 $return_value;
 __33ee2e1595d3877bd1d9accaa72305c8
 
-meta::internal_function('internal::main', <<'__acb38ec5971c89f794f486f1c30900e6');
+meta::internal_function('internal::main', <<'__52a583d41ccf5cb52118a6d96038cc76');
 disable();
 
 $SIG{'INT'} = sub {
@@ -1119,7 +1118,7 @@ $SIG{'INT'} = sub {
   exit 1;
 };
 
-my $initial_state        = state();
+$transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action || 'usage';
@@ -1128,12 +1127,12 @@ terminal::message('warning', "Unknown action: '$function_name'") and $function_n
 chomp(my $result = &$function_name(@ARGV));
 print "$result\n" if $result;
 
-save() unless $initial_state eq state();
+save() unless state() eq $transient{initial};
 
 END {
   enable();
 }
-__acb38ec5971c89f794f486f1c30900e6
+__52a583d41ccf5cb52118a6d96038cc76
 
 meta::internal_function('invoke_editor_on', <<'__7c798760d79429e5b52d9fa934e889d8');
 my ($data, %options) = @_;
@@ -1306,12 +1305,13 @@ __6999988eaf441c9b1282e03e1db427b5
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
-meta::parent('./sdoc', <<'__b058828a5b55f650e5457f6b0df06301');
+meta::parent('./sdoc', <<'__8df50cce1d08f0b862b86ca0ff865c32');
+function::lss
 function::sdoc
 meta::type::sdoc
 parent::/home/spencertipping/bin/object
 retriever::sdoc
-__b058828a5b55f650e5457f6b0df06301
+__8df50cce1d08f0b862b86ca0ff865c32
 
 meta::parent('/home/spencertipping/bin/object', <<'__b1308b5b9c4a7001a50498e0844fa748');
 bootstrap::initialization
@@ -1422,10 +1422,11 @@ meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
 
-meta::parent('object', <<'__acb15f9d12c9be68c2d2596767668b21');
+meta::parent('object', <<'__b1308b5b9c4a7001a50498e0844fa748');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
+function::cc
 function::child
 function::clone
 function::cp
@@ -1509,7 +1510,7 @@ meta::type::state
 meta::type::watch
 retriever::file
 retriever::id
-__acb15f9d12c9be68c2d2596767668b21
+__b1308b5b9c4a7001a50498e0844fa748
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess

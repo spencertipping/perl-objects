@@ -492,15 +492,12 @@ $@ ? terminal::message('error', $@) : $result;
 __f2b57dd342923797e8e2287c3095803f
 
 meta::function('reload', 'execute($_) for grep ! /^bootstrap::/, keys %data;');
-meta::function('rm', <<'__963fdd3d9f6a0ba279b001b1f5679a38');
-for my $to_be_deleted (@_) {
-  terminal::message('warning', "$to_be_deleted does not exist") unless exists $data{$to_be_deleted};
-}
-
+meta::function('rm', <<'__210e6394da779d9a7255f5d646a9e4b7');
+exists $data{$_} or terminal::message('warning', "$_ does not exist") for @_;
 delete @data{@_};
-__963fdd3d9f6a0ba279b001b1f5679a38
+__210e6394da779d9a7255f5d646a9e4b7
 
-meta::function('save', <<'__ca9ab587c78ff2024ef9ad8ca634db5b');
+meta::function('save', <<'__8ee504cf511b547752405dc1f80d41dc');
 if (! verify()) {
   die "$0 has not been updated";
 } else {
@@ -508,8 +505,9 @@ if (! verify()) {
   eval {file::write($0, $serialized_data)};
   die $@ if $@;
   terminal::message('info', "$0 saved successfully.");
+  $transient{initial} = state();
 }
-__ca9ab587c78ff2024ef9ad8ca634db5b
+__8ee504cf511b547752405dc1f80d41dc
 
 meta::function('save-state', <<'__5c5b586331e25951140ced6442d9fe2b');
 # Creates a named copy of the current state and stores it.
@@ -836,7 +834,7 @@ die $@ if $@;
 $return_value;
 __33ee2e1595d3877bd1d9accaa72305c8
 
-meta::internal_function('internal::main', <<'__acb38ec5971c89f794f486f1c30900e6');
+meta::internal_function('internal::main', <<'__52a583d41ccf5cb52118a6d96038cc76');
 disable();
 
 $SIG{'INT'} = sub {
@@ -844,7 +842,7 @@ $SIG{'INT'} = sub {
   exit 1;
 };
 
-my $initial_state        = state();
+$transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action || 'usage';
@@ -853,12 +851,12 @@ terminal::message('warning', "Unknown action: '$function_name'") and $function_n
 chomp(my $result = &$function_name(@ARGV));
 print "$result\n" if $result;
 
-save() unless $initial_state eq state();
+save() unless state() eq $transient{initial};
 
 END {
   enable();
 }
-__acb38ec5971c89f794f486f1c30900e6
+__52a583d41ccf5cb52118a6d96038cc76
 
 meta::internal_function('invoke_editor_on', <<'__7c798760d79429e5b52d9fa934e889d8');
 my ($data, %options) = @_;
