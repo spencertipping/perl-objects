@@ -249,6 +249,7 @@ run this script with the 'usage' argument.
 
 __c63395cbc6f7160b603befbb2d9b6700
 
+meta::data('current-continuation', 'finished writing cc');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License
@@ -277,6 +278,11 @@ meta::data('name', 'object');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', 'join "\\n", retrieve(@_);');
+meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
+# Stashes a quick one-line continuation. (Used to remind me what I was doing.)
+@_ ? associate('data::current-continuation', join(' ', @_)) : retrieve('data::current-continuation');
+__5c64e1adc128113e1b409e0fbcbe29a2
+
 meta::function('child', <<'__3eeb4b4fd37a502b53f0008e7835b5de');
 my ($child_name) = @_;
 

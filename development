@@ -311,6 +311,11 @@ meta::data('name', 'dev');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', 'join "\\n", retrieve(@_);');
+meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
+# Stashes a quick one-line continuation. (Used to remind me what I was doing.)
+@_ ? associate('data::current-continuation', join(' ', @_)) : retrieve('data::current-continuation');
+__5c64e1adc128113e1b409e0fbcbe29a2
+
 meta::function('child', <<'__3eeb4b4fd37a502b53f0008e7835b5de');
 my ($child_name) = @_;
 
@@ -1137,7 +1142,108 @@ parent::/home/spencertipping/bin/object
 retriever::sdoc
 __b058828a5b55f650e5457f6b0df06301
 
-meta::parent('/home/spencertipping/bin/object', <<'__acb15f9d12c9be68c2d2596767668b21');
+meta::parent('/home/spencertipping/bin/object', <<'__b1308b5b9c4a7001a50498e0844fa748');
+bootstrap::initialization
+bootstrap::perldoc
+function::cat
+function::cc
+function::child
+function::clone
+function::cp
+function::create
+function::current-state
+function::disable
+function::edit
+function::enable
+function::export
+function::extern
+function::grep
+function::hash
+function::import
+function::import-bundle
+function::load-state
+function::lock
+function::ls
+function::ls-a
+function::mv
+function::parents
+function::perl
+function::reload
+function::rm
+function::save
+function::save-state
+function::serialize
+function::serialize_single
+function::sh
+function::shell
+function::size
+function::snapshot
+function::state
+function::unlock
+function::update
+function::update-from
+function::usage
+function::verify
+internal_function::associate
+internal_function::attribute
+internal_function::chmod_self
+internal_function::complete
+internal_function::debug_trace
+internal_function::execute
+internal_function::exported
+internal_function::extension_for
+internal_function::fast_hash
+internal_function::file::read
+internal_function::file::write
+internal_function::fnv_hash
+internal_function::hypothetically
+internal_function::internal::main
+internal_function::invoke_editor_on
+internal_function::namespace
+internal_function::retrieve
+internal_function::retrieve_with_hooks
+internal_function::select_keys
+internal_function::separate_options
+internal_function::strip
+internal_function::table_display
+internal_function::temporary_name
+internal_function::translate_backtrace
+internal_function::with_exported
+library::terminal
+message_color::state
+message_color::states
+message_color::watch
+meta::configure
+meta::externalize
+meta::functor::editable
+meta::type::bootstrap
+meta::type::data
+meta::type::function
+meta::type::inc
+meta::type::internal_function
+meta::type::library
+meta::type::message_color
+meta::type::meta
+meta::type::parent
+meta::type::retriever
+meta::type::state
+meta::type::watch
+retriever::file
+retriever::id
+__b1308b5b9c4a7001a50498e0844fa748
+
+meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
+meta::type::configuration
+parent::/home/spencertipping/bin/object
+__511208c99d8bc2caa3067db9f1824163
+
+meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
+function::note
+meta::type::note
+parent::object
+__320d51928ec8e2e370d67d30abe059b5
+
+meta::parent('object', <<'__acb15f9d12c9be68c2d2596767668b21');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -1225,105 +1331,6 @@ meta::type::watch
 retriever::file
 retriever::id
 __acb15f9d12c9be68c2d2596767668b21
-
-meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
-meta::type::configuration
-parent::/home/spencertipping/bin/object
-__511208c99d8bc2caa3067db9f1824163
-
-meta::parent('notes', <<'__320d51928ec8e2e370d67d30abe059b5');
-function::note
-meta::type::note
-parent::object
-__320d51928ec8e2e370d67d30abe059b5
-
-meta::parent('object', <<'__4d0e33987ce7bf61960b406ece50cef7');
-bootstrap::initialization
-bootstrap::perldoc
-function::cat
-function::child
-function::clone
-function::cp
-function::create
-function::current-state
-function::disable
-function::edit
-function::enable
-function::export
-function::extern
-function::grep
-function::hash
-function::import
-function::import-bundle
-function::load-state
-function::lock
-function::ls
-function::ls-a
-function::mv
-function::parents
-function::perl
-function::reload
-function::rm
-function::save
-function::save-state
-function::serialize
-function::serialize_single
-function::sh
-function::shell
-function::size
-function::snapshot
-function::state
-function::unlock
-function::update
-function::update-from
-function::usage
-function::verify
-internal_function::associate
-internal_function::attribute
-internal_function::chmod_self
-internal_function::complete
-internal_function::debug_trace
-internal_function::execute
-internal_function::exported
-internal_function::extension_for
-internal_function::fast_hash
-internal_function::file::read
-internal_function::file::write
-internal_function::fnv_hash
-internal_function::hypothetically
-internal_function::internal::main
-internal_function::invoke_editor_on
-internal_function::namespace
-internal_function::retrieve
-internal_function::retrieve_with_hooks
-internal_function::select_keys
-internal_function::separate_options
-internal_function::strip
-internal_function::table_display
-internal_function::temporary_name
-internal_function::translate_backtrace
-internal_function::with_exported
-library::terminal
-message_color::state
-message_color::states
-message_color::watch
-meta::configure
-meta::externalize
-meta::functor::editable
-meta::type::bootstrap
-meta::type::data
-meta::type::function
-meta::type::inc
-meta::type::internal_function
-meta::type::library
-meta::type::message_color
-meta::type::meta
-meta::type::parent
-meta::type::retriever
-meta::type::state
-meta::type::watch
-retriever::file
-__4d0e33987ce7bf61960b406ece50cef7
 
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess

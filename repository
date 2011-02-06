@@ -303,6 +303,11 @@ meta::data('name', 'repository');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', 'join "\\n", retrieve(@_);');
+meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
+# Stashes a quick one-line continuation. (Used to remind me what I was doing.)
+@_ ? associate('data::current-continuation', join(' ', @_)) : retrieve('data::current-continuation');
+__5c64e1adc128113e1b409e0fbcbe29a2
+
 meta::function('child', <<'__3eeb4b4fd37a502b53f0008e7835b5de');
 my ($child_name) = @_;
 
@@ -1032,10 +1037,11 @@ meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
 
-meta::parent('/home/spencertipping/bin/object', <<'__acb15f9d12c9be68c2d2596767668b21');
+meta::parent('/home/spencertipping/bin/object', <<'__b1308b5b9c4a7001a50498e0844fa748');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
+function::cc
 function::child
 function::clone
 function::cp
@@ -1119,7 +1125,7 @@ meta::type::state
 meta::type::watch
 retriever::file
 retriever::id
-__acb15f9d12c9be68c2d2596767668b21
+__b1308b5b9c4a7001a50498e0844fa748
 
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
