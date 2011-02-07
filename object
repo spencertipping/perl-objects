@@ -246,21 +246,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
-meta::data('name', 'object');
 meta::data('quiet', '1');
 meta::data('watching', '1');
 meta::function('cat', 'join "\\n", retrieve(@_);');
-meta::function('child', <<'__e591447b2717131414c14aad87b0370e');
+meta::function('child', <<'__9b5175a0e9b94998754cad35582b987a');
 my ($child_name) = @_;
-
-hypothetically(sub {
-  associate('data::name', $child_name);
-  clone($child_name)});
-
+clone($child_name);
 enable();
 qx($child_name update-from $0 -nu);
 disable();
-__e591447b2717131414c14aad87b0370e
+__9b5175a0e9b94998754cad35582b987a
 meta::function('clone', <<'__5a30a4ba6293e250ed22884d609e4781');
 for (grep length, @_) {
   file::write($_, serialize(), noclobber => 1);
@@ -421,15 +416,18 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__6fba10c85b61da4c5280b99ab9ccc16a');
+meta::function('shell', <<'__d83f3ed980dc46e4d4eb16586f999e0d');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
 $term->ornaments(0);
 my $attribs = $term->Attribs;
+my $name = $0;
 $attribs->{completion_entry_function} = $attribs->{list_completion_function};
 
-while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions], defined($_ = $term->readline("\033[1;32m" . name() . "\033[0;0m "))) {
+$name =~ s/^.*\///o;
+
+while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions], defined($_ = $term->readline("\033[1;32m$name\033[0;0m "))) {
   my $command_line = $_;
   my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
   my $function_name = shift(@args) or next;
@@ -438,7 +436,7 @@ while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_f
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
   print dangerous('', sub {&$function_name(@args)}), "\n"}
-__6fba10c85b61da4c5280b99ab9ccc16a
+__d83f3ed980dc46e4d4eb16586f999e0d
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
