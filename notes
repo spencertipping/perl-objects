@@ -737,7 +737,7 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('terminal', <<'__c3e2765e602bc96fa5d2ce04a05547eb');
+meta::library('terminal', <<'__31f88c81d989b9f3463951aadcd66930');
 # Functions for nice-looking terminal output.
 package terminal;
 
@@ -748,11 +748,11 @@ $process =~ s/^.*\///;
 sub message {print STDERR "[$_[0]] $_[1]\n"}
 sub color {
   my ($name, $color) = @_;
-  *{"terminal::$name"} = sub {print STDERR "\033[1;30m$process(\033[1;${color}m$name\033[1;30m)\033[0;0m $_\n" for @_}}
+  *{"terminal::$name"} = sub {chomp $_, print STDERR "\033[1;30m$process(\033[1;${color}m$name\033[1;30m)\033[0;0m $_\n" for @_}}
 
 my %preloaded = (info => 32, progress => 32, state => 34, debug => 34, warning => 33, error => 31);
 color $_, $preloaded{$_} for keys %preloaded;
-__c3e2765e602bc96fa5d2ce04a05547eb
+__31f88c81d989b9f3463951aadcd66930
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('object', <<'__8a434dcd2367919d9059dc0fa66f6c80');
