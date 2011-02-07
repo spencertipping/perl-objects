@@ -332,22 +332,22 @@ my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
 __ac86cbe9c9fb12fc8cef2cc88e80c01e
 meta::function('initial-state', '$transient{initial};');
-meta::function('load-state', <<'__43b91921c93f3ac6eb86634237bdc19b');
+meta::function('load-state', <<'__0bddb2edf7d13e60bf47e7bce8c8c011');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
 
-terminal::state('Saving current state into _...');
+terminal::state('saving current state into _...');
 &{'save-state'}('_');
 
 delete $data{$_} for grep ! /^state::/, keys %data;
 %externalized_functions = ();
 
-terminal::state("Restoring state $state_name...");
+terminal::state("restoring state $state_name...");
 meta::eval_in($state, "state::$state_name");
 terminal::error($@) if $@;
 reload();
 verify();
-__43b91921c93f3ac6eb86634237bdc19b
+__0bddb2edf7d13e60bf47e7bce8c8c011
 meta::function('lock', 'chmod_self(sub {$_[0] & 0555});');
 meta::function('ls', <<'__acdc3ca5777ab9c7c430d493a7555998');
 my ($options, @criteria) = separate_options(@_);
@@ -388,7 +388,7 @@ meta::function('rm', <<'__26d4a78ddb47259b3d8dcabe390426bd');
 exists $data{$_} or terminal::warning("$_ does not exist") for @_;
 delete @data{@_};
 __26d4a78ddb47259b3d8dcabe390426bd
-meta::function('save', 'dangerous("Saving $0...", sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
+meta::function('save', 'dangerous("saving $0...", sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
 meta::function('save-state', <<'__5c5b586331e25951140ced6442d9fe2b');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
@@ -419,7 +419,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__d0d9b8355e5eb54b1da29b7b5f5c79dc');
+meta::function('shell', <<'__c3952c1482cd39dfc045ed9efecd6214');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -440,11 +440,11 @@ while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_f
   my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
   my $function_name = shift(@args) or next;
 
-  terminal::warning("Command not found: '$function_name' (use 'ls' to see available commands)"), next unless $externalized_functions{$function_name};
+  terminal::warning("$function_name invalid (use 'ls' to see available commands)"), next unless $externalized_functions{$function_name};
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
   print dangerous('', sub {&$function_name(@args)}), "\n"}
-__d0d9b8355e5eb54b1da29b7b5f5c79dc
+__c3952c1482cd39dfc045ed9efecd6214
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
@@ -461,7 +461,7 @@ __119111f84c3e32a5536838ac84bc6f10
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__4eb47fbb62a6a740578b9a7acff53798');
+meta::function('update-from', <<'__4bb87dcea3d13203b15070a4a44389f8');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transient{inherit}{$type}.
 
@@ -477,15 +477,15 @@ my $force      =    $$options{'-f'} || $$options{'--force'};
 &{'save-state'}('before-update') if $save_state;
 
 for my $target (@targets) {
-  dangerous('', sub {
+  dangerous("updating from $target", sub {
     my $attributes = join '', qx($target ls -aiu);
-    die "Skipping unreachable $target" unless $attributes;
+    die "skipping unreachable $target" unless $attributes;
 
     rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
     associate("parent::$target", $attributes) unless $no_parents;
 
-    dangerous("Updating meta attributes from $target...",     sub {eval qx($target serialize -ipmu)});
-    dangerous("Updating non-meta attributes from $target...", sub {eval qx($target serialize -ipMu)});
+    dangerous('', sub {eval qx($target serialize -ipmu)});
+    dangerous('', sub {eval qx($target serialize -ipMu)});
     reload()})}
 
 if (verify()) {terminal::info("Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state}
@@ -494,7 +494,7 @@ elsif ($force) {terminal::warning('Failed to verify: at this point your object w
 else {terminal::error('Verification failed after the upgrade was complete.');
       terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
       return &{'load-state'}('before-update') if $save_state}
-__4eb47fbb62a6a740578b9a7acff53798
+__4bb87dcea3d13203b15070a4a44389f8
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__123f83b5cb5c2400ae0b5c8af1c7bf20');
 file::write(my $other = $transient{temporary_filename} = temporary_name(), my $serialized_data = serialize());
@@ -529,10 +529,10 @@ my $result = eval {&$computation()};
 terminal::warning(translate_backtrace($@)), return undef if $@;
 $result;
 __167c759b4f9e54a667222dd3d405200d
-meta::internal_function('debug_trace', <<'__f887289259890731458a66398b628cdc');
-quiet() or terminal::message('debug', join ', ', @_);
+meta::internal_function('debug_trace', <<'__77644ab45a770a6e172680f659911507');
+terminal::debug(join ', ', @_);
 wantarray ? @_ : $_[0];
-__f887289259890731458a66398b628cdc
+__77644ab45a770a6e172680f659911507
 meta::internal_function('execute', <<'__4b4efc33bc6767a7aade7f427eedf83f');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
@@ -610,7 +610,7 @@ my $return_value  = eval {&$side_effect()};
 die $@ if $@;
 $return_value;
 __33ee2e1595d3877bd1d9accaa72305c8
-meta::internal_function('internal::main', <<'__1a920241209715887fe3003d819586fe');
+meta::internal_function('internal::main', <<'__b7379923a1c7d2481bad4247b8a71974');
 disable();
 
 $SIG{'INT'} = sub {snapshot(); exit 1};
@@ -619,7 +619,7 @@ $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::message('warning', "Unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+terminal::warning("unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
 
 chomp(my $result = &$function_name(@ARGV));
 print "$result\n" if $result;
@@ -629,7 +629,7 @@ save() unless state() eq $transient{initial};
 END {
   enable();
 }
-__1a920241209715887fe3003d819586fe
+__b7379923a1c7d2481bad4247b8a71974
 meta::internal_function('invoke_editor_on', <<'__32c8b1e3c90bd40d504703e22b26e1f5');
 my ($data, %options) = @_;
 my $editor   = $options{editor} || $ENV{VISUAL} || $ENV{EDITOR} || die 'Either the $VISUAL or $EDITOR environment variable should be set to a valid editor';
