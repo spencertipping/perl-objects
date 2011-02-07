@@ -449,7 +449,7 @@ meta::function('rm', <<'__26d4a78ddb47259b3d8dcabe390426bd');
 exists $data{$_} or terminal::warning("$_ does not exist") for @_;
 delete @data{@_};
 __26d4a78ddb47259b3d8dcabe390426bd
-meta::function('save', 'dangerous("saving $0...", sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
+meta::function('save', 'dangerous("saving $0", sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
 meta::function('save-state', <<'__5c5b586331e25951140ced6442d9fe2b');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
@@ -793,11 +793,10 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('terminal', <<'__b318afc9bd9fb3ac805ce5e4b6c9dae4');
+meta::library('terminal', <<'__c3e2765e602bc96fa5d2ce04a05547eb');
 # Functions for nice-looking terminal output.
 package terminal;
 
-my $longest = 0;
 my $process = $0;
 
 $process =~ s/^.*\///;
@@ -805,15 +804,11 @@ $process =~ s/^.*\///;
 sub message {print STDERR "[$_[0]] $_[1]\n"}
 sub color {
   my ($name, $color) = @_;
-  $longest = length $name if length $name > $longest;
-
-  *{"terminal::$name"} = sub {
-    my $padding = ' ' x ($longest - length $name);
-    print STDERR "\033[1;30m$process\033[0;0m$padding\[\033[1;${color}m$name\033[0;0m] $_\n" for @_}}
+  *{"terminal::$name"} = sub {print STDERR "\033[1;30m$process(\033[1;${color}m$name\033[1;30m)\033[0;0m $_\n" for @_}}
 
 my %preloaded = (info => 32, progress => 32, state => 34, debug => 34, warning => 33, error => 31);
 color $_, $preloaded{$_} for keys %preloaded;
-__b318afc9bd9fb3ac805ce5e4b6c9dae4
+__c3e2765e602bc96fa5d2ce04a05547eb
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('object', <<'__8a434dcd2367919d9059dc0fa66f6c80');
