@@ -245,8 +245,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
-meta::data('name', 'timesheet');
-meta::data('quiet', '1');
 meta::data('times', <<'__129245221c65e95871fd1f421f2cc77e');
 # Times go here. They are in the following format:
 # <date>  <start>  <end>
