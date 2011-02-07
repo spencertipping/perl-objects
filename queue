@@ -54,7 +54,7 @@ sub meta::externalize {
   *{"::$name"} = $implementation || $attribute;
 }
 __9141b4e8752515391385516ae94b23b5
-meta::meta('functor::editable', <<'__c30f2b0daccff461eb7b37a8aa090e27');
+meta::meta('functor::editable', <<'__e3d2ede6edf65ffe2123584b2bd5dab7');
 # An editable type. This creates a type whose default action is to open an editor
 # on whichever value is mentioned. This can be changed using different flags.
 
@@ -71,12 +71,11 @@ sub meta::functor::editable {
       my $attribute             = "${typename}::$name";
       my ($command, @new_value) = @_;
 
-      if (not defined $command) {
-        return &{$options{default}}(retrieve($attribute)) if ref $options{default} eq 'CODE';
-        return edit($attribute) if $command eq 'edit' or $options{default} eq 'edit';
-        return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import'}
-      else {return retrieve($attribute)}}}}
-__c30f2b0daccff461eb7b37a8aa090e27
+      return &{$options{default}}(retrieve($attribute)) if ref $options{default} eq 'CODE' and not defined $command;
+      return edit($attribute) if $command eq 'edit' or $options{default} eq 'edit' and not defined $command;
+      return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
+      return retrieve($attribute)}}}
+__e3d2ede6edf65ffe2123584b2bd5dab7
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -340,6 +339,7 @@ meta::function('import-bundle', <<'__4c7139ed5c9f65f38a33cf8f8a6cae27');
 eval join '', <STDIN>;
 die $@ if $@;
 __4c7139ed5c9f65f38a33cf8f8a6cae27
+meta::function('initial-state', '$transient{initial};');
 meta::function('load-state', <<'__43b91921c93f3ac6eb86634237bdc19b');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
@@ -431,7 +431,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__70fc8838da32da36fc376752c83b1e53');
+meta::function('shell', <<'__d0d9b8355e5eb54b1da29b7b5f5c79dc');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -442,7 +442,11 @@ $attribs->{completion_entry_function} = $attribs->{list_completion_function};
 
 $name =~ s/^.*\///o;
 
-my $prompt = sub {"\033[1;32m$name\033[1;30m" . substr(state(), 0, 4) . "\033[0;0m "};
+my $prompt = sub {
+  my $state = state();
+  my $other = $state ne $transient{initial} ? 33 : 30;
+  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m "};
+
 while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions], defined($_ = $term->readline(&$prompt()))) {
   my $command_line = $_;
   my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
@@ -452,7 +456,7 @@ while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_f
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
   print dangerous('', sub {&$function_name(@args)}), "\n"}
-__70fc8838da32da36fc376752c83b1e53
+__d0d9b8355e5eb54b1da29b7b5f5c79dc
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
@@ -466,11 +470,12 @@ my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __119111f84c3e32a5536838ac84bc6f10
+meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__2449ea3791f880ad9359729094736b03');
+meta::function('update-from', <<'__4eb47fbb62a6a740578b9a7acff53798');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
-# and we determine it here by checking for $transients{inherit}{$type}.
+# and we determine it here by checking for $transient{inherit}{$type}.
 
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
@@ -484,24 +489,24 @@ my $force      =    $$options{'-f'} || $$options{'--force'};
 &{'save-state'}('before-update') if $save_state;
 
 for my $target (@targets) {
-  dangerous("Updating from $target", sub {
+  dangerous('', sub {
     my $attributes = join '', qx($target ls -aiu);
-    terminal::warning("Skipping unreachable object $target"), next unless $attributes;
+    die "Skipping unreachable $target" unless $attributes;
 
     rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
     associate("parent::$target", $attributes) unless $no_parents;
 
-    dangerous('Updating meta attributes...',     sub {eval qx($target serialize -ipmu)});
-    dangerous('Updating non-meta attributes...', sub {eval qx($target serialize -ipMu)});
-    reload();
+    dangerous("Updating meta attributes from $target...",     sub {eval qx($target serialize -ipmu)});
+    dangerous("Updating non-meta attributes from $target...", sub {eval qx($target serialize -ipMu)});
+    reload()})}
 
-    if (verify()) {terminal::info("Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state}
-    elsif ($force) {terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                      'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
-    else {terminal::error('Verification failed after the upgrade was complete.');
-          terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-          return &{'load-state'}('before-update') if $save_state}})}
-__2449ea3791f880ad9359729094736b03
+if (verify()) {terminal::info("Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state}
+elsif ($force) {terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
+                                  'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
+else {terminal::error('Verification failed after the upgrade was complete.');
+      terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
+      return &{'load-state'}('before-update') if $save_state}
+__4eb47fbb62a6a740578b9a7acff53798
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__123f83b5cb5c2400ae0b5c8af1c7bf20');
 file::write(my $other = $transient{temporary_filename} = temporary_name(), my $serialized_data = serialize());
@@ -773,11 +778,14 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('terminal', <<'__09b73279f3343e34f69b3b10e4515981');
+meta::library('terminal', <<'__b318afc9bd9fb3ac805ce5e4b6c9dae4');
 # Functions for nice-looking terminal output.
 package terminal;
 
 my $longest = 0;
+my $process = $0;
+
+$process =~ s/^.*\///;
 
 sub message {print STDERR "[$_[0]] $_[1]\n"}
 sub color {
@@ -786,13 +794,11 @@ sub color {
 
   *{"terminal::$name"} = sub {
     my $padding = ' ' x ($longest - length $name);
-    print STDERR "$padding\[\033[1;${color}m$name\033[0;0m] $_\n" for @_;
-  };
-}
+    print STDERR "\033[1;30m$process\033[0;0m$padding\[\033[1;${color}m$name\033[0;0m] $_\n" for @_}}
 
-my %preloaded = (info => 32, state => 34, debug => 34, warning => 33, error => 31);
+my %preloaded = (info => 32, progress => 32, state => 34, debug => 34, warning => 33, error => 31);
 color $_, $preloaded{$_} for keys %preloaded;
-__09b73279f3343e34f69b3b10e4515981
+__b318afc9bd9fb3ac805ce5e4b6c9dae4
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
@@ -805,7 +811,7 @@ function::note
 meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
-meta::parent('object', <<'__b48487cb555ed29687eadbe87fdad930');
+meta::parent('object', <<'__8a434dcd2367919d9059dc0fa66f6c80');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -823,6 +829,7 @@ function::extern
 function::grep
 function::hash
 function::import
+function::initial-state
 function::load-state
 function::lock
 function::ls
@@ -841,6 +848,7 @@ function::shell
 function::size
 function::snapshot
 function::state
+function::touch
 function::unlock
 function::update
 function::update-from
@@ -890,7 +898,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__b48487cb555ed29687eadbe87fdad930
+__8a434dcd2367919d9059dc0fa66f6c80
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();

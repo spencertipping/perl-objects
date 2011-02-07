@@ -462,9 +462,9 @@ __119111f84c3e32a5536838ac84bc6f10
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__2449ea3791f880ad9359729094736b03');
+meta::function('update-from', <<'__4eb47fbb62a6a740578b9a7acff53798');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
-# and we determine it here by checking for $transients{inherit}{$type}.
+# and we determine it here by checking for $transient{inherit}{$type}.
 
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
@@ -478,24 +478,24 @@ my $force      =    $$options{'-f'} || $$options{'--force'};
 &{'save-state'}('before-update') if $save_state;
 
 for my $target (@targets) {
-  dangerous("Updating from $target", sub {
+  dangerous('', sub {
     my $attributes = join '', qx($target ls -aiu);
-    terminal::warning("Skipping unreachable object $target"), next unless $attributes;
+    die "Skipping unreachable $target" unless $attributes;
 
     rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
     associate("parent::$target", $attributes) unless $no_parents;
 
-    dangerous('Updating meta attributes...',     sub {eval qx($target serialize -ipmu)});
-    dangerous('Updating non-meta attributes...', sub {eval qx($target serialize -ipMu)});
-    reload();
+    dangerous("Updating meta attributes from $target...",     sub {eval qx($target serialize -ipmu)});
+    dangerous("Updating non-meta attributes from $target...", sub {eval qx($target serialize -ipMu)});
+    reload()})}
 
-    if (verify()) {terminal::info("Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state}
-    elsif ($force) {terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                      'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
-    else {terminal::error('Verification failed after the upgrade was complete.');
-          terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-          return &{'load-state'}('before-update') if $save_state}})}
-__2449ea3791f880ad9359729094736b03
+if (verify()) {terminal::info("Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state}
+elsif ($force) {terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
+                                  'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
+else {terminal::error('Verification failed after the upgrade was complete.');
+      terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
+      return &{'load-state'}('before-update') if $save_state}
+__4eb47fbb62a6a740578b9a7acff53798
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__123f83b5cb5c2400ae0b5c8af1c7bf20');
 file::write(my $other = $transient{temporary_filename} = temporary_name(), my $serialized_data = serialize());
@@ -733,11 +733,14 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('terminal', <<'__d7015b941c1c02b65aa780cf1a305cde');
+meta::library('terminal', <<'__b318afc9bd9fb3ac805ce5e4b6c9dae4');
 # Functions for nice-looking terminal output.
 package terminal;
 
 my $longest = 0;
+my $process = $0;
+
+$process =~ s/^.*\///;
 
 sub message {print STDERR "[$_[0]] $_[1]\n"}
 sub color {
@@ -746,11 +749,11 @@ sub color {
 
   *{"terminal::$name"} = sub {
     my $padding = ' ' x ($longest - length $name);
-    print STDERR "$padding\[\033[1;${color}m$name\033[0;0m] $_\n" for @_}}
+    print STDERR "\033[1;30m$process\033[0;0m$padding\[\033[1;${color}m$name\033[0;0m] $_\n" for @_}}
 
 my %preloaded = (info => 32, progress => 32, state => 34, debug => 34, warning => 33, error => 31);
 color $_, $preloaded{$_} for keys %preloaded;
-__d7015b941c1c02b65aa780cf1a305cde
+__b318afc9bd9fb3ac805ce5e4b6c9dae4
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
