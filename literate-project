@@ -136,6 +136,7 @@ sub id {
   "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
 };
 __34a5da8558897a4388fc22ed4b0c3c6b
+meta::meta('template::beamer', 'tex::template tex::id(qw/frame pause item block alertblock exampleblock/);');
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource perl/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
 meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize description item/);');
@@ -1357,9 +1358,16 @@ meta::section('introduction', <<'__da922cd923eedb4306efb6920b9ebc91');
     g++ false.s -o false
   - end
 __da922cd923eedb4306efb6920b9ebc91
-meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
+meta::section('main', <<'__c1b7dbd1f04ec959ebc9166f86250608');
 - documentclass article
 - include resource::header
+
+- comment << end
+  The setup above produces a regular article. Preprocessor templates already
+  exist for Beamer presentations, though. You can compile to Beamer by changing
+  - documentclass article to - documentclass beamer. Naturally you'll have to
+  change some other things about your document too.
+- end
 
 - title  Literate Project
 - author Spencer Tipping
@@ -1386,7 +1394,7 @@ meta::section('main', <<'__589811f7266bdf4ec8b030aeb648dddc');
   
   - include section::introduction
 - end
-__589811f7266bdf4ec8b030aeb648dddc
+__c1b7dbd1f04ec959ebc9166f86250608
 meta::template('comment', '\'\';     # A mechanism for line or block comments.');
 meta::template('eval', <<'__eb0b1058649eb2d833f348540516b358');
 my $result = eval $_[0];
