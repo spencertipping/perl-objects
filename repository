@@ -312,7 +312,7 @@ rm($_) for grep /^cached_dependency::/, keys %data;
 my %dependencies = dependencies();
 associate("cached_dependency::$_", LWP::Simple::get($dependencies{$_})) for keys %dependencies;
 __9eb9747ca6d4cdcb7d863ca9ed13f80a
-meta::function('edit', <<'__b878c50c3d058d5a344dcb1f52b625a3');
+meta::function('edit', <<'__c74a5d1c0dbd922acaf1397f89190fce');
 my ($name, %options) = @_;
 my $extension = extension_for($name);
 
@@ -320,7 +320,8 @@ die "Attribute $name does not exist." unless exists $data{$name};
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
           execute => $name !~ /^bootstrap::/);
 save();
-__b878c50c3d058d5a344dcb1f52b625a3
+'';
+__c74a5d1c0dbd922acaf1397f89190fce
 meta::function('enable', 'chmod_self(sub {$_[0] | $_[0] >> 2});');
 meta::function('export', <<'__388e0cc60507443cb1c0cc3e2658cfef');
 # Exports data into a text file.
@@ -413,6 +414,11 @@ die "'$from' does not exist" unless exists $data{$from};
 associate($to, retrieve($from));
 rm($from);
 __52e95180e3c7019116bd798e0da0fdda
+meta::function('name', <<'__6848cbc257e4b6d7441b25acb04e23c9');
+my $name = $0;
+$name =~ s/^.*\///;
+$name;
+__6848cbc257e4b6d7441b25acb04e23c9
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__986a274c013b77fe08d29726ce3799fe');
 my $result = eval(join ' ', @_);
@@ -423,7 +429,7 @@ meta::function('rm', <<'__26d4a78ddb47259b3d8dcabe390426bd');
 exists $data{$_} or terminal::warning("$_ does not exist") for @_;
 delete @data{@_};
 __26d4a78ddb47259b3d8dcabe390426bd
-meta::function('save', 'dangerous("saving $0", sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
+meta::function('save', 'dangerous(\'\', sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
 meta::function('save-state', <<'__5c5b586331e25951140ced6442d9fe2b');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
@@ -454,16 +460,14 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__c3952c1482cd39dfc045ed9efecd6214');
+meta::function('shell', <<'__44f4c89b3f25a47a44ef85f16c960743');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
 $term->ornaments(0);
 my $attribs = $term->Attribs;
-my $name = $0;
+my $name = name();
 $attribs->{completion_entry_function} = $attribs->{list_completion_function};
-
-$name =~ s/^.*\///o;
 
 my $prompt = sub {
   my $state = state();
@@ -479,7 +483,7 @@ while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_f
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
   print dangerous('', sub {&$function_name(@args)}), "\n"}
-__c3952c1482cd39dfc045ed9efecd6214
+__44f4c89b3f25a47a44ef85f16c960743
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
@@ -801,13 +805,11 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('terminal', <<'__31f88c81d989b9f3463951aadcd66930');
+meta::library('terminal', <<'__0ec2ca45ce7b9b56c05c9b284a7ee78a');
 # Functions for nice-looking terminal output.
 package terminal;
 
-my $process = $0;
-
-$process =~ s/^.*\///;
+my $process = ::name();
 
 sub message {print STDERR "[$_[0]] $_[1]\n"}
 sub color {
@@ -816,7 +818,7 @@ sub color {
 
 my %preloaded = (info => 32, progress => 32, state => 34, debug => 34, warning => 33, error => 31);
 color $_, $preloaded{$_} for keys %preloaded;
-__31f88c81d989b9f3463951aadcd66930
+__0ec2ca45ce7b9b56c05c9b284a7ee78a
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::message_color('watch', 'blue');
@@ -824,7 +826,7 @@ meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa306
 meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
-meta::parent('/home/spencertipping/bin/object', <<'__8a434dcd2367919d9059dc0fa66f6c80');
+meta::parent('/home/spencertipping/bin/object', <<'__59e6a6d404efe9edcd702da0f4895df2');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -848,6 +850,7 @@ function::lock
 function::ls
 function::ls-a
 function::mv
+function::name
 function::parents
 function::perl
 function::reload
@@ -911,7 +914,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__8a434dcd2367919d9059dc0fa66f6c80
+__59e6a6d404efe9edcd702da0f4895df2
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
