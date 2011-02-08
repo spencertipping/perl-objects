@@ -136,7 +136,15 @@ sub id {
   "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
 };
 __34a5da8558897a4388fc22ed4b0c3c6b
-meta::meta('template::beamer', 'tex::template tex::id(qw/frame pause item block alertblock exampleblock/);');
+meta::meta('template::beamer', <<'__fc293f4856a8335806dee61c9692b0b2');
+tex::template tex::id(qw/frame pause item block alertblock exampleblock/);
+
+my $fframe_template = tex::template_for {
+  my ($name, $line, $block) = @_;
+  "\\begin{frame}[fragile]\n$block\n\\end{frame}\n";
+};
+&$fframe_template(tex::id('fframe'));
+__fc293f4856a8335806dee61c9692b0b2
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource perl/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
 meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize description item/);');
