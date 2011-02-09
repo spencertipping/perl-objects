@@ -460,7 +460,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__44f4c89b3f25a47a44ef85f16c960743');
+meta::function('shell', <<'__d7af156228ebbf921ab2ae7f5432c4b8');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -470,9 +470,10 @@ my $name = name();
 $attribs->{completion_entry_function} = $attribs->{list_completion_function};
 
 my $prompt = sub {
-  my $state = state();
-  my $other = $state ne $transient{initial} ? 33 : 30;
-  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m "};
+  my $state  = state();
+  my $other  = $state ne $transient{initial} ? 33 : 30;
+  my $locked = is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
+  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$locked "};
 
 while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions], defined($_ = $term->readline(&$prompt()))) {
   my $command_line = $_;
@@ -483,7 +484,7 @@ while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_f
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
   print dangerous('', sub {&$function_name(@args)}), "\n"}
-__44f4c89b3f25a47a44ef85f16c960743
+__d7af156228ebbf921ab2ae7f5432c4b8
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
@@ -716,6 +717,7 @@ my $result = file::read($filename);
 unlink $filename;
 $result;
 __32c8b1e3c90bd40d504703e22b26e1f5
+meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
 meta::internal_function('namespace', <<'__93213d60cafb9627e0736b48cd1f0760');
 my ($name) = @_;
 $name =~ s/::.*$//;
@@ -826,7 +828,7 @@ meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa306
 meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
-meta::parent('/home/spencertipping/bin/object', <<'__59e6a6d404efe9edcd702da0f4895df2');
+meta::parent('/home/spencertipping/bin/object', <<'__24f211bef7e65af28726dfe6075c671f');
 bootstrap::initialization
 bootstrap::perldoc
 function::cat
@@ -885,6 +887,7 @@ internal_function::fnv_hash
 internal_function::hypothetically
 internal_function::internal::main
 internal_function::invoke_editor_on
+internal_function::is_locked
 internal_function::namespace
 internal_function::retrieve
 internal_function::retrieve_with_hooks
@@ -914,7 +917,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__59e6a6d404efe9edcd702da0f4895df2
+__24f211bef7e65af28726dfe6075c671f
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
