@@ -527,6 +527,12 @@ my ($start, $end) = split /,/o, $comments_for_extension{lc($other_extension || $
 join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs retrieve($filename)),
          "\n$start $generated_string $end\n";
 __060cfa349e629eb90a82b87a8ba00c1d
+meta::function('sdocp', <<'__8b7ed5bbd537234ae53c0691b6d02c97');
+# Renders an attribute as SDocP. This logic was taken directly from the sdoc script.
+my $attribute = retrieve($_[0]);
+sub escape {my @results = map {s/\\/\\\\/go; s/\n/\\n/go; s/'/\\'/go; $_} @_; wantarray ? @results : $results[0]}
+"sdocp('" . escape($_[0]) . "', '" . escape($attribute) . "');";
+__8b7ed5bbd537234ae53c0691b6d02c97
 meta::function('serialize', <<'__5148e8ca46eeb3e297f76d098e496bcf');
 my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
@@ -885,13 +891,15 @@ color $_, $preloaded{$_} for keys %preloaded;
 __0ec2ca45ce7b9b56c05c9b284a7ee78a
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('./sdoc', <<'__8df50cce1d08f0b862b86ca0ff865c32');
+meta::parent('./sdoc', <<'__2d47795f5a2f946e1655dcc68b32aadd');
 function::lss
 function::sdoc
+function::sdocp
 meta::type::sdoc
 parent::/home/spencertipping/bin/object
 retriever::sdoc
-__8df50cce1d08f0b862b86ca0ff865c32
+retriever::sdocp
+__2d47795f5a2f946e1655dcc68b32aadd
 meta::parent('/home/spencertipping/bin/object', <<'__24f211bef7e65af28726dfe6075c671f');
 bootstrap::initialization
 bootstrap::perldoc
@@ -1098,6 +1106,10 @@ __1258d5867978f2068c8efd130c2066f7
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('sdoc', 'exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]") : undef;');
+meta::retriever('sdocp', <<'__2fe74510364ec3ea28fefc4f66b864b3');
+my $attribute = attribute($_[0]);
+exists $data{"sdoc::$_[0]"} ? sdocp("sdoc::$_[0]") : undef;
+__2fe74510364ec3ea28fefc4f66b864b3
 meta::template('comment', '\'\';     # A mechanism for line or block comments.');
 meta::template('eval', <<'__eb0b1058649eb2d833f348540516b358');
 my $result = eval $_[0];
