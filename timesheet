@@ -76,6 +76,10 @@ sub meta::functor::editable {
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
       return retrieve($attribute)}}}
 __e3d2ede6edf65ffe2123584b2bd5dab7
+meta::meta('type::alias', <<'__11f7dad00d90cc0277bb72b1364ec535');
+meta::configure 'alias', inherit => 0;
+meta::define_form 'alias', \&meta::bootstrap::implementation;
+__11f7dad00d90cc0277bb72b1364ec535
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -264,6 +268,10 @@ December 10, 2010       09:00   17:00
 December 11, 2010       23:00   24:30   # 11PM to 12:30AM
 __129245221c65e95871fd1f421f2cc77e
 meta::data('watching', '1');
+meta::function('alias', <<'__82708b00ecb7499701a9f4c6c5fe9839');
+my ($name, @stuff) = @_;
+@stuff ? associate("alias::$name", join ' ', @stuff) : retrieve("alias::$name") || "Undefined alias $name";
+__82708b00ecb7499701a9f4c6c5fe9839
 meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
 # Stashes a quick one-line continuation. (Used to remind me what I was doing.)
@@ -420,7 +428,6 @@ my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-',
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
 __acdc3ca5777ab9c7c430d493a7555998
-meta::function('ls-a', 'ls(\'-ad\', @_);');
 meta::function('mv', <<'__52e95180e3c7019116bd798e0da0fdda');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -473,7 +480,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__d7af156228ebbf921ab2ae7f5432c4b8');
+meta::function('shell', <<'__faaf329381e39ffc0fa3dd038785e1a5');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -488,16 +495,20 @@ my $prompt = sub {
   my $locked = is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
   "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$locked "};
 
+my $split = sub {grep length, split /\s+|("[^"\\]*(?:\\.)?")/o, join ' ', @_};
+my $resolve_aliases = sub {
+  my ($command, @args) = @_;
+  exists $data{"alias::$command"} ? (&$split(retrieve("alias::$command")), @args) : @_};
+
 while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions], defined($_ = $term->readline(&$prompt()))) {
-  my $command_line = $_;
-  my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
-  my $function_name = shift(@args) or next;
+  my @parsed = &$resolve_aliases(&$split($_));
+  my $function_name = shift(@parsed) or next;
 
   terminal::warning("$function_name invalid (use 'ls' to see available commands)"), next unless $externalized_functions{$function_name};
 
-  s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
-  print dangerous('', sub {&$function_name(@args)}), "\n"}
-__d7af156228ebbf921ab2ae7f5432c4b8
+  s/^"(.*)"$/\1/o, s/\\\\"/"/go for @parsed;
+  print dangerous('', sub {&$function_name(@parsed)}), "\n"}
+__faaf329381e39ffc0fa3dd038785e1a5
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
@@ -804,9 +815,10 @@ color $_, $preloaded{$_} for keys %preloaded;
 __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('object', <<'__24f211bef7e65af28726dfe6075c671f');
+meta::parent('object', <<'__198daf3f2d9bdd5cc38c7dd8533310f4');
 bootstrap::initialization
 bootstrap::perldoc
+function::alias
 function::cat
 function::cc
 function::child
@@ -826,7 +838,6 @@ function::initial-state
 function::load-state
 function::lock
 function::ls
-function::ls-a
 function::mv
 function::name
 function::parents
@@ -880,6 +891,7 @@ message_color::states
 meta::configure
 meta::externalize
 meta::functor::editable
+meta::type::alias
 meta::type::bootstrap
 meta::type::data
 meta::type::function
@@ -893,7 +905,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__24f211bef7e65af28726dfe6075c671f
+__198daf3f2d9bdd5cc38c7dd8533310f4
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();

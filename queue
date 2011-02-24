@@ -76,6 +76,10 @@ sub meta::functor::editable {
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
       return retrieve($attribute)}}}
 __e3d2ede6edf65ffe2123584b2bd5dab7
+meta::meta('type::alias', <<'__11f7dad00d90cc0277bb72b1364ec535');
+meta::configure 'alias', inherit => 0;
+meta::define_form 'alias', \&meta::bootstrap::implementation;
+__11f7dad00d90cc0277bb72b1364ec535
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -248,6 +252,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 meta::data('watching', '1');
+meta::function('alias', <<'__82708b00ecb7499701a9f4c6c5fe9839');
+my ($name, @stuff) = @_;
+@stuff ? associate("alias::$name", join ' ', @stuff) : retrieve("alias::$name") || "Undefined alias $name";
+__82708b00ecb7499701a9f4c6c5fe9839
 meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
 # Stashes a quick one-line continuation. (Used to remind me what I was doing.)
@@ -435,7 +443,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__d7af156228ebbf921ab2ae7f5432c4b8');
+meta::function('shell', <<'__faaf329381e39ffc0fa3dd038785e1a5');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -450,16 +458,20 @@ my $prompt = sub {
   my $locked = is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
   "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$locked "};
 
+my $split = sub {grep length, split /\s+|("[^"\\]*(?:\\.)?")/o, join ' ', @_};
+my $resolve_aliases = sub {
+  my ($command, @args) = @_;
+  exists $data{"alias::$command"} ? (&$split(retrieve("alias::$command")), @args) : @_};
+
 while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions], defined($_ = $term->readline(&$prompt()))) {
-  my $command_line = $_;
-  my @args = grep length, split /\s+|("[^"\\]*(?:\\.)?")/o;
-  my $function_name = shift(@args) or next;
+  my @parsed = &$resolve_aliases(&$split($_));
+  my $function_name = shift(@parsed) or next;
 
   terminal::warning("$function_name invalid (use 'ls' to see available commands)"), next unless $externalized_functions{$function_name};
 
-  s/^"(.*)"$/\1/o, s/\\\\"/"/go for @args;
-  print dangerous('', sub {&$function_name(@args)}), "\n"}
-__d7af156228ebbf921ab2ae7f5432c4b8
+  s/^"(.*)"$/\1/o, s/\\\\"/"/go for @parsed;
+  print dangerous('', sub {&$function_name(@parsed)}), "\n"}
+__faaf329381e39ffc0fa3dd038785e1a5
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
 my ($name) = @_;
@@ -810,9 +822,10 @@ function::note
 meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
-meta::parent('object', <<'__24f211bef7e65af28726dfe6075c671f');
+meta::parent('object', <<'__198daf3f2d9bdd5cc38c7dd8533310f4');
 bootstrap::initialization
 bootstrap::perldoc
+function::alias
 function::cat
 function::cc
 function::child
@@ -832,7 +845,6 @@ function::initial-state
 function::load-state
 function::lock
 function::ls
-function::ls-a
 function::mv
 function::name
 function::parents
@@ -886,6 +898,7 @@ message_color::states
 meta::configure
 meta::externalize
 meta::functor::editable
+meta::type::alias
 meta::type::bootstrap
 meta::type::data
 meta::type::function
@@ -899,7 +912,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__24f211bef7e65af28726dfe6075c671f
+__198daf3f2d9bdd5cc38c7dd8533310f4
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
