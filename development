@@ -1013,9 +1013,10 @@ function::note
 meta::type::note
 parent::object
 __320d51928ec8e2e370d67d30abe059b5
-meta::parent('object', <<'__24f211bef7e65af28726dfe6075c671f');
+meta::parent('object', <<'__198daf3f2d9bdd5cc38c7dd8533310f4');
 bootstrap::initialization
 bootstrap::perldoc
+function::alias
 function::cat
 function::cc
 function::child
@@ -1035,7 +1036,6 @@ function::initial-state
 function::load-state
 function::lock
 function::ls
-function::ls-a
 function::mv
 function::name
 function::parents
@@ -1089,6 +1089,7 @@ message_color::states
 meta::configure
 meta::externalize
 meta::functor::editable
+meta::type::alias
 meta::type::bootstrap
 meta::type::data
 meta::type::function
@@ -1102,7 +1103,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__24f211bef7e65af28726dfe6075c671f
+__198daf3f2d9bdd5cc38c7dd8533310f4
 meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
 function::preprocess
 meta::type::template
