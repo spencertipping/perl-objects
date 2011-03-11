@@ -396,6 +396,7 @@ meta::function('note', <<'__bcbfeac6dd2112f47296265444570a6e');
 # Creates a note with a given name, useful for jotting things down.
 create("note::$_[0]");
 __bcbfeac6dd2112f47296265444570a6e
+meta::function('notes', 'ls(\'-a\', \'^note::\');');
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__986a274c013b77fe08d29726ce3799fe');
 my $result = eval(join ' ', @_);
