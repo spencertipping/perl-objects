@@ -402,6 +402,7 @@ meta::function('note', <<'__bcbfeac6dd2112f47296265444570a6e');
 # Creates a note with a given name, useful for jotting things down.
 create("note::$_[0]");
 __bcbfeac6dd2112f47296265444570a6e
+meta::function('notes', 'ls(\'-a\', \'^note::\');');
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__986a274c013b77fe08d29726ce3799fe');
 my $result = eval(join ' ', @_);
@@ -817,11 +818,12 @@ meta::note('queue', <<'__5fd27e7684a58beb914b27cd8518abbd');
 Queue.
 This stores todo items in whatever format you care to use.
 __5fd27e7684a58beb914b27cd8518abbd
-meta::parent('/home/spencertipping/bin/notes', <<'__320d51928ec8e2e370d67d30abe059b5');
+meta::parent('/home/spencertipping/bin/notes', <<'__885245820bcb60424dfcbd480e5b966e');
 function::note
+function::notes
 meta::type::note
 parent::object
-__320d51928ec8e2e370d67d30abe059b5
+__885245820bcb60424dfcbd480e5b966e
 meta::parent('object', <<'__198daf3f2d9bdd5cc38c7dd8533310f4');
 bootstrap::initialization
 bootstrap::perldoc
