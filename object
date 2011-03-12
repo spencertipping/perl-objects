@@ -341,6 +341,11 @@ my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
 __ac86cbe9c9fb12fc8cef2cc88e80c01e
 meta::function('initial-state', '$transient{initial};');
+meta::function('is', <<'__5d4fddb72b0715694b83aa0c925a8d04');
+my ($attribute, @criteria) = @_;
+my ($options, @stuff) = separate_options(@criteria);
+grep $_ eq $attribute, select_keys(%$options);
+__5d4fddb72b0715694b83aa0c925a8d04
 meta::function('load-state', <<'__0bddb2edf7d13e60bf47e7bce8c8c011');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
