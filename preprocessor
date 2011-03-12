@@ -921,6 +921,11 @@ retriever::id
 __198daf3f2d9bdd5cc38c7dd8533310f4
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
+meta::retriever('pp', <<'__f4a8c288d69963d6ebc5ce0bf7794777');
+return undef unless namespace($_[0]) eq 'pp';
+my $attr = retrieve(attribute($_[0]));
+defined $attr ? preprocess($attr) : undef;
+__f4a8c288d69963d6ebc5ce0bf7794777
 meta::template('comment', '\'\';     # A mechanism for line or block comments.');
 meta::template('eval', <<'__eb0b1058649eb2d833f348540516b358');
 my $result = eval $_[0];

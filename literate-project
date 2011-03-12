@@ -1281,15 +1281,16 @@ meta::type::state
 retriever::file
 retriever::id
 __198daf3f2d9bdd5cc38c7dd8533310f4
-meta::parent('preprocessor', <<'__9c447d98a6cfad0ea5444db7eb4b75de');
+meta::parent('preprocessor', <<'__096673520f3131b7654ae23941e9012f');
 function::preprocess
 meta::type::template
 parent::object
+retriever::pp
 template::comment
 template::eval
 template::failing_conditional
 template::include
-__9c447d98a6cfad0ea5444db7eb4b75de
+__096673520f3131b7654ae23941e9012f
 meta::parent('vim-highlighters', <<'__1258d5867978f2068c8efd130c2066f7');
 function::vim
 meta::type::vim_highlighter
@@ -1330,6 +1331,11 @@ meta::resource('header-refs', '\\newcommand{\\Ref}[2]{\\hyperref[#2]{#1 \\ref*{#
 meta::resource('header-resource', '\\lstnewenvironment{resourcecode}{}{}');
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
+meta::retriever('pp', <<'__f4a8c288d69963d6ebc5ce0bf7794777');
+return undef unless namespace($_[0]) eq 'pp';
+my $attr = retrieve(attribute($_[0]));
+defined $attr ? preprocess($attr) : undef;
+__f4a8c288d69963d6ebc5ce0bf7794777
 meta::retriever('sdoc', 'exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]") : undef;');
 meta::retriever('sdocp', <<'__fef74cd94fa8761618662802f0bfc171');
 my $attribute = attribute($_[0]);
