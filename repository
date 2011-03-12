@@ -188,7 +188,6 @@ meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
-meta::meta('type::watch', 'meta::functor::editable \'watch\', prefix => \'watch::\', inherit => 1, extension => \'.pl\', default => \'cat\';');
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
@@ -374,10 +373,6 @@ meta::function('import', <<'__ac86cbe9c9fb12fc8cef2cc88e80c01e');
 my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
 __ac86cbe9c9fb12fc8cef2cc88e80c01e
-meta::function('import-bundle', <<'__4c7139ed5c9f65f38a33cf8f8a6cae27');
-eval join '', <STDIN>;
-die $@ if $@;
-__4c7139ed5c9f65f38a33cf8f8a6cae27
 meta::function('initial-state', '$transient{initial};');
 meta::function('load-state', <<'__0bddb2edf7d13e60bf47e7bce8c8c011');
 my ($state_name) = @_;
@@ -418,7 +413,6 @@ my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-',
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
 __acdc3ca5777ab9c7c430d493a7555998
-meta::function('ls-a', 'ls(\'-ad\', @_);');
 meta::function('mv', <<'__52e95180e3c7019116bd798e0da0fdda');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -576,40 +570,6 @@ my ($mode_function)      = @_;
 my (undef, undef, $mode) = stat $0;
 chmod &$mode_function($mode), $0;
 __b13487447c65f2dc790bd6b21dde89dd
-meta::internal_function('complete', <<'__f14ae2337c0653b6bb6fd02bb6493646');
-my @functions  = sort keys %externalized_functions;
-my @attributes = sort keys %data;
-
-sub match {
-  my ($text, @options) = @_;
-  my @matches = sort grep /^$text/, @options;
-
-  if    (@matches == 0) {return undef;}
-  elsif (@matches == 1) {return $matches [0];}
-  elsif (@matches >  1) {return ((longest ($matches [0], $matches [@matches - 1])), @matches);}
-}
-
-sub longest {
-  my ($s1, $s2) = @_; 
-  return substr ($s1, 0, length $1) if ($s1 ^ $s2) =~ /^(\0*)/;
-  return ''; 
-}
-
-# This is another way to implement autocompletion.
-#
-# my $attribs = $term->Attribs;
-# $attribs->{completion_entry_function} = $attribs->{list_completion_function};
-# $attribs->{completion_word} = [sort keys %data, sort keys %externalized_functions];
-
-my ($text, $line) = @_;
-if ($line =~ / /) {
-  # Start matching attribute names.
-  match ($text, @attributes);
-} else {
-  # Start of line, so it's a function.
-  match ($text, @functions);
-}
-__f14ae2337c0653b6bb6fd02bb6493646
 meta::internal_function('dangerous', <<'__167c759b4f9e54a667222dd3d405200d');
 # Wraps a computation that may produce an error.
 my ($message, $computation) = @_;
@@ -840,7 +800,6 @@ color $_, $preloaded{$_} for keys %preloaded;
 __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::message_color('watch', 'blue');
 meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa3067db9f1824163');
 meta::type::configuration
 parent::/home/spencertipping/bin/object
