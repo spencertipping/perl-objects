@@ -386,6 +386,11 @@ my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
 __ac86cbe9c9fb12fc8cef2cc88e80c01e
 meta::function('initial-state', '$transient{initial};');
+meta::function('is', <<'__5d4fddb72b0715694b83aa0c925a8d04');
+my ($attribute, @criteria) = @_;
+my ($options, @stuff) = separate_options(@criteria);
+grep $_ eq $attribute, select_keys(%$options);
+__5d4fddb72b0715694b83aa0c925a8d04
 meta::function('load-state', <<'__0bddb2edf7d13e60bf47e7bce8c8c011');
 my ($state_name) = @_;
 my $state = retrieve("state::$state_name");
@@ -932,7 +937,7 @@ meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa306
 meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
-meta::parent('/home/spencertipping/bin/object', <<'__198daf3f2d9bdd5cc38c7dd8533310f4');
+meta::parent('/home/spencertipping/bin/object', <<'__06a7f6db3f4a0fb3df149238368bb8b7');
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
@@ -952,6 +957,7 @@ function::grep
 function::hash
 function::import
 function::initial-state
+function::is
 function::load-state
 function::lock
 function::ls
@@ -1022,7 +1028,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__198daf3f2d9bdd5cc38c7dd8533310f4
+__06a7f6db3f4a0fb3df149238368bb8b7
 meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
 meta::type::configuration
 parent::/home/spencertipping/bin/object
@@ -1033,7 +1039,7 @@ function::notes
 meta::type::note
 parent::object
 __885245820bcb60424dfcbd480e5b966e
-meta::parent('object', <<'__198daf3f2d9bdd5cc38c7dd8533310f4');
+meta::parent('object', <<'__06a7f6db3f4a0fb3df149238368bb8b7');
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
@@ -1053,6 +1059,7 @@ function::grep
 function::hash
 function::import
 function::initial-state
+function::is
 function::load-state
 function::lock
 function::ls
@@ -1123,7 +1130,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__198daf3f2d9bdd5cc38c7dd8533310f4
+__06a7f6db3f4a0fb3df149238368bb8b7
 meta::parent('preprocessor', <<'__096673520f3131b7654ae23941e9012f');
 function::preprocess
 meta::type::template
