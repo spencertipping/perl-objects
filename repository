@@ -322,16 +322,18 @@ for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
   associate("cached_dependency::$_", LWP::Simple::get($dependencies{$_}))}
 __0dea14d6eee0043b3664098a1613144e
-meta::function('edit', <<'__c74a5d1c0dbd922acaf1397f89190fce');
+meta::function('edit', <<'__d4a523db46b488b20f444e07d28fea33');
 my ($name, %options) = @_;
 my $extension = extension_for($name);
 
-die "Attribute $name does not exist." unless exists $data{$name};
+die "Attribute $name does not exist" unless exists $data{$name};
+die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || exists $options{'-f'};
+
 associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
           execute => $name !~ /^bootstrap::/);
 save();
 '';
-__c74a5d1c0dbd922acaf1397f89190fce
+__d4a523db46b488b20f444e07d28fea33
 meta::function('enable', 'chmod_self(sub {$_[0] | $_[0] >> 2});');
 meta::function('export', <<'__388e0cc60507443cb1c0cc3e2658cfef');
 # Exports data into a text file.
