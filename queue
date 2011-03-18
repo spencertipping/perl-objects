@@ -316,7 +316,7 @@ my $name = pop @_;
 file::write($name, join "\n", retrieve(@_));
 __388e0cc60507443cb1c0cc3e2658cfef
 meta::function('extern', '&{$_[0]}(retrieve(@_[1 .. $#_]));');
-meta::function('grep', <<'__ba0d15b75bfe3555d76b894c93d465b7');
+meta::function('grep', <<'__a32de7e18e12734fff127c8cb904cf53');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
 
@@ -327,22 +327,21 @@ my @attributes           = select_keys(%$options, '--criteria' => join('|', @cri
 my @m_attributes, @m_line_numbers, @m_lines;
 
 for my $k (@attributes) {
+  next unless length $k;
   my @lines = split /\n/, retrieve($k);
   for (0 .. $#lines) {
     next unless $lines[$_] =~ /$pattern/;
-
-    $lines[$_] =~ s/($pattern)/\033[1;31m\1\033[0;0m/g if $$options{'-c'};
-
     push @m_attributes,   $k;
     push @m_line_numbers, $_ + 1;
-    push @m_lines,        $lines[$_]}} 
+    push @m_lines,        $lines[$_] // ''}} 
 
 if ($$options{'-c'}) {
+  s/($pattern)/\033[1;31m\1\033[0;0m/g for @m_lines;
   s/^/\033[1;34m/o for @m_attributes;
   s/^/\033[1;32m/o && s/$/\033[0;0m/o for @m_line_numbers}
 
 table_display([@m_attributes], [@m_line_numbers], [@m_lines]);
-__ba0d15b75bfe3555d76b894c93d465b7
+__a32de7e18e12734fff127c8cb904cf53
 meta::function('hash', 'fast_hash(@_);');
 meta::function('identity', 'retrieve(\'data::permanent-identity\') || associate(\'data::permanent-identity\', fast_hash(rand() . name() . serialize()));');
 meta::function('import', <<'__ac86cbe9c9fb12fc8cef2cc88e80c01e');
