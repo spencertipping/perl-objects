@@ -256,6 +256,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
+meta::data('permanent-identity', '70dae4b46eb4e06798ec6f38d17d4c7b');
 meta::data('watching', '1');
 meta::function('alias', <<'__82708b00ecb7499701a9f4c6c5fe9839');
 my ($name, @stuff) = @_;
@@ -266,19 +267,22 @@ meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
 # Stashes a quick one-line continuation. (Used to remind me what I was doing.)
 @_ ? associate('data::current-continuation', join(' ', @_)) : retrieve('data::current-continuation');
 __5c64e1adc128113e1b409e0fbcbe29a2
-meta::function('child', <<'__9b5175a0e9b94998754cad35582b987a');
+meta::function('child', <<'__3948f6702c460c73411bb96c979f413e');
 my ($child_name) = @_;
 clone($child_name);
 enable();
-qx($child_name update-from $0 -nu);
+qx($child_name update-from $0 -n);
 disable();
-__9b5175a0e9b94998754cad35582b987a
-meta::function('clone', <<'__5a30a4ba6293e250ed22884d609e4781');
+__3948f6702c460c73411bb96c979f413e
+meta::function('clone', <<'__79a353024579f41c5720d4a3b3f612e4');
 for (grep length, @_) {
-  file::write($_, serialize(), noclobber => 1);
-  chmod(0700, $_);
+  hypothetically(sub {
+    rm('data::permanent-identity');
+    file::write($_, serialize(), noclobber => 1);
+    chmod(0700, $_);
+  });
 }
-__5a30a4ba6293e250ed22884d609e4781
+__79a353024579f41c5720d4a3b3f612e4
 meta::function('cp', <<'__e5fee448a74ecbf4ae215e6b43dfc048');
 my $from = shift @_;
 my $value = retrieve($from);
@@ -345,6 +349,7 @@ if ($$options{'-c'}) {
 table_display([@m_attributes], [@m_line_numbers], [@m_lines]);
 __ba0d15b75bfe3555d76b894c93d465b7
 meta::function('hash', 'fast_hash(@_);');
+meta::function('identity', 'retrieve(\'data::permanent-identity\') || associate(\'data::permanent-identity\', fast_hash(rand() . name() . serialize()));');
 meta::function('import', <<'__ac86cbe9c9fb12fc8cef2cc88e80c01e');
 my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
@@ -835,7 +840,7 @@ color $_, $preloaded{$_} for keys %preloaded;
 __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('object', <<'__06a7f6db3f4a0fb3df149238368bb8b7');
+meta::parent('object', <<'__58aa45c6ee879c6ba1748c706ff17745');
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
@@ -853,6 +858,7 @@ function::export
 function::extern
 function::grep
 function::hash
+function::identity
 function::import
 function::initial-state
 function::is
@@ -926,7 +932,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__06a7f6db3f4a0fb3df149238368bb8b7
+__58aa45c6ee879c6ba1748c706ff17745
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('pp', <<'__f4a8c288d69963d6ebc5ce0bf7794777');
