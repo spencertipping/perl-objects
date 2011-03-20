@@ -115,6 +115,13 @@ meta::define_form 'function', sub {
   meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
 };
 __d93b3cc15693707dac518e3d6b1f5648
+meta::meta('type::hook', <<'__f55a3f728ddfb90204dff3fe5d86845c');
+meta::configure 'hook', extension => '.pl', inherit => 0;
+meta::define_form 'hook', sub {
+  my ($name, $value) = @_;
+  *{"hook::$name"} = meta::eval_in("sub {\n$value\n}", "hook::$name");
+};
+__f55a3f728ddfb90204dff3fe5d86845c
 meta::meta('type::inc', <<'__c95915391b969734305f2f492d5ca8e3');
 meta::configure 'inc', inherit => 1, extension => '.pl';
 meta::define_form 'inc', sub {
@@ -274,48 +281,49 @@ THE SOFTWARE.
 __3c6177256de0fddb721f534c3ad8c0ee
 meta::data('permanent-identity', '05bc3036c343fdb8aec5b0be12a9b19e');
 meta::data('watching', '1');
-meta::function('alias', <<'__82708b00ecb7499701a9f4c6c5fe9839');
+meta::function('alias', <<'__ea18a693d64c2a14659f0a3edd20a3fa');
 my ($name, @stuff) = @_;
-@stuff ? associate("alias::$name", join ' ', @stuff) : retrieve("alias::$name") || "Undefined alias $name";
-__82708b00ecb7499701a9f4c6c5fe9839
+@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join ' ', @stuff)}) : retrieve("alias::$name") || "Undefined alias $name";
+__ea18a693d64c2a14659f0a3edd20a3fa
 meta::function('cat', 'join "\\n", retrieve(@_);');
-meta::function('cc', <<'__5c64e1adc128113e1b409e0fbcbe29a2');
+meta::function('cc', <<'__c4d52b1d8f52a480f07b81b93c3aac7b');
 # Stashes a quick one-line continuation. (Used to remind me what I was doing.)
-@_ ? associate('data::current-continuation', join(' ', @_)) : retrieve('data::current-continuation');
-__5c64e1adc128113e1b409e0fbcbe29a2
-meta::function('child', <<'__3948f6702c460c73411bb96c979f413e');
-my ($child_name) = @_;
-clone($child_name);
-enable();
-qx($child_name update-from $0 -n);
-disable();
-__3948f6702c460c73411bb96c979f413e
-meta::function('clone', <<'__79a353024579f41c5720d4a3b3f612e4');
+@_ ? associate('data::current-continuation', hook('set-cc', join(' ', @_))) : retrieve('data::current-continuation');
+__c4d52b1d8f52a480f07b81b93c3aac7b
+meta::function('child', <<'__f69646398c3123d3d939a7f2b3156606');
+around_hook('child', @_, sub {
+  my ($child_name) = @_;
+  clone($child_name);
+  enable();
+  qx($child_name update-from $0 -n);
+  disable()});
+__f69646398c3123d3d939a7f2b3156606
+meta::function('clone', <<'__54e00ff2103e54423d4c9febb97ce063');
 for (grep length, @_) {
-  hypothetically(sub {
-    rm('data::permanent-identity');
-    file::write($_, serialize(), noclobber => 1);
-    chmod(0700, $_);
-  });
-}
-__79a353024579f41c5720d4a3b3f612e4
+  around_hook('clone', $_, sub {
+    hypothetically(sub {
+      rm('data::permanent-identity');
+      file::write($_, serialize(), noclobber => 1);
+      chmod(0700, $_)})})}
+__54e00ff2103e54423d4c9febb97ce063
 meta::function('cp', <<'__e5fee448a74ecbf4ae215e6b43dfc048');
 my $from = shift @_;
 my $value = retrieve($from);
 associate($_, $value) for @_;
 __e5fee448a74ecbf4ae215e6b43dfc048
-meta::function('create', <<'__7ca9912feb8e43dc446bab9a0c79821a');
+meta::function('create', <<'__090c342a2dc304b39c643d53350474a0');
 my ($name, $value) = @_;
-return edit($name) if exists $data{$name};
-associate($name, defined $value ? $value : '');
-edit($name) unless defined $value;
-__7ca9912feb8e43dc446bab9a0c79821a
+around_hook('create', $name, $value, sub {
+  return edit($name) if exists $data{$name};
+  associate($name, defined $value ? $value : '');
+  edit($name) unless defined $value});
+__090c342a2dc304b39c643d53350474a0
 meta::function('current-state', <<'__d83ae43551c0f58d1d0ce576402a315a');
 my @valid_keys   = grep ! /^state::/, sort keys %data;
 my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys));
 join "\n", map serialize_single($_), @ordered_keys;
 __d83ae43551c0f58d1d0ce576402a315a
-meta::function('disable', 'chmod_self(sub {$_[0] & 0666});');
+meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('dupdate', <<'__0dea14d6eee0043b3664098a1613144e');
 # Update the repository based on the dependencies it lists.
 use LWP::Simple ();
@@ -326,19 +334,20 @@ for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
   associate("cached_dependency::$_", LWP::Simple::get($dependencies{$_}))}
 __0dea14d6eee0043b3664098a1613144e
-meta::function('edit', <<'__d4a523db46b488b20f444e07d28fea33');
+meta::function('edit', <<'__6da7b44df34219cf87876b642d6fe500');
 my ($name, %options) = @_;
 my $extension = extension_for($name);
 
 die "Attribute $name does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || exists $options{'-f'};
 
-associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
-          execute => $name !~ /^bootstrap::/);
+around_hook('edit', @_, sub {
+  associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
+            execute => $name !~ /^bootstrap::/)});
 save();
 '';
-__d4a523db46b488b20f444e07d28fea33
-meta::function('enable', 'chmod_self(sub {$_[0] | $_[0] >> 2});');
+__6da7b44df34219cf87876b642d6fe500
+meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
 meta::function('export', <<'__388e0cc60507443cb1c0cc3e2658cfef');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
@@ -374,6 +383,13 @@ if ($$options{'-c'}) {
 table_display([@m_attributes], [@m_line_numbers], [@m_lines]);
 __a32de7e18e12734fff127c8cb904cf53
 meta::function('hash', 'fast_hash(@_);');
+meta::function('hook', <<'__d74d8e2b611342af6a0897e0bd62e6e6');
+my ($hook, @args) = @_;
+$transient{active_hooks}{$hook} = 1;
+dangerous('', sub {&$_(@args)}) for grep /^hook::${hook}::/, sort keys %data;
+@args;
+__d74d8e2b611342af6a0897e0bd62e6e6
+meta::function('hooks', 'join "\\n", sort keys %{$transient{active_hooks}};');
 meta::function('identity', 'retrieve(\'data::permanent-identity\') || associate(\'data::permanent-identity\', fast_hash(rand() . name() . serialize()));');
 meta::function('import', <<'__ac86cbe9c9fb12fc8cef2cc88e80c01e');
 my $name = pop @_;
@@ -385,23 +401,24 @@ my ($attribute, @criteria) = @_;
 my ($options, @stuff) = separate_options(@criteria);
 grep $_ eq $attribute, select_keys(%$options);
 __5d4fddb72b0715694b83aa0c925a8d04
-meta::function('load-state', <<'__0bddb2edf7d13e60bf47e7bce8c8c011');
-my ($state_name) = @_;
-my $state = retrieve("state::$state_name");
+meta::function('load-state', <<'__ea18db867bd62a294e067f60e6975dcf');
+around_hook('load-state', @_, sub {
+  my ($state_name) = @_;
+  my $state = retrieve("state::$state_name");
 
-terminal::state('saving current state into _...');
-&{'save-state'}('_');
+  terminal::state('saving current state into _...');
+  &{'save-state'}('_');
 
-delete $data{$_} for grep ! /^state::/, keys %data;
-%externalized_functions = ();
+  delete $data{$_} for grep ! /^state::/, keys %data;
+  %externalized_functions = ();
 
-terminal::state("restoring state $state_name...");
-meta::eval_in($state, "state::$state_name");
-terminal::error($@) if $@;
-reload();
-verify();
-__0bddb2edf7d13e60bf47e7bce8c8c011
-meta::function('lock', 'chmod_self(sub {$_[0] & 0555});');
+  terminal::state("restoring state $state_name...");
+  meta::eval_in($state, "state::$state_name");
+  terminal::error(hook('load-state-failed', $@)) if $@;
+  reload();
+  verify()});
+__ea18db867bd62a294e067f60e6975dcf
+meta::function('lock', 'hook(\'lock\', chmod_self(sub {$_[0] & 0555}));');
 meta::function('ls', <<'__acdc3ca5777ab9c7c430d493a7555998');
 my ($options, @criteria) = separate_options(@_);
 my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
@@ -440,17 +457,19 @@ meta::function('perl', <<'__986a274c013b77fe08d29726ce3799fe');
 my $result = eval(join ' ', @_);
 $@ ? terminal::error($@) : $result;
 __986a274c013b77fe08d29726ce3799fe
-meta::function('reload', 'execute($_) for grep ! /^bootstrap::/, keys %data;');
-meta::function('rm', <<'__26d4a78ddb47259b3d8dcabe390426bd');
-exists $data{$_} or terminal::warning("$_ does not exist") for @_;
-delete @data{@_};
-__26d4a78ddb47259b3d8dcabe390426bd
-meta::function('save', 'dangerous(\'\', sub {file::write($0, serialize()); $transient{initial} = state()}) if verify();');
-meta::function('save-state', <<'__5c5b586331e25951140ced6442d9fe2b');
+meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
+meta::function('rm', <<'__7cecfb1691a7bf86741f00058bcc54ca');
+around_hook('rm', @_, sub {
+  exists $data{$_} or terminal::warning("$_ does not exist") for @_;
+  delete @data{@_}});
+__7cecfb1691a7bf86741f00058bcc54ca
+meta::function('save', 'around_hook(\'save\', sub {dangerous(\'\', sub {file::write($0, serialize()); $transient{initial} = state()}) if verify()});');
+meta::function('save-state', <<'__863e4d9fa75ca198ef7a755248d1002a');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
-associate("state::$state_name", &{'current-state'}(), execute => 1);
-__5c5b586331e25951140ced6442d9fe2b
+around_hook('save-state', $state_name, sub {
+  associate("state::$state_name", &{'current-state'}(), execute => 1)});
+__863e4d9fa75ca198ef7a755248d1002a
 meta::function('serialize', <<'__5148e8ca46eeb3e297f76d098e496bcf');
 my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
@@ -476,7 +495,7 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', <<'__faaf329381e39ffc0fa3dd038785e1a5');
+meta::function('shell', <<'__6a61e32b2dbfe3565ed6ef41d1d77c39');
 use Term::ReadLine;
 
 my $term = new Term::ReadLine "$0 shell";
@@ -503,15 +522,16 @@ while ($attribs->{completion_word} = [sort keys %data, sort keys %externalized_f
   terminal::warning("$function_name invalid (use 'ls' to see available commands)"), next unless $externalized_functions{$function_name};
 
   s/^"(.*)"$/\1/o, s/\\\\"/"/go for @parsed;
-  print dangerous('', sub {&$function_name(@parsed)}), "\n"}
-__faaf329381e39ffc0fa3dd038785e1a5
+  around_hook('shell-command', $function_name, @parsed, sub {
+    print dangerous('', sub {&$function_name(@parsed)}), "\n"})}
+__6a61e32b2dbfe3565ed6ef41d1d77c39
 meta::function('size', 'length(serialize());');
-meta::function('snapshot', <<'__c5d8a624c3eecc183f39b33c9b72f0db');
+meta::function('snapshot', <<'__d3d84a364524eeb8ee90623f545187e8');
 my ($name) = @_;
 file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
-$finalname;
-__c5d8a624c3eecc183f39b33c9b72f0db
+hook('snapshot', $finalname);
+__d3d84a364524eeb8ee90623f545187e8
 meta::function('state', <<'__119111f84c3e32a5536838ac84bc6f10');
 my @keys = sort keys %data;
 my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
@@ -519,51 +539,75 @@ $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
 __119111f84c3e32a5536838ac84bc6f10
 meta::function('touch', 'associate($_, \'\') for @_;');
-meta::function('unlock', 'chmod_self(sub {$_[0] | 0200});');
+meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__4bb87dcea3d13203b15070a4a44389f8');
+meta::function('update-from', <<'__4872d8da1fee53aace2c4f422841c0ba');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transient{inherit}{$type}.
 
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-my ($options, @targets) = separate_options(@_);
+around_hook('before-update-from-invocation', separate_options(@_), sub {
+  my ($options, @targets) = @_;
 
-@targets or return;
-my $save_state = ! ($$options{'-n'} || $$options{'--no-save'});
-my $no_parents =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
-my $force      =    $$options{'-f'} || $$options{'--force'};
+  @targets or return;
+  my $save_state = ! ($$options{'-n'} || $$options{'--no-save'});
+  my $no_parents =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
+  my $force      =    $$options{'-f'} || $$options{'--force'};
 
-&{'save-state'}('before-update') if $save_state;
+  &{'save-state'}('before-update') if $save_state;
 
-for my $target (@targets) {
-  dangerous("updating from $target", sub {
-    my $attributes = join '', qx($target ls -aiu);
-    die "skipping unreachable $target" unless $attributes;
+  for my $target (@targets) {
+    around_hook('update-from', $target, sub {
+    dangerous("updating from $target", sub {
+      my $attributes = join '', qx($target ls -aiu);
+      die "skipping unreachable $target" unless $attributes;
 
-    rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
-    associate("parent::$target", $attributes) unless $no_parents;
+      rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
+      associate("parent::$target", $attributes) unless $no_parents;
 
-    dangerous('', sub {eval qx($target serialize -ipmu)});
-    dangerous('', sub {eval qx($target serialize -ipMu)});
-    reload()})}
+      dangerous('', sub {eval qx($target serialize -ipmu)});
+      dangerous('', sub {eval qx($target serialize -ipMu)});
+      reload()})})}
 
-if (verify()) {terminal::info("Successfully updated from $_[0]. Run 'load-state before-update' to undo this change.") if $save_state}
-elsif ($force) {terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                  'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
-else {terminal::error('Verification failed after the upgrade was complete.');
-      terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-      return &{'load-state'}('before-update') if $save_state}
-__4bb87dcea3d13203b15070a4a44389f8
+  if (verify()) {hook('update-from-succeeded', $options, @targets);
+                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state}
+  elsif ($force) {hook('update-from-failed', $options, @targets);
+                  terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
+                                    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
+  else {hook('update-from-failed', $options, @targets);
+        terminal::error('Verification failed after the upgrade was complete.');
+        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
+        return &{'load-state'}('before-update') if $save_state}});
+__4872d8da1fee53aace2c4f422841c0ba
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
-meta::function('verify', <<'__123f83b5cb5c2400ae0b5c8af1c7bf20');
+meta::function('verify', <<'__d31b85fffd464ddf516d2afeb63dcbde');
 file::write(my $other = $transient{temporary_filename} = temporary_name(), my $serialized_data = serialize());
 chomp(my $observed = join '', qx|perl '$other' state|);
 
 unlink $other if my $result = $observed eq (my $state = state());
 terminal::error("Verification failed; expected $state but got $observed from $other") unless $result;
+hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
-__123f83b5cb5c2400ae0b5c8af1c7bf20
+__d31b85fffd464ddf516d2afeb63dcbde
+meta::internal_function('around_hook', <<'__e1cd17b80d4e8165df9c94facd9f239b');
+# around_hook('hookname', @args, sub {
+#   stuff;
+# });
+
+# Invokes 'before-hookname' on @args before the sub runs, invokes the
+# sub on @args, then invokes 'after-hookname' on @args afterwards.
+# The after-hook is not invoked if the sub calls 'die' or otherwise
+# unwinds the stack.
+
+my $hook = shift @_;
+my $f    = pop @_;
+
+hook("before-$hook", @_);
+my $result = &$f(@_);
+hook("after-$hook", @_);
+$result;
+__e1cd17b80d4e8165df9c94facd9f239b
 meta::internal_function('associate', <<'__fc4f785bcf3ffe3225a73a1fdd314703');
 my ($name, $value, %options) = @_;
 die "Namespace does not exist" unless exists $datatypes{namespace($name)};
@@ -670,7 +714,7 @@ my $return_value  = eval {&$side_effect()};
 die $@ if $@;
 $return_value;
 __33ee2e1595d3877bd1d9accaa72305c8
-meta::internal_function('internal::main', <<'__b7379923a1c7d2481bad4247b8a71974');
+meta::internal_function('internal::main', <<'__903bc413b89dc2709a6b0eddb546eed7');
 disable();
 
 $SIG{'INT'} = sub {snapshot(); exit 1};
@@ -681,15 +725,16 @@ chomp(my $default_action = retrieve('data::default-action'));
 my $function_name = shift(@ARGV) || $default_action || 'usage';
 terminal::warning("unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
 
-chomp(my $result = &$function_name(@ARGV));
-print "$result\n" if $result;
+around_hook('main-function', $function_name, @ARGV, sub {
+  chomp(my $result = &$function_name(@ARGV));
+  print "$result\n" if $result});
 
 save() unless state() eq $transient{initial};
 
 END {
   enable();
 }
-__b7379923a1c7d2481bad4247b8a71974
+__903bc413b89dc2709a6b0eddb546eed7
 meta::internal_function('invoke_editor_on', <<'__1448132d5294a4b8390b4a684d8a78f9');
 my ($data, %options) = @_;
 my $editor    = $options{editor} || $ENV{VISUAL} || $ENV{EDITOR} || die 'Either the $VISUAL or $EDITOR environment variable should be set to a valid editor';
@@ -815,7 +860,7 @@ meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa306
 meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
-meta::parent('/home/spencertipping/bin/object', <<'__58aa45c6ee879c6ba1748c706ff17745');
+meta::parent('/home/spencertipping/bin/object', <<'__ebddf828b1c914a7461db84c344b9ebd');
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
@@ -833,6 +878,8 @@ function::export
 function::extern
 function::grep
 function::hash
+function::hook
+function::hooks
 function::identity
 function::import
 function::initial-state
@@ -861,6 +908,7 @@ function::update
 function::update-from
 function::usage
 function::verify
+internal_function::around_hook
 internal_function::associate
 internal_function::attribute
 internal_function::chmod_self
@@ -897,6 +945,7 @@ meta::type::alias
 meta::type::bootstrap
 meta::type::data
 meta::type::function
+meta::type::hook
 meta::type::inc
 meta::type::internal_function
 meta::type::library
@@ -907,7 +956,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__58aa45c6ee879c6ba1748c706ff17745
+__ebddf828b1c914a7461db84c344b9ebd
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
