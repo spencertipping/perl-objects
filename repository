@@ -324,16 +324,16 @@ my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys)
 join "\n", map serialize_single($_), @ordered_keys;
 __d83ae43551c0f58d1d0ce576402a315a
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
-meta::function('dupdate', <<'__0dea14d6eee0043b3664098a1613144e');
+meta::function('dupdate', <<'__1c0273217c5b9f2756bb14a4a00aa7e2');
 # Update the repository based on the dependencies it lists.
 use LWP::Simple ();
-rm($_) for grep /^cached_dependency::/, keys %data;
+rm(grep /^cached_dependency::/, keys %data);
 my %dependencies = dependencies();
 
 for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
   associate("cached_dependency::$_", LWP::Simple::get($dependencies{$_}))}
-__0dea14d6eee0043b3664098a1613144e
+__1c0273217c5b9f2756bb14a4a00aa7e2
 meta::function('edit', <<'__6da7b44df34219cf87876b642d6fe500');
 my ($name, %options) = @_;
 my $extension = extension_for($name);
