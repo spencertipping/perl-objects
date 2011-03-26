@@ -415,7 +415,6 @@ my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-',
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
 __acdc3ca5777ab9c7c430d493a7555998
-meta::function('lss', '# Attribute function::lss');
 meta::function('mv', <<'__52e95180e3c7019116bd798e0da0fdda');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
