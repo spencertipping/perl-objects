@@ -1190,7 +1190,7 @@ meta::type::state
 retriever::file
 retriever::id
 __ebddf828b1c914a7461db84c344b9ebd
-meta::parent('preprocessor', <<'__096673520f3131b7654ae23941e9012f');
+meta::parent('preprocessor', <<'__a29d7395a865c21764fce8ec08e1a668');
 function::preprocess
 meta::type::template
 parent::object
@@ -1199,7 +1199,8 @@ template::comment
 template::eval
 template::failing_conditional
 template::include
-__096673520f3131b7654ae23941e9012f
+template::pinclude
+__a29d7395a865c21764fce8ec08e1a668
 meta::parent('repository', <<'__f88c2b0e5725507b3fdb5719fd65e6d3');
 function::dupdate
 meta::type::cached_dependency
@@ -1239,6 +1240,15 @@ my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
+meta::template('pinclude', <<'__5ba61c3034a4b183881936aec30d2be9');
+# Just like the regular include, but makes sure to insert paragraph boundaries
+# (this is required for SDoc to function properly).
+
+my ($commands) = @_;
+return '' if template::failing_conditional($commands);
+my $text = join "\n\n", map retrieve($_), split /\s+/, $commands;
+"\n\n$text\n\n";
+__5ba61c3034a4b183881936aec30d2be9
 internal::main();
 
 __END__

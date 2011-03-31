@@ -1005,6 +1005,15 @@ my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __e0624844a65ae41e0217dd871fc0dbfb
+meta::template('pinclude', <<'__5ba61c3034a4b183881936aec30d2be9');
+# Just like the regular include, but makes sure to insert paragraph boundaries
+# (this is required for SDoc to function properly).
+
+my ($commands) = @_;
+return '' if template::failing_conditional($commands);
+my $text = join "\n\n", map retrieve($_), split /\s+/, $commands;
+"\n\n$text\n\n";
+__5ba61c3034a4b183881936aec30d2be9
 internal::main();
 
 __END__
