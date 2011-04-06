@@ -782,7 +782,7 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('shell', <<'__30220d5245b2d740ce1b6e933e351643');
+meta::library('shell', <<'__7df727b3be0d8579da3fee5144041f75');
 # Functions for shell parsing and execution.
 package shell;
 use Term::ReadLine;
@@ -802,14 +802,13 @@ sub execute {
 sub run {execute(parse(tokenize(@_)))}
 
 sub prompt {
-  my $stuff  = join ' ', @_;
-  my $name   = ::name();
-  my $state  = ::state();
-  my $other  = $state ne $transient{initial} ? 33 : 30;
-  my $locked = ::is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
+  my %options = @_;
+  my $name    = $options{name}  // ::name();
+  my $state   = $options{state} // ::state();
+  my $other   = $state ne $transient{initial} ? 33 : 30;
+  my $locked  = ::is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
 
-  $stuff = " $stuff" if length $stuff;
-  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$locked\033[1;34m$stuff\033[0;0m "}
+  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$locked\033[1;34m$options{stuff}\033[0;0m "}
 
 sub repl {
   my %options = @_;
@@ -825,7 +824,7 @@ sub repl {
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
 
   &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
-__30220d5245b2d740ce1b6e933e351643
+__7df727b3be0d8579da3fee5144041f75
 meta::library('terminal', <<'__c52308d05ebb4ff61c5fc36e6d9c7a8a');
 # Functions for nice-looking terminal output.
 package terminal;
