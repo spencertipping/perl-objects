@@ -157,16 +157,17 @@ meta::meta('template::sections', <<'__0bf14cbc6a0e77d9b82dd185d8d8a9a0');
 tex::labeled_template(s1 => 'section', s2 => 'subsection', s3 => 'subsubsection', s4 => 'paragraph', s5 => 'subparagraph');
 tex::labeled_template(sc => 'chapter', sp => 'part');
 __0bf14cbc6a0e77d9b82dd185d8d8a9a0
-meta::meta('type::alias', <<'__7c63364bfcdb203ce8e3d59fb4cbba3b');
+meta::meta('type::alias', <<'__28fe15dd61f4902ed5180d8604d15d97');
 meta::configure 'alias', inherit => 0;
 meta::define_form 'alias', sub {
   my ($name, $value) = @_;
-  my @pre_tokenized  = shell::tokenize($value);
   meta::externalize $name, "alias::$name", sub {
-    shell::run(@pre_tokenized, shell::tokenize(@_));
+    # Can't pre-tokenize because shell::tokenize doesn't exist until the library::
+    # namespace has been evaluated (which will be after alias::).
+    shell::run(shell::tokenize($value), shell::tokenize(@_));
   };
 };
-__7c63364bfcdb203ce8e3d59fb4cbba3b
+__28fe15dd61f4902ed5180d8604d15d97
 meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
