@@ -335,13 +335,15 @@ my $name = pop @_;
 file::write($name, join "\n", retrieve(@_));
 __388e0cc60507443cb1c0cc3e2658cfef
 meta::function('extern', '&{$_[0]}(retrieve(@_[1 .. $#_]));');
-meta::function('grep', <<'__a32de7e18e12734fff127c8cb904cf53');
+meta::function('grep', <<'__f2f28b81f4bcf4cf9fbe9e27bc9447b0');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
 
-my $pattern              = shift @_ or die 'Must specify a pattern to search for';
-my ($options, @criteria) = separate_options(@_);
+my ($pattern, @args)     = @_;
+my ($options, @criteria) = separate_options(@args);
 my @attributes           = select_keys(%$options, '--criteria' => join('|', @criteria));
+
+$pattern = qr/$pattern/;
 
 my @m_attributes, @m_line_numbers, @m_lines;
 
@@ -349,7 +351,7 @@ for my $k (@attributes) {
   next unless length $k;
   my @lines = split /\n/, retrieve($k);
   for (0 .. $#lines) {
-    next unless $lines[$_] =~ /$pattern/;
+    next unless $lines[$_] =~ $pattern;
     push @m_attributes,   $k;
     push @m_line_numbers, $_ + 1;
     push @m_lines,        $lines[$_] // ''}} 
@@ -360,7 +362,7 @@ if ($$options{'-c'}) {
   s/^/\033[1;32m/o && s/$/\033[0;0m/o for @m_line_numbers}
 
 table_display([@m_attributes], [@m_line_numbers], [@m_lines]);
-__a32de7e18e12734fff127c8cb904cf53
+__f2f28b81f4bcf4cf9fbe9e27bc9447b0
 meta::function('hash', 'fast_hash(@_);');
 meta::function('hook', <<'__d74d8e2b611342af6a0897e0bd62e6e6');
 my ($hook, @args) = @_;
