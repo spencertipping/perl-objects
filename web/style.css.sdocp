@@ -1,0 +1,1 @@
+sdocp('style.css.sdoc', 'Basic styling.\nFix the default font, etc.\n\nbody {max-width: 900px; margin-left: auto; margin-right: auto; font-family: sans-serif}\n');
