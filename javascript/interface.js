@@ -5,9 +5,10 @@
 // This interface lets users open self-modifying Perl files as web pages. Attributes will be shown in a list, and each one can be expanded to show its value.
 
 caterwaul.deglobalize().clone('std seq continuation montenegro parser')(function ($) {
+  jQuery = fn_[$.apply(this, arguments)] /se[_.prototype = $.prototype],
+
   $(fn_[$('body').empty().append(the_interface),
         where*[original_html = $('body').html(),
-               jQuery        = $,
 
                parse_attributes(s) = l*[unescape(s)           = s.replace(/\\(['\\])/g, '$1'),
 
