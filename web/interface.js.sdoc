@@ -37,7 +37,7 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
                                    attributes(trim_bootstrap(unescape(s))),
 
          partition(name, xs)     = html[div.partition(h1.namespace(name), div.attributes)] /se[_.find('.attributes').append(seq[~xs *+attribute])],
-         attribute(x)            = html[div.attribute(a.name(x.attribute), pre.contents(x.value) /css({display: 'none'}))] /se[
+         attribute(x)            = html[div.attribute(a.name(x.attribute), pre.contents /text(x.value) /css({display: 'none'}))] /se[
                                    _.find('.name').clickable(fn_[_.children('.contents').toggle()])],
 
          separate_namespaces(xs) = l[namespace_object = seq[~xs *[[_.namespace, true]]].object()] in seq[sk[namespace_object] *[[_, seq[~xs %x[x.namespace === _]]]]].object(),
