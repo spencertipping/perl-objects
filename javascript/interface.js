@@ -7,6 +7,7 @@
 caterwaul.deglobalize().clone('std seq continuation montenegro parser')(function ($) {
   $(fn_[$('body').empty().append(the_interface),
         where*[original_html = $('body').html(),
+               jQuery        = $,
 
                parse_attributes(s) = l*[unescape(s)           = s.replace(/\\(['\\])/g, '$1'),
 
