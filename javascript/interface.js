@@ -5,7 +5,8 @@
 // This interface lets users open self-modifying Perl files as web pages. Attributes will be shown in a list, and each one can be expanded to show its value.
 
 $(caterwaul.deglobalize().clone('std seq continuation montenegro')(function ($) {
-  return _ /cps[$('body').empty().append(the_interface),
+  return fn_[$('body').empty().append(the_interface),
+
   where*[original_html = $('body').html(),
          the_interface = 'Hi there!']]})($.noConflict(true)));
 
