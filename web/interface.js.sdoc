@@ -46,6 +46,8 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
          the_interface()         = l*[parsed                  = parse_attributes(original_html),
                                       model                   = l[partitioned = separate_namespaces(parsed)] in seq[sp[partitioned] *~[[_[0], !(_[1] *[[_.attribute, _.value]])]]].object(),
 
+                                      _ = console.log(model),
+
                                       instructions            = html[h1('Usage instructions'),
                                                                      p('This HTML file is also a valid Perl script that can rewrite itself to update its state. (See "',
                                                                        a('writing self-modifying Perl') *href('http://github.com/spencertipping/writing-self-modifying-perl') *target('_blank'),
