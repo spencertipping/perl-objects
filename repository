@@ -199,6 +199,23 @@ meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
+meta::bootstrap('html', <<'__2e1c8bf01da2001ea730a48dadedc314');
+<html>
+  <head>
+  <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
+  <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'></script>
+  <script src='http://spencertipping.com/caterwaul/caterwaul.all.min.js'></script>
+  <script src='http://spencertipping.com/montenegro/montenegro.client.js'></script>
+
+  <link rel='stylesheet' href='web/style.css'/>
+
+  <!-- <script src='http://spencertipping.com/perl-objects/web/interface.js'></script> -->
+  <script src='web/interface.js'></script>
+  </head>
+  <body></body>
+</html>
+
+__2e1c8bf01da2001ea730a48dadedc314
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
@@ -882,7 +899,8 @@ meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa306
 meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
-meta::parent('/home/spencertipping/bin/object', <<'__febaa835f7b66f7fdcb99de9560857bd');
+meta::parent('/home/spencertipping/bin/object', <<'__40cc4bb813030b3d1a49faba89a17775');
+bootstrap::html
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
@@ -979,7 +997,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__febaa835f7b66f7fdcb99de9560857bd
+__40cc4bb813030b3d1a49faba89a17775
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
