@@ -4,30 +4,40 @@ Licensed under the terms of the MIT source code license
 Introduction.
 This interface lets users open self-modifying Perl files as web pages. Attributes will be shown in a list, and each one can be expanded to show its value.
 
-caterwaul.deglobalize().clone('std seq continuation montenegro parser')(function ($) {
+caterwaul.clone('std seq continuation montenegro parser')(function ($) {
   $(fn_[$('body').empty().append(the_interface),
-        where*[original_html = $('body').html(),
 
-               parse_attributes(s) = l*[unescape(s)           = s.replace(/\\(['\\])/g, '$1'),
+  where*[original_html           = $('body').html(),
 
-                                        namespace             = peg[c(/meta::(\w+)/, 7) >> fn[xs][xs[1]]],
-                                        string                = peg[c('\'') % (c(/[^\\']/, 1) / (c(/\\(.)/, 2) >> unescape))[0] % c('\'') >> fn[xs][xs[1]]],
-                                        here_document         = peg[c('<<') % string >> fn[xs][xs[1]]],
+         parse_attributes(s)     = l*[namespace             = peg[[c(/[\s\n]+/, 1)] % c(/meta::(\w+)/, 7) >> fn[xs][xs[1][1]]],
+                                      string                = peg[c('\'') % (c(/[^\\']/, 1) / (c(/\\(.)/, 2) >> fn[xs][xs[1]]))[0] % c('\'') >> fn[xs][xs[1].join('')]],
+                                      here_document         = peg[c('<<') % string >> fn[xs][xs[1]]],
 
-                                        invocation_common     = peg[namespace % c('(') % string % c(/,\s*/, 1) >> fn[xs][{namespace: xs[0], attribute: xs[2]}]],
+                                      invocation_common     = peg[namespace % c('(') % string % c(/,\s*/, 1) >> fn[xs][{namespace: xs[0], attribute: xs[2]}]],
 
-                                        short_form_invocation = peg[invocation_common % string % c(');') % c('\n') >> fn[xs][xs[0] /se[_.value = xs[1]]]],
+                                      short_form_invocation = peg[invocation_common % string % c(');\n') >> fn[xs][xs[0] /se[_.value = xs[1]]]],
 
-                                        long_form_invocation  = l*[beginning            = peg[invocation_common % here_document % c(');\n') >> fn[xs][xs[0] /se[_.marker = xs[1]]]],
-                                                                   ending(end)          = peg[(-c(end) % c(fn_[1]))[0] % c(end) >> fn[xs][seq[~xs[0] *[_[1]]].join('')]],
-                                                                   parse_heredoc(input) = l[beginning_result = beginning(input) || {result: {marker: fn_[false]}}] in
-                                                                                          ending(beginning_result.result.marker)(beginning_result)] in
-                                                                parse_heredoc,
+                                      long_form_invocation  = l*[beginning            = peg[invocation_common % here_document % c(');\n') >> fn[xs][xs[0] /se[_.marker = xs[1]]]],
+                                                                 ending(end)          = peg[(reject(c(end)) % c(fn_[1]))[0] % c(end) >> fn[xs][seq[~xs[0] *[_[1]]].join('')]],
+                                                                 parse_heredoc(input) = l*[begin = beginning(input),
+                                                                                           end   = begin.result && ending(begin.result.marker)(begin)] in
+                                                                                        end /se[_.result = begin.result /se[_.value = end.result], when[begin.result]]] in
+                                                              parse_heredoc,
 
-                                        attribute             = peg[short_form_invocation / long_form_invocation],
-                                        attributes            = peg[attribute[0]],
+                                      attribute             = peg[short_form_invocation / long_form_invocation],
+                                      attributes            = peg[attribute[0]],
 
-                                        trim_bootstrap(s)     = s.replace(/^(?:(?!meta::\w+\().)*/, '')] in attributes(trim_bootstrap(s)),
+                                      unescape(s)           = s.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&amp;/gi, '&'),
+                                      trim_bootstrap(s)     = s.replace(/^(?:(?!\nmeta::\w+\()(?:.|\n))*\n/, '')] in
 
-               the_interface = html[pre(document.createTextNode(JSON.stringify(parse_attributes(original_html)))),
-                                    pre(document.createTextNode(original_html))]]])})($);
+                                   attributes(trim_bootstrap(unescape(s))),
+
+         partition(name, xs)     = html[h1(name), div.attributes] /se[_.find('.attributes').append(seq[~xs *+attribute])],
+         attribute(x)            = html[div.attribute(a.name(x.name), pre.contents(x.value))] /se[
+                                   _.find('.name').clickable(fn_[_.find('.contents').toggle()]),
+                                   _.find('.contents').hide()],
+
+         separate_namespaces(xs) = l[namespace_object = seq[~xs *[[_.namespace, true]]].object()] in seq[sk[namespace_object] *[[_, seq[xs %x[x.namespace === _]]]]].object(),
+         namespace_sections(xs)  = l[partitions = separate_namespaces(xs)] in seq[sp[partitions] *[partition(_[0], _[1])]],
+
+         the_interface           = namespace_sections(parse_attributes(original_html))]])})($);
