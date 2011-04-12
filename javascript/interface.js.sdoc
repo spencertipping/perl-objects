@@ -27,7 +27,7 @@ caterwaul.deglobalize().clone('std seq continuation montenegro parser')(function
                                         attribute             = peg[short_form_invocation / long_form_invocation],
                                         attributes            = peg[attribute[0]],
 
-                                        trim_bootstrap(s)     = s.replace(/^(?:(?!meta::).)*/, '')] in attributes(trim_bootstrap(s)),
+                                        trim_bootstrap(s)     = s.replace(/^(?:(?!meta::\w+\().)*/, '')] in attributes(trim_bootstrap(s)),
 
                the_interface = html[pre(document.createTextNode(JSON.stringify(parse_attributes(original_html)))),
                                     pre(document.createTextNode(original_html))]]])})($);
