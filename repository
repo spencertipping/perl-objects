@@ -277,6 +277,10 @@ meta::configuration('dependencies', <<'__b6eba94b8e547ade68991d31e4d950fe');
 # caterwaul.js:         http://spencertipping.com/caterwaul/caterwaul.all.js
 # montenegro.server.js: http://spencertipping.com/montenegro/montenegro.server.js
 __b6eba94b8e547ade68991d31e4d950fe
+meta::data('author', <<'__0ad4df90c3f703fea9b5af4a4e2553af');
+Spencer Tipping
+
+__0ad4df90c3f703fea9b5af4a4e2553af
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License

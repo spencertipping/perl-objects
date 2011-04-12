@@ -254,6 +254,10 @@ run this script with the 'usage' argument.
 =cut
 
 __c63395cbc6f7160b603befbb2d9b6700
+meta::data('author', <<'__0ad4df90c3f703fea9b5af4a4e2553af');
+Spencer Tipping
+
+__0ad4df90c3f703fea9b5af4a4e2553af
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License
