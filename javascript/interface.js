@@ -32,12 +32,12 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
 
                                    attributes(trim_bootstrap(unescape(s))),
 
-         partition(name, xs)     = html[h1(name), div.attributes] /se[_.find('.attributes').append(seq[~xs *+attribute])],
+         partition(name, xs)     = html[h1.namespace(name), div.attributes] /se[_.find('.attributes').append(seq[~xs *+attribute])],
          attribute(x)            = html[div.attribute(a.name(x.name), pre.contents(x.value))] /se[
                                    _.find('.name').clickable(fn_[_.find('.contents').toggle()]),
                                    _.find('.contents').hide()],
 
-         separate_namespaces(xs) = l[namespace_object = seq[~xs *[[_.namespace, true]]].object()] in seq[sk[namespace_object] *[[_, seq[xs %x[x.namespace === _]]]]].object(),
+         separate_namespaces(xs) = l[namespace_object = seq[~xs *[[_.namespace, true]]].object()] in seq[sk[namespace_object] *[[_, seq[~xs %x[x.namespace === _]]]]].object(),
          namespace_sections(xs)  = l[partitions = separate_namespaces(xs)] in seq[sp[partitions] *[partition(_[0], _[1])]],
 
          the_interface           = namespace_sections(parse_attributes(original_html))]])})($);
