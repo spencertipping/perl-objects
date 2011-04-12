@@ -22,7 +22,7 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
                                       short_form_invocation = peg[invocation_common % string % c(');\n') >> fn[xs][xs[0] /se[_.value = xs[1]]]],
 
                                       long_form_invocation  = l*[beginning            = peg[invocation_common % here_document % c(');\n') >> fn[xs][xs[0] /se[_.marker = xs[1]]]],
-                                                                 ending(end)          = peg[(reject(c(end)) % c(fn_[1]))[0] % c(end) >> fn[xs][seq[~xs[0] *[_[1]]].join('')]],
+                                                                 ending(end)          = peg[(reject(c(end)) % (c(/[^_]+/, 1) / c('_')))[0] % c(end) >> fn[xs][seq[~xs[0] *[_[1]]].join('')]],
                                                                  parse_heredoc(input) = l*[begin = beginning(input),
                                                                                            end   = begin.result && ending(begin.result.marker)(begin)] in
                                                                                         end /se[_.result = begin.result /se[_.value = end.result], when[begin.result]]] in
