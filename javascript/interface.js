@@ -20,8 +20,9 @@ caterwaul.deglobalize().clone('std seq continuation montenegro parser')(function
                                         short_form_invocation = peg[invocation_common % string % c(');') % c('\n') >> fn[xs][xs[0] /se[_.value = xs[1]]]],
 
                                         long_form_invocation  = l*[beginning            = peg[invocation_common % here_document % c(');\n') >> fn[xs][xs[0] /se[_.marker = xs[1]]]],
-                                                                   ending(end)          = peg[(-c(end) % c(/.|\n/, 1))[0] % c(end)],
-                                                                   parse_heredoc(input) = l[beginning_result = beginning(input)] in ending(beginning_result.result.marker)(beginning_result)] in
+                                                                   ending(end)          = peg[(-c(end) % c(fn_[1]))[0] % c(end) >> fn[xs][seq[~xs[0] *[_[1]]].join('')]],
+                                                                   parse_heredoc(input) = l[beginning_result = beginning(input) || {result: {marker: null}}] in
+                                                                                          ending(beginning_result.result.marker)(beginning_result)] in
                                                                 parse_heredoc,
 
                                         attribute             = peg[short_form_invocation / long_form_invocation],
