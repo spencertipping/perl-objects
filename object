@@ -181,8 +181,7 @@ meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
-meta::bootstrap('html', <<'__cd75cb11bb1fb68e79ddb50030a0a333');
-<!doctype html>
+meta::bootstrap('html', <<'__04f8994f5a345079828b7c5a9abf0bc4');
 <html>
   <head>
   <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
@@ -194,7 +193,7 @@ meta::bootstrap('html', <<'__cd75cb11bb1fb68e79ddb50030a0a333');
   <body></body>
 </html>
 
-__cd75cb11bb1fb68e79ddb50030a0a333
+__04f8994f5a345079828b7c5a9abf0bc4
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
