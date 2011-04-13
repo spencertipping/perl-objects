@@ -386,11 +386,11 @@ my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
 __ac86cbe9c9fb12fc8cef2cc88e80c01e
 meta::function('initial-state', '$transient{initial};');
-meta::function('is', <<'__5d4fddb72b0715694b83aa0c925a8d04');
+meta::function('is', <<'__1d3401965e4720ed972470b54b447db0');
 my ($attribute, @criteria) = @_;
 my ($options, @stuff) = separate_options(@criteria);
-grep $_ eq $attribute, select_keys(%$options);
-__5d4fddb72b0715694b83aa0c925a8d04
+attribute_is($attribute, %$options);
+__1d3401965e4720ed972470b54b447db0
 meta::function('load-state', <<'__ea18db867bd62a294e067f60e6975dcf');
 around_hook('load-state', @_, sub {
   my ($state_name) = @_;
@@ -603,6 +603,15 @@ my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
 __62efb9f22157835940af1d5feae98d98
+meta::internal_function('attribute_is', <<'__128205fc93d6ada83347b312aff1fb63');
+my ($attribute, %options) = @_;
+my %inherited             = parent_attributes(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
+my $criteria              = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
+
+$attribute =~ /$criteria/ and ! $options{'-u'} || ! $inherited{$attribute} and ! $options{'-U'} || $inherited{$attribute}
+                          and ! $options{'-I'} || ! $transient{inherit}{namespace($attribute)} and ! $options{'-i'} || $transient{inherit}{namespace($attribute)}
+                          and ! $options{'-S'} || ! $attribute =~ /^state::/o and ! $options{'-M'} || ! /^meta::/o and ! $options{'-m'} || $attribute =~ /^meta::/o;
+__128205fc93d6ada83347b312aff1fb63
 meta::internal_function('chmod_self', <<'__b13487447c65f2dc790bd6b21dde89dd');
 my ($mode_function)      = @_;
 my (undef, undef, $mode) = stat $0;
@@ -781,15 +790,10 @@ my $result      = undef;
 defined($result = &$_($attribute)) and return $result for map $transient{retrievers}{$_}, sort keys %{$transient{retrievers}};
 return undef;
 __5186a0343624789d08d1cc2084550f3d
-meta::internal_function('select_keys', <<'__496503933c0acca58f48114125d5a70e');
-my %options   = @_;
-my %inherited = parent_attributes(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
-my $criteria  = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
-
-grep /$criteria/ && (! $options{'-u'} || ! $inherited{$_}) && (! $options{'-U'} || $inherited{$_}) &&
-                    (! $options{'-I'} || ! $transient{inherit}{namespace($_)}) && (! $options{'-i'} || $transient{inherit}{namespace($_)}) &&
-                    (! $options{'-S'} || ! /^state::/o) && (! $options{'-M'} || ! /^meta::/o) && (! $options{'-m'} || /^meta::/o), sort keys %data;
-__496503933c0acca58f48114125d5a70e
+meta::internal_function('select_keys', <<'__1cd075b241905d9ab3199e680e86dced');
+my %options = @_;
+grep attribute_is($_, %options), sort keys %data;
+__1cd075b241905d9ab3199e680e86dced
 meta::internal_function('separate_options', <<'__d47e8ee23fe55e27bb523c9fcb2f5ca1');
 # Things with one dash are short-form options, two dashes are long-form.
 # Characters after short-form are combined; so -auv4 becomes -a -u -v -4.
