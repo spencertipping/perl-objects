@@ -48,7 +48,8 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
          the_interface()         = l*[parsed                  = parse_attributes(original_html),
                                       model                   = l[partitioned = separate_namespaces(parsed)] in seq[sp[partitioned] *~[[_[0], !(_[1] *[[_.attribute, _.value]])]]].object(),
 
-                                      description             = l[description = model.data.description || '[no description specified]'] in
+                                      description             = l[description = model.data.description         /re[_ ? html[pre /text(_)] :
+                                                                                model.data['description.html'] /re[_ ? html[div(_)]       : '[no description specified]']]] in
                                                                 html[div.description(h1('Description'), description)],
 
                                       instructions            = html[h1('Usage instructions'),
