@@ -48,6 +48,9 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
          the_interface()         = l*[parsed                  = parse_attributes(original_html),
                                       model                   = l[partitioned = separate_namespaces(parsed)] in seq[sp[partitioned] *~[[_[0], !(_[1] *[[_.attribute, _.value]])]]].object(),
 
+                                      description             = l[description = model.data.description || '[no description specified]'] in
+                                                                html[div.description(h1('Description'), description)],
+
                                       instructions            = html[h1('Usage instructions'),
                                                                      p('This HTML file is also a valid Perl script that can rewrite itself to update its state. (See "',
                                                                        a('writing self-modifying Perl') *href('http://github.com/spencertipping/writing-self-modifying-perl') *target('_blank'),
@@ -61,7 +64,7 @@ caterwaul.clone('std seq continuation montenegro parser')(function ($) {
 
                                       metadata_section        = l[identity = model.data['permanent-identity'] || '[unidentified]', author = model.data.author || '[no author specified]',
                                                                   license  = model.data.license || '[no license specified]'] in
-                                                                html[div.metadata(h1.identity(identity), h1.author(author), pre.license(license), div.instructions(instructions))],
+                                                                html[div.metadata(h1.identity(identity), h1.author(author), pre.license(license), description, div.instructions(instructions))],
 
                                       attribute_section       = html[div.attributes(namespace_sections(parse_attributes(original_html)))]] in
 
