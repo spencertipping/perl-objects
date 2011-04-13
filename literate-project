@@ -299,23 +299,21 @@ meta::define_form 'template', sub {
 };
 __25f4d6eafb1d3eea6d5d3d9a71a5623e
 meta::meta('type::vim_highlighter', 'meta::functor::editable \'vim_highlighter\', extension => \'.vim\', inherit => 1, default => \'edit\';');
-meta::bootstrap('html', <<'__2e1c8bf01da2001ea730a48dadedc314');
+meta::bootstrap('html', <<'__aa347c4339e71e7acc9ea4fc3d593347');
 <html>
   <head>
   <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
+  <link rel='stylesheet' href='http://spencertipping.com/perl-objects/web/style.css'/>
+
   <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'></script>
   <script src='http://spencertipping.com/caterwaul/caterwaul.all.min.js'></script>
   <script src='http://spencertipping.com/montenegro/montenegro.client.js'></script>
-
-  <link rel='stylesheet' href='web/style.css'/>
-
-  <!-- <script src='http://spencertipping.com/perl-objects/web/interface.js'></script> -->
-  <script src='web/interface.js'></script>
+  <script src='http://spencertipping.com/perl-objects/web/interface.js'></script>
   </head>
   <body></body>
 </html>
 
-__2e1c8bf01da2001ea730a48dadedc314
+__aa347c4339e71e7acc9ea4fc3d593347
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
@@ -372,10 +370,7 @@ run this script with the 'usage' argument.
 =cut
 
 __c63395cbc6f7160b603befbb2d9b6700
-meta::data('author', <<'__0ad4df90c3f703fea9b5af4a4e2553af');
-Spencer Tipping
-
-__0ad4df90c3f703fea9b5af4a4e2553af
+meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License
@@ -746,6 +741,69 @@ my ($start, $end) = split /,/o, $comments_for_extension{lc($other_extension || $
 join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs retrieve($filename)),
          "\n$start $generated_string $end\n";
 __060cfa349e629eb90a82b87a8ba00c1d
+meta::function('sdoc-html', <<'__5fffe6139a81ff67ee063ebcbfadad2a');
+# Converts SDoc to logically-structured HTML. Sections end up being nested,
+# and code sections and examples are marked as such. For instance, here is some
+# sample output:
+
+# <div class='section level1'>
+#   <h1 class='title'>Foo</h1>
+#   <p>This is a paragraph...</p>
+#   <p>This is another paragraph...</p>
+#   <pre class='code'>int main () {return 0;}</pre>
+#   <pre class='quoted'>int main () {return 0} // Won't compile</pre>
+#   <div class='section level2'>
+#     <h2 class='title'>Bar</h2>
+#     ...
+#   </div>
+# </div>
+
+# It is generally good about escaping things that would interfere with HTML,
+# but within text paragraphs it lets you write literal HTML. The heuristic is
+# that known tags that are reasonably well-formed are allowed, but unknown ones
+# are escaped.
+
+my ($attribute)   = @_;
+my @paragraphs    = split /\n(?:\s*\n)+/, retrieve($attribute);
+
+my $known_tags    = join '|', qw[html head body meta script style link title div a span input button textarea option select form label iframe blockquote code caption
+                                 table tbody tr td th thead tfoot img h1 h2 h3 h4 h5 h6 li ol ul noscript p pre samp sub sup var canvas audio video];
+my $section_level = 0;
+my @markup;
+
+my $indent        = sub {'  ' x ($_[0] || $section_level)};
+my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm};
+
+my $escape_all    = sub {s/&/&amp;/g; s/</&lt;/g; s/>/&gt;/g};
+my $escape_some   = sub {s/&/&amp;/g; s/<(?!\/|($known_tags)[^>]*>.*<\/\1>)/&lt;/g};
+
+my $code          = sub {&$escape_all(); &$unindent();             push @markup, &$indent() . "<pre class='code'>$_</pre>"};
+my $quoted        = sub {&$escape_all(); &$unindent(); s/^\|\s?//; push @markup, &$indent() . "<pre class='quoted'>$_</pre>"};
+
+my $paragraph     = sub {&$escape_some(); push @markup, &$indent() . "<p>$_</p>"};
+
+my $section       = sub {my $h = $_[0] > 6 ? 6 : $_[0]; push @markup, &$indent($_[0] - 1) . "<div class='section level$_[0]'>", &$indent($_[0]) . "<h$h>$2</h$h>"};
+my $close_section = sub {push @markup, &$indent($_[0]) . "</div>"};
+
+my $title = sub {
+  my $indentation = (length($1) >> 1) + 1;
+  &$close_section($section_level) while $section_level-- >= $indentation;
+  &$section($indentation);
+  $section_level = $indentation;
+};
+
+for (@paragraphs) {
+  &$code(),   next unless /^\h*[A-Z|]/;
+  &$quoted(), next if     /^\h*\|/;
+
+  &$title(), s/^.*\n// if /^(\s*)(\S.*)\.\n([^\n]+)/ and length("$1$2") - 10 < length($3);
+  &$paragraph();
+}
+
+&$close_section($section_level) while $section_level--;
+
+join "\n", @markup;
+__5fffe6139a81ff67ee063ebcbfadad2a
 meta::function('sdocp', <<'__8b7ed5bbd537234ae53c0691b6d02c97');
 # Renders an attribute as SDocP. This logic was taken directly from the sdoc script.
 my $attribute = retrieve($_[0]);
@@ -1185,14 +1243,16 @@ color $_, $preloaded{$_} for keys %preloaded;
 __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('./sdoc', <<'__6b80e7e220f0ce19851eaf5bb9cf2fc7');
+meta::parent('./sdoc', <<'__1ef271cd8c077e0c25c52c8c3bed1818');
 function::sdoc
+function::sdoc-html
 function::sdocp
 meta::type::sdoc
 parent::/home/spencertipping/bin/object
+retriever::html-sdoc
 retriever::sdoc
 retriever::sdocp
-__6b80e7e220f0ce19851eaf5bb9cf2fc7
+__1ef271cd8c077e0c25c52c8c3bed1818
 meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa3067db9f1824163');
 meta::type::configuration
 parent::/home/spencertipping/bin/object
@@ -1314,7 +1374,8 @@ function::notes
 meta::type::note
 parent::object
 __885245820bcb60424dfcbd480e5b966e
-meta::parent('object', <<'__febaa835f7b66f7fdcb99de9560857bd');
+meta::parent('object', <<'__40cc4bb813030b3d1a49faba89a17775');
+bootstrap::html
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
@@ -1411,7 +1472,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__febaa835f7b66f7fdcb99de9560857bd
+__40cc4bb813030b3d1a49faba89a17775
 meta::parent('preprocessor', <<'__a29d7395a865c21764fce8ec08e1a668');
 function::preprocess
 meta::type::template
@@ -1467,6 +1528,11 @@ __5a7e0bd196996326e6278b6dc308371c
 meta::resource('header-refs', '\\newcommand{\\Ref}[2]{\\hyperref[#2]{#1 \\ref*{#2}}}');
 meta::resource('header-resource', '\\lstnewenvironment{resourcecode}{}{}');
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
+meta::retriever('html-sdoc', <<'__54d22ab83d9f3f2e27ef51033b4817a7');
+my ($attribute) = @_;
+return undef unless $attribute =~ s/^html::/sdoc::/ and exists $data{$attribute};
+&{'sdoc-html'}($attribute);
+__54d22ab83d9f3f2e27ef51033b4817a7
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('pp', <<'__f4a8c288d69963d6ebc5ce0bf7794777');
 return undef unless namespace($_[0]) eq 'pp';

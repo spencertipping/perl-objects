@@ -188,23 +188,21 @@ meta::define_form 'template', sub {
   meta::externalize "template::$name", "template::$name", meta::eval_in("sub {\n$value\n}", "template::$name");
 };
 __25f4d6eafb1d3eea6d5d3d9a71a5623e
-meta::bootstrap('html', <<'__2e1c8bf01da2001ea730a48dadedc314');
+meta::bootstrap('html', <<'__aa347c4339e71e7acc9ea4fc3d593347');
 <html>
   <head>
   <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
+  <link rel='stylesheet' href='http://spencertipping.com/perl-objects/web/style.css'/>
+
   <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'></script>
   <script src='http://spencertipping.com/caterwaul/caterwaul.all.min.js'></script>
   <script src='http://spencertipping.com/montenegro/montenegro.client.js'></script>
-
-  <link rel='stylesheet' href='web/style.css'/>
-
-  <!-- <script src='http://spencertipping.com/perl-objects/web/interface.js'></script> -->
-  <script src='web/interface.js'></script>
+  <script src='http://spencertipping.com/perl-objects/web/interface.js'></script>
   </head>
   <body></body>
 </html>
 
-__2e1c8bf01da2001ea730a48dadedc314
+__aa347c4339e71e7acc9ea4fc3d593347
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
@@ -261,10 +259,7 @@ run this script with the 'usage' argument.
 =cut
 
 __c63395cbc6f7160b603befbb2d9b6700
-meta::data('author', <<'__0ad4df90c3f703fea9b5af4a4e2553af');
-Spencer Tipping
-
-__0ad4df90c3f703fea9b5af4a4e2553af
+meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__3c6177256de0fddb721f534c3ad8c0ee');
 MIT License
