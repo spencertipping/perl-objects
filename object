@@ -744,7 +744,7 @@ meta::internal_function('parent_attributes', <<'__480776f176ab728c6b7450287be578
 my $attributes = sub {my ($name, $value) = split /\s+/o, $_; $name => ($value || 1)};
 map &$attributes(), split /\n/o, join("\n", retrieve(@_));
 __480776f176ab728c6b7450287be5782a
-meta::internal_function('parent_ordering', <<'__2d1f4295b235d06b8ed49d051969ebc8');
+meta::internal_function('parent_ordering', <<'__61a829bfd725b367836b5342d26efce1');
 # Topsorts the parents by dependency chain. The simplest way to do this is to
 # transitively compute the number of parents referred to by each parent.
 # You can pass in a list of parents if you want; otherwise it uses all of them.
@@ -762,13 +762,13 @@ $parent_count = sub {
   my ($key) = @_;
   return $parent_count{$key} if exists $parent_count{$key};
   my $count = 0;
-  $count += $parent_count->($_) + 1 for @{$parents_of{$key}};
+  $count += $parent_count->($_) + exists $data{$_} for @{$parents_of{$key}};
   $parent_count{$key} = $count};
 
 my %inverses;
 push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
 map @{$inverses{$_}}, sort keys %inverses;
-__2d1f4295b235d06b8ed49d051969ebc8
+__61a829bfd725b367836b5342d26efce1
 meta::internal_function('retrieve', <<'__0b6f4342009684fdfa259f45ac75ae37');
 my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;
 wantarray ? @results : $results[0];
