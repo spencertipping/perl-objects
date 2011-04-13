@@ -8,6 +8,8 @@ body    {max-width: 900px; margin-left: auto; margin-right: auto; font-family: '
 a       {color: #35a; text-decoration: none}
 a:hover {color: #126; text-decoration: underline}
 
+h1, h2, h3, h4, h5, h6 {font-family: 'Ubuntu', sans-serif; font-weight: normal}
+
 Individual attribute display.
 This mostly has to do with the way monospaced data gets shown.
 
