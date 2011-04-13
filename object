@@ -409,9 +409,9 @@ around_hook('load-state', @_, sub {
   verify()});
 __ea18db867bd62a294e067f60e6975dcf
 meta::function('lock', 'hook(\'lock\', chmod_self(sub {$_[0] & 0555}));');
-meta::function('ls', <<'__acdc3ca5777ab9c7c430d493a7555998');
+meta::function('ls', <<'__7585c2f886d5a8f0258b8749374da6bc');
 my ($options, @criteria) = separate_options(@_);
-my ($all, $shadows, $dereference, $sizes, $flags) = @$options{qw(-a -s -d -z -l)};
+my ($all, $shadows, $dereference, $sizes, $flags, $hashes) = @$options{qw(-a -s -d -z -l -h)};
 $all   ||= $dereference;
 $sizes ||= $flags;
 
@@ -424,13 +424,14 @@ my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_funct
 my @externals = map $inverses{$_}, grep length, @definitions;
 my @internals = grep length $inverses{$_}, @definitions;
 my @sizes     = map sprintf('%6d %6d', length(serialize_single($_)), length(retrieve($_))), @{$all ? \@definitions : \@internals} if $sizes;
+my @hashes    = map fast_hash(retrieve($_)), @definitions if $hashes;
 
 my %flag_hashes = map {$_ => {map {$_ => 1} select_keys("-$_" => 1)}} qw(m u i) if $flags;
 my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-', sort keys %flag_hashes)} @definitions if $flags;
 
 join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
-                                                    $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : ());
-__acdc3ca5777ab9c7c430d493a7555998
+                                                    $sizes ? ([@sizes]) : (), $hashes ? ([@hashes]) : (), $flags ? ([@flags]) : ());
+__7585c2f886d5a8f0258b8749374da6bc
 meta::function('mv', <<'__52e95180e3c7019116bd798e0da0fdda');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -505,7 +506,7 @@ __119111f84c3e32a5536838ac84bc6f10
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__4872d8da1fee53aace2c4f422841c0ba');
+meta::function('update-from', <<'__e1fbeada809188f32fe145d7d342164b');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transient{inherit}{$type}.
 
@@ -515,23 +516,41 @@ around_hook('before-update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
 
   @targets or return;
-  my $save_state = ! ($$options{'-n'} || $$options{'--no-save'});
-  my $no_parents =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
-  my $force      =    $$options{'-f'} || $$options{'--force'};
+
+  my @known_targets     = grep s/^parent:://, parent_ordering(map "parent::$_", grep exists $data{"parent::$_"}, @targets);
+  my @unknown_targets   = grep ! exists $data{"parent::$_"}, @targets;
+  @targets = (@known_targets, @unknown_targets);
+
+  my $save_state        = ! ($$options{'-n'} || $$options{'--no-save'});
+  my $no_parents        =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
+  my $force             =    $$options{'-f'} || $$options{'--force'};
+  my $clobber_divergent =    $$options{'-D'} || $$options{'--clobber-divergent'};
 
   &{'save-state'}('before-update') if $save_state;
 
   for my $target (@targets) {
-    around_hook('update-from', $target, sub {
     dangerous("updating from $target", sub {
-      my $attributes = join '', qx($target ls -aiu);
+    around_hook('update-from', $target, sub {
+      my $attributes = join '', qx($target ls -ahiu);
+      my %divergent;
       die "skipping unreachable $target" unless $attributes;
 
-      rm(split /\n/, retrieve("parent::$target")) if $data{"parent::$target"};
+      for my $to_rm (split /\n/, retrieve("parent::$target")) {
+        my ($name, $hash) = split(/\s+/, $to_rm);
+        next unless exists $data{$name};
+
+        my $local_hash = fast_hash(retrieve($name));
+        if ($clobber_divergent or $hash eq $local_hash or ! defined $hash) {rm($name)}
+        else {terminal::info("preserving local version of divergent attribute $name (use update -D to clobber it)");
+              $divergent{$name} = retrieve($name)}}
+
       associate("parent::$target", $attributes) unless $no_parents;
 
       dangerous('', sub {eval qx($target serialize -ipmu)});
       dangerous('', sub {eval qx($target serialize -ipMu)});
+
+      map associate($_, $divergent{$_}), keys %divergent unless $clobber_divergent;
+
       reload()})})}
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
@@ -543,7 +562,7 @@ around_hook('before-update-from-invocation', separate_options(@_), sub {
         terminal::error('Verification failed after the upgrade was complete.');
         terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
         return &{'load-state'}('before-update') if $save_state}});
-__4872d8da1fee53aace2c4f422841c0ba
+__e1fbeada809188f32fe145d7d342164b
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__d31b85fffd464ddf516d2afeb63dcbde');
 file::write(my $other = $transient{temporary_filename} = temporary_name(), my $serialized_data = serialize());
@@ -721,6 +740,35 @@ my ($name) = @_;
 $name =~ s/::.*$//;
 $name;
 __93213d60cafb9627e0736b48cd1f0760
+meta::internal_function('parent_attributes', <<'__480776f176ab728c6b7450287be5782a');
+my $attributes = sub {my ($name, $value) = split /\s+/o, $_; $name => ($value || 1)};
+map &$attributes(), split /\n/o, join("\n", retrieve(@_));
+__480776f176ab728c6b7450287be5782a
+meta::internal_function('parent_ordering', <<'__2d1f4295b235d06b8ed49d051969ebc8');
+# Topsorts the parents by dependency chain. The simplest way to do this is to
+# transitively compute the number of parents referred to by each parent.
+# You can pass in a list of parents if you want; otherwise it uses all of them.
+
+my @parents = @_ ? @_ : grep /^parent::/, keys %data;
+
+my %parents_of = map {
+  my $t = $_;
+  my %attributes = parent_attributes($_);
+  $t => [grep /^parent::/, keys %attributes]} @parents;
+
+my %parent_count;
+my $parent_count;
+$parent_count = sub {
+  my ($key) = @_;
+  return $parent_count{$key} if exists $parent_count{$key};
+  my $count = 0;
+  $count += $parent_count->($_) + 1 for @{$parents_of{$key}};
+  $parent_count{$key} = $count};
+
+my %inverses;
+push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
+map @{$inverses{$_}}, sort keys %inverses;
+__2d1f4295b235d06b8ed49d051969ebc8
 meta::internal_function('retrieve', <<'__0b6f4342009684fdfa259f45ac75ae37');
 my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;
 wantarray ? @results : $results[0];
@@ -733,15 +781,15 @@ my $result      = undef;
 defined($result = &$_($attribute)) and return $result for map $transient{retrievers}{$_}, sort keys %{$transient{retrievers}};
 return undef;
 __5186a0343624789d08d1cc2084550f3d
-meta::internal_function('select_keys', <<'__8ee1d5fa37927c66d9eec4d0d8269493');
+meta::internal_function('select_keys', <<'__496503933c0acca58f48114125d5a70e');
 my %options   = @_;
-my %inherited = map {$_ => 1} split /\n/o, join "\n", retrieve(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
+my %inherited = parent_attributes(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
 my $criteria  = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
 
 grep /$criteria/ && (! $options{'-u'} || ! $inherited{$_}) && (! $options{'-U'} || $inherited{$_}) &&
                     (! $options{'-I'} || ! $transient{inherit}{namespace($_)}) && (! $options{'-i'} || $transient{inherit}{namespace($_)}) &&
                     (! $options{'-S'} || ! /^state::/o) && (! $options{'-M'} || ! /^meta::/o) && (! $options{'-m'} || /^meta::/o), sort keys %data;
-__8ee1d5fa37927c66d9eec4d0d8269493
+__496503933c0acca58f48114125d5a70e
 meta::internal_function('separate_options', <<'__d47e8ee23fe55e27bb523c9fcb2f5ca1');
 # Things with one dash are short-form options, two dashes are long-form.
 # Characters after short-form are combined; so -auv4 becomes -a -u -v -4.
