@@ -323,6 +323,7 @@ meta::function('cc', <<'__c4d52b1d8f52a480f07b81b93c3aac7b');
 # Stashes a quick one-line continuation. (Used to remind me what I was doing.)
 @_ ? associate('data::current-continuation', hook('set-cc', join(' ', @_))) : retrieve('data::current-continuation');
 __c4d52b1d8f52a480f07b81b93c3aac7b
+meta::function('ccc', 'rm(\'data::current-continuation\');');
 meta::function('child', <<'__f69646398c3123d3d939a7f2b3156606');
 around_hook('child', @_, sub {
   my ($child_name) = @_;
@@ -695,7 +696,10 @@ my $delimiter = '__' . fast_hash($contents);
 return "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __ef0f63556d22816ed102d3bbe2172b28
 meta::function('sh', 'system(@_);');
-meta::function('shell', 'shell::repl();');
+meta::function('shell', <<'__dc8238ad70b1e02eaf230c4f1bd21690');
+terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
+shell::repl();
+__dc8238ad70b1e02eaf230c4f1bd21690
 meta::function('size', 'length(serialize());');
 meta::function('snapshot', <<'__d3d84a364524eeb8ee90623f545187e8');
 my ($name) = @_;
@@ -1073,6 +1077,7 @@ sub color {
 my %preloaded = (info => 32, progress => 32, state => 34, debug => 34, warning => 33, error => 31);
 color $_, $preloaded{$_} for keys %preloaded;
 __c52308d05ebb4ff61c5fc36e6d9c7a8a
+meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('./sdoc', <<'__1ef271cd8c077e0c25c52c8c3bed1818');
@@ -1089,13 +1094,14 @@ meta::parent('/home/spencertipping/bin/configuration', <<'__511208c99d8bc2caa306
 meta::type::configuration
 parent::/home/spencertipping/bin/object
 __511208c99d8bc2caa3067db9f1824163
-meta::parent('/home/spencertipping/bin/object', <<'__40cc4bb813030b3d1a49faba89a17775');
+meta::parent('/home/spencertipping/bin/object', <<'__35806b23f7e9db5fec1ffe42bee778b1');
 bootstrap::html
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
 function::cat
 function::cc
+function::ccc
 function::child
 function::clone
 function::cp
@@ -1167,6 +1173,7 @@ internal_function::translate_backtrace
 internal_function::with_exported
 library::shell
 library::terminal
+message_color::cc
 message_color::state
 message_color::states
 meta::configure
@@ -1187,7 +1194,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__40cc4bb813030b3d1a49faba89a17775
+__35806b23f7e9db5fec1ffe42bee778b1
 meta::parent('configuration', <<'__511208c99d8bc2caa3067db9f1824163');
 meta::type::configuration
 parent::/home/spencertipping/bin/object
@@ -1198,13 +1205,14 @@ function::notes
 meta::type::note
 parent::object
 __885245820bcb60424dfcbd480e5b966e
-meta::parent('object', <<'__40cc4bb813030b3d1a49faba89a17775');
+meta::parent('object', <<'__35806b23f7e9db5fec1ffe42bee778b1');
 bootstrap::html
 bootstrap::initialization
 bootstrap::perldoc
 function::alias
 function::cat
 function::cc
+function::ccc
 function::child
 function::clone
 function::cp
@@ -1276,6 +1284,7 @@ internal_function::translate_backtrace
 internal_function::with_exported
 library::shell
 library::terminal
+message_color::cc
 message_color::state
 message_color::states
 meta::configure
@@ -1296,7 +1305,7 @@ meta::type::retriever
 meta::type::state
 retriever::file
 retriever::id
-__40cc4bb813030b3d1a49faba89a17775
+__35806b23f7e9db5fec1ffe42bee778b1
 meta::parent('preprocessor', <<'__a29d7395a865c21764fce8ec08e1a668');
 function::preprocess
 meta::type::template
