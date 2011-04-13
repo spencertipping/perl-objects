@@ -1188,7 +1188,7 @@ terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
 __fc4f32c46d95c6deed0414364d1c7410
-meta::library('shell', <<'__7df727b3be0d8579da3fee5144041f75');
+meta::library('shell', <<'__528f486cc4d9eb390e4c350b8727c751');
 # Functions for shell parsing and execution.
 package shell;
 use Term::ReadLine;
@@ -1213,8 +1213,9 @@ sub prompt {
   my $state   = $options{state} // ::state();
   my $other   = $state ne $transient{initial} ? 33 : 30;
   my $locked  = ::is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
+  my $cc      = length ::retrieve('data::current-continuation') ? "\033[1;36mcc\033[0;0m" : '';
 
-  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$locked\033[1;34m$options{stuff}\033[0;0m "}
+  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$cc$locked\033[1;34m$options{stuff}\033[0;0m "}
 
 sub repl {
   my %options = @_;
@@ -1230,7 +1231,7 @@ sub repl {
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
 
   &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
-__7df727b3be0d8579da3fee5144041f75
+__528f486cc4d9eb390e4c350b8727c751
 meta::library('terminal', <<'__c52308d05ebb4ff61c5fc36e6d9c7a8a');
 # Functions for nice-looking terminal output.
 package terminal;
