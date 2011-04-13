@@ -409,10 +409,9 @@ around_hook('load-state', @_, sub {
   verify()});
 __ea18db867bd62a294e067f60e6975dcf
 meta::function('lock', 'hook(\'lock\', chmod_self(sub {$_[0] & 0555}));');
-meta::function('ls', <<'__7585c2f886d5a8f0258b8749374da6bc');
+meta::function('ls', <<'__992087a0d63d41e0bb551803476cfe72');
 my ($options, @criteria) = separate_options(@_);
-my ($all, $shadows, $dereference, $sizes, $flags, $hashes) = @$options{qw(-a -s -d -z -l -h)};
-$all   ||= $dereference;
+my ($all, $shadows, $sizes, $flags, $hashes) = @$options{qw(-a -s -z -l -h)};
 $sizes ||= $flags;
 
 return table_display([grep ! exists $data{$externalized_functions{$_}}, sort keys %externalized_functions]) if $shadows;
@@ -429,9 +428,8 @@ my @hashes    = map fast_hash(retrieve($_)), @definitions if $hashes;
 my %flag_hashes = map {$_ => {map {$_ => 1} select_keys("-$_" => 1)}} qw(m u i) if $flags;
 my @flags       = map {my $k = $_; join '', map($flag_hashes{$_}{$k} ? $_ : '-', sort keys %flag_hashes)} @definitions if $flags;
 
-join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $dereference ? ([@externals]) : (),
-                                                    $sizes ? ([@sizes]) : (), $hashes ? ([@hashes]) : (), $flags ? ([@flags]) : ());
-__7585c2f886d5a8f0258b8749374da6bc
+join "\n", map strip($_), split /\n/, table_display($all ? [@definitions] : [grep length, @externals], $sizes ? ([@sizes]) : (), $hashes ? ([@hashes]) : (), $flags ? ([@flags]) : ());
+__992087a0d63d41e0bb551803476cfe72
 meta::function('mv', <<'__52e95180e3c7019116bd798e0da0fdda');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -603,15 +601,16 @@ my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
 __62efb9f22157835940af1d5feae98d98
-meta::internal_function('attribute_is', <<'__128205fc93d6ada83347b312aff1fb63');
-my ($attribute, %options) = @_;
-my %inherited             = parent_attributes(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
-my $criteria              = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
+meta::internal_function('attribute_is', <<'__7bf6fde9d247cbba37d5e0ff6a9dc1ee');
+my ($a, %options) = @_;
+my %inherited     = parent_attributes(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
+my $criteria      = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
 
-$attribute =~ /$criteria/ and ! $options{'-u'} || ! $inherited{$attribute} and ! $options{'-U'} || $inherited{$attribute}
-                          and ! $options{'-I'} || ! $transient{inherit}{namespace($attribute)} and ! $options{'-i'} || $transient{inherit}{namespace($attribute)}
-                          and ! $options{'-S'} || ! $attribute =~ /^state::/o and ! $options{'-M'} || ! /^meta::/o and ! $options{'-m'} || $attribute =~ /^meta::/o;
-__128205fc93d6ada83347b312aff1fb63
+$a =~ /$criteria/ and ! $options{'-u'} || ! $inherited{$a} and ! $options{'-U'} || $inherited{$a}
+                  and ! $options{'-d'} || fast_hash(retrieve($a)) ne $inherited{$a} and ! $options{'-D'} || fast_hash(retrieve($a)) eq $inherited{$a}
+                  and ! $options{'-I'} || ! $transient{inherit}{namespace($a)} and ! $options{'-i'} || $transient{inherit}{namespace($a)}
+                  and ! $options{'-S'} || ! $a =~ /^state::/o and ! $options{'-M'} || ! /^meta::/o and ! $options{'-m'} || $a =~ /^meta::/o;
+__7bf6fde9d247cbba37d5e0ff6a9dc1ee
 meta::internal_function('chmod_self', <<'__b13487447c65f2dc790bd6b21dde89dd');
 my ($mode_function)      = @_;
 my (undef, undef, $mode) = stat $0;
