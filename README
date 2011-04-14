@@ -1,0 +1,3 @@
+Self-modifying Perl files
+You should probably check out http://github.com/spencertipping/writing-self-modifying-perl
+for an intro to how these work.
