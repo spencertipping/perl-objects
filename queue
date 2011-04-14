@@ -187,7 +187,7 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
 meta::meta('type::watch', 'meta::functor::editable \'watch\', prefix => \'watch::\', inherit => 1, extension => \'.pl\', default => \'cat\';');
-meta::bootstrap('html', <<'__aa347c4339e71e7acc9ea4fc3d593347');
+meta::bootstrap('html', <<'__9b839f4c0c8d6bb18bf6d9d0e670e497');
 <html>
   <head>
   <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
@@ -196,12 +196,13 @@ meta::bootstrap('html', <<'__aa347c4339e71e7acc9ea4fc3d593347');
   <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'></script>
   <script src='http://spencertipping.com/caterwaul/caterwaul.all.min.js'></script>
   <script src='http://spencertipping.com/montenegro/montenegro.client.js'></script>
+  <script src='http://spencertipping.com/perl-objects/web/attribute-parser.js'></script>
   <script src='http://spencertipping.com/perl-objects/web/interface.js'></script>
   </head>
   <body></body>
 </html>
 
-__aa347c4339e71e7acc9ea4fc3d593347
+__9b839f4c0c8d6bb18bf6d9d0e670e497
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
@@ -990,14 +991,14 @@ meta::note('queue', <<'__5fd27e7684a58beb914b27cd8518abbd');
 Queue.
 This stores todo items in whatever format you care to use.
 __5fd27e7684a58beb914b27cd8518abbd
-meta::parent('/home/spencertipping/bin/notes', <<'__9bd87fe8c3b24d930048afd7f1626853');
+meta::parent('/home/spencertipping/bin/notes', <<'__9c368586e3352c56a5ff8f4a7fdd1d8e');
 function::note    bcbfeac6dd2112f47296265444570a6e
 function::notes   15b3aca0cba3b327a984928154eda2b5
 meta::type::note  7ca6b375a66ecbfd14bef5bcefeb6643
-parent::object    6b93679549b63f96ad5863923e0c4f1f
-__9bd87fe8c3b24d930048afd7f1626853
-meta::parent('object', <<'__6b93679549b63f96ad5863923e0c4f1f');
-bootstrap::html                         aa347c4339e71e7acc9ea4fc3d593347
+parent::object    281e882a68d555bbd5c0e098c22d1bf3
+__9c368586e3352c56a5ff8f4a7fdd1d8e
+meta::parent('object', <<'__281e882a68d555bbd5c0e098c22d1bf3');
+bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
 bootstrap::initialization               8774229a1a0ce7fd056d81ba0b077f79
 bootstrap::perldoc                      c63395cbc6f7160b603befbb2d9b6700
 function::alias                         28744564997657da45ab16cd5b441104
@@ -1101,7 +1102,7 @@ meta::type::retriever                   6e847a9d205e4a5589765a3366cdd115
 meta::type::state                       c1f29670be26f1df6100ffe4334e1202
 retriever::file                         b8e7aefc98b8341260d91f21dc61d749
 retriever::id                           a791a5735e9b4f2cb8b99fd39dc17bc3
-__6b93679549b63f96ad5863923e0c4f1f
+__281e882a68d555bbd5c0e098c22d1bf3
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::state('before-update', <<'__89745bd82a414444683caaac775ea5f8');

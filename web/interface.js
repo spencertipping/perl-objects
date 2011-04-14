@@ -14,8 +14,8 @@ caterwaul.clone('std seq continuation montenegro')(function ($) {
   where*[original_html           = $('body').html(),
          loading_interface       = html[h1('parsing object state...')],
 
-         partition(name, xs)     = html[div.partition(h1.namespace(name), div.attributes)] /se[_.find('.attributes').append(seq[~xs *+attribute])],
-         attribute(x)            = html[div.attribute(a.name(x.attribute), pre.contents /text(x.value) /css({display: 'none'}))] /se[
+         partition(name, xs)     = html[div.partition(h1.namespace(name), div.attributes)] /se[_.find('.attributes').append(seq[sp[xs] *[attribute(_[0], _[1])]])],
+         attribute(name, value)  = html[div.attribute(a.name(name), pre.contents /text(value) /css({display: 'none'}))] /se[
                                    _.find('.name').clickable(fn_[_.children('.contents').toggle()])],
 
          namespace_sections(ps)  = seq[sp[ps] *[partition(_[0], _[1])]],
