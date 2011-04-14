@@ -185,7 +185,7 @@ meta::meta('type::state', <<'__c1f29670be26f1df6100ffe4334e1202');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __c1f29670be26f1df6100ffe4334e1202
-meta::bootstrap('html', <<'__aa347c4339e71e7acc9ea4fc3d593347');
+meta::bootstrap('html', <<'__9b839f4c0c8d6bb18bf6d9d0e670e497');
 <html>
   <head>
   <meta http-equiv='content-type' content='text/html; charset=UTF-8' />
@@ -194,12 +194,13 @@ meta::bootstrap('html', <<'__aa347c4339e71e7acc9ea4fc3d593347');
   <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'></script>
   <script src='http://spencertipping.com/caterwaul/caterwaul.all.min.js'></script>
   <script src='http://spencertipping.com/montenegro/montenegro.client.js'></script>
+  <script src='http://spencertipping.com/perl-objects/web/attribute-parser.js'></script>
   <script src='http://spencertipping.com/perl-objects/web/interface.js'></script>
   </head>
   <body></body>
 </html>
 
-__aa347c4339e71e7acc9ea4fc3d593347
+__9b839f4c0c8d6bb18bf6d9d0e670e497
 meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
