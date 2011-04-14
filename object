@@ -623,11 +623,11 @@ $a =~ /$criteria/ and ! $options{'-u'} || ! $inherited{$a} and ! $options{'-U'} 
                   and ! $options{'-I'} || ! $transient{inherit}{namespace($a)} and ! $options{'-i'} || $transient{inherit}{namespace($a)}
                   and ! $options{'-S'} || ! $a =~ /^state::/o and ! $options{'-M'} || ! /^meta::/o and ! $options{'-m'} || $a =~ /^meta::/o;
 __7bf6fde9d247cbba37d5e0ff6a9dc1ee
-meta::internal_function('cache', <<'__21d3c423864ae6b2faa1b59e662feca7');
+meta::internal_function('cache', <<'__c119f9d7ea9a147c6d526a6283fb119a');
 my ($name, %pairs) = @_;
-if (%pairs) {associate("cache::$name", join "\n", map "$_ $pairs{$_}", sort keys %pairs)}
-else        {map split(/\s/, $_), split /\n/, retrieve("cache::$name")}
-__21d3c423864ae6b2faa1b59e662feca7
+if (%pairs) {associate("cache::$name", join "\n", map {$pairs{$_} =~ s/\n//g; "$_ $pairs{$_}"} sort keys %pairs)}
+else        {map split(/\s/, $_, 2), split /\n/, retrieve("cache::$name")}
+__c119f9d7ea9a147c6d526a6283fb119a
 meta::internal_function('chmod_self', <<'__b13487447c65f2dc790bd6b21dde89dd');
 my ($mode_function)      = @_;
 my (undef, undef, $mode) = stat $0;
