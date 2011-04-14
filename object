@@ -96,6 +96,10 @@ meta::meta('type::bootstrap', <<'__297d03fb32df03b46ea418469fc4e49e');
 meta::configure 'bootstrap', extension => '.pl', inherit => 1;
 meta::define_form 'bootstrap', sub {};
 __297d03fb32df03b46ea418469fc4e49e
+meta::meta('type::cache', <<'__52eac0d7b550a358cc86803fe1a9d921');
+meta::configure 'cache', inherit => 0;
+meta::define_form 'cache', \&meta::bootstrap::implementation;
+__52eac0d7b550a358cc86803fe1a9d921
 meta::meta('type::data', 'meta::functor::editable \'data\', extension => \'\', inherit => 0, default => \'cat\';');
 meta::meta('type::function', <<'__d93b3cc15693707dac518e3d6b1f5648');
 meta::configure 'function', extension => '.pl', inherit => 1;
@@ -504,7 +508,7 @@ __119111f84c3e32a5536838ac84bc6f10
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
-meta::function('update-from', <<'__e1fbeada809188f32fe145d7d342164b');
+meta::function('update-from', <<'__d86a78c26adf0414eedbceec62affb8e');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transient{inherit}{$type}.
 
@@ -512,6 +516,8 @@ meta::function('update-from', <<'__e1fbeada809188f32fe145d7d342164b');
 
 around_hook('before-update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
+  my %parent_id_cache = cache('parent-identification');
+  my %already_seen;
 
   @targets or return;
 
@@ -529,6 +535,10 @@ around_hook('before-update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
+      my $identity = $parent_id_cache{$target} ||= join '', qx($target identity);
+      next if $already_seen{$identity};
+      $already_seen{$identity} = 1;
+
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
       die "skipping unreachable $target" unless $attributes;
@@ -551,6 +561,8 @@ around_hook('before-update-from-invocation', separate_options(@_), sub {
 
       reload()})})}
 
+  cache('parent-identification', %parent_id_cache);
+
   if (verify()) {hook('update-from-succeeded', $options, @targets);
                  terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state}
   elsif ($force) {hook('update-from-failed', $options, @targets);
@@ -560,7 +572,7 @@ around_hook('before-update-from-invocation', separate_options(@_), sub {
         terminal::error('Verification failed after the upgrade was complete.');
         terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
         return &{'load-state'}('before-update') if $save_state}});
-__e1fbeada809188f32fe145d7d342164b
+__d86a78c26adf0414eedbceec62affb8e
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__d31b85fffd464ddf516d2afeb63dcbde');
 file::write(my $other = $transient{temporary_filename} = temporary_name(), my $serialized_data = serialize());
@@ -611,6 +623,11 @@ $a =~ /$criteria/ and ! $options{'-u'} || ! $inherited{$a} and ! $options{'-U'} 
                   and ! $options{'-I'} || ! $transient{inherit}{namespace($a)} and ! $options{'-i'} || $transient{inherit}{namespace($a)}
                   and ! $options{'-S'} || ! $a =~ /^state::/o and ! $options{'-M'} || ! /^meta::/o and ! $options{'-m'} || $a =~ /^meta::/o;
 __7bf6fde9d247cbba37d5e0ff6a9dc1ee
+meta::internal_function('cache', <<'__21d3c423864ae6b2faa1b59e662feca7');
+my ($name, %pairs) = @_;
+if (%pairs) {associate("cache::$name", join "\n", map "$_ $pairs{$_}", sort keys %pairs)}
+else        {map split(/\s/, $_), split /\n/, retrieve("cache::$name")}
+__21d3c423864ae6b2faa1b59e662feca7
 meta::internal_function('chmod_self', <<'__b13487447c65f2dc790bd6b21dde89dd');
 my ($mode_function)      = @_;
 my (undef, undef, $mode) = stat $0;
