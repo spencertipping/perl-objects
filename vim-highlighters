@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
 
+# For the benefit of HTML viewers:
+# <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
+
 $|++;
 
 my %data;
@@ -202,9 +205,12 @@ meta::bootstrap('html', <<'__9b839f4c0c8d6bb18bf6d9d0e670e497');
 </html>
 
 __9b839f4c0c8d6bb18bf6d9d0e670e497
-meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
+meta::bootstrap('initialization', <<'__b39f25c213ceb0418551084d1bddeb20');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
+
+# For the benefit of HTML viewers:
+# <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
 
@@ -240,7 +246,7 @@ meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
 
-__8774229a1a0ce7fd056d81ba0b077f79
+__b39f25c213ceb0418551084d1bddeb20
 meta::bootstrap('perldoc', <<'__c63395cbc6f7160b603befbb2d9b6700');
 =head1 Self-modifying Perl script
 
@@ -942,9 +948,9 @@ __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('object', <<'__281e882a68d555bbd5c0e098c22d1bf3');
+meta::parent('object', <<'__f23aa0012cbf6a998cb464002582e694');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
-bootstrap::initialization               8774229a1a0ce7fd056d81ba0b077f79
+bootstrap::initialization               b39f25c213ceb0418551084d1bddeb20
 bootstrap::perldoc                      c63395cbc6f7160b603befbb2d9b6700
 function::alias                         28744564997657da45ab16cd5b441104
 function::cat                           a19fdfda461f9a0aa01978dff2e2c2f7
@@ -1047,7 +1053,7 @@ meta::type::retriever                   6e847a9d205e4a5589765a3366cdd115
 meta::type::state                       c1f29670be26f1df6100ffe4334e1202
 retriever::file                         b8e7aefc98b8341260d91f21dc61d749
 retriever::id                           a791a5735e9b4f2cb8b99fd39dc17bc3
-__281e882a68d555bbd5c0e098c22d1bf3
+__f23aa0012cbf6a998cb464002582e694
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();

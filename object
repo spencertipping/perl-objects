@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
 
+# For the benefit of HTML viewers:
+# <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
+
 $|++;
 
 my %data;
@@ -201,9 +204,12 @@ meta::bootstrap('html', <<'__9b839f4c0c8d6bb18bf6d9d0e670e497');
 </html>
 
 __9b839f4c0c8d6bb18bf6d9d0e670e497
-meta::bootstrap('initialization', <<'__8774229a1a0ce7fd056d81ba0b077f79');
+meta::bootstrap('initialization', <<'__b39f25c213ceb0418551084d1bddeb20');
 #!/usr/bin/perl
 # Run perldoc on this file for documentation.
+
+# For the benefit of HTML viewers:
+# <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
 
@@ -239,7 +245,7 @@ meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
 
-__8774229a1a0ce7fd056d81ba0b077f79
+__b39f25c213ceb0418551084d1bddeb20
 meta::bootstrap('perldoc', <<'__c63395cbc6f7160b603befbb2d9b6700');
 =head1 Self-modifying Perl script
 
