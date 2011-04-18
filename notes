@@ -336,19 +336,19 @@ my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys)
 join "\n", map serialize_single($_), @ordered_keys;
 __d83ae43551c0f58d1d0ce576402a315a
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
-meta::function('edit', <<'__36bd3f2c1165d0c041b0fa9a96a85378');
+meta::function('edit', <<'__c31d73791820a10ec910af043f67d4eb');
 my ($name, %options) = @_;
 my $extension = extension_for($name);
 
 die "$name is virtual or does not exist" unless exists $data{$name};
-die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || exists $options{'-f'};
+die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $options{'-f'};
 
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
             execute => $name !~ /^bootstrap::/)});
 save() unless $data{'data::edit::no-save'};
 '';
-__36bd3f2c1165d0c041b0fa9a96a85378
+__c31d73791820a10ec910af043f67d4eb
 meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
 meta::function('export', <<'__388e0cc60507443cb1c0cc3e2658cfef');
 # Exports data into a text file.
@@ -628,16 +628,16 @@ my ($name) = @_;
 $name =~ s/^[^:]*:://;
 $name;
 __62efb9f22157835940af1d5feae98d98
-meta::internal_function('attribute_is', <<'__7bf6fde9d247cbba37d5e0ff6a9dc1ee');
+meta::internal_function('attribute_is', <<'__7a375b8f2d341b09f3ba6c077450cb7b');
 my ($a, %options) = @_;
 my %inherited     = parent_attributes(grep /^parent::/o, sort keys %data) if $options{'-u'} or $options{'-U'};
 my $criteria      = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
 
 $a =~ /$criteria/ and ! $options{'-u'} || ! $inherited{$a} and ! $options{'-U'} || $inherited{$a}
-                  and ! $options{'-d'} || fast_hash(retrieve($a)) ne $inherited{$a} and ! $options{'-D'} || fast_hash(retrieve($a)) eq $inherited{$a}
+                  and ! $options{'-d'} || $inherited{$a} && fast_hash(retrieve($a)) ne $inherited{$a} and ! $options{'-D'} || (! $inherited{$a} || fast_hash(retrieve($a)) eq $inherited{$a})
                   and ! $options{'-I'} || ! $transient{inherit}{namespace($a)} and ! $options{'-i'} || $transient{inherit}{namespace($a)}
                   and ! $options{'-S'} || ! $a =~ /^state::/o and ! $options{'-M'} || ! /^meta::/o and ! $options{'-m'} || $a =~ /^meta::/o;
-__7bf6fde9d247cbba37d5e0ff6a9dc1ee
+__7a375b8f2d341b09f3ba6c077450cb7b
 meta::internal_function('cache', <<'__c119f9d7ea9a147c6d526a6283fb119a');
 my ($name, %pairs) = @_;
 if (%pairs) {associate("cache::$name", join "\n", map {$pairs{$_} =~ s/\n//g; "$_ $pairs{$_}"} sort keys %pairs)}
@@ -949,7 +949,7 @@ __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('object', <<'__f23aa0012cbf6a998cb464002582e694');
+meta::parent('object', <<'__d6fb208217d7616534e5991bf0ad95c3');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
 bootstrap::initialization               b39f25c213ceb0418551084d1bddeb20
 bootstrap::perldoc                      c63395cbc6f7160b603befbb2d9b6700
@@ -963,7 +963,7 @@ function::cp                            e5fee448a74ecbf4ae215e6b43dfc048
 function::create                        090c342a2dc304b39c643d53350474a0
 function::current-state                 d83ae43551c0f58d1d0ce576402a315a
 function::disable                       49db26fcd680ca34c1f52629a7375d2f
-function::edit                          36bd3f2c1165d0c041b0fa9a96a85378
+function::edit                          c31d73791820a10ec910af043f67d4eb
 function::enable                        37af2d2e603e2455be227ae3c5a42c3a
 function::export                        388e0cc60507443cb1c0cc3e2658cfef
 function::extern                        6a9fa8c2a8a4eaae9fe8d38e402145e4
@@ -1002,7 +1002,7 @@ function::verify                        d31b85fffd464ddf516d2afeb63dcbde
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
 internal_function::associate            fc4f785bcf3ffe3225a73a1fdd314703
 internal_function::attribute            62efb9f22157835940af1d5feae98d98
-internal_function::attribute_is         7bf6fde9d247cbba37d5e0ff6a9dc1ee
+internal_function::attribute_is         7a375b8f2d341b09f3ba6c077450cb7b
 internal_function::cache                c119f9d7ea9a147c6d526a6283fb119a
 internal_function::chmod_self           b13487447c65f2dc790bd6b21dde89dd
 internal_function::dangerous            4b8343178d6d4d1b760d61b1cfda008c
@@ -1054,7 +1054,7 @@ meta::type::retriever                   6e847a9d205e4a5589765a3366cdd115
 meta::type::state                       c1f29670be26f1df6100ffe4334e1202
 retriever::file                         b8e7aefc98b8341260d91f21dc61d749
 retriever::id                           a791a5735e9b4f2cb8b99fd39dc17bc3
-__f23aa0012cbf6a998cb464002582e694
+__d6fb208217d7616534e5991bf0ad95c3
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 internal::main();
