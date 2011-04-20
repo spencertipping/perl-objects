@@ -618,7 +618,11 @@ meta::function('shell', <<'__dc8238ad70b1e02eaf230c4f1bd21690');
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
 shell::repl();
 __dc8238ad70b1e02eaf230c4f1bd21690
-meta::function('size', 'length(serialize());');
+meta::function('size', <<'__140728e163286a0f3f514f468c475cfc');
+my $size = 0;
+$size += length $data{$_} for keys %data;
+sprintf "% 7d % 7d", length(serialize()), $size;
+__140728e163286a0f3f514f468c475cfc
 meta::function('snapshot', <<'__d3d84a364524eeb8ee90623f545187e8');
 my ($name) = @_;
 file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
@@ -1065,7 +1069,7 @@ __c52308d05ebb4ff61c5fc36e6d9c7a8a
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('/home/spencertipping/bin/object', <<'__3138f43dfe4f21288bd577b3fa2ae8a6');
+meta::parent('/home/spencertipping/bin/object', <<'__a97c1b7831b7fb208b35ad47ecdaed01');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
 bootstrap::initialization               b39f25c213ceb0418551084d1bddeb20
 bootstrap::perldoc                      c63395cbc6f7160b603befbb2d9b6700
@@ -1106,7 +1110,7 @@ function::serialize                     5148e8ca46eeb3e297f76d098e496bcf
 function::serialize_single              ef0f63556d22816ed102d3bbe2172b28
 function::sh                            9647fa9227bef6c139a79d0dd4acc8b4
 function::shell                         dc8238ad70b1e02eaf230c4f1bd21690
-function::size                          ed32c644d604fdc61dda48bd3fbe5559
+function::size                          140728e163286a0f3f514f468c475cfc
 function::snapshot                      d3d84a364524eeb8ee90623f545187e8
 function::state                         119111f84c3e32a5536838ac84bc6f10
 function::touch                         819878bc64df094d3323c7050f2c3e97
@@ -1170,7 +1174,7 @@ meta::type::retriever                   6e847a9d205e4a5589765a3366cdd115
 meta::type::state                       c1f29670be26f1df6100ffe4334e1202
 retriever::file                         b8e7aefc98b8341260d91f21dc61d749
 retriever::id                           a791a5735e9b4f2cb8b99fd39dc17bc3
-__3138f43dfe4f21288bd577b3fa2ae8a6
+__a97c1b7831b7fb208b35ad47ecdaed01
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('html-sdoc', <<'__54d22ab83d9f3f2e27ef51033b4817a7');
 my ($attribute) = @_;
