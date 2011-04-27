@@ -799,6 +799,7 @@ meta::internal_function('parent_ordering', <<'__');
 # You can pass in a list of parents if you want; otherwise it uses all of them.
 
 my @parents = @_ ? @_ : grep /^parent::/, keys %data;
+my %all_parents = map {$_ => 1} @parents;
 
 my %parents_of = map {
   my $t = $_;
@@ -816,7 +817,7 @@ $parent_count = sub {
 
 my %inverses;
 push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
-map @{$inverses{$_}}, sort keys %inverses;
+grep exists $all_parents{$_}, map @{$inverses{$_}}, sort keys %inverses;
 __
 meta::internal_function('retrieve', <<'__');
 my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;

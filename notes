@@ -807,6 +807,7 @@ meta::internal_function('parent_ordering', <<'__');
 # You can pass in a list of parents if you want; otherwise it uses all of them.
 
 my @parents = @_ ? @_ : grep /^parent::/, keys %data;
+my %all_parents = map {$_ => 1} @parents;
 
 my %parents_of = map {
   my $t = $_;
@@ -824,7 +825,7 @@ $parent_count = sub {
 
 my %inverses;
 push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
-map @{$inverses{$_}}, sort keys %inverses;
+grep exists $all_parents{$_}, map @{$inverses{$_}}, sort keys %inverses;
 __
 meta::internal_function('retrieve', <<'__');
 my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;
@@ -1037,7 +1038,7 @@ internal_function::invoke_editor_on     1448132d5294a4b8390b4a684d8a78f9
 internal_function::is_locked            42c3c89625863a31105d1df49a2a762f
 internal_function::namespace            93213d60cafb9627e0736b48cd1f0760
 internal_function::parent_attributes    480776f176ab728c6b7450287be5782a
-internal_function::parent_ordering      61a829bfd725b367836b5342d26efce1
+internal_function::parent_ordering      63a68ab7e6e7b8a3de57316f76599fb8
 internal_function::retrieve             0b6f4342009684fdfa259f45ac75ae37
 internal_function::retrieve_with_hooks  5186a0343624789d08d1cc2084550f3d
 internal_function::select_keys          1cd075b241905d9ab3199e680e86dced
