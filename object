@@ -533,7 +533,7 @@ meta::function('update-from', <<'__');
 
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-around_hook('before-update-from-invocation', separate_options(@_), sub {
+around_hook('update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
   my %parent_id_cache = cache('parent-identification');
   my %already_seen;
@@ -796,9 +796,8 @@ __
 meta::internal_function('parent_ordering', <<'__');
 # Topsorts the parents by dependency chain. The simplest way to do this is to
 # transitively compute the number of parents referred to by each parent.
-# You can pass in a list of parents if you want; otherwise it uses all of them.
 
-my @parents = @_ ? @_ : grep /^parent::/, keys %data;
+my @parents = @_;
 my %all_parents = map {$_ => 1} @parents;
 
 my %parents_of = map {

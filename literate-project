@@ -901,7 +901,7 @@ meta::function('update-from', <<'__');
 
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-around_hook('before-update-from-invocation', separate_options(@_), sub {
+around_hook('update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
   my %parent_id_cache = cache('parent-identification');
   my %already_seen;
@@ -1191,9 +1191,8 @@ __
 meta::internal_function('parent_ordering', <<'__');
 # Topsorts the parents by dependency chain. The simplest way to do this is to
 # transitively compute the number of parents referred to by each parent.
-# You can pass in a list of parents if you want; otherwise it uses all of them.
 
-my @parents = @_ ? @_ : grep /^parent::/, keys %data;
+my @parents = @_;
 my %all_parents = map {$_ => 1} @parents;
 
 my %parents_of = map {
@@ -1359,14 +1358,14 @@ function::sdoc                           060cfa349e629eb90a82b87a8ba00c1d
 function::sdoc-html                      5fffe6139a81ff67ee063ebcbfadad2a
 function::sdocp                          8b7ed5bbd537234ae53c0691b6d02c97
 meta::type::sdoc                         392c65eddae300e2aa67014b85884979
-parent::/home/spencertipping/bin/object  385b13843913ed1dcb550a46803b703f
+parent::/home/spencertipping/bin/object  056e5fcfd807c6aaaf69ea4be5cfe809
 retriever::html-sdoc                     54d22ab83d9f3f2e27ef51033b4817a7
 retriever::sdoc                          6de8ec1f1436fb8e7477b533c321081b
 retriever::sdocp                         fef74cd94fa8761618662802f0bfc171
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
-parent::/home/spencertipping/bin/object  385b13843913ed1dcb550a46803b703f
+parent::/home/spencertipping/bin/object  056e5fcfd807c6aaaf69ea4be5cfe809
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
@@ -1415,7 +1414,7 @@ function::state                         119111f84c3e32a5536838ac84bc6f10
 function::touch                         819878bc64df094d3323c7050f2c3e97
 function::unlock                        8fc9bd69f3466f0b54ee2c6965f68cea
 function::update                        4de1a6a4085836590a3b1ef997f9d5ea
-function::update-from                   d86a78c26adf0414eedbceec62affb8e
+function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
 function::usage                         b36ead828ad566c8e3919f3b40fb99e6
 function::verify                        d31b85fffd464ddf516d2afeb63dcbde
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
@@ -1439,7 +1438,7 @@ internal_function::invoke_editor_on     1448132d5294a4b8390b4a684d8a78f9
 internal_function::is_locked            42c3c89625863a31105d1df49a2a762f
 internal_function::namespace            93213d60cafb9627e0736b48cd1f0760
 internal_function::parent_attributes    480776f176ab728c6b7450287be5782a
-internal_function::parent_ordering      63a68ab7e6e7b8a3de57316f76599fb8
+internal_function::parent_ordering      87bee77390de5b9e9c6e07f9af9eb70a
 internal_function::retrieve             0b6f4342009684fdfa259f45ac75ae37
 internal_function::retrieve_with_hooks  5186a0343624789d08d1cc2084550f3d
 internal_function::select_keys          1cd075b241905d9ab3199e680e86dced
@@ -1479,18 +1478,18 @@ meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
 parent::/home/spencertipping/bin/object  293415c4d45c10239298fa46b01cff17
 __
 meta::parent('development', <<'__');
-parent::./sdoc            695ee23540134cee92b1d56860526ffc
+parent::./sdoc            41011745c353862f8dfda5ece6eae515
 parent::configuration     ac11a129422079b6afaee9d2ce14905c
-parent::notes             7769dd65d580c1ddd9d5f69acea9e10d
-parent::preprocessor      c83406d8ecb069f1ae83fe971181706b
-parent::repository        39cb8625b0d67ef96f39364732fe6c17
-parent::vim-highlighters  cb6d58d7dda66f7b5722443a8d14298a
+parent::notes             3a81cce2349bbfa2527cf029edd46b56
+parent::preprocessor      0e42c50f2e04e3bce8cb4d32ab93a24d
+parent::repository        d8ff4ae14ecc2757080eccc65b442ce5
+parent::vim-highlighters  a254d7a65b095f9ed2c13b2f292652d7
 __
 meta::parent('notes', <<'__');
 function::note    bcbfeac6dd2112f47296265444570a6e
 function::notes   15b3aca0cba3b327a984928154eda2b5
 meta::type::note  7ca6b375a66ecbfd14bef5bcefeb6643
-parent::object    385b13843913ed1dcb550a46803b703f
+parent::object    056e5fcfd807c6aaaf69ea4be5cfe809
 __
 meta::parent('object', <<'__');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
@@ -1539,7 +1538,7 @@ function::state                         119111f84c3e32a5536838ac84bc6f10
 function::touch                         819878bc64df094d3323c7050f2c3e97
 function::unlock                        8fc9bd69f3466f0b54ee2c6965f68cea
 function::update                        4de1a6a4085836590a3b1ef997f9d5ea
-function::update-from                   d86a78c26adf0414eedbceec62affb8e
+function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
 function::usage                         b36ead828ad566c8e3919f3b40fb99e6
 function::verify                        d31b85fffd464ddf516d2afeb63dcbde
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
@@ -1563,7 +1562,7 @@ internal_function::invoke_editor_on     1448132d5294a4b8390b4a684d8a78f9
 internal_function::is_locked            42c3c89625863a31105d1df49a2a762f
 internal_function::namespace            93213d60cafb9627e0736b48cd1f0760
 internal_function::parent_attributes    480776f176ab728c6b7450287be5782a
-internal_function::parent_ordering      63a68ab7e6e7b8a3de57316f76599fb8
+internal_function::parent_ordering      87bee77390de5b9e9c6e07f9af9eb70a
 internal_function::retrieve             0b6f4342009684fdfa259f45ac75ae37
 internal_function::retrieve_with_hooks  5186a0343624789d08d1cc2084550f3d
 internal_function::select_keys          1cd075b241905d9ab3199e680e86dced
@@ -1601,7 +1600,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           66e539d29e9afa903569efad0eb7c886
 meta::type::template           25f4d6eafb1d3eea6d5d3d9a71a5623e
-parent::object                 385b13843913ed1dcb550a46803b703f
+parent::object                 056e5fcfd807c6aaaf69ea4be5cfe809
 retriever::pp                  f4a8c288d69963d6ebc5ce0bf7794777
 template::comment              7f8e9be5cd7c865fa64efe3123f62b38
 template::eval                 eb0b1058649eb2d833f348540516b358
@@ -1612,12 +1611,12 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               1c0273217c5b9f2756bb14a4a00aa7e2
 meta::type::cached_dependency                   e9455b403cbff27bbcc41d917fef482f
-parent::/home/spencertipping/bin/configuration  45f229756b591eded9497abfd8b59e89
+parent::/home/spencertipping/bin/configuration  ad4d8b8232d9cfda76b4bf8f4521232d
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                bd231af998c353790253bc6660be0b90
 meta::type::vim_highlighter  d6ea5b59c918d4e2cfebf5c880f43be8
-parent::object               385b13843913ed1dcb550a46803b703f
+parent::object               056e5fcfd807c6aaaf69ea4be5cfe809
 __
 meta::resource('header', <<'__');
 - include resource::header-packages

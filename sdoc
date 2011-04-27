@@ -649,7 +649,7 @@ meta::function('update-from', <<'__');
 
 # Note that this assumes you trust the remote script. If you don't, then you shouldn't update from it.
 
-around_hook('before-update-from-invocation', separate_options(@_), sub {
+around_hook('update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
   my %parent_id_cache = cache('parent-identification');
   my %already_seen;
@@ -912,9 +912,8 @@ __
 meta::internal_function('parent_ordering', <<'__');
 # Topsorts the parents by dependency chain. The simplest way to do this is to
 # transitively compute the number of parents referred to by each parent.
-# You can pass in a list of parents if you want; otherwise it uses all of them.
 
-my @parents = @_ ? @_ : grep /^parent::/, keys %data;
+my @parents = @_;
 my %all_parents = map {$_ => 1} @parents;
 
 my %parents_of = map {
@@ -1122,7 +1121,7 @@ function::state                         119111f84c3e32a5536838ac84bc6f10
 function::touch                         819878bc64df094d3323c7050f2c3e97
 function::unlock                        8fc9bd69f3466f0b54ee2c6965f68cea
 function::update                        4de1a6a4085836590a3b1ef997f9d5ea
-function::update-from                   d86a78c26adf0414eedbceec62affb8e
+function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
 function::usage                         b36ead828ad566c8e3919f3b40fb99e6
 function::verify                        d31b85fffd464ddf516d2afeb63dcbde
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
@@ -1146,7 +1145,7 @@ internal_function::invoke_editor_on     1448132d5294a4b8390b4a684d8a78f9
 internal_function::is_locked            42c3c89625863a31105d1df49a2a762f
 internal_function::namespace            93213d60cafb9627e0736b48cd1f0760
 internal_function::parent_attributes    480776f176ab728c6b7450287be5782a
-internal_function::parent_ordering      63a68ab7e6e7b8a3de57316f76599fb8
+internal_function::parent_ordering      87bee77390de5b9e9c6e07f9af9eb70a
 internal_function::retrieve             0b6f4342009684fdfa259f45ac75ae37
 internal_function::retrieve_with_hooks  5186a0343624789d08d1cc2084550f3d
 internal_function::select_keys          1cd075b241905d9ab3199e680e86dced
