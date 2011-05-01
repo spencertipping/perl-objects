@@ -368,7 +368,9 @@ my @attributes           = select_keys(%$options, '--criteria' => join('|', @cri
 
 $pattern = qr/$pattern/;
 
-my @m_attributes, @m_line_numbers, @m_lines;
+my @m_attributes;
+my @m_line_numbers;
+my @m_lines;
 
 for my $k (@attributes) {
   next unless length $k;
@@ -377,9 +379,9 @@ for my $k (@attributes) {
     next unless $lines[$_] =~ $pattern;
     push @m_attributes,   $k;
     push @m_line_numbers, $_ + 1;
-    push @m_lines,        $lines[$_] // ''}} 
+    push @m_lines,        '' . ($lines[$_] // '')}}
 
-if ($$options{'-c'}) {
+unless ($$options{'-C'}) {
   s/($pattern)/\033[1;31m\1\033[0;0m/g for @m_lines;
   s/^/\033[1;34m/o for @m_attributes;
   s/^/\033[1;32m/o && s/$/\033[0;0m/o for @m_line_numbers}
@@ -983,7 +985,7 @@ function::edit                          c31d73791820a10ec910af043f67d4eb
 function::enable                        37af2d2e603e2455be227ae3c5a42c3a
 function::export                        388e0cc60507443cb1c0cc3e2658cfef
 function::extern                        6a9fa8c2a8a4eaae9fe8d38e402145e4
-function::grep                          f2f28b81f4bcf4cf9fbe9e27bc9447b0
+function::grep                          3ad630ca30f1abae3cf28ef6293f0e00
 function::hash                          7a903f90f2c8ed27af7e030f407d9f7b
 function::hook                          d74d8e2b611342af6a0897e0bd62e6e6
 function::hooks                         230122bdc8929884e45b2f78a7743e2e

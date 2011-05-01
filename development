@@ -422,7 +422,9 @@ my @attributes           = select_keys(%$options, '--criteria' => join('|', @cri
 
 $pattern = qr/$pattern/;
 
-my @m_attributes, @m_line_numbers, @m_lines;
+my @m_attributes;
+my @m_line_numbers;
+my @m_lines;
 
 for my $k (@attributes) {
   next unless length $k;
@@ -431,9 +433,9 @@ for my $k (@attributes) {
     next unless $lines[$_] =~ $pattern;
     push @m_attributes,   $k;
     push @m_line_numbers, $_ + 1;
-    push @m_lines,        $lines[$_] // ''}} 
+    push @m_lines,        '' . ($lines[$_] // '')}}
 
-if ($$options{'-c'}) {
+unless ($$options{'-C'}) {
   s/($pattern)/\033[1;31m\1\033[0;0m/g for @m_lines;
   s/^/\033[1;34m/o for @m_attributes;
   s/^/\033[1;32m/o && s/$/\033[0;0m/o for @m_line_numbers}
@@ -1193,14 +1195,14 @@ function::sdoc                           060cfa349e629eb90a82b87a8ba00c1d
 function::sdoc-html                      5fffe6139a81ff67ee063ebcbfadad2a
 function::sdocp                          8b7ed5bbd537234ae53c0691b6d02c97
 meta::type::sdoc                         392c65eddae300e2aa67014b85884979
-parent::/home/spencertipping/bin/object  056e5fcfd807c6aaaf69ea4be5cfe809
+parent::/home/spencertipping/bin/object  4e114ee5933f8a10ce856c55da4aea34
 retriever::html-sdoc                     54d22ab83d9f3f2e27ef51033b4817a7
 retriever::sdoc                          6de8ec1f1436fb8e7477b533c321081b
 retriever::sdocp                         fef74cd94fa8761618662802f0bfc171
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
-parent::/home/spencertipping/bin/object  056e5fcfd807c6aaaf69ea4be5cfe809
+parent::/home/spencertipping/bin/object  4e114ee5933f8a10ce856c55da4aea34
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
@@ -1220,7 +1222,7 @@ function::edit                          c31d73791820a10ec910af043f67d4eb
 function::enable                        37af2d2e603e2455be227ae3c5a42c3a
 function::export                        388e0cc60507443cb1c0cc3e2658cfef
 function::extern                        6a9fa8c2a8a4eaae9fe8d38e402145e4
-function::grep                          f2f28b81f4bcf4cf9fbe9e27bc9447b0
+function::grep                          3ad630ca30f1abae3cf28ef6293f0e00
 function::hash                          7a903f90f2c8ed27af7e030f407d9f7b
 function::hook                          d74d8e2b611342af6a0897e0bd62e6e6
 function::hooks                         230122bdc8929884e45b2f78a7743e2e
@@ -1316,7 +1318,7 @@ meta::parent('notes', <<'__');
 function::note    bcbfeac6dd2112f47296265444570a6e
 function::notes   15b3aca0cba3b327a984928154eda2b5
 meta::type::note  7ca6b375a66ecbfd14bef5bcefeb6643
-parent::object    056e5fcfd807c6aaaf69ea4be5cfe809
+parent::object    4e114ee5933f8a10ce856c55da4aea34
 __
 meta::parent('object', <<'__');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
@@ -1427,7 +1429,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           66e539d29e9afa903569efad0eb7c886
 meta::type::template           25f4d6eafb1d3eea6d5d3d9a71a5623e
-parent::object                 056e5fcfd807c6aaaf69ea4be5cfe809
+parent::object                 4e114ee5933f8a10ce856c55da4aea34
 retriever::pp                  f4a8c288d69963d6ebc5ce0bf7794777
 template::comment              7f8e9be5cd7c865fa64efe3123f62b38
 template::eval                 eb0b1058649eb2d833f348540516b358
@@ -1438,12 +1440,12 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               1c0273217c5b9f2756bb14a4a00aa7e2
 meta::type::cached_dependency                   e9455b403cbff27bbcc41d917fef482f
-parent::/home/spencertipping/bin/configuration  ad4d8b8232d9cfda76b4bf8f4521232d
+parent::/home/spencertipping/bin/configuration  4217fa0ccd97c9eecfbb342e8f740271
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                bd231af998c353790253bc6660be0b90
 meta::type::vim_highlighter  d6ea5b59c918d4e2cfebf5c880f43be8
-parent::object               056e5fcfd807c6aaaf69ea4be5cfe809
+parent::object               4e114ee5933f8a10ce856c55da4aea34
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('html-sdoc', <<'__');
