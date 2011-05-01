@@ -365,7 +365,9 @@ my @attributes           = select_keys(%$options, '--criteria' => join('|', @cri
 
 $pattern = qr/$pattern/;
 
-my @m_attributes, @m_line_numbers, @m_lines;
+my @m_attributes;
+my @m_line_numbers;
+my @m_lines;
 
 for my $k (@attributes) {
   next unless length $k;
@@ -374,9 +376,9 @@ for my $k (@attributes) {
     next unless $lines[$_] =~ $pattern;
     push @m_attributes,   $k;
     push @m_line_numbers, $_ + 1;
-    push @m_lines,        $lines[$_] // ''}} 
+    push @m_lines,        '' . ($lines[$_] // '')}}
 
-if ($$options{'-c'}) {
+unless ($$options{'-C'}) {
   s/($pattern)/\033[1;31m\1\033[0;0m/g for @m_lines;
   s/^/\033[1;34m/o for @m_attributes;
   s/^/\033[1;32m/o && s/$/\033[0;0m/o for @m_line_numbers}
