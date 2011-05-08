@@ -303,6 +303,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __
+meta::data('permanent-identity', 'f29f40d2b47ab782312a207ed9958b13');
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
 return ls('-a', '^alias::') unless defined $name;
@@ -342,11 +343,7 @@ around_hook('create', $name, $value, sub {
   associate($name, defined $value ? $value : '');
   edit($name) unless defined $value});
 __
-meta::function('current-state', <<'__');
-my @valid_keys   = grep ! /^state::/, sort keys %data;
-my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys));
-join "\n", map serialize_single($_), @ordered_keys;
-__
+meta::function('current-state', 'serialize(\'-pS\');');
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($name, %options) = @_;
@@ -412,6 +409,10 @@ meta::function('identity', 'retrieve(\'data::permanent-identity\') || associate(
 meta::function('import', <<'__');
 my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
+__
+meta::function('import-setting', <<'__');
+my ($setting) = @_;
+associate("setting::$setting", file::read("$ENV{HOME}/$setting"));
 __
 meta::function('initial-state', '$transient{initial};');
 meta::function('is', <<'__');
@@ -729,7 +730,13 @@ my ($mode_function)      = @_;
 my (undef, undef, $mode) = stat $0;
 chmod &$mode_function($mode), $0;
 __
-meta::internal_function('create_setting', 'terminal::info("creating $ENV{HOME}/$_"), file::write("$ENV{HOME}/$_", retrieve("pp::$_"), mkpath => 1) for @_;');
+meta::internal_function('create_setting', <<'__');
+for my $setting (@_) {
+  my $filename = $setting;
+  $filename =~ s/^setting:://;
+  terminal::info("creating $ENV{HOME}/$filename");
+  file::write("$ENV{HOME}/$filename", retrieve("pp::$setting"), mkpath => 1)}
+__
 meta::internal_function('dangerous', <<'__');
 # Wraps a computation that may produce an error.
 my ($message, $computation) = @_;
@@ -1043,7 +1050,7 @@ function::child                         f69646398c3123d3d939a7f2b3156606
 function::clone                         54e00ff2103e54423d4c9febb97ce063
 function::cp                            e5fee448a74ecbf4ae215e6b43dfc048
 function::create                        090c342a2dc304b39c643d53350474a0
-function::current-state                 d83ae43551c0f58d1d0ce576402a315a
+function::current-state                 48c98d3bd74f3ee14d358fd127a7867a
 function::disable                       49db26fcd680ca34c1f52629a7375d2f
 function::edit                          c31d73791820a10ec910af043f67d4eb
 function::enable                        37af2d2e603e2455be227ae3c5a42c3a
@@ -1149,7 +1156,7 @@ function::child                         f69646398c3123d3d939a7f2b3156606
 function::clone                         54e00ff2103e54423d4c9febb97ce063
 function::cp                            e5fee448a74ecbf4ae215e6b43dfc048
 function::create                        090c342a2dc304b39c643d53350474a0
-function::current-state                 d83ae43551c0f58d1d0ce576402a315a
+function::current-state                 48c98d3bd74f3ee14d358fd127a7867a
 function::disable                       49db26fcd680ca34c1f52629a7375d2f
 function::edit                          c31d73791820a10ec910af043f67d4eb
 function::enable                        37af2d2e603e2455be227ae3c5a42c3a
@@ -1246,7 +1253,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           66e539d29e9afa903569efad0eb7c886
 meta::type::template           25f4d6eafb1d3eea6d5d3d9a71a5623e
-parent::object                 4e114ee5933f8a10ce856c55da4aea34
+parent::object                 9088a9cf9c95b7c1184f1c3b528824ba
 retriever::pp                  f4a8c288d69963d6ebc5ce0bf7794777
 template::comment              7f8e9be5cd7c865fa64efe3123f62b38
 template::eval                 eb0b1058649eb2d833f348540516b358

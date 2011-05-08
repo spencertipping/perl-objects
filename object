@@ -327,11 +327,7 @@ around_hook('create', $name, $value, sub {
   associate($name, defined $value ? $value : '');
   edit($name) unless defined $value});
 __
-meta::function('current-state', <<'__');
-my @valid_keys   = grep ! /^state::/, sort keys %data;
-my @ordered_keys = (grep(/^meta::/, @valid_keys), grep(! /^meta::/, @valid_keys));
-join "\n", map serialize_single($_), @ordered_keys;
-__
+meta::function('current-state', 'serialize(\'-pS\');');
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($name, %options) = @_;
