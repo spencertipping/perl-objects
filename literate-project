@@ -801,7 +801,7 @@ my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//g
 my $escape_all    = sub {s/&/&amp;/g; s/</&lt;/g; s/>/&gt;/g};
 my $escape_some   = sub {s/&/&amp;/g; s/<(?!\/|($known_tags)[^>]*>.*<\/\1>)/&lt;/gs};
 
-my $code          = sub {&$escape_all(); &$unindent();                             push @markup, &$indent() . "<pre class='code'>$_</pre>"};
+my $code          = sub {&$escape_all(); &$unindent(); s/^c\n//;                   push @markup, &$indent() . "<pre class='code'>$_</pre>"};
 my $quoted        = sub {&$escape_all(); &$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, &$indent() . "<pre class='quoted'>$_</pre>"};
 
 my $paragraph     = sub {&$escape_some(); push @markup, &$indent() . "<p>$_</p>"};
@@ -1353,7 +1353,7 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('./sdoc', <<'__');
 function::sdoc                           060cfa349e629eb90a82b87a8ba00c1d
-function::sdoc-html                      c694b83927cd97c5f1af9768c120d14b
+function::sdoc-html                      4ec4c1710abddb753db5557d79e6b165
 function::sdocp                          8b7ed5bbd537234ae53c0691b6d02c97
 meta::type::sdoc                         392c65eddae300e2aa67014b85884979
 parent::/home/spencertipping/bin/object  9088a9cf9c95b7c1184f1c3b528824ba
@@ -1476,7 +1476,7 @@ meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
 parent::/home/spencertipping/bin/object  293415c4d45c10239298fa46b01cff17
 __
 meta::parent('development', <<'__');
-parent::./sdoc            8995ae5c43db023f06cecfe5e5d37d1a
+parent::./sdoc            7123644754d371e203fe3cb97af02af4
 parent::configuration     ac11a129422079b6afaee9d2ce14905c
 parent::notes             d70bf6eb1e4108e29a132c399e599c66
 parent::preprocessor      30aa7c5087c842a5eaf3ddccd9b5046f
