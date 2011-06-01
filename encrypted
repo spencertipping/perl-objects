@@ -124,11 +124,10 @@ meta::define_form 'encrypted', sub {
     my ($command, @arguments) = @_;
     return terminal::error("temporary decrypted attribute $name already exists") if exists $data{$name};
 
-    associate($name, decrypt(retrieve("encrypted::$name")));
+    unhide($name);
     my $result = dangerous('', sub {&$command($name, @arguments)});
-    associate("encrypted::$name", encrypt(retrieve($name)));
+    hide($name);
 
-    rm($name);
     $result;
   };
 };
@@ -367,11 +366,6 @@ around_hook('create', $name, $value, sub {
   edit($name) unless defined $value});
 __
 meta::function('current-state', 'serialize(\'-pS\');');
-meta::function('decrypt', <<'__');
-# Decrypt data using the password stored in the transient table.
-use Crypt::CBC;
-Crypt::CBC->new(-key => encryption_key(), -cipher => 'Blowfish')->decrypt(unpack 'u*', $_[0]);
-__
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($name, %options) = @_;
@@ -387,11 +381,6 @@ save() unless $data{'data::edit::no-save'};
 '';
 __
 meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
-meta::function('encrypt', <<'__');
-# Encrypt data using the password stored in the transient table.
-use Crypt::CBC;
-join '', pack 'u*', Crypt::CBC->new(-key => encryption_key(), -salt => substr(state(), 0, 8), -cipher => 'Blowfish')->encrypt($_[0]);
-__
 meta::function('export', <<'__');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
@@ -431,6 +420,10 @@ unless ($$options{'-C'}) {
 table_display([@m_attributes], [@m_line_numbers], [@m_lines]);
 __
 meta::function('hash', 'fast_hash(@_);');
+meta::function('hidden', <<'__');
+# List all hidden attributes.
+map attribute($_), select_keys('--namespace' => 'encrypted');
+__
 meta::function('hide', <<'__');
 # Encrypts an attribute.
 associate("encrypted::$_", encrypt(retrieve($_))), rm($_) for @_;
@@ -455,14 +448,15 @@ attribute_is($attribute, %$options);
 __
 meta::function('key', <<'__');
 use Term::ReadKey;
+use Digest::MD5 qw/md5_base64/;
 
 ReadMode('noecho');
 print 'encryption password: ';
-my $k = $transient{encryption_key} = fast_hash(ReadLine(0));
+$transient{encryption_key} = md5_base64(ReadLine(0));
 print "\n";
 ReadMode(0);
 
-$k;
+terminal::info('encryption key set');
 __
 meta::function('load-state', <<'__');
 around_hook('load-state', @_, sub {
@@ -669,6 +663,7 @@ hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
 __
 meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
+meta::indicator('key', 'defined $transient{encryption_key} ? "\\033[1;35m " . substr(fast_hash($transient{encryption_key}), 0, 4) . " \\033[0;0m" : "\\033[1;35m -nk- \\033[0;0m";');
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
 meta::indicator('state', <<'__');
 my $state = $options{state} // state();
@@ -742,7 +737,25 @@ meta::internal_function('debug_trace', <<'__');
 terminal::debug(join ', ', @_);
 wantarray ? @_ : $_[0];
 __
-meta::internal_function('encryption_key', '$transient{encryption_key} // key();');
+meta::internal_function('decrypt', <<'__');
+# Decrypt data using the password stored in the transient table.
+use Crypt::CBC;
+my ($hash, @lines) = split /\n/, Crypt::CBC->new(-key => encryption_key(), -cipher => 'Blowfish')->decrypt(unpack 'u*', $_[0]);
+my $data = join "\n", @lines;
+my $observed_hash = fast_hash($data);
+
+die 'decrypted data fails integrity check' unless $observed_hash eq $hash;
+$data;
+__
+meta::internal_function('encrypt', <<'__');
+# Encrypt data with a hash to make sure that it gets decrypted properly.
+use Crypt::CBC;
+join '', pack 'u*', Crypt::CBC->new(-key => encryption_key(), -salt => substr(state(), 0, 8), -cipher => 'Blowfish')->encrypt(fast_hash($_[0]) . "\n" . $_[0]);
+__
+meta::internal_function('encryption_key', <<'__');
+key() unless defined $transient{encryption_key};
+$transient{encryption_key};
+__
 meta::internal_function('execute', <<'__');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
