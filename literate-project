@@ -237,6 +237,16 @@ meta::define_form 'inc', sub {
   }
 };
 __
+meta::meta('type::indicator', <<'__');
+# Shell indicator function. The output of each of these is automatically
+# appended to the shell prompt.
+
+meta::configure 'indicator', inherit => 1, extension => '.pl';
+meta::define_form 'indicator', sub {
+  my ($name, $value) = @_;
+  *{"indicator::$name"} = meta::eval_in("sub {\n$value\n}", "indicator::$name");
+};
+__
 meta::meta('type::internal_function', <<'__');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
@@ -978,6 +988,13 @@ meta::function('vim', <<'__');
 # Installs VIM highlighters.
 file::write("$ENV{'HOME'}/.vim/syntax/$_.vim", retrieve("vim_highlighter::$_")) for grep s/^vim_highlighter:://o, keys %data;
 __
+meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
+meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
+meta::indicator('state', <<'__');
+my $state = $options{state} // state();
+my $color = $state ne $transient{initial} ? 33 : 30;
+"\033[1;${color}m" . substr($state, 0, 4) . "\033[0;0m";
+__
 meta::internal_function('around_hook', <<'__');
 # around_hook('hookname', @args, sub {
 #   stuff;
@@ -1311,13 +1328,11 @@ sub run {execute(parse(tokenize(@_)))}
 
 sub prompt {
   my %options = @_;
-  my $name    = $options{name}  // ::name();
-  my $state   = $options{state} // ::state();
-  my $other   = $state ne $transient{initial} ? 33 : 30;
-  my $locked  = ::is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
-  my $cc      = length ::retrieve('data::current-continuation') ? "\033[1;36mcc\033[0;0m" : '';
+  my $name    = $options{name} // ::name();
 
-  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$cc$locked\033[1;34m$options{stuff}\033[0;0m "}
+  my $indicators = join '', map &{"::$_"}(), ::select_keys('--namespace' => 'indicator');
+
+  "\033[1;32m$name\033[0;0m$indicators "}
 
 sub repl {
   my %options = @_;
@@ -1356,14 +1371,14 @@ function::sdoc                           060cfa349e629eb90a82b87a8ba00c1d
 function::sdoc-html                      4ec4c1710abddb753db5557d79e6b165
 function::sdocp                          8b7ed5bbd537234ae53c0691b6d02c97
 meta::type::sdoc                         392c65eddae300e2aa67014b85884979
-parent::/home/spencertipping/bin/object  9088a9cf9c95b7c1184f1c3b528824ba
+parent::/home/spencertipping/bin/object  4836750c5b8786c6af81b3bdb6a36cfe
 retriever::html-sdoc                     54d22ab83d9f3f2e27ef51033b4817a7
 retriever::sdoc                          6de8ec1f1436fb8e7477b533c321081b
 retriever::sdocp                         fef74cd94fa8761618662802f0bfc171
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
-parent::/home/spencertipping/bin/object  9088a9cf9c95b7c1184f1c3b528824ba
+parent::/home/spencertipping/bin/object  4836750c5b8786c6af81b3bdb6a36cfe
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
@@ -1415,6 +1430,9 @@ function::update                        4de1a6a4085836590a3b1ef997f9d5ea
 function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
 function::usage                         b36ead828ad566c8e3919f3b40fb99e6
 function::verify                        d31b85fffd464ddf516d2afeb63dcbde
+indicator::cc                           b1190e73099664849c6a1a4e7ad65ee9
+indicator::locked                       ffb92e5a149c000f9d006fae9d6738b3
+indicator::state                        20afc906ad035536f0d17505ee1e62e4
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
 internal_function::associate            fc4f785bcf3ffe3225a73a1fdd314703
 internal_function::attribute            62efb9f22157835940af1d5feae98d98
@@ -1446,7 +1464,7 @@ internal_function::table_display        8a6897e093f36bf05477a3889b84a61d
 internal_function::temporary_name       0fb1402061581b69822f913631b4a9d9
 internal_function::translate_backtrace  06fad3d85833a6484e426401b95e0206
 internal_function::with_exported        fc4f32c46d95c6deed0414364d1c7410
-library::shell                          528f486cc4d9eb390e4c350b8727c751
+library::shell                          b78ec7919471ad2cba8baf3017058b2a
 library::terminal                       c52308d05ebb4ff61c5fc36e6d9c7a8a
 message_color::cc                       6249446f73b3c5af2404c322c150e57b
 message_color::state                    14e993fdf2c62df353613c243dc9053b
@@ -1461,6 +1479,7 @@ meta::type::data                        58d8027f20099b28a159eaac67314051
 meta::type::function                    d93b3cc15693707dac518e3d6b1f5648
 meta::type::hook                        f55a3f728ddfb90204dff3fe5d86845c
 meta::type::inc                         c95915391b969734305f2f492d5ca8e3
+meta::type::indicator                   e156df50d05ec83542c8f3980cfc98a3
 meta::type::internal_function           34abb44c67c7e282569e28ef6f4d62ab
 meta::type::library                     b6dd78120e6d787acdb5c1629f7f1896
 meta::type::message_color               794bf137c425293738f07636bcfb5c55
@@ -1476,18 +1495,18 @@ meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
 parent::/home/spencertipping/bin/object  293415c4d45c10239298fa46b01cff17
 __
 meta::parent('development', <<'__');
-parent::./sdoc            7123644754d371e203fe3cb97af02af4
+parent::./sdoc            fde20513f733e9cdde32b4382d17f2cc
 parent::configuration     ac11a129422079b6afaee9d2ce14905c
-parent::notes             d70bf6eb1e4108e29a132c399e599c66
-parent::preprocessor      30aa7c5087c842a5eaf3ddccd9b5046f
-parent::repository        0d317b0c917f59703ee01bf3cf03ad13
-parent::vim-highlighters  570bd862e9e3d5a7d245b96df44a0859
+parent::notes             b744fcd35e26fe27adb6ab0736531988
+parent::preprocessor      5edb1276784c35fbff0b91838b12a74f
+parent::repository        632bc02a0257514ef517cb6015516a31
+parent::vim-highlighters  3eea888daf6328732357a4b9e5c3425e
 __
 meta::parent('notes', <<'__');
 function::note    bcbfeac6dd2112f47296265444570a6e
 function::notes   15b3aca0cba3b327a984928154eda2b5
 meta::type::note  7ca6b375a66ecbfd14bef5bcefeb6643
-parent::object    9088a9cf9c95b7c1184f1c3b528824ba
+parent::object    4836750c5b8786c6af81b3bdb6a36cfe
 __
 meta::parent('object', <<'__');
 bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
@@ -1539,6 +1558,9 @@ function::update                        4de1a6a4085836590a3b1ef997f9d5ea
 function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
 function::usage                         b36ead828ad566c8e3919f3b40fb99e6
 function::verify                        d31b85fffd464ddf516d2afeb63dcbde
+indicator::cc                           b1190e73099664849c6a1a4e7ad65ee9
+indicator::locked                       ffb92e5a149c000f9d006fae9d6738b3
+indicator::state                        20afc906ad035536f0d17505ee1e62e4
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
 internal_function::associate            fc4f785bcf3ffe3225a73a1fdd314703
 internal_function::attribute            62efb9f22157835940af1d5feae98d98
@@ -1570,7 +1592,7 @@ internal_function::table_display        8a6897e093f36bf05477a3889b84a61d
 internal_function::temporary_name       0fb1402061581b69822f913631b4a9d9
 internal_function::translate_backtrace  06fad3d85833a6484e426401b95e0206
 internal_function::with_exported        fc4f32c46d95c6deed0414364d1c7410
-library::shell                          528f486cc4d9eb390e4c350b8727c751
+library::shell                          b78ec7919471ad2cba8baf3017058b2a
 library::terminal                       c52308d05ebb4ff61c5fc36e6d9c7a8a
 message_color::cc                       6249446f73b3c5af2404c322c150e57b
 message_color::state                    14e993fdf2c62df353613c243dc9053b
@@ -1585,6 +1607,7 @@ meta::type::data                        58d8027f20099b28a159eaac67314051
 meta::type::function                    d93b3cc15693707dac518e3d6b1f5648
 meta::type::hook                        f55a3f728ddfb90204dff3fe5d86845c
 meta::type::inc                         c95915391b969734305f2f492d5ca8e3
+meta::type::indicator                   e156df50d05ec83542c8f3980cfc98a3
 meta::type::internal_function           34abb44c67c7e282569e28ef6f4d62ab
 meta::type::library                     b6dd78120e6d787acdb5c1629f7f1896
 meta::type::message_color               794bf137c425293738f07636bcfb5c55
@@ -1598,7 +1621,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           66e539d29e9afa903569efad0eb7c886
 meta::type::template           25f4d6eafb1d3eea6d5d3d9a71a5623e
-parent::object                 9088a9cf9c95b7c1184f1c3b528824ba
+parent::object                 4836750c5b8786c6af81b3bdb6a36cfe
 retriever::pp                  f4a8c288d69963d6ebc5ce0bf7794777
 template::comment              7f8e9be5cd7c865fa64efe3123f62b38
 template::eval                 eb0b1058649eb2d833f348540516b358
@@ -1609,12 +1632,12 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               1c0273217c5b9f2756bb14a4a00aa7e2
 meta::type::cached_dependency                   e9455b403cbff27bbcc41d917fef482f
-parent::/home/spencertipping/bin/configuration  e4d22dc2215115982f6b79ed0ce22a42
+parent::/home/spencertipping/bin/configuration  2db920adc83974d520292606a19e8a98
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                bd231af998c353790253bc6660be0b90
 meta::type::vim_highlighter  d6ea5b59c918d4e2cfebf5c880f43be8
-parent::object               9088a9cf9c95b7c1184f1c3b528824ba
+parent::object               4836750c5b8786c6af81b3bdb6a36cfe
 __
 meta::resource('header', <<'__');
 - include resource::header-packages

@@ -138,6 +138,16 @@ meta::define_form 'inc', sub {
   }
 };
 __
+meta::meta('type::indicator', <<'__');
+# Shell indicator function. The output of each of these is automatically
+# appended to the shell prompt.
+
+meta::configure 'indicator', inherit => 1, extension => '.pl';
+meta::define_form 'indicator', sub {
+  my ($name, $value) = @_;
+  *{"indicator::$name"} = meta::eval_in("sub {\n$value\n}", "indicator::$name");
+};
+__
 meta::meta('type::internal_function', <<'__');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
@@ -716,6 +726,13 @@ terminal::error("Verification failed; expected $state but got $observed from $ot
 hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
 __
+meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
+meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
+meta::indicator('state', <<'__');
+my $state = $options{state} // state();
+my $color = $state ne $transient{initial} ? 33 : 30;
+"\033[1;${color}m" . substr($state, 0, 4) . "\033[0;0m";
+__
 meta::internal_function('around_hook', <<'__');
 # around_hook('hookname', @args, sub {
 #   stuff;
@@ -1032,13 +1049,11 @@ sub run {execute(parse(tokenize(@_)))}
 
 sub prompt {
   my %options = @_;
-  my $name    = $options{name}  // ::name();
-  my $state   = $options{state} // ::state();
-  my $other   = $state ne $transient{initial} ? 33 : 30;
-  my $locked  = ::is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
-  my $cc      = length ::retrieve('data::current-continuation') ? "\033[1;36mcc\033[0;0m" : '';
+  my $name    = $options{name} // ::name();
 
-  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$cc$locked\033[1;34m$options{stuff}\033[0;0m "}
+  my $indicators = join '', map &{"::$_"}(), ::select_keys('--namespace' => 'indicator');
+
+  "\033[1;32m$name\033[0;0m$indicators "}
 
 sub repl {
   my %options = @_;
@@ -1122,6 +1137,9 @@ function::update                        4de1a6a4085836590a3b1ef997f9d5ea
 function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
 function::usage                         b36ead828ad566c8e3919f3b40fb99e6
 function::verify                        d31b85fffd464ddf516d2afeb63dcbde
+indicator::cc                           b1190e73099664849c6a1a4e7ad65ee9
+indicator::locked                       ffb92e5a149c000f9d006fae9d6738b3
+indicator::state                        20afc906ad035536f0d17505ee1e62e4
 internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
 internal_function::associate            fc4f785bcf3ffe3225a73a1fdd314703
 internal_function::attribute            62efb9f22157835940af1d5feae98d98
@@ -1153,7 +1171,7 @@ internal_function::table_display        8a6897e093f36bf05477a3889b84a61d
 internal_function::temporary_name       0fb1402061581b69822f913631b4a9d9
 internal_function::translate_backtrace  06fad3d85833a6484e426401b95e0206
 internal_function::with_exported        fc4f32c46d95c6deed0414364d1c7410
-library::shell                          528f486cc4d9eb390e4c350b8727c751
+library::shell                          b78ec7919471ad2cba8baf3017058b2a
 library::terminal                       c52308d05ebb4ff61c5fc36e6d9c7a8a
 message_color::cc                       6249446f73b3c5af2404c322c150e57b
 message_color::state                    14e993fdf2c62df353613c243dc9053b
@@ -1168,6 +1186,7 @@ meta::type::data                        58d8027f20099b28a159eaac67314051
 meta::type::function                    d93b3cc15693707dac518e3d6b1f5648
 meta::type::hook                        f55a3f728ddfb90204dff3fe5d86845c
 meta::type::inc                         c95915391b969734305f2f492d5ca8e3
+meta::type::indicator                   e156df50d05ec83542c8f3980cfc98a3
 meta::type::internal_function           34abb44c67c7e282569e28ef6f4d62ab
 meta::type::library                     b6dd78120e6d787acdb5c1629f7f1896
 meta::type::message_color               794bf137c425293738f07636bcfb5c55
