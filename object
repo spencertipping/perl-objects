@@ -138,6 +138,16 @@ meta::define_form 'inc', sub {
   }
 };
 __
+meta::meta('type::indicator', <<'__');
+# Shell indicator function. The output of each of these is automatically
+# appended to the shell prompt.
+
+meta::configure 'indicator', inherit => 1, extension => '.pl';
+meta::define_form 'indicator', sub {
+  my ($name, $value) = @_;
+  *{"indicator::$name"} = meta::eval_in("sub {\n$value\n}", "indicator::$name");
+};
+__
 meta::meta('type::internal_function', <<'__');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
@@ -600,6 +610,13 @@ terminal::error("Verification failed; expected $state but got $observed from $ot
 hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
 __
+meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
+meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
+meta::indicator('state', <<'__');
+my $state = $options{state} // state();
+my $color = $state ne $transient{initial} ? 33 : 30;
+"\033[1;${color}m" . substr($state, 0, 4) . "\033[0;0m";
+__
 meta::internal_function('around_hook', <<'__');
 # around_hook('hookname', @args, sub {
 #   stuff;
@@ -916,13 +933,11 @@ sub run {execute(parse(tokenize(@_)))}
 
 sub prompt {
   my %options = @_;
-  my $name    = $options{name}  // ::name();
-  my $state   = $options{state} // ::state();
-  my $other   = $state ne $transient{initial} ? 33 : 30;
-  my $locked  = ::is_locked() ? "\033[1;31mlocked\033[0;0m" : '';
-  my $cc      = length ::retrieve('data::current-continuation') ? "\033[1;36mcc\033[0;0m" : '';
+  my $name    = $options{name} // ::name();
 
-  "\033[1;32m$name\033[1;${other}m" . substr($state, 0, 4) . "\033[0;0m$cc$locked\033[1;34m$options{stuff}\033[0;0m "}
+  my $indicators = join '', map &{"::$_"}(), ::select_keys('--namespace' => 'indicator');
+
+  "\033[1;32m$name\033[0;0m$indicators "}
 
 sub repl {
   my %options = @_;
