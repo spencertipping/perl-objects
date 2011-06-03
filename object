@@ -21,7 +21,7 @@ sub meta::define_form {
     my ($name, $value, %options) = @_;
     chomp $value;
     $data{"${namespace}::$name"} = $value unless $options{no_binding};
-    $delegate->($name, $value) unless $options{no_delegate}}}
+    &$delegate($name, $value) unless $options{no_delegate}}}
 
 sub meta::eval_in {
   my ($what, $where) = @_;
@@ -37,6 +37,7 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
+
 meta::meta('configure', <<'__');
 # A function to configure transients. Transients can be used to store any number of
 # different things, but one of the more common usages is type descriptors.
@@ -237,7 +238,7 @@ sub meta::define_form {
     my ($name, $value, %options) = @_;
     chomp $value;
     $data{"${namespace}::$name"} = $value unless $options{no_binding};
-    $delegate->($name, $value) unless $options{no_delegate}}}
+    &$delegate($name, $value) unless $options{no_delegate}}}
 
 sub meta::eval_in {
   my ($what, $where) = @_;
@@ -253,6 +254,7 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
+
 __
 meta::bootstrap('perldoc', <<'__');
 =head1 Self-modifying Perl script
@@ -684,8 +686,9 @@ __
 meta::internal_function('execute', <<'__');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
-eval {&{"meta::$namespace"}(attribute($name), retrieve($name), no_binding => 1)};
+eval {&{$datatypes{$namespace}}(attribute($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
+
 __
 meta::internal_function('exported', <<'__');
 # Allocates a temporary file containing the concatenation of attributes you specify,
