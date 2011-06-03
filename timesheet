@@ -198,6 +198,10 @@ meta::meta('type::state', <<'__');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __
+meta::meta('type::timesheet', <<'__');
+meta::functor::editable 'timesheet', extension => 'timesheet', inherit => 0, default => 'edit';
+
+__
 meta::bootstrap('html', <<'__');
 <html>
   <head>
@@ -299,24 +303,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __
 meta::data('permanent-identity', 'f0f0939887ede2ecaa8c879aff4a7717');
-meta::data('times', <<'__');
-# Times go here. They are in the following format:
-# <date>  <start>  <end>
-# where each field is separated from the others by at least two spaces.
-# Note that dates can have spaces, but not two spaces in a row. They
-# aren't parsed in any way, so that field could be used for nearly
-# anything.
-
-# Start and end times should be in 24-hour format, for example 13:00.
-# If you work after midnight, don't wrap the time around zero -- report
-# it as 24:00 or 25:00. This timesheet is uninsightful about time
-# subtraction and will subtract hours from the total if the end time
-# seems to be less than the start time.
-
-# For example:
-December 10, 2010       09:00   17:00
-December 11, 2010       23:00   24:30   # 11PM to 12:30AM
-__
 meta::data('watching', '1');
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
@@ -358,33 +344,31 @@ around_hook('create', $name, $value, sub {
   edit($name) unless defined $value});
 __
 meta::function('csv', <<'__');
-my $times = retrieve('data::times');
+my @parsed_entries = &{'parse-timesheet'}(retrieve($_[0] // 'timesheet::default'));
+my %categories;
+my %totals;
 
+my $format_time = sub {
+  my ($minutes) = @_;
+  my $hours = int($minutes / 60);
+  my $new_minutes = sprintf "%02d", $minutes % 60;
+  "$hours:$new_minutes"};
+
+push @{$categories{${$_}{title}} ||= []}, $_ for @parsed_entries;
+$totals{${$_}{title}} += ${$_}{duration}     for @parsed_entries;
+
+my @all_times           = map "${$_}{date}, ${$_}{start_time}, ${$_}{end_time}, " . &$format_time(${$_}{duration}) . ", \"${$_}{title}\"", @parsed_entries;
+my @indexed_by_category = map {"$_: " . &$format_time($totals{$_}) . " total\n" .
+                               join("\n", map "${$_}{date}, ${$_}{start_time}, ${$_}{end_time}, " . &$format_time(${$_}{duration}), @{$categories{$_}})} keys %categories;
 my $minute_total = 0;
-my $current_line = 0;
-my @new_lines;
+$minute_total += ${$_}{duration} for @parsed_entries;
 
-for my $line (split /\n/, $times) {
-  ++$current_line;
-  next if $line =~ /^\s*#/o || ! length $line;
-  my @line_bits = split /\s{2,}/, $line;
-  my $new_line  = '"' . (join '","', @line_bits) . '"';
+my $total_row = "Total, " . &$format_time($minute_total);
 
-  my @start_time = split /:/, $line_bits[1];
-  my @end_time   = split /:/, $line_bits[2];
+join "\n\n", join("\n", @all_times),
+             join("\n\n", @indexed_by_category),
+             $total_row;
 
-  my $current_duration = ($end_time[0] - $start_time[0]) * 60 + $end_time[1] - $start_time[1];
-  $minute_total += $current_duration;
-
-  terminal::message('warning', "Negative time on line $current_line") if $current_duration < 0;
-
-  push @new_lines, $new_line;
-}
-
-my $hour_total = 0;
-++$hour_total, $minute_total -= 60 while $minute_total >= 60;
-my $formatted_minutes = sprintf '%02d', $minute_total;
-(join "\n", @new_lines) . "\n\"Total\",\"\",\"\",\"$hour_total:$formatted_minutes\"";
 __
 meta::function('current-state', 'serialize(\'-pS\');');
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
@@ -513,6 +497,38 @@ $name =~ s/^.*\///;
 $name;
 __
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
+meta::function('parse-timesheet', <<'__');
+my ($times) = @_;
+
+my $minute_total = 0;
+my $current_line = 0;
+my @parsed_entries;
+
+for my $line (split /\n/, $times) {
+  ++$current_line;
+  next if $line =~ /^\s*#/o || ! length $line;
+  $line =~ s/\s+#.*$//;
+  my @line_bits = split /\s{2,}/, $line;
+
+  my @start_time = split /:/, $line_bits[1];
+  my @end_time   = split /:/, $line_bits[2];
+
+  my $current_duration = ($end_time[0] - $start_time[0]) * 60 + $end_time[1] - $start_time[1];
+  $minute_total += $current_duration;
+
+  terminal::message('warning', "ignoring negative time on line $current_line"), next if $current_duration < 0;
+
+  push @parsed_entries, {date       => $line_bits[0],
+                         start_time => $line_bits[1],
+                         end_time   => $line_bits[2],
+                         start      => $start_time[0] * 60 + $start_time[1],
+                         end        => $end_time[0] * 60 + $end_time[1],
+                         duration   => $current_duration,
+                         total      => $minute_total,
+                         title      => $line_bits[3]}}
+@parsed_entries;
+
+__
 meta::function('perl', <<'__');
 my $result = eval(join ' ', @_);
 $@ ? terminal::error($@) : $result;
@@ -1134,6 +1150,27 @@ retriever::id                           4da6080168d32445150cc4200af7af6e
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
+meta::timesheet('default', <<'__');
+# Times go here. They are in the following format:
+# <date>  <start>  <end>  <title>
+# where each field is separated from the others by at least two spaces.
+# Note that dates can have spaces, but not two spaces in a row. They
+# aren't parsed in any way, so that field could be used for nearly
+# anything.
+
+# Start and end times should be in 24-hour format, for example 13:00.
+# If you work after midnight, don't wrap the time around zero -- report
+# it as 24:00 or 25:00. This timesheet is uninsightful about time
+# subtraction and will ignore lines that appear to be negative.
+
+# Times are also indexed by title when you produce a CSV file. This can
+# be useful for analysis.
+
+# For example:
+December 10, 2010       09:00   17:00   Working on X
+December 11, 2010       23:00   24:30   # 11PM to 12:30AM
+
+__
 internal::main();
 
 __END__
