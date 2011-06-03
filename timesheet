@@ -199,7 +199,7 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __
 meta::meta('type::timesheet', <<'__');
-meta::functor::editable 'timesheet', extension => 'timesheet', inherit => 0, default => 'edit';
+meta::functor::editable 'timesheet', extension => '.timesheet', inherit => 0, default => 'edit';
 
 __
 meta::bootstrap('html', <<'__');
