@@ -343,33 +343,6 @@ around_hook('create', $name, $value, sub {
   associate($name, defined $value ? $value : '');
   edit($name) unless defined $value});
 __
-meta::function('csv', <<'__');
-my @parsed_entries = &{'parse-timesheet'}(retrieve($_[0] // 'timesheet::default'));
-my %categories;
-my %totals;
-
-my $format_time = sub {
-  my ($minutes) = @_;
-  my $hours = int($minutes / 60);
-  my $new_minutes = sprintf "%02d", $minutes % 60;
-  "$hours:$new_minutes"};
-
-push @{$categories{${$_}{title}} ||= []}, $_ for @parsed_entries;
-$totals{${$_}{title}} += ${$_}{duration}     for @parsed_entries;
-
-my @all_times           = map "${$_}{date}, ${$_}{start_time}, ${$_}{end_time}, " . &$format_time(${$_}{duration}) . ", \"${$_}{title}\"", @parsed_entries;
-my @indexed_by_category = map {"$_: " . &$format_time($totals{$_}) . " total\n" .
-                               join("\n", map "${$_}{date}, ${$_}{start_time}, ${$_}{end_time}, " . &$format_time(${$_}{duration}), @{$categories{$_}})} keys %categories;
-my $minute_total = 0;
-$minute_total += ${$_}{duration} for @parsed_entries;
-
-my $total_row = "Total, " . &$format_time($minute_total);
-
-join "\n\n", join("\n", @all_times),
-             join("\n\n", @indexed_by_category),
-             $total_row;
-
-__
 meta::function('current-state', 'serialize(\'-pS\');');
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
@@ -525,7 +498,8 @@ for my $line (split /\n/, $times) {
                          end        => $end_time[0] * 60 + $end_time[1],
                          duration   => $current_duration,
                          total      => $minute_total,
-                         title      => $line_bits[3]}}
+                         title      => $line_bits[3],
+                         details    => join("  ", @line_bits[4 .. $#line_bits])}}
 @parsed_entries;
 
 __
@@ -596,6 +570,34 @@ my @keys = sort keys %data;
 my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
+__
+meta::function('timesheet-csv', <<'__');
+my @parsed_entries = &{'parse-timesheet'}(retrieve($_[0] // 'timesheet::default'));
+my %categories;
+my %totals;
+
+my $format_time = sub {
+  my ($minutes) = @_;
+  my $hours = int($minutes / 60);
+  my $new_minutes = sprintf "%02d", $minutes % 60;
+  "$hours:$new_minutes"};
+
+push @{$categories{${$_}{title}} ||= []}, $_ for @parsed_entries;
+$totals{${$_}{title}} += ${$_}{duration}     for @parsed_entries;
+
+my @all_times           = map "${$_}{date}, ${$_}{start_time}, ${$_}{end_time}, " . &$format_time(${$_}{duration}) . ", \"${$_}{title}\", \"${$_}{details}\"", @parsed_entries;
+my @indexed_by_category = map {"$_: " . &$format_time($totals{$_}) . " total\n" .
+                               join("\n", map "${$_}{date}, ${$_}{start_time}, ${$_}{end_time}, " . &$format_time(${$_}{duration}) . ", \"${$_}{details}\"",
+                                              @{$categories{$_}})} sort keys %categories;
+my $minute_total = 0;
+$minute_total += ${$_}{duration} for @parsed_entries;
+
+my $total_row = "Total, " . &$format_time($minute_total);
+
+join "\n\n", "Tasks by date:\n"     . join("\n", @all_times),
+             "Tasks by category:\n" . join("\n\n", @indexed_by_category),
+             $total_row;
+
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
@@ -1152,7 +1154,7 @@ meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::timesheet('default', <<'__');
 # Times go here. They are in the following format:
-# <date>  <start>  <end>  <title>
+# <date>  <start>  <end>  <category>  <details>
 # where each field is separated from the others by at least two spaces.
 # Note that dates can have spaces, but not two spaces in a row. They
 # aren't parsed in any way, so that field could be used for nearly
@@ -1167,8 +1169,9 @@ meta::timesheet('default', <<'__');
 # be useful for analysis.
 
 # For example:
-December 10, 2010       09:00   17:00   Working on X
-December 11, 2010       23:00   24:30   # 11PM to 12:30AM
+December 10, 2010       09:00   12:00   Working on X    Added feature X1
+December 10, 2010       13:00   17:00   Working on X    Added feature X2
+December 11, 2010       23:00   24:30   Working late    Wrote bugs that I'll have to fix later  # 11PM to 12:30AM
 
 __
 internal::main();
