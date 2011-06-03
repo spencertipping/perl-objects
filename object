@@ -37,7 +37,6 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-
 meta::meta('configure', <<'__');
 # A function to configure transients. Transients can be used to store any number of
 # different things, but one of the more common usages is type descriptors.
@@ -254,7 +253,6 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-
 __
 meta::bootstrap('perldoc', <<'__');
 =head1 Self-modifying Perl script
@@ -347,8 +345,7 @@ die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $options{'-f'};
 
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
-            execute => $name !~ /^bootstrap::/)});
+  associate($name, invoke_editor_on($data{$name} // '', %options, attribute => $name, extension => $extension), execute => 1)});
 save() unless $data{'data::edit::no-save'};
 '';
 __
@@ -687,7 +684,7 @@ __
 meta::internal_function('execute', <<'__');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
-eval {&{"meta::$namespace"}(attribute($name), retrieve($name))};
+eval {&{"meta::$namespace"}(attribute($name), retrieve($name), no_binding => 1)};
 warn $@ if $@ && $options{'carp'};
 __
 meta::internal_function('exported', <<'__');
