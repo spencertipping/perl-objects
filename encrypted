@@ -389,6 +389,11 @@ my $name = pop @_;
 file::write($name, join "\n", retrieve(@_));
 __
 meta::function('extern', '&{$_[0]}(retrieve(@_[1 .. $#_]));');
+meta::function('forget-key', <<'__');
+delete $transient{encryption_key};
+terminal::info('encryption key is now unset');
+
+__
 meta::function('grep', <<'__');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
