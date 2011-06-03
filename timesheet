@@ -21,7 +21,7 @@ sub meta::define_form {
     my ($name, $value, %options) = @_;
     chomp $value;
     $data{"${namespace}::$name"} = $value unless $options{no_binding};
-    $delegate->($name, $value) unless $options{no_delegate}}}
+    &$delegate($name, $value) unless $options{no_delegate}}}
 
 sub meta::eval_in {
   my ($what, $where) = @_;
@@ -238,7 +238,7 @@ sub meta::define_form {
     my ($name, $value, %options) = @_;
     chomp $value;
     $data{"${namespace}::$name"} = $value unless $options{no_binding};
-    $delegate->($name, $value) unless $options{no_delegate}}}
+    &$delegate($name, $value) unless $options{no_delegate}}}
 
 sub meta::eval_in {
   my ($what, $where) = @_;
@@ -396,8 +396,7 @@ die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $options{'-f'};
 
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} || "# Attribute $name", %options, attribute => $name, extension => $extension),
-            execute => $name !~ /^bootstrap::/)});
+  associate($name, invoke_editor_on($data{$name} // '', %options, attribute => $name, extension => $extension), execute => 1)});
 save() unless $data{'data::edit::no-save'};
 '';
 __
@@ -737,8 +736,9 @@ __
 meta::internal_function('execute', <<'__');
 my ($name, %options) = @_;
 my $namespace = namespace($name);
-eval {&{"meta::$namespace"}(attribute($name), retrieve($name))};
+eval {&{$datatypes{$namespace}}(attribute($name), retrieve($name))};
 warn $@ if $@ && $options{'carp'};
+
 __
 meta::internal_function('exported', <<'__');
 # Allocates a temporary file containing the concatenation of attributes you specify,
@@ -1022,114 +1022,115 @@ meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('object', <<'__');
-bootstrap::html                         9b839f4c0c8d6bb18bf6d9d0e670e497
-bootstrap::initialization               b39f25c213ceb0418551084d1bddeb20
-bootstrap::perldoc                      c63395cbc6f7160b603befbb2d9b6700
-function::alias                         28744564997657da45ab16cd5b441104
-function::cat                           a19fdfda461f9a0aa01978dff2e2c2f7
-function::cc                            c4d52b1d8f52a480f07b81b93c3aac7b
-function::ccc                           2351344fc688518c75aa4ab3acec1c4a
-function::child                         f69646398c3123d3d939a7f2b3156606
-function::clone                         54e00ff2103e54423d4c9febb97ce063
-function::cp                            e5fee448a74ecbf4ae215e6b43dfc048
-function::create                        090c342a2dc304b39c643d53350474a0
-function::current-state                 48c98d3bd74f3ee14d358fd127a7867a
-function::disable                       49db26fcd680ca34c1f52629a7375d2f
-function::edit                          c31d73791820a10ec910af043f67d4eb
-function::enable                        37af2d2e603e2455be227ae3c5a42c3a
-function::export                        388e0cc60507443cb1c0cc3e2658cfef
-function::extern                        6a9fa8c2a8a4eaae9fe8d38e402145e4
-function::grep                          3ad630ca30f1abae3cf28ef6293f0e00
-function::hash                          7a903f90f2c8ed27af7e030f407d9f7b
-function::hook                          d74d8e2b611342af6a0897e0bd62e6e6
-function::hooks                         230122bdc8929884e45b2f78a7743e2e
-function::identity                      37106ce13a0200af001d361ce7e81e57
-function::import                        ac86cbe9c9fb12fc8cef2cc88e80c01e
-function::initial-state                 e21ba3519838b221a7b2d4e8a7544e7f
-function::is                            1d3401965e4720ed972470b54b447db0
-function::load-state                    ea18db867bd62a294e067f60e6975dcf
-function::lock                          9bf21fee2f0f809131d43553bde82fa5
-function::ls                            61a247f0a582f63d85b5d5a963a46893
-function::mv                            52e95180e3c7019116bd798e0da0fdda
-function::name                          6848cbc257e4b6d7441b25acb04e23c9
-function::parents                       f94c3a5addbc92fe7f90d198fa701484
-function::perl                          986a274c013b77fe08d29726ce3799fe
-function::reload                        c57ff432c3ffd91a5506cd3eb8bf50c9
-function::rm                            7cecfb1691a7bf86741f00058bcc54ca
-function::save                          181da4858ac39c157dbf38e6bac7a0d2
-function::save-state                    863e4d9fa75ca198ef7a755248d1002a
-function::serialize                     5148e8ca46eeb3e297f76d098e496bcf
-function::serialize_single              e7a22f806b580d5c63982ffc7f218a1a
-function::sh                            9647fa9227bef6c139a79d0dd4acc8b4
-function::shell                         dc8238ad70b1e02eaf230c4f1bd21690
-function::size                          140728e163286a0f3f514f468c475cfc
-function::snapshot                      d3d84a364524eeb8ee90623f545187e8
-function::state                         119111f84c3e32a5536838ac84bc6f10
-function::touch                         819878bc64df094d3323c7050f2c3e97
-function::unlock                        8fc9bd69f3466f0b54ee2c6965f68cea
-function::update                        4de1a6a4085836590a3b1ef997f9d5ea
-function::update-from                   beead29d50b0b204bc9a8dc6f07d0003
-function::usage                         b36ead828ad566c8e3919f3b40fb99e6
-function::verify                        d31b85fffd464ddf516d2afeb63dcbde
-indicator::cc                           b1190e73099664849c6a1a4e7ad65ee9
-indicator::locked                       ffb92e5a149c000f9d006fae9d6738b3
-indicator::state                        20afc906ad035536f0d17505ee1e62e4
-internal_function::around_hook          e1cd17b80d4e8165df9c94facd9f239b
-internal_function::associate            fc4f785bcf3ffe3225a73a1fdd314703
-internal_function::attribute            62efb9f22157835940af1d5feae98d98
-internal_function::attribute_is         c88e0f87cf807ab0af73ca10032b54b2
-internal_function::cache                c119f9d7ea9a147c6d526a6283fb119a
-internal_function::chmod_self           b13487447c65f2dc790bd6b21dde89dd
-internal_function::dangerous            4b8343178d6d4d1b760d61b1cfda008c
-internal_function::debug_trace          77644ab45a770a6e172680f659911507
-internal_function::execute              4b4efc33bc6767a7aade7f427eedf83f
-internal_function::exported             27414e8f2ceeaef3555b9726e690eb0f
-internal_function::extension_for        65e48f50f20bc04aa561720b03bf494c
-internal_function::fast_hash            ac70f469e697725cfb87629833434ab1
-internal_function::file::read           186bbcef8f6f0dd8b72ba0fdeb1de040
-internal_function::file::write          eb7b1efebe0db73378b0cce46681788d
-internal_function::fnv_hash             8d001a3a7988631bab21a41cee559758
-internal_function::hypothetically       33ee2e1595d3877bd1d9accaa72305c8
-internal_function::internal::main       435a9e83ac803960745d9aa5aac6c75f
-internal_function::invoke_editor_on     1448132d5294a4b8390b4a684d8a78f9
-internal_function::is_locked            42c3c89625863a31105d1df49a2a762f
-internal_function::namespace            93213d60cafb9627e0736b48cd1f0760
-internal_function::parent_attributes    480776f176ab728c6b7450287be5782a
-internal_function::parent_ordering      87bee77390de5b9e9c6e07f9af9eb70a
-internal_function::retrieve             0b6f4342009684fdfa259f45ac75ae37
-internal_function::retrieve_with_hooks  5186a0343624789d08d1cc2084550f3d
-internal_function::select_keys          1cd075b241905d9ab3199e680e86dced
-internal_function::separate_options     d47e8ee23fe55e27bb523c9fcb2f5ca1
-internal_function::strip                4af6a470effeed94c0dd9800d01f7d66
-internal_function::table_display        8a6897e093f36bf05477a3889b84a61d
-internal_function::temporary_name       0fb1402061581b69822f913631b4a9d9
-internal_function::translate_backtrace  06fad3d85833a6484e426401b95e0206
-internal_function::with_exported        fc4f32c46d95c6deed0414364d1c7410
-library::shell                          b78ec7919471ad2cba8baf3017058b2a
-library::terminal                       c52308d05ebb4ff61c5fc36e6d9c7a8a
-message_color::cc                       6249446f73b3c5af2404c322c150e57b
-message_color::state                    14e993fdf2c62df353613c243dc9053b
-message_color::states                   152a940086f7cee6110528a09af7dd78
-meta::configure                         25976e07665878d3fae18f050160343f
-meta::externalize                       9141b4e8752515391385516ae94b23b5
-meta::functor::editable                 e3d2ede6edf65ffe2123584b2bd5dab7
-meta::type::alias                       28fe15dd61f4902ed5180d8604d15d97
-meta::type::bootstrap                   297d03fb32df03b46ea418469fc4e49e
-meta::type::cache                       52eac0d7b550a358cc86803fe1a9d921
-meta::type::data                        58d8027f20099b28a159eaac67314051
-meta::type::function                    d93b3cc15693707dac518e3d6b1f5648
-meta::type::hook                        f55a3f728ddfb90204dff3fe5d86845c
-meta::type::inc                         c95915391b969734305f2f492d5ca8e3
-meta::type::indicator                   e156df50d05ec83542c8f3980cfc98a3
-meta::type::internal_function           34abb44c67c7e282569e28ef6f4d62ab
-meta::type::library                     b6dd78120e6d787acdb5c1629f7f1896
-meta::type::message_color               794bf137c425293738f07636bcfb5c55
-meta::type::meta                        640f25635ce2365b0648962918cf9932
-meta::type::parent                      607e9931309b1b595424bedcee5dfa45
-meta::type::retriever                   6e847a9d205e4a5589765a3366cdd115
-meta::type::state                       c1f29670be26f1df6100ffe4334e1202
-retriever::file                         b8e7aefc98b8341260d91f21dc61d749
-retriever::id                           a791a5735e9b4f2cb8b99fd39dc17bc3
+bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
+bootstrap::initialization               7637e32ba308624d824eacc9337c2512
+bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
+function::alias                         4feab1da50b0ef7a7103231ff8fdc796
+function::cat                           f684de6c8776617a437b76009114f52e
+function::cc                            12ea9176e388400704d823433c209b7a
+function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
+function::child                         f5764adf0b4e892f147a9b6b68d4816f
+function::clone                         bb42e04e10a8e54e88786b6fbc4fb213
+function::cp                            3fe69d1b58d90045ad520048977538c4
+function::create                        3010d55f4dfa59a998742e07823ed54d
+function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
+function::disable                       53b449708cc2ffdefa352e53bb7d847d
+function::edit                          9ce5ba1ae4607e8cf1975080bcde1cf4
+function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
+function::export                        2374cd1dbf7616cb38cafba4e171075d
+function::extern                        1290a5223e2824763eecfb3a54961eff
+function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
+function::hash                          6ee131d093e95b80039b4df9c7c84a02
+function::hook                          675cdb98b5dd8567bdd5a02ead6184b5
+function::hooks                         3d989899c616f7440429a2d9bf1cc44b
+function::identity                      6523885762fcc2f354fc25cf6ed126ce
+function::import                        5d0f0634cbd01274f2237717507198a2
+function::initial-state                 03d8ed608855a723124e79ca184d8e73
+function::is                            ee26a8494ff12dc6df26e61ecd926302
+function::load-state                    2123ad2d7bfaf83c8959fa003d8c4ad4
+function::lock                          5d8db258704e6a8623fac796f62fac02
+function::ls                            0b310755e747c65bca09508fd9d841f0
+function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
+function::name                          955ba2d1fe1d67cd78651a4042283b00
+function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
+function::perl                          a0f341ea54391b63b6195e7992b6a686
+function::reload                        1589f4cf8374e0011991cb8907afca3e
+function::rm                            6f6fd7a6c25558eb469d78ea888f8551
+function::save                          778c0e1043b9c6c96fb8f266f8061624
+function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
+function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
+function::serialize_single              aa77af032272f5a2664e21713739a223
+function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
+function::shell                         c07f3725aa8e31ac5b55ffcf0f39bba1
+function::size                          6cd9a4dd17be87ea2962f8f566a97d11
+function::snapshot                      56939a47f2758421669641e15ebd66eb
+function::state                         8c68044dccae28f33244d0c7e9e9acfb
+function::touch                         3991b1b7c7187566f50e5e58ce01fa06
+function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
+function::update                        161a7afaf55c1268ffe82ab170ae27e1
+function::update-from                   66828c66a5510b916ab0e065d4e05110
+function::usage                         5bdd370f5a56cfbf199e08d398091444
+function::verify                        0c0cc1dfeab7d705919df122f7850a4f
+indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
+indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
+indicator::state                        7c9d42b8fcee852a80d61c4f119c1239
+internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
+internal_function::associate            05a75afb70daee635eefec8ae037f593
+internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
+internal_function::attribute_is         a33841586c7a83264ba2116937d1c5b6
+internal_function::cache                eb9da45580a9ac0882baf98acd2ecd60
+internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
+internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
+internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
+internal_function::execute              f0924e087d978ff2ab1e117124db3042
+internal_function::exported             3ec48f01deefa840b52111f2e3f34749
+internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
+internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
+internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
+internal_function::file::write          3e290fdcb353c6f842eb5a40f2e575f8
+internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
+internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
+internal_function::internal::main       f31f2945a19a668d92505f114ab29c78
+internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
+internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
+internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
+internal_function::parent_attributes    f6ccfaa982ab1a4d066043981aaca277
+internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
+internal_function::retrieve             8a34d1fe047fe1b40c3d2957c4a789eb
+internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
+internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
+internal_function::separate_options     da1c2a3a1e03faafe6b4446ebb6bad90
+internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
+internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
+internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
+internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
+internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
+library::shell                          faa0189a8a358db9dc166257ca5c0708
+library::terminal                       7e2d045782405934a9614fe04bcfe559
+message_color::cc                       2218ef0f7425de5c717762ffb100eb43
+message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
+message_color::states                   ac66eeeff487b5f43f88a78ea18b3d56
+meta::configure                         69c2e727c124521d074fde21f8bbc4db
+meta::externalize                       7610c2983b848bfb93390b9e423373dd
+meta::functor::editable                 48246c608f363de66511400e00b26164
+meta::type::alias                       889d26d2df385e9ff8e2da7de4e48374
+meta::type::bootstrap                   51108ab2ddb8d966e927c8f62d9ef3e5
+meta::type::cache                       9267171f2eace476f64a1a670eaaf2c7
+meta::type::data                        120e1649a468d3b3fd3fb783b4168499
+meta::type::function                    8ea626198861dc59dd7f303eecb5ff88
+meta::type::hook                        ff92aef328b6bdc6f87ddd0821f3e42f
+meta::type::inc                         78e0375b6725487cb1f0deca41e96bbe
+meta::type::indicator                   feb54a2624e6983617685047c717427f
+meta::type::internal_function           eff3cf31e2635f51c83836f116c99d2f
+meta::type::library                     7622e8d65e03066668bade74715d65ad
+meta::type::message_color               557a1b44979cbf77a7251fbdc4c5b82c
+meta::type::meta                        c6250056816b58a9608dd1b2614246f8
+meta::type::parent                      09d1d03379e4e0b262e06939f4e00464
+meta::type::retriever                   71a29050bf9f20f6c71afddff83addc9
+meta::type::state                       84da7d5220471307f1f990c5057d3319
+retriever::file                         3bbc9d8a887a536044bafff1d54def7e
+retriever::id                           4da6080168d32445150cc4200af7af6e
+
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
