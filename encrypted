@@ -740,17 +740,23 @@ __
 meta::internal_function('decrypt', <<'__');
 # Decrypt data using the password stored in the transient table.
 use Crypt::CBC;
-my ($hash, @lines) = split /\n/, Crypt::CBC->new(-key => encryption_key(), -cipher => 'Blowfish')->decrypt(unpack 'u*', $_[0]);
-my $data = join "\n", @lines;
+my ($encrypted) = @_;
+my $decrypted   = Crypt::CBC->new(-key => encryption_key(), -cipher => 'Blowfish')->decrypt(join '', unpack 'u*', $encrypted);
+
+my ($hash, $data) = split /\n/, $decrypted, 2;
 my $observed_hash = fast_hash($data);
 
 die 'decrypted data fails integrity check' unless $observed_hash eq $hash;
 $data;
+
 __
 meta::internal_function('encrypt', <<'__');
 # Encrypt data with a hash to make sure that it gets decrypted properly.
 use Crypt::CBC;
-join '', pack 'u*', Crypt::CBC->new(-key => encryption_key(), -salt => substr(state(), 0, 8), -cipher => 'Blowfish')->encrypt(fast_hash($_[0]) . "\n" . $_[0]);
+
+my ($data) = @_;
+pack 'u*', Crypt::CBC->new(-key => encryption_key(), -salt => substr(state(), 0, 8), -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $data);
+
 __
 meta::internal_function('encryption_key', <<'__');
 key() unless defined $transient{encryption_key};
