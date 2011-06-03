@@ -459,7 +459,7 @@ meta::function('mount', <<'__');
 use Fuse;
 use POSIX;
 
-my ($mountpoint) = $_[0] // temporary_filename();
+my ($mountpoint) = $_[0] // temporary_name();
 my ($uid, $gid) = ($<, int $();
 my $hash_length = length fast_hash('');
 
@@ -498,24 +498,26 @@ my $stat_directory = sub {return -ENOENT() unless exists $directory_hooks{$_[0]}
                           1, 1, 0040500, 1, $uid, $gid, 0, 1, 0, 0, 0, 1, 1};
 my $stat_file      = sub {my $contents = &$read($_[0]) // return -ENOENT();
                           1, 1, 0100400, 1, $uid, $gid, 0, length $contents, 0, 0, 0, 16, 1};
+if (fork) {
+  terminal::info("starting $ENV{SHELL} inside $mountpoint.");
+  terminal::info('exit the shell to return and automatically unmount.');
 
-terminal::info("mounting filesystem on $mountpoint...");
-dangerous('', sub {
-  Fuse::main(
-    mountpoint => $mountpoint,
-    getattr    => sub {&$is_directory($_[0]) ? &$stat_directory($_[0]) : &$stat_file($_[0])},
-    getdir     => $readdir,
-    open       => sub {0},
-    read       => $read)}) unless fork;
+  sleep 1;
 
-terminal::info("starting /bin/bash inside $mountpoint");
-sleep 1;                # Give fuse a moment to mount the directory
-my $oldpwd = getcwd();
-chdir $mountpoint;
-system('/bin/bash');
-chdir $oldpwd;
-system("fusermount -u $mountpoint");
-rmdir $mountpoint;
+  my $oldpwd = getcwd();
+  chdir $mountpoint && system($ENV{SHELL});
+  chdir $oldpwd     && system("fusermount -u $mountpoint");
+  rmdir $mountpoint or terminal::warning('failed to remove mountpoint')}
+
+else {
+  terminal::info("mounting filesystem on $mountpoint...");
+  exit dangerous('', sub {
+    Fuse::main(
+      mountpoint => $mountpoint,
+      getattr    => sub {&$is_directory($_[0]) ? &$stat_directory($_[0]) : &$stat_file($_[0])},
+      getdir     => $readdir,
+      open       => sub {0},
+      read       => $read)})}
 
 __
 meta::function('mv', <<'__');
