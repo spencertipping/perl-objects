@@ -431,7 +431,9 @@ map attribute($_), select_keys('--namespace' => 'encrypted');
 __
 meta::function('hide', <<'__');
 # Encrypts an attribute.
+exists $data{$_} or die "$_ doesn't exist; not hiding anything" for @_;
 associate("encrypted::$_", encrypt(retrieve($_))), rm($_) for @_;
+
 __
 meta::function('hook', <<'__');
 my ($hook, @args) = @_;
@@ -588,7 +590,9 @@ __
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unhide', <<'__');
 # Decrypts attributes.
+exists $data{"encrypted::$_"} or die "encrypted::$_ doesn't exist; not unhiding anything" for @_;
 associate($_, decrypt(retrieve("encrypted::$_"))), rm("encrypted::$_") for @_;
+
 __
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
