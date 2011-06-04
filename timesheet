@@ -735,6 +735,17 @@ hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
 __
 meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
+meta::indicator('duration', <<'__');
+my $start_time = retrieve('data::current-start-time');
+return unless $start_time;
+
+my $start = &{'parse-time'}($start_time);
+my $now   = &{'parse-time'}(&{'time-signature'}());
+my $duration = $now - $start;
+
+"\033[1;34m${duration}m\033[0;0m";
+
+__
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
 meta::indicator('state', <<'__');
 my $state = $options{state} // state();
