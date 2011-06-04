@@ -301,7 +301,8 @@ meta::data('permanent-identity', '99aeabc9ec7fe80b1b39f5e53dc7e49e');
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
 return ls('-a', '^alias::') unless defined $name;
-@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join ' ', @stuff)}) : retrieve("alias::$name") || "Undefined alias $name";
+@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)}) : retrieve("alias::$name") || "Undefined alias $name";
+
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('cc', <<'__');
