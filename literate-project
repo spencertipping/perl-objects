@@ -1347,7 +1347,8 @@ sub repl {
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
 
-  &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
+  length $_ && &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
+
 __
 meta::library('terminal', <<'__');
 # Functions for nice-looking terminal output.
@@ -1371,7 +1372,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  a6e665ecce572216b24de2cc8fbb042b
+parent::/home/spencertipping/bin/object  1b013aea6f726b0747ec8ed78eadd50f
 retriever::html-sdoc                     c98c4a902a9473df7c875bca9b90af31
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1379,7 +1380,8 @@ retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                6a442b586820b0719ec533aa1aeec1d1
-parent::/home/spencertipping/bin/object  a6e665ecce572216b24de2cc8fbb042b
+parent::/home/spencertipping/bin/object  df16d2086f726b0747ec8ed746c99d97
+
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
@@ -1465,7 +1467,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          faa0189a8a358db9dc166257ca5c0708
+library::shell                          378715d20a4a87ee305dd2c3cff1b588
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
@@ -1497,11 +1499,11 @@ meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
 parent::/home/spencertipping/bin/object  293415c4d45c10239298fa46b01cff17
 __
 meta::parent('development', <<'__');
-parent::./sdoc            1ef01cc2e77e82316ffb924c9b599e20
+parent::./sdoc            a98752959265cd6275d8b107c3320ddc
 parent::configuration     835c872a2163166e001c4e07b5191353
 parent::notes             cf1155a861dfd38d3f5b1e9088e70a35
 parent::preprocessor      6c6ba7ea903710cc71caadf588664385
-parent::repository        6c2545888ecd98aa48da455493ecdfc9
+parent::repository        61c33798c4c6dad0bfba695798f11e1a
 parent::vim-highlighters  4d57f2d88b648166403f00b05253e34b
 
 __
@@ -1638,7 +1640,7 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               e51e7c6b51e2806cb11cd4aaed07b6af
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
-parent::/home/spencertipping/bin/configuration  4bf69eabad3ce7bc6bca5c183fe1084e
+parent::/home/spencertipping/bin/configuration  c7add07c91e7fe3dfd181cdae9a749e5
 
 __
 meta::parent('vim-highlighters', <<'__');
