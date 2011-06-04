@@ -295,6 +295,7 @@ __
 meta::cache('parent-identification', <<'__');
 ./sdoc a1e8480e579614c01dabeecf0f963bcc
 /home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
+object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::data('author', 'Spencer Tipping');
@@ -325,7 +326,8 @@ meta::data('permanent-identity', '62bc8a83ef5d4941cd2c1cdfb57a0320');
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
 return ls('-a', '^alias::') unless defined $name;
-@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join ' ', @stuff)}) : retrieve("alias::$name") || "Undefined alias $name";
+@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)}) : retrieve("alias::$name") || "Undefined alias $name";
+
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('cc', <<'__');
@@ -1137,7 +1139,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  df16d2086f726b0747ec8ed746c99d97
+parent::/home/spencertipping/bin/object  d8afbb7286800b32bf2a9f20fb275d8e
 retriever::html-sdoc                     c98c4a902a9473df7c875bca9b90af31
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1147,7 +1149,7 @@ meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               7637e32ba308624d824eacc9337c2512
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
-function::alias                         4feab1da50b0ef7a7103231ff8fdc796
+function::alias                         fb63bb3836ab968de2ee93f33d1704ec
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
@@ -1258,7 +1260,7 @@ meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               7637e32ba308624d824eacc9337c2512
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
-function::alias                         4feab1da50b0ef7a7103231ff8fdc796
+function::alias                         fb63bb3836ab968de2ee93f33d1704ec
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
@@ -1368,7 +1370,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               df16d2086f726b0747ec8ed746c99d97
+parent::object               d8afbb7286800b32bf2a9f20fb275d8e
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
