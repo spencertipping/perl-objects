@@ -344,6 +344,12 @@ around_hook('create', $name, $value, sub {
   edit($name) unless defined $value});
 __
 meta::function('current-state', 'serialize(\'-pS\');');
+meta::function('date-signature', <<'__');
+use Time::Piece;
+my $now = localtime;
+sprintf("%04d.%02d%02d", $now->year, $now->mon, $now->mday);
+
+__
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($name, %options) = @_;
@@ -470,6 +476,12 @@ $name =~ s/^.*\///;
 $name;
 __
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
+meta::function('parse-time', <<'__');
+# This function doesn't normally take multiple arguments, but it can.
+my ($hours, $minutes) = split /:/, join ':', @_;
+$hours * 60 + $minutes;
+
+__
 meta::function('parse-timesheet', <<'__');
 my ($times) = @_;
 
@@ -483,19 +495,19 @@ for my $line (split /\n/, $times) {
   $line =~ s/\s+#.*$//;
   my @line_bits = split /\s{2,}/, $line;
 
-  my @start_time = split /:/, $line_bits[1];
-  my @end_time   = split /:/, $line_bits[2];
+  my $start_time = &{'parse-time'}($line_bits[1]);
+  my $end_time   = &{'parse-time'}($line_bits[2]);
 
-  my $current_duration = ($end_time[0] - $start_time[0]) * 60 + $end_time[1] - $start_time[1];
-  $minute_total += $current_duration;
+  my $current_duration = $end_time - $start_time;
 
   terminal::message('warning', "ignoring negative time on line $current_line"), next if $current_duration < 0;
 
+  $minute_total += $current_duration;
   push @parsed_entries, {date       => $line_bits[0],
                          start_time => $line_bits[1],
                          end_time   => $line_bits[2],
-                         start      => $start_time[0] * 60 + $start_time[1],
-                         end        => $end_time[0] * 60 + $end_time[1],
+                         start      => $start_time,
+                         end        => $end_time,
                          duration   => $current_duration,
                          total      => $minute_total,
                          title      => $line_bits[3],
@@ -565,11 +577,56 @@ file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
+meta::function('start', <<'__');
+die 'already working on ' . retrieve('data::current-details') if retrieve('data::current-category');
+
+my ($category, @details) = @_;
+my $now = localtime;
+my $date_signature = &{'date-signature'}();
+my $time_signature = &{'time-signature'}();
+
+associate('data::current-start-time', $time_signature);
+associate('data::current-category', $category);
+associate('data::current-details', join ' ', @details);
+associate('timesheet::default', retrieve('timesheet::default') . sprintf("%-16s%-8s", $date_signature, $time_signature));
+
+terminal::info("starting $category @details at $time_signature");
+
+__
 meta::function('state', <<'__');
 my @keys = sort keys %data;
 my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
+__
+meta::function('stop', <<'__');
+use Time::Piece;
+
+die 'not working on anything' unless retrieve('data::current-category');
+
+my ($category, @details) = @_;
+my $details = join ' ', @details;
+$category ||= retrieve('data::current-category');
+$details  ||= retrieve('data::current-details');
+
+my $time_signature = &{'time-signature'}();
+my $start_time     = retrieve('data::current-start-time');
+my $duration       = &{'parse-time'}($time_signature) - &{'parse-time'}($start_time);
+
+rm('data::current-category');
+rm('data::current-details');
+rm('data::current-start-time');
+
+associate('timesheet::default', retrieve('timesheet::default') . sprintf("%-8s%-16s%s\n", $time_signature, $category, $details));
+
+terminal::info("stopping $category $details at $time_signature ($duration minutes)");
+
+__
+meta::function('time-signature', <<'__');
+use Time::Piece;
+my $now = localtime;
+sprintf("%02d:%02d", $now->hour, $now->min);
+
 __
 meta::function('timesheet-csv', <<'__');
 my @parsed_entries = &{'parse-timesheet'}(retrieve($_[0] // 'timesheet::default'));
@@ -1169,9 +1226,9 @@ meta::timesheet('default', <<'__');
 # be useful for analysis.
 
 # For example:
-December 10, 2010       09:00   12:00   Working on X    Added feature X1
-December 10, 2010       13:00   17:00   Working on X    Added feature X2
-December 11, 2010       23:00   24:30   Working late    Wrote bugs that I'll have to fix later  # 11PM to 12:30AM
+2010.1210       09:00   12:00   Working on X    Added feature X1
+2010.1211       13:00   17:00   Working on X    Added feature X2
+2010.1211       23:00   24:30   Working late    Wrote bugs that I'll have to fix later  # 11PM to 12:30AM
 
 __
 internal::main();
