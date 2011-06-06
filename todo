@@ -493,11 +493,11 @@ meta::function('parse-todo', <<'__');
 # Takes a string of todo text and parses it. Multiple todo lists can be
 # combined, resulting in a longer list.
 my @todo_paragraphs = grep s/^\h*\|//, split /\n{2,}/, join "\n\n", retrieve(@_);
-my @todo_lines      = grep /^\h*\[[ \|]+\]\h*\w/, map split(/\n/), @todo_paragraphs;
+my @todo_lines      = grep /^\h*\[\W+\]\h*\w/, map split(/\n/), @todo_paragraphs;
 
-sub progress_of {my ($s) = @_; ($s =~ /^(\|*)/ and length $1) / length $s}
+sub progress_of {my ($s) = @_; ($s =~ /^(\S*)/ and length $1) / length $s}
 
-map /^\s*\[([ \|]+)\]\h*(\H+)\h*(.*)$/ && {progress_meter => $1, progress => progress_of($1), category => $2, details => $3}, @todo_lines;
+map /^\s*\[(\W+)\]\h*(\H+)\h*(.*)$/ && {progress_meter => $1, progress => progress_of($1), category => $2, details => $3}, @todo_lines;
 
 __
 meta::function('perl', <<'__');
@@ -1396,8 +1396,8 @@ Normal paragraphs like this one are ignored. To create a todo list, you quote pa
 
 Each of these items contains a completion meter, a category, and a description. The summary function breaks down todo lists by category, giving you a completion percentage for each one.
 
-| [|| ] more-example Mostly done
-  [|||] more-example Complete
+| [// ] more-example Mostly done
+  [///] more-example Complete
 
 __
 internal::main();
