@@ -686,7 +686,7 @@ $category_completion{$_->{category}} += $_->{progress} for @todo_items;
 $category_completion{$_} /= @{$categories{$_}} for keys %categories;
 
 join "\n\n", map sprintf("%s: %4.2f%%\n%s", $_, $category_completion{$_} * 100,
-                         join "\n", map sprintf("%-8s %-16s %s", "[$_->{progress_meter}]", $_->{category}, $_->{details}), @{$categories{$_}}), sort keys %categories;
+                         join "\n", map sprintf("%-8s %s", "[$_->{progress_meter}]", $_->{details}), @{$categories{$_}}), sort keys %categories;
 
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
