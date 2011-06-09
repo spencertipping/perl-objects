@@ -501,7 +501,7 @@ for my $line (split /\n/, $times) {
 
   my $current_duration = $end_time - $start_time;
 
-  terminal::message('warning', "ignoring negative time on line $current_line"), next if $current_duration < 0;
+  terminal::warning("ignoring negative time on line $current_line"), next if $current_duration < 0;
 
   $minute_total += $current_duration;
   push @parsed_entries, {date       => $line_bits[0],
