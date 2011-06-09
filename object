@@ -513,7 +513,8 @@ __
 meta::function('sh', 'system(@_);');
 meta::function('shell', <<'__');
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
-shell::repl();
+around_hook('shell', sub {shell::repl()});
+
 __
 meta::function('size', <<'__');
 my $size = 0;
