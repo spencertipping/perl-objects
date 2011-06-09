@@ -588,7 +588,8 @@ __
 meta::function('sh', 'system(@_);');
 meta::function('shell', <<'__');
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
-shell::repl();
+around_hook('shell', sub {shell::repl()});
+
 __
 meta::function('size', <<'__');
 my $size = 0;
@@ -1095,7 +1096,7 @@ function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize_single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
-function::shell                         c07f3725aa8e31ac5b55ffcf0f39bba1
+function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
 function::size                          6cd9a4dd17be87ea2962f8f566a97d11
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
@@ -1206,7 +1207,7 @@ function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize_single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
-function::shell                         c07f3725aa8e31ac5b55ffcf0f39bba1
+function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
 function::size                          6cd9a4dd17be87ea2962f8f566a97d11
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
@@ -1280,7 +1281,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 d8afbb7286800b32bf2a9f20fb275d8e
+parent::object                 33c806ac057c1c9941aa9d980c8ff9c5
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294

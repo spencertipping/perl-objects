@@ -521,7 +521,8 @@ __
 meta::function('sh', 'system(@_);');
 meta::function('shell', <<'__');
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
-shell::repl();
+around_hook('shell', sub {shell::repl()});
+
 __
 meta::function('size', <<'__');
 my $size = 0;
@@ -1021,7 +1022,7 @@ function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize_single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
-function::shell                         c07f3725aa8e31ac5b55ffcf0f39bba1
+function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
 function::size                          6cd9a4dd17be87ea2962f8f566a97d11
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb

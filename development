@@ -735,7 +735,8 @@ __
 meta::function('sh', 'system(@_);');
 meta::function('shell', <<'__');
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
-shell::repl();
+around_hook('shell', sub {shell::repl()});
+
 __
 meta::function('size', <<'__');
 my $size = 0;
@@ -1204,7 +1205,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  d8afbb7286800b32bf2a9f20fb275d8e
+parent::/home/spencertipping/bin/object  33c806ac057c1c9941aa9d980c8ff9c5
 retriever::html-sdoc                     c98c4a902a9473df7c875bca9b90af31
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1212,7 +1213,7 @@ retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                6a442b586820b0719ec533aa1aeec1d1
-parent::/home/spencertipping/bin/object  d8afbb7286800b32bf2a9f20fb275d8e
+parent::/home/spencertipping/bin/object  33c806ac057c1c9941aa9d980c8ff9c5
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1255,7 +1256,7 @@ function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize_single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
-function::shell                         c07f3725aa8e31ac5b55ffcf0f39bba1
+function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
 function::size                          6cd9a4dd17be87ea2962f8f566a97d11
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
@@ -1334,7 +1335,7 @@ meta::parent('notes', <<'__');
 function::note    5e2737593e8d13fc43bb10e97603e53a
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    d8afbb7286800b32bf2a9f20fb275d8e
+parent::object    33c806ac057c1c9941aa9d980c8ff9c5
 
 __
 meta::parent('object', <<'__');
@@ -1377,7 +1378,7 @@ function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize_single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
-function::shell                         c07f3725aa8e31ac5b55ffcf0f39bba1
+function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
 function::size                          6cd9a4dd17be87ea2962f8f566a97d11
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
@@ -1451,7 +1452,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 d8afbb7286800b32bf2a9f20fb275d8e
+parent::object                 33c806ac057c1c9941aa9d980c8ff9c5
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1463,13 +1464,13 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               e51e7c6b51e2806cb11cd4aaed07b6af
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
-parent::/home/spencertipping/bin/configuration  b35b6c1c292e779cd4658dbf6a0eae8e
+parent::/home/spencertipping/bin/configuration  5972a2c5fc22366149800db70efb1e53
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               d8afbb7286800b32bf2a9f20fb275d8e
+parent::object               33c806ac057c1c9941aa9d980c8ff9c5
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
