@@ -372,12 +372,17 @@ meta::function('dupdate', <<'__');
 # Update the repository based on the dependencies it lists. These dependencies
 # can be anything that's retrievable.
 
+# If you have any ::s in the local name of the dependency, then the cached_dependency::
+# prefix won't be added. This lets you import slices of other objects and have
+# those slices merge into any namespace you'd like.
+
 rm(grep /^cached_dependency::/, keys %data);
 my %dependencies = dependencies();
 
 for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
-  associate("cached_dependency::$_", retrieve($dependencies{$_}))}
+  my $prefix = /::/ ? '' : 'cached_dependency::';
+  associate("${prefix}::$_", retrieve($dependencies{$_}))}
 
 __
 meta::function('edit', <<'__');
