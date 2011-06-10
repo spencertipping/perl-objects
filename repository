@@ -1135,8 +1135,8 @@ __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('http', <<'__');
 use LWP::Simple ();
-return undef unless $_[0] =~ /^(http:)?(\/\/\w+.*)$/;
-LWP::Simple::get("http://$2");
+return undef unless $_[0] =~ /^(?:http:)?\/\/(\w+.*)$/;
+LWP::Simple::get("http://$1");
 
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');

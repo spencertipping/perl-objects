@@ -388,14 +388,16 @@ __
 meta::function('current-state', 'serialize(\'-pS\');');
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('dupdate', <<'__');
-# Update the repository based on the dependencies it lists.
-use LWP::Simple ();
+# Update the repository based on the dependencies it lists. These dependencies
+# can be anything that's retrievable.
+
 rm(grep /^cached_dependency::/, keys %data);
 my %dependencies = dependencies();
 
 for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
-  associate("cached_dependency::$_", LWP::Simple::get($dependencies{$_}))}
+  associate("cached_dependency::$_", retrieve($dependencies{$_}))}
+
 __
 meta::function('edit', <<'__');
 my ($name, %options) = @_;
@@ -1206,7 +1208,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  33c806ac057c1c9941aa9d980c8ff9c5
+parent::/home/spencertipping/bin/object  8f8fd7f160ccb2fce8485e921074adbf
 retriever::html-sdoc                     c98c4a902a9473df7c875bca9b90af31
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1337,7 +1339,7 @@ meta::parent('notes', <<'__');
 function::note    5e2737593e8d13fc43bb10e97603e53a
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    33c806ac057c1c9941aa9d980c8ff9c5
+parent::object    8f8fd7f160ccb2fce8485e921074adbf
 
 __
 meta::parent('object', <<'__');
@@ -1365,7 +1367,7 @@ function::hooks                         3d989899c616f7440429a2d9bf1cc44b
 function::identity                      6523885762fcc2f354fc25cf6ed126ce
 function::import                        5d0f0634cbd01274f2237717507198a2
 function::initial-state                 03d8ed608855a723124e79ca184d8e73
-function::is                            ee26a8494ff12dc6df26e61ecd926302
+function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    2123ad2d7bfaf83c8959fa003d8c4ad4
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            0b310755e747c65bca09508fd9d841f0
@@ -1449,12 +1451,13 @@ meta::type::retriever                   71a29050bf9f20f6c71afddff83addc9
 meta::type::state                       84da7d5220471307f1f990c5057d3319
 retriever::file                         3bbc9d8a887a536044bafff1d54def7e
 retriever::id                           4da6080168d32445150cc4200af7af6e
+retriever::object                       c7633990b4e01bdc783da7e545799f4f
 
 __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 33c806ac057c1c9941aa9d980c8ff9c5
+parent::object                 8f8fd7f160ccb2fce8485e921074adbf
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1464,15 +1467,16 @@ template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
 
 __
 meta::parent('repository', <<'__');
-function::dupdate                               e51e7c6b51e2806cb11cd4aaed07b6af
+function::dupdate                               cdd15a478be20ea1ce5b780d96c64faf
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
-parent::/home/spencertipping/bin/configuration  5972a2c5fc22366149800db70efb1e53
+parent::/home/spencertipping/bin/configuration  7f2185af66a4cc7f6762e573ca25f79d
+retriever::http                                 81b95a8c1403dcaf7c3cf063f3a0bf73
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               33c806ac057c1c9941aa9d980c8ff9c5
+parent::object               8f8fd7f160ccb2fce8485e921074adbf
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
@@ -1480,6 +1484,12 @@ meta::retriever('html-sdoc', <<'__');
 my ($attribute) = @_;
 return undef unless $attribute =~ s/^html::/sdoc::/ and exists $data{$attribute};
 &{'sdoc-html'}($attribute);
+__
+meta::retriever('http', <<'__');
+use LWP::Simple ();
+return undef unless $_[0] =~ /^(http:)?(\/\/\w+.*)$/;
+LWP::Simple::get("http://$2");
+
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('object', <<'__');
