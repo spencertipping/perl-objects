@@ -1035,7 +1035,7 @@ meta::parent('/home/spencertipping/bin/notes', <<'__');
 function::note    5e2737593e8d13fc43bb10e97603e53a
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    8f8fd7f160ccb2fce8485e921074adbf
+parent::object    dcebc8c5c3ed92cd48b2e950129ab969
 
 __
 meta::parent('object', <<'__');
@@ -1148,6 +1148,7 @@ meta::type::state                       84da7d5220471307f1f990c5057d3319
 retriever::file                         3bbc9d8a887a536044bafff1d54def7e
 retriever::id                           4da6080168d32445150cc4200af7af6e
 retriever::object                       c7633990b4e01bdc783da7e545799f4f
+retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
@@ -1156,6 +1157,12 @@ meta::retriever('object', <<'__');
 # Fetch a property from another Perl object. This uses the 'cat' function.
 return undef unless $_[0] =~ /^object::(.*?)::(.*)$/ && -x $1 && qx|$1 is '$2'|;
 join '', qx|$1 cat '$2'|;
+
+__
+meta::retriever('perl', <<'__');
+# Lets you use the result of evaluating some Perl expression
+return undef unless $_[0] =~ /^perl::(.*)$/;
+eval $1;
 
 __
 meta::state('before-update', <<'__29a');
