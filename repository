@@ -383,7 +383,7 @@ my %dependencies = map &{attribute($_)}(), select_keys('--criteria' => "^configu
 for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
   my $prefix = /::/ ? '' : 'cached_dependency::';
-  associate("${prefix}::$_", retrieve($dependencies{$_}))}
+  associate("${prefix}$_", retrieve($dependencies{$_}))}
 
 __
 meta::function('edit', <<'__');
