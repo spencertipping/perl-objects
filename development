@@ -391,12 +391,17 @@ meta::function('dupdate', <<'__');
 # Update the repository based on the dependencies it lists. These dependencies
 # can be anything that's retrievable.
 
+# If you have any ::s in the local name of the dependency, then the cached_dependency::
+# prefix won't be added. This lets you import slices of other objects and have
+# those slices merge into any namespace you'd like.
+
 rm(grep /^cached_dependency::/, keys %data);
-my %dependencies = dependencies();
+my %dependencies = map &{attribute($_)}(), select_keys('--criteria' => "^configuration::depend.*");
 
 for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
-  associate("cached_dependency::$_", retrieve($dependencies{$_}))}
+  my $prefix = /::/ ? '' : 'cached_dependency::';
+  associate("${prefix}::$_", retrieve($dependencies{$_}))}
 
 __
 meta::function('edit', <<'__');
@@ -1467,7 +1472,7 @@ template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
 
 __
 meta::parent('repository', <<'__');
-function::dupdate                               cdd15a478be20ea1ce5b780d96c64faf
+function::dupdate                               7ce5af6c1ab3bf0db5c99e14189efd68
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
 parent::/home/spencertipping/bin/configuration  7f2185af66a4cc7f6762e573ca25f79d
 retriever::http                                 a23617a5787de41d1a89ad4496cacce3

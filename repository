@@ -377,7 +377,7 @@ meta::function('dupdate', <<'__');
 # those slices merge into any namespace you'd like.
 
 rm(grep /^cached_dependency::/, keys %data);
-my %dependencies = dependencies();
+my %dependencies = map &{attribute($_)}(), select_keys('--criteria' => "^configuration::depend.*");
 
 for (keys %dependencies) {
   terminal::info("Retrieving $dependencies{$_} as $_");
