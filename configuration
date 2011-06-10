@@ -109,13 +109,14 @@ meta::functor::editable 'configuration', inherit => 0, extension => '.conf', def
   # Comments are not parsed in option text; that is, you could specify an option that contained
   # a # and the # and following text would be considered part of that option.
   my ($data) = @_;
-  my @options = grep /:/o && ! /^\h*#/o && ! /^\h*$/o, split(/\v+/o, $data);
+  my @options = grep /:\h+/o && ! /^\h*#/o && ! /^\h*$/o, split(/\v+/o, $data);
   s/^\h+//o for @options;
-  my @key_values = map split(/\s*:\s*/o, $_, 2), @options;
+  my @key_values = map split(/\h*:\h+/o, $_, 2), @options;
   $key_values[$_ << 1] and $key_values[$_ << 1] =~ s/\s/_/go for 0 .. @key_values >> 1;
   $key_values[$_ << 1] and $key_values[$_ << 1] = lc $key_values[$_ << 1] for 0 .. @key_values >> 1;
   @key_values;
 };
+
 __
 meta::meta('type::data', 'meta::functor::editable \'data\', extension => \'\', inherit => 0, default => \'cat\';');
 meta::meta('type::function', <<'__');
