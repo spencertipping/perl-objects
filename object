@@ -983,6 +983,12 @@ return undef unless $_[0] =~ /^object::(.*?)::(.*)$/ && -x $1 && qx|$1 is '$2'|;
 join '', qx|$1 cat '$2'|;
 
 __
+meta::retriever('perl', <<'__');
+# Lets you use the result of evaluating some Perl expression
+return undef unless $_[0] =~ /^perl::(.*)$/;
+eval $1;
+
+__
 internal::main();
 
 __END__
