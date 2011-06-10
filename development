@@ -465,7 +465,8 @@ meta::function('initial-state', '$transient{initial};');
 meta::function('is', <<'__');
 my ($attribute, @criteria) = @_;
 my ($options, @stuff) = separate_options(@criteria);
-attribute_is($attribute, %$options);
+exists $data{$attribute} and attribute_is($attribute, %$options);
+
 __
 meta::function('load-state', <<'__');
 around_hook('load-state', @_, sub {
@@ -1213,7 +1214,7 @@ retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                6a442b586820b0719ec533aa1aeec1d1
-parent::/home/spencertipping/bin/object  33c806ac057c1c9941aa9d980c8ff9c5
+parent::/home/spencertipping/bin/object  8f8fd7f160ccb2fce8485e921074adbf
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1241,7 +1242,7 @@ function::hooks                         3d989899c616f7440429a2d9bf1cc44b
 function::identity                      6523885762fcc2f354fc25cf6ed126ce
 function::import                        5d0f0634cbd01274f2237717507198a2
 function::initial-state                 03d8ed608855a723124e79ca184d8e73
-function::is                            ee26a8494ff12dc6df26e61ecd926302
+function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    2123ad2d7bfaf83c8959fa003d8c4ad4
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            0b310755e747c65bca09508fd9d841f0
@@ -1325,6 +1326,7 @@ meta::type::retriever                   71a29050bf9f20f6c71afddff83addc9
 meta::type::state                       84da7d5220471307f1f990c5057d3319
 retriever::file                         3bbc9d8a887a536044bafff1d54def7e
 retriever::id                           4da6080168d32445150cc4200af7af6e
+retriever::object                       c7633990b4e01bdc783da7e545799f4f
 
 __
 meta::parent('configuration', <<'__');
@@ -1480,6 +1482,12 @@ return undef unless $attribute =~ s/^html::/sdoc::/ and exists $data{$attribute}
 &{'sdoc-html'}($attribute);
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
+meta::retriever('object', <<'__');
+# Fetch a property from another Perl object. This uses the 'cat' function.
+return undef unless $_[0] =~ /^object::(.*?)::(.*)$/ && -x $1 && qx|$1 is '$2'|;
+join '', qx|$1 cat '$2'|;
+
+__
 meta::retriever('pp', <<'__');
 return undef unless namespace($_[0]) eq 'pp';
 my $attr = retrieve(attribute($_[0]));
