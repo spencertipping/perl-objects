@@ -546,7 +546,7 @@ meta::function('secure-shell', <<'__');
 # The list of attributes is recomputed because the user may have added one
 # during the shell session, and we want to catch that.
 
-my $hidden = sub {grep length && ! /^\s*#/, map split(/\n/, retrieve($_)), select_keys('--namespace' => 'hidden')};
+my $hidden = sub {grep ! /^\s*#/, map split(/\n/, retrieve($_)), select_keys('--namespace' => 'hidden')};
 dangerous('', sub {unhide($_)}) for &$hidden();
 shell();
 dangerous('', sub {hide($_)}) for &$hidden();
