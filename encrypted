@@ -547,9 +547,9 @@ meta::function('secure-shell', <<'__');
 # during the shell session, and we want to catch that.
 
 my $hidden = sub {grep ! /^\s*#/, map split(/\n/, retrieve($_)), select_keys('--namespace' => 'hidden')};
-unhide($_) for &$hidden();
+dangerous('', sub {unhide($_)}) for &$hidden();
 shell();
-hide($_) for &$hidden();
+dangerous('', sub {hide($_)}) for &$hidden();
 
 __
 meta::function('serialize', <<'__');
