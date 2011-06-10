@@ -139,6 +139,10 @@ meta::define_form 'function', sub {
   meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
 };
 __
+meta::meta('type::hidden', <<'__');
+meta::functor::editable 'hidden', extension => '', inherit => 1, default => 'edit';
+
+__
 meta::meta('type::hook', <<'__');
 meta::configure 'hook', extension => '.pl', inherit => 0;
 meta::define_form 'hook', sub {
@@ -536,6 +540,17 @@ meta::function('save-state', <<'__');
 my ($state_name) = @_;
 around_hook('save-state', $state_name, sub {
   associate("state::$state_name", &{'current-state'}(), execute => 1)});
+__
+meta::function('secure-shell', <<'__');
+# Unhide hidden attributes, then hide them when the user exits the shell.
+# The list of attributes is recomputed because the user may have added one
+# during the shell session, and we want to catch that.
+
+my $hidden = sub {grep ! /^\s*#/, map split(/\n/, retrieve($_)), select_keys('--namespace' => 'hidden')};
+unhide($_) for &$hidden();
+shell();
+hide($_) for &$hidden();
+
 __
 meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
