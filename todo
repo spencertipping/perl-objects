@@ -1370,12 +1370,13 @@ meta::type::state                       84da7d5220471307f1f990c5057d3319
 retriever::file                         3bbc9d8a887a536044bafff1d54def7e
 retriever::id                           4da6080168d32445150cc4200af7af6e
 retriever::object                       c7633990b4e01bdc783da7e545799f4f
+retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               8f8fd7f160ccb2fce8485e921074adbf
+parent::object               dcebc8c5c3ed92cd48b2e950129ab969
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
