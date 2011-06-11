@@ -549,6 +549,7 @@ meta::function('secure-shell', <<'__');
 
 my $hidden = sub {grep length && ! /^\s*#/, map split(/\n/, retrieve($_)), select_keys('--namespace' => 'hidden')};
 dangerous('', sub {unhide($_)}) for &$hidden();
+reload();
 shell();
 dangerous('', sub {hide($_)}) for &$hidden();
 
