@@ -512,6 +512,11 @@ $delimiter = substr($delimiter, 0, $chars);
 "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 __
 meta::function('sh', 'system(@_);');
+meta::function('shb', <<'__');
+# Backgrounded shell job.
+exec(@_) unless fork;
+
+__
 meta::function('shell', <<'__');
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
 around_hook('shell', sub {shell::repl()});
