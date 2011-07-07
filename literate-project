@@ -1383,7 +1383,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  dcebc8c5c3ed92cd48b2e950129ab969
+parent::/home/spencertipping/bin/object  56639a90b66d228e47f8786942cbe0c7
 retriever::html-sdoc                     c98c4a902a9473df7c875bca9b90af31
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1513,19 +1513,19 @@ meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
 parent::/home/spencertipping/bin/object  293415c4d45c10239298fa46b01cff17
 __
 meta::parent('development', <<'__');
-parent::./sdoc            2f942628c020ff6b5ff0ac17beb2229e
+parent::./sdoc            5fc7c0a8944d04b89a178d70e678a1d4
 parent::configuration     835c872a2163166e001c4e07b5191353
-parent::notes             8ff762960dbff60c01cea9e7f6fc063a
-parent::preprocessor      47927de34eb81538f3a6190e71885779
-parent::repository        df206f2c8cd08b68be29319dec8ed52e
-parent::vim-highlighters  bf65e8311a9198ad426085f5d13dd93b
+parent::notes             58ef754f1469b0f447e5a589a39c064d
+parent::preprocessor      ee1e499bce8313b61579bf8d45d2b9a5
+parent::repository        d1392b788cd08b6806f446ed94cb21eb
+parent::vim-highlighters  cee8af6e0e64042d7002d6daaff9e277
 
 __
 meta::parent('notes', <<'__');
 function::note    5e2737593e8d13fc43bb10e97603e53a
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    dcebc8c5c3ed92cd48b2e950129ab969
+parent::object    56639a90b66d228e47f8786942cbe0c7
 
 __
 meta::parent('object', <<'__');
@@ -1568,6 +1568,7 @@ function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize_single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
+function::shb                           7b2685a4041c25bc495816e472bdace5
 function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
 function::size                          6cd9a4dd17be87ea2962f8f566a97d11
 function::snapshot                      56939a47f2758421669641e15ebd66eb
@@ -1644,7 +1645,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 dcebc8c5c3ed92cd48b2e950129ab969
+parent::object                 56639a90b66d228e47f8786942cbe0c7
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1656,14 +1657,14 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               f3332a122f7864d40119b33bdef42912
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
-parent::/home/spencertipping/bin/configuration  19487ddf618fdd05409defb63747ebd3
+parent::/home/spencertipping/bin/configuration  0da83470ebda4b9ab01896c4a93d77f0
 retriever::http                                 a23617a5787de41d1a89ad4496cacce3
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               dcebc8c5c3ed92cd48b2e950129ab969
+parent::object               56639a90b66d228e47f8786942cbe0c7
 
 __
 meta::resource('header', <<'__');
