@@ -53,9 +53,12 @@ meta::meta('externalize', <<'__');
 
 sub meta::externalize {
   my ($name, $attribute, $implementation) = @_;
-  $externalized_functions{$name} = $attribute;
-  *{"::$name"} = $implementation || $attribute;
+  my $escaped = $name;
+  $escaped =~ s/[^A-Za-z0-9:]/_/go;
+  $externalized_functions{$name} = $externalized_functions{$escaped} = $attribute;
+  *{"::$name"} = *{"::$escaped"} = $implementation || $attribute;
 }
+
 __
 meta::meta('functor::editable', <<'__');
 # An editable type. This creates a type whose default action is to open an editor
@@ -482,7 +485,7 @@ around_hook('load-state', @_, sub {
   my $state = retrieve("state::$state_name");
 
   terminal::state('saving current state into _...');
-  &{'save-state'}('_');
+  save_state('_');
 
   delete $data{$_} for grep ! /^state::/, keys %data;
   %externalized_functions = ();
@@ -492,6 +495,7 @@ around_hook('load-state', @_, sub {
   terminal::error(hook('load-state-failed', $@)) if $@;
   reload();
   verify()});
+
 __
 meta::function('lock', 'hook(\'lock\', chmod_self(sub {$_[0] & 0555}));');
 meta::function('ls', <<'__');
@@ -604,7 +608,8 @@ meta::function('save-state', <<'__');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
 around_hook('save-state', $state_name, sub {
-  associate("state::$state_name", &{'current-state'}(), execute => 1)});
+  associate("state::$state_name", current_state(), execute => 1)});
+
 __
 meta::function('sdoc', <<'__');
 # Applies SDoc processing to a file or attribute. Takes the file or attribute
@@ -720,7 +725,7 @@ my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '-
 my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__END__']};
 join "\n", @final_array;
 __
-meta::function('serialize_single', <<'__');
+meta::function('serialize-single', <<'__');
 # Serializes a single attribute and optimizes for content.
 
 my $name          = $_[0] || $_;
@@ -771,7 +776,10 @@ $hash;
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
-meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
+meta::function('update', <<'__');
+update_from(@_, grep s/^parent:://o, sort keys %data);
+
+__
 meta::function('update-from', <<'__');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transient{inherit}{$type}.
@@ -794,7 +802,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             =    $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent =    $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  &{'save-state'}('before-update') if $save_state;
+  save_state('before-update') if $save_state;
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -835,7 +843,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
         terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-        return &{'load-state'}('before-update') if $save_state}});
+        return load_state('before-update') if $save_state}});
+
 __
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__');
@@ -1219,15 +1228,15 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  56639a90b66d228e47f8786942cbe0c7
-retriever::html-sdoc                     c98c4a902a9473df7c875bca9b90af31
+parent::/home/spencertipping/bin/object  e546074f87548ab0c05e2591f0a3f5e3
+retriever::html-sdoc                     2a5d5aa45e2d7576f79e045177d8705c
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                7f5ba514d47ac29a3c226d0e331d9da4
-parent::/home/spencertipping/bin/object  56639a90b66d228e47f8786942cbe0c7
+parent::/home/spencertipping/bin/object  1ac66054532268622a9faa98082ee254
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1256,7 +1265,7 @@ function::identity                      6523885762fcc2f354fc25cf6ed126ce
 function::import                        5d0f0634cbd01274f2237717507198a2
 function::initial-state                 03d8ed608855a723124e79ca184d8e73
 function::is                            41564c8f21b12ab80824ac825266d805
-function::load-state                    2123ad2d7bfaf83c8959fa003d8c4ad4
+function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            0b310755e747c65bca09508fd9d841f0
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
@@ -1266,9 +1275,9 @@ function::perl                          a0f341ea54391b63b6195e7992b6a686
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
-function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
+function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
-function::serialize_single              aa77af032272f5a2664e21713739a223
+function::serialize-single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           7b2685a4041c25bc495816e472bdace5
 function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
@@ -1277,8 +1286,8 @@ function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
-function::update                        161a7afaf55c1268ffe82ab170ae27e1
-function::update-from                   66828c66a5510b916ab0e065d4e05110
+function::update                        ac391dc90e507e7586c81850e7c2ecdd
+function::update-from                   631721c4dc30e11b2023a6703cbcef52
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1321,7 +1330,7 @@ message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
 message_color::states                   ac66eeeff487b5f43f88a78ea18b3d56
 meta::configure                         69c2e727c124521d074fde21f8bbc4db
-meta::externalize                       7610c2983b848bfb93390b9e423373dd
+meta::externalize                       aa44e27e0bbee6f0ca4de25d603a1fc7
 meta::functor::editable                 48246c608f363de66511400e00b26164
 meta::type::alias                       889d26d2df385e9ff8e2da7de4e48374
 meta::type::bootstrap                   51108ab2ddb8d966e927c8f62d9ef3e5
@@ -1352,7 +1361,7 @@ meta::parent('notes', <<'__');
 function::note    5e2737593e8d13fc43bb10e97603e53a
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    56639a90b66d228e47f8786942cbe0c7
+parent::object    e546074f87548ab0c05e2591f0a3f5e3
 
 __
 meta::parent('object', <<'__');
@@ -1393,7 +1402,7 @@ function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
 function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
-function::serialize_single              aa77af032272f5a2664e21713739a223
+function::serialize-single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           7b2685a4041c25bc495816e472bdace5
 function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
@@ -1446,7 +1455,7 @@ message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
 message_color::states                   ac66eeeff487b5f43f88a78ea18b3d56
 meta::configure                         69c2e727c124521d074fde21f8bbc4db
-meta::externalize                       7610c2983b848bfb93390b9e423373dd
+meta::externalize                       aa44e27e0bbee6f0ca4de25d603a1fc7
 meta::functor::editable                 48246c608f363de66511400e00b26164
 meta::type::alias                       889d26d2df385e9ff8e2da7de4e48374
 meta::type::bootstrap                   51108ab2ddb8d966e927c8f62d9ef3e5
@@ -1472,7 +1481,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 56639a90b66d228e47f8786942cbe0c7
+parent::object                 e546074f87548ab0c05e2591f0a3f5e3
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1484,21 +1493,22 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               f3332a122f7864d40119b33bdef42912
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
-parent::/home/spencertipping/bin/configuration  0da83470ebda4b9ab01896c4a93d77f0
+parent::/home/spencertipping/bin/configuration  dbbf35bbb112e4df8e6f0b244ad8d4c3
 retriever::http                                 a23617a5787de41d1a89ad4496cacce3
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               56639a90b66d228e47f8786942cbe0c7
+parent::object               e546074f87548ab0c05e2591f0a3f5e3
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('html-sdoc', <<'__');
 my ($attribute) = @_;
 return undef unless $attribute =~ s/^html::/sdoc::/ and exists $data{$attribute};
-&{'sdoc-html'}($attribute);
+sdoc_html($attribute);
+
 __
 meta::retriever('http', <<'__');
 use LWP::Simple ();

@@ -53,9 +53,12 @@ meta::meta('externalize', <<'__');
 
 sub meta::externalize {
   my ($name, $attribute, $implementation) = @_;
-  $externalized_functions{$name} = $attribute;
-  *{"::$name"} = $implementation || $attribute;
+  my $escaped = $name;
+  $escaped =~ s/[^A-Za-z0-9:]/_/go;
+  $externalized_functions{$name} = $externalized_functions{$escaped} = $attribute;
+  *{"::$name"} = *{"::$escaped"} = $implementation || $attribute;
 }
+
 __
 meta::meta('functor::editable', <<'__');
 # An editable type. This creates a type whose default action is to open an editor
@@ -417,7 +420,7 @@ around_hook('load-state', @_, sub {
   my $state = retrieve("state::$state_name");
 
   terminal::state('saving current state into _...');
-  &{'save-state'}('_');
+  save_state('_');
 
   delete $data{$_} for grep ! /^state::/, keys %data;
   %externalized_functions = ();
@@ -427,6 +430,7 @@ around_hook('load-state', @_, sub {
   terminal::error(hook('load-state-failed', $@)) if $@;
   reload();
   verify()});
+
 __
 meta::function('lock', 'hook(\'lock\', chmod_self(sub {$_[0] & 0555}));');
 meta::function('ls', <<'__');
@@ -480,7 +484,8 @@ meta::function('save-state', <<'__');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
 around_hook('save-state', $state_name, sub {
-  associate("state::$state_name", &{'current-state'}(), execute => 1)});
+  associate("state::$state_name", current_state(), execute => 1)});
+
 __
 meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
@@ -490,7 +495,7 @@ my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '-
 my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__END__']};
 join "\n", @final_array;
 __
-meta::function('serialize_single', <<'__');
+meta::function('serialize-single', <<'__');
 # Serializes a single attribute and optimizes for content.
 
 my $name          = $_[0] || $_;
@@ -541,7 +546,10 @@ $hash;
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
-meta::function('update', '&{\'update-from\'}(@_, grep s/^parent:://o, sort keys %data);');
+meta::function('update', <<'__');
+update_from(@_, grep s/^parent:://o, sort keys %data);
+
+__
 meta::function('update-from', <<'__');
 # Upgrade all attributes that aren't customized. Customization is defined when the data type is created,
 # and we determine it here by checking for $transient{inherit}{$type}.
@@ -564,7 +572,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             =    $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent =    $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  &{'save-state'}('before-update') if $save_state;
+  save_state('before-update') if $save_state;
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -605,7 +613,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
         terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-        return &{'load-state'}('before-update') if $save_state}});
+        return load_state('before-update') if $save_state}});
+
 __
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
 meta::function('verify', <<'__');
