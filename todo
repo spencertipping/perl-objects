@@ -1301,7 +1301,7 @@ function::identity                      6523885762fcc2f354fc25cf6ed126ce
 function::import                        5d0f0634cbd01274f2237717507198a2
 function::initial-state                 03d8ed608855a723124e79ca184d8e73
 function::is                            41564c8f21b12ab80824ac825266d805
-function::load-state                    2123ad2d7bfaf83c8959fa003d8c4ad4
+function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            0b310755e747c65bca09508fd9d841f0
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
@@ -1311,7 +1311,7 @@ function::perl                          a0f341ea54391b63b6195e7992b6a686
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
-function::save-state                    a7d349c67a4be8fa9e81fe34b7a94cfd
+function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
 function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize-single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
@@ -1322,8 +1322,8 @@ function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
-function::update                        161a7afaf55c1268ffe82ab170ae27e1
-function::update-from                   66828c66a5510b916ab0e065d4e05110
+function::update                        ac391dc90e507e7586c81850e7c2ecdd
+function::update-from                   631721c4dc30e11b2023a6703cbcef52
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1392,7 +1392,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               e546074f87548ab0c05e2591f0a3f5e3
+parent::object               1ac66054532268622a9faa98082ee254
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
