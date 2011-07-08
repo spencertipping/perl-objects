@@ -307,6 +307,11 @@ THE SOFTWARE.
 __
 meta::data('permanent-identity', 'f0f0939887ede2ecaa8c879aff4a7717');
 meta::data('watching', '1');
+meta::function('ad', <<'__');
+return @{$transient{path}} = () unless @_;
+push @{$transient{path}}, @_;
+
+__
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
 return ls('-a', '^alias::') unless defined $name;
@@ -454,7 +459,7 @@ $sizes = $flags = $hashes = $parent_hashes = 1 if $long;
 return table_display([grep ! exists $data{$externalized_functions{$_}}, sort keys %externalized_functions]) if $shadows;
 
 my $criteria    = join('|', @criteria);
-my @definitions = select_keys('--criteria' => $criteria, %$options);
+my @definitions = select_keys('--criteria' => $criteria, '--path' => $transient{path}, %$options);
 
 my %inverses  = map {$externalized_functions{$_} => $_} keys %externalized_functions;
 my @externals = map $inverses{$_}, grep length, @definitions;
@@ -469,6 +474,7 @@ my @parent_hashes = map $inherited{$_} || '-', @definitions if $parent_hashes;
 
 join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @externals] : [@definitions],
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
+
 __
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
@@ -524,6 +530,10 @@ __
 meta::function('perl', <<'__');
 my $result = eval(join ' ', @_);
 $@ ? terminal::error($@) : $result;
+__
+meta::function('rd', <<'__');
+@{$transient{path}} = grep $_ ne $_[0], @{$transient{path}};
+
 __
 meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
 meta::function('rm', <<'__');
@@ -778,6 +788,10 @@ my $duration = $now - $start;
 
 __
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
+meta::indicator('path', <<'__');
+join "\033[1;30m|\033[0;0m", @{$transient{path}};
+
+__
 meta::indicator('state', <<'__');
 my $state = $options{state} // state();
 my $color = $state ne $transient{initial} ? 33 : 30;
@@ -817,6 +831,7 @@ meta::internal_function('attribute_is', <<'__');
 my ($a, %options) = @_;
 my %inherited     = parent_attributes(grep /^parent::/o, sort keys %data) if grep exists $options{$_}, qw/-u -U -d -D/;
 my $criteria      = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
+my $path          = $options{'--path'} ? join('|', @{$options{'--path'}}) : '.';
 
 my %tests = ('-u' => sub {! $inherited{$a}},
              '-d' => sub {$inherited{$a} && fast_hash(retrieve($a)) ne $inherited{$a}},
@@ -826,7 +841,8 @@ my %tests = ('-u' => sub {! $inherited{$a}},
 
 return 0 unless scalar keys %tests == scalar grep ! exists $options{$_}    ||   &{$tests{$_}}(), keys %tests;
 return 0 unless scalar keys %tests == scalar grep ! exists $options{uc $_} || ! &{$tests{$_}}(), keys %tests;
-$a =~ /$criteria/
+$a =~ /$criteria/ and $a =~ /$path/;
+
 __
 meta::internal_function('cache', <<'__');
 my ($name, %pairs) = @_;
@@ -1143,6 +1159,7 @@ meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               7637e32ba308624d824eacc9337c2512
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
+function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
 function::alias                         fb63bb3836ab968de2ee93f33d1704ec
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
@@ -1167,11 +1184,12 @@ function::initial-state                 03d8ed608855a723124e79ca184d8e73
 function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
-function::ls                            0b310755e747c65bca09508fd9d841f0
+function::ls                            01a23d51d5b529e03943bd57e33f92df
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          a0f341ea54391b63b6195e7992b6a686
+function::rd                            528f869b989aa593962784f68a5b6ae5
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
@@ -1192,11 +1210,12 @@ function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
+indicator::path                         8a9685787cda6af8f63594f6dcde7582
 indicator::state                        7c9d42b8fcee852a80d61c4f119c1239
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            05a75afb70daee635eefec8ae037f593
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
-internal_function::attribute_is         a33841586c7a83264ba2116937d1c5b6
+internal_function::attribute_is         a145549f6ce44abbcf66308b426d30ec
 internal_function::cache                eb9da45580a9ac0882baf98acd2ecd60
 internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
