@@ -388,6 +388,8 @@ for (keys %dependencies) {
   my $prefix = /::/ ? '' : 'cached_dependency::';
   associate("${prefix}$_", retrieve($dependencies{$_}))}
 
+reload();
+
 __
 meta::function('edit', <<'__');
 my ($name, %options) = @_;

@@ -1532,7 +1532,7 @@ parent::./sdoc            cf30ed24cbd679b96e608a6c67dae069
 parent::configuration     835c872a2163166e001c4e07b5191353
 parent::notes             52e9dde4eef92e36cc2ba8ad9f51123e
 parent::preprocessor      d5f9081e9a9a0b5e737ceee08f5ce507
-parent::repository        0fe3f55c8cd08b6895126f9944027fc6
+parent::repository        81d731c0563910cce59ffab7624116ec
 parent::vim-highlighters  b93baa0feaf90f5afc0ab0bed1bd1136
 
 __
@@ -1670,7 +1670,7 @@ template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
 
 __
 meta::parent('repository', <<'__');
-function::dupdate                               f3332a122f7864d40119b33bdef42912
+function::dupdate                               3203750417390913ae3892002b53bdc1
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
 parent::/home/spencertipping/bin/configuration  5baec3ad75737e776a1d1b27021d2d01
 retriever::http                                 a23617a5787de41d1a89ad4496cacce3
