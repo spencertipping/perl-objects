@@ -715,7 +715,10 @@ hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
 __
 meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
-meta::indicator('key', 'defined $transient{encryption_key} ? "\\033[1;35m " . substr(fast_hash($transient{encryption_key}), 0, 4) . " \\033[0;0m" : "\\033[1;35m -nk- \\033[0;0m";');
+meta::indicator('key', <<'__');
+defined $transient{encryption_key} ? "\033[1;35m" . substr(fast_hash($transient{encryption_key}), 0, 4) . "\033[0;0m" : "\033[1;35m-nk-\033[0;0m";
+
+__
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
 meta::indicator('path', <<'__');
 join "\033[1;30m|\033[0;0m", @{$transient{path}};
