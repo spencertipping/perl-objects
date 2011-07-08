@@ -483,7 +483,8 @@ my $result = eval(join ' ', @_);
 $@ ? terminal::error($@) : $result;
 __
 meta::function('rd', <<'__');
-@{$transient{path}} = grep $_ ne $_[0], @{$transient{path}};
+my $pattern = join '|', @_;
+@{$transient{path}} = grep $_ !~ /^$pattern$/, @{$transient{path}};
 
 __
 meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
@@ -648,11 +649,6 @@ meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';')
 meta::indicator('path', <<'__');
 join "\033[1;30m|\033[0;0m", @{$transient{path}};
 
-__
-meta::indicator('state', <<'__');
-my $state = $options{state} // state();
-my $color = $state ne $transient{initial} ? 33 : 30;
-"\033[1;${color}m" . substr($state, 0, 4) . "\033[0;0m";
 __
 meta::internal_function('around_hook', <<'__');
 # around_hook('hookname', @args, sub {
@@ -1046,7 +1042,7 @@ function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          a0f341ea54391b63b6195e7992b6a686
-function::rd                            528f869b989aa593962784f68a5b6ae5
+function::rd                            eea4e1cdd9133abb985205ae5daf5f15
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
@@ -1068,7 +1064,6 @@ function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
 indicator::path                         8a9685787cda6af8f63594f6dcde7582
-indicator::state                        7c9d42b8fcee852a80d61c4f119c1239
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            05a75afb70daee635eefec8ae037f593
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd

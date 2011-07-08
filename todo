@@ -516,7 +516,8 @@ my $result = eval(join ' ', @_);
 $@ ? terminal::error($@) : $result;
 __
 meta::function('rd', <<'__');
-@{$transient{path}} = grep $_ ne $_[0], @{$transient{path}};
+my $pattern = join '|', @_;
+@{$transient{path}} = grep $_ !~ /^$pattern$/, @{$transient{path}};
 
 __
 meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
@@ -802,11 +803,6 @@ meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';')
 meta::indicator('path', <<'__');
 join "\033[1;30m|\033[0;0m", @{$transient{path}};
 
-__
-meta::indicator('state', <<'__');
-my $state = $options{state} // state();
-my $color = $state ne $transient{initial} ? 33 : 30;
-"\033[1;${color}m" . substr($state, 0, 4) . "\033[0;0m";
 __
 meta::internal_function('around_hook', <<'__');
 # around_hook('hookname', @args, sub {
@@ -1171,7 +1167,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  de1786e5b7333cb3be5ffa3f6a3af4df
+parent::/home/spencertipping/bin/object  568b124735b8f6cd6d6f61add0bb9bad
 retriever::html-sdoc                     2a5d5aa45e2d7576f79e045177d8705c
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1211,7 +1207,7 @@ function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          a0f341ea54391b63b6195e7992b6a686
-function::rd                            528f869b989aa593962784f68a5b6ae5
+function::rd                            eea4e1cdd9133abb985205ae5daf5f15
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
@@ -1233,7 +1229,6 @@ function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
 indicator::path                         8a9685787cda6af8f63594f6dcde7582
-indicator::state                        7c9d42b8fcee852a80d61c4f119c1239
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            05a75afb70daee635eefec8ae037f593
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
@@ -1298,6 +1293,7 @@ meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               7637e32ba308624d824eacc9337c2512
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
+function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
 function::alias                         fb63bb3836ab968de2ee93f33d1704ec
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
@@ -1322,11 +1318,12 @@ function::initial-state                 03d8ed608855a723124e79ca184d8e73
 function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
-function::ls                            0b310755e747c65bca09508fd9d841f0
+function::ls                            01a23d51d5b529e03943bd57e33f92df
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          a0f341ea54391b63b6195e7992b6a686
+function::rd                            eea4e1cdd9133abb985205ae5daf5f15
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::save                          778c0e1043b9c6c96fb8f266f8061624
@@ -1347,11 +1344,11 @@ function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
-indicator::state                        7c9d42b8fcee852a80d61c4f119c1239
+indicator::path                         8a9685787cda6af8f63594f6dcde7582
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            05a75afb70daee635eefec8ae037f593
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
-internal_function::attribute_is         a33841586c7a83264ba2116937d1c5b6
+internal_function::attribute_is         a145549f6ce44abbcf66308b426d30ec
 internal_function::cache                eb9da45580a9ac0882baf98acd2ecd60
 internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
@@ -1411,7 +1408,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               1ac66054532268622a9faa98082ee254
+parent::object               568b124735b8f6cd6d6f61add0bb9bad
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
