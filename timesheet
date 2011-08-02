@@ -626,12 +626,12 @@ __
 meta::function('stop', <<'__');
 use Time::Piece;
 
-die 'not working on anything' unless retrieve('data::current-category');
-
 my ($category, @details) = @_;
 my $details = join ' ', @details;
 $category ||= retrieve('data::current-category');
 $details  ||= retrieve('data::current-details');
+
+die 'not working on anything' unless $category;
 
 my $time_signature = &{'time-signature'}();
 my $start_time     = retrieve('data::current-start-time');
