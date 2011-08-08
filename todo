@@ -1137,7 +1137,7 @@ sub repl {
   my $attribs = $term->Attribs;
   $attribs->{completion_entry_function} = $attribs->{list_completion_function};
 
-  my $autocomplete = $options{autocomplete} || sub {[sort keys %data, sort keys %externalized_functions]};
+  my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
@@ -1167,7 +1167,7 @@ function::sdoc                           4d33dcf625897e463bb30fc91cb94339
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  568b124735b8f6cd6d6f61add0bb9bad
+parent::/home/spencertipping/bin/object  97acda5f35b8f6cd6d6f61ad515f0d3e
 retriever::html-sdoc                     2a5d5aa45e2d7576f79e045177d8705c
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1260,7 +1260,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          378715d20a4a87ee305dd2c3cff1b588
+library::shell                          2c5e6663a8f672e2242a7d3ea3276f09
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
@@ -1376,7 +1376,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          378715d20a4a87ee305dd2c3cff1b588
+library::shell                          2c5e6663a8f672e2242a7d3ea3276f09
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
@@ -1408,7 +1408,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               568b124735b8f6cd6d6f61add0bb9bad
+parent::object               97acda5f35b8f6cd6d6f61ad515f0d3e
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');

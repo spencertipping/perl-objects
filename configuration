@@ -993,7 +993,7 @@ sub repl {
   my $attribs = $term->Attribs;
   $attribs->{completion_entry_function} = $attribs->{list_completion_function};
 
-  my $autocomplete = $options{autocomplete} || sub {[sort keys %data, sort keys %externalized_functions]};
+  my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
@@ -1105,7 +1105,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          378715d20a4a87ee305dd2c3cff1b588
+library::shell                          2c5e6663a8f672e2242a7d3ea3276f09
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
