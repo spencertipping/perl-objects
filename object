@@ -976,7 +976,7 @@ sub repl {
   my $attribs = $term->Attribs;
   $attribs->{completion_entry_function} = $attribs->{list_completion_function};
 
-  my $autocomplete = $options{autocomplete} || sub {[sort keys %data, sort keys %externalized_functions]};
+  my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
