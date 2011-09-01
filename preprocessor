@@ -82,6 +82,17 @@ sub meta::functor::editable {
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
       return retrieve($attribute)}}}
 __
+meta::meta('functor::html-templates', <<'__');
+my @html_elements = qw/html head title meta script style link body div/;    # Very incomplete list
+
+for my $e (@html_elements) {
+  meta::externalize "template::$e", "template::$e", sub {
+    my ($line, $block) = @_;
+    "<$e $line>\n$block\n</$e>";
+  };
+}
+
+__
 meta::meta('type::alias', <<'__');
 meta::configure 'alias', inherit => 0;
 meta::define_form 'alias', sub {
