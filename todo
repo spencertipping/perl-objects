@@ -1,7 +1,15 @@
 #!/usr/bin/perl
-# Run perldoc on this file for documentation.
+# 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
 
-# For the benefit of HTML viewers:
+# This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
+# really gnarly). If you're curious what it's made of, I recommend reading
+# http://github.com/spencertipping/writing-self-modifying-perl.
+#
+# If you got one of these from someone and don't know what to do with it, send
+# it to spencer@spencertipping.com and I'll see if I can figure out what it
+# does.
+
+# For the benefit of HTML viewers (this is hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -238,9 +246,17 @@ meta::bootstrap('html', <<'__');
 __
 meta::bootstrap('initialization', <<'__');
 #!/usr/bin/perl
-# Run perldoc on this file for documentation.
+# 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
 
-# For the benefit of HTML viewers:
+# This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
+# really gnarly). If you're curious what it's made of, I recommend reading
+# http://github.com/spencertipping/writing-self-modifying-perl.
+#
+# If you got one of these from someone and don't know what to do with it, send
+# it to spencer@spencertipping.com and I'll see if I can figure out what it
+# does.
+
+# For the benefit of HTML viewers (this is hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -555,7 +571,7 @@ sub is_code    {map /^\s*[^A-Z\|\s]/o, @_}
 sub is_blank   {map /^\n/o, @_}
 sub comment    {my ($text, $s, $e) = @_; join "\n", map("$s $_$e", split /\n/, $text)}
 
-sub paragraphs {map split(/(\n{2,})/, $_), @_}
+sub paragraphs {map split(/((?:\n\h*){2,})/, $_), @_}
 
 my ($filename) = @_;
 
@@ -570,6 +586,7 @@ my ($start, $end) = split /,/o, $comments_for_extension{lc($other_extension || $
 
 join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs retrieve($filename)),
          "\n$start $generated_string $end\n";
+
 __
 meta::function('sdoc-html', <<'__');
 # Converts SDoc to logically-structured HTML. Sections end up being nested,
@@ -1163,11 +1180,11 @@ meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('./sdoc', <<'__');
-function::sdoc                           4d33dcf625897e463bb30fc91cb94339
+function::sdoc                           237d9c094c1f8ef0c074071618f0af25
 function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-parent::/home/spencertipping/bin/object  97acda5f35b8f6cd6d6f61ad515f0d3e
+parent::/home/spencertipping/bin/object  d53d1f464e12d065394298dd96d22301
 retriever::html-sdoc                     2a5d5aa45e2d7576f79e045177d8705c
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1175,7 +1192,7 @@ retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               7637e32ba308624d824eacc9337c2512
+bootstrap::initialization               1cf74e7209f32722a79b6e49e3907fd3
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
 function::alias                         fb63bb3836ab968de2ee93f33d1704ec
@@ -1291,7 +1308,7 @@ retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 __
 meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               7637e32ba308624d824eacc9337c2512
+bootstrap::initialization               1cf74e7209f32722a79b6e49e3907fd3
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
 function::alias                         fb63bb3836ab968de2ee93f33d1704ec
@@ -1408,7 +1425,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  11a2d74eca3445ee1b7887a6f6370462
-parent::object               97acda5f35b8f6cd6d6f61ad515f0d3e
+parent::object               d53d1f464e12d065394298dd96d22301
 
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
