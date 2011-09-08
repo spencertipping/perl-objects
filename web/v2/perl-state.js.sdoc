@@ -1,0 +1,7 @@
+Perl object user interface | Spencer Tipping
+Licensed under the terms of the MIT source code license
+
+Introduction.
+This page displays some basic information about a self-modifying Perl file. To do this, it uses the page's URL (so that it can get its source verbatim) and the body's original HTML content (in
+case its self-retrieval fails) to parse out the Perl object's state. Unfortunately it isn't possible to run Perl from inside Javascript yet. Otherwise the UI would show the runtime state of
+the object as well as its static state.
