@@ -14,7 +14,14 @@
 
 magic=$(head -n2 "$1" | tail -n1 | awk '{print $2}')
 if [[ $magic == '99aeabc9ec7fe80b1b39f5e53dc7e49e' ]]; then
-  grep "^meta::data('permanent-identity'" "$1" | tail -c36 | head -c32 && echo || "$1" identity
+  identity_line="$(grep "^meta::data('permanent-identity'" "$1")"
+
+  if [[ $? == 0 ]]; then
+    echo "$identity_line" | tail -c36 | head -c32
+    echo
+  else
+    "./$1" identity
+  fi
 
   exit 0
 else
