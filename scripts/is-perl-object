@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Usage:
+# ./is-perl-object /path/to/file
+#
+# Returns a zero status code and prints the object's identity if the file can
+# be identified as a self-modifying Perl script, and returns a status code of
+# 1 otherwise.
+
+# Identity retrieval is optimized, but will query the Perl object directly if
+# the optimistic lookup fails. If the Perl object is unidentified, this may
+# cause an ID to be generated for that object, in which case it will rewrite
+# itself if possible.
+
+magic=$(head -n2 "$1" | tail -n1 | awk '{print $2}')
+if [[ $magic == '99aeabc9ec7fe80b1b39f5e53dc7e49e' ]]; then
+  grep "^meta::data('permanent-identity'" "$1" | tail -c36 | head -c32 && echo || "$1" identity
+
+  exit 0
+else
+  exit 1
+fi
