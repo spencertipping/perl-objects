@@ -484,16 +484,13 @@ exists $data{$attribute} and attribute_is($attribute, %$options);
 
 __
 meta::function('key', <<'__');
-use Term::ReadKey;
-use Digest::MD5 qw/md5_base64/;
+# Strongly-hashed encryption key. You can prepend a tilde to specify that the
+# old thin hashing function should be used.
+my $password = read_password('encryption password [iterated hash]: ');
+$transient{encryption_key} = $password =~ /^~/ ? md5_base64(substr($password, 1)) :
+                                                 iterated_hash($password);
+terminal::info('encryption key is now set');
 
-ReadMode('noecho');
-print 'encryption password: ';
-$transient{encryption_key} = md5_base64(ReadLine(0));
-print "\n";
-ReadMode(0);
-
-terminal::info('encryption key set');
 __
 meta::function('load-state', <<'__');
 around_hook('load-state', @_, sub {
@@ -951,6 +948,14 @@ unlink $filename;
 $result;
 __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
+meta::internal_function('iterated_hash', <<'__');
+# Repeatedly hashes a string to increase the effort required to guess passwords.
+my ($s) = @_;
+my $h = $s;
+$h = md5_base64($h . $s) for 1 .. 262144;
+$h;
+
+__
 meta::internal_function('namespace', <<'__');
 my ($name) = @_;
 $name =~ s/::.*$//;
@@ -984,6 +989,19 @@ $parent_count = sub {
 my %inverses;
 push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
 grep exists $all_parents{$_}, map @{$inverses{$_}}, sort keys %inverses;
+__
+meta::internal_function('read_password', <<'__');
+use Term::ReadKey;
+my ($prompt) = @_;
+
+ReadMode('noecho');
+print $prompt;
+my $result = ReadLine(0);
+print "\n";
+ReadMode(0);
+
+$result;
+
 __
 meta::internal_function('retrieve', <<'__');
 my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;
