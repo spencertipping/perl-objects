@@ -576,7 +576,7 @@ meta::function('secure-shell', <<'__');
 # The list of attributes is recomputed because the user may have added one
 # during the shell session, and we want to catch that.
 
-my $hidden = sub {grep length && ! /^\s*#/, map split(/\n/, retrieve($_)), select_keys('--namespace' => 'hidden')};
+my $hidden = sub {parse_hidden(select_keys('--namespace' => 'hidden'))};
 dangerous('', sub {unhide($_)}) for &$hidden();
 reload();
 shell();
@@ -950,6 +950,8 @@ __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
 meta::internal_function('iterated_hash', <<'__');
 # Repeatedly hashes a string to increase the effort required to guess passwords.
+use Digest::MD5 qw/md5_base64/;
+
 my ($s) = @_;
 my $h = $s;
 $h = md5_base64($h . $s) for 1 .. 262144;
@@ -989,6 +991,10 @@ $parent_count = sub {
 my %inverses;
 push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
 grep exists $all_parents{$_}, map @{$inverses{$_}}, sort keys %inverses;
+__
+meta::internal_function('parse_hidden', <<'__');
+grep length && ! /^\s*#/, map map(select_keys('--criteria' => $_), split /\n/), retrieve(@_);
+
 __
 meta::internal_function('read_password', <<'__');
 use Term::ReadKey;
