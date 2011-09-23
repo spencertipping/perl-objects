@@ -458,6 +458,11 @@ meta::function('hidden', <<'__');
 # List all hidden attributes.
 map attribute($_), select_keys('--namespace' => 'encrypted');
 __
+meta::function('hidden-attributes', <<'__');
+my ($prefix) = @_;
+parse_hidden($prefix, retrieve(select_keys('--namespace' => 'hidden')));
+
+__
 meta::function('hide', <<'__');
 # Encrypts an attribute.
 exists $data{$_} or die "$_ doesn't exist; not hiding anything" for @_;
@@ -576,11 +581,10 @@ meta::function('secure-shell', <<'__');
 # The list of attributes is recomputed because the user may have added one
 # during the shell session, and we want to catch that.
 
-my $hidden = sub {parse_hidden(select_keys('--namespace' => 'hidden'))};
-dangerous('', sub {unhide($_)}) for &$hidden();
+dangerous('', sub {unhide($_)}) for hidden_attributes('^encrypted::');
 reload();
 shell();
-dangerous('', sub {hide($_)}) for &$hidden();
+dangerous('', sub {hide($_)}) for hidden_attributes('^');
 
 __
 meta::function('serialize', <<'__');
@@ -993,7 +997,8 @@ push @{$inverses{$parent_count->($_)} ||= []}, $_ for @parents;
 grep exists $all_parents{$_}, map @{$inverses{$_}}, sort keys %inverses;
 __
 meta::internal_function('parse_hidden', <<'__');
-grep length && ! /^\s*#/, map map(select_keys('--criteria' => $_), split /\n/), retrieve(@_);
+my ($prefix, @hidden_specs) = @_;
+map map(select_keys('--criteria' => "$prefix$_"), grep length && ! /^\s*#/, split /\n/), @hidden_specs;
 
 __
 meta::internal_function('read_password', <<'__');
