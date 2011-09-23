@@ -581,7 +581,7 @@ meta::function('secure-shell', <<'__');
 # The list of attributes is recomputed because the user may have added one
 # during the shell session, and we want to catch that.
 
-dangerous('', sub {unhide($_)}) for hidden_attributes('^encrypted::');
+dangerous('', sub {unhide($_)}) for grep s/^encrypted:://, hidden_attributes('^encrypted::');
 reload();
 shell();
 dangerous('', sub {hide($_)}) for hidden_attributes('^');
