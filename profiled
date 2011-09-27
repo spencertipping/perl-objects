@@ -55,18 +55,6 @@ sub meta::configure {
   $transient{$_}{$datatype} = $options{$_} for keys %options;
 }
 __
-meta::meta('deferred_eval_in', <<'__');
-# Creates a proxy function that causes the real one to be evaluated into
-# existence the first time it is called.
-
-sub meta::deferred_eval_in {
-  my ($f, $place) = @_;
-  my $underlying_subroutine = undef;
-
-  sub {$underlying_subroutine ||= meta::eval_in $f, $place;
-       goto &$underlying_subroutine}}
-
-__
 meta::meta('externalize', <<'__');
 # Function externalization. Data types should call this method when defining a function
 # that has an external interface.
@@ -1133,7 +1121,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          3e290fdcb353c6f842eb5a40f2e575f8
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       7fc63ccbc2965784b705422d00e6d0a3
+internal_function::internal::main       f31f2945a19a668d92505f114ab29c78
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
@@ -1154,18 +1142,17 @@ message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
 message_color::states                   ac66eeeff487b5f43f88a78ea18b3d56
 meta::configure                         69c2e727c124521d074fde21f8bbc4db
-meta::deferred_eval_in                  1d456b980359e48906cb8a205d6db8b8
 meta::externalize                       aa44e27e0bbee6f0ca4de25d603a1fc7
 meta::functor::editable                 48246c608f363de66511400e00b26164
 meta::type::alias                       889d26d2df385e9ff8e2da7de4e48374
 meta::type::bootstrap                   51108ab2ddb8d966e927c8f62d9ef3e5
 meta::type::cache                       9267171f2eace476f64a1a670eaaf2c7
 meta::type::data                        120e1649a468d3b3fd3fb783b4168499
-meta::type::function                    d1f6c07d4179dfc1b254232cbef9f6cf
+meta::type::function                    8ea626198861dc59dd7f303eecb5ff88
 meta::type::hook                        ff92aef328b6bdc6f87ddd0821f3e42f
 meta::type::inc                         78e0375b6725487cb1f0deca41e96bbe
 meta::type::indicator                   feb54a2624e6983617685047c717427f
-meta::type::internal_function           026675843f8471ec5de451a9368dfb18
+meta::type::internal_function           eff3cf31e2635f51c83836f116c99d2f
 meta::type::library                     7622e8d65e03066668bade74715d65ad
 meta::type::message_color               557a1b44979cbf77a7251fbdc4c5b82c
 meta::type::meta                        c6250056816b58a9608dd1b2614246f8
