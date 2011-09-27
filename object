@@ -55,18 +55,6 @@ sub meta::configure {
   $transient{$_}{$datatype} = $options{$_} for keys %options;
 }
 __
-meta::meta('deferred_eval_in', <<'__');
-# Creates a proxy function that causes the real one to be evaluated into
-# existence the first time it is called.
-
-sub meta::deferred_eval_in {
-  my ($f, $place) = @_;
-  my $underlying_subroutine = undef;
-
-  sub {$underlying_subroutine ||= meta::eval_in $f, $place;
-       goto &$underlying_subroutine}}
-
-__
 meta::meta('externalize', <<'__');
 # Function externalization. Data types should call this method when defining a function
 # that has an external interface.
@@ -131,8 +119,8 @@ meta::meta('type::function', <<'__');
 meta::configure 'function', extension => '.pl', inherit => 1;
 meta::define_form 'function', sub {
   my ($name, $value) = @_;
-  meta::externalize $name, "function::$name", meta::deferred_eval_in("sub {\n$value\n}", "function::$name")};
-
+  meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
+};
 __
 meta::meta('type::hook', <<'__');
 meta::configure 'hook', extension => '.pl', inherit => 0;
@@ -175,8 +163,8 @@ meta::meta('type::internal_function', <<'__');
 meta::configure 'internal_function', extension => '.pl', inherit => 1;
 meta::define_form 'internal_function', sub {
   my ($name, $value) = @_;
-  *{$name} = meta::deferred_eval_in("sub {\n$value\n}", "internal_function::$name")};
-
+  *{$name} = meta::eval_in("sub {\n$value\n}", "internal_function::$name");
+};
 __
 meta::meta('type::library', <<'__');
 meta::configure 'library', extension => '.pl', inherit => 1;
@@ -839,7 +827,6 @@ save() unless state() eq $transient{initial};
 END {
   enable();
 }
-
 __
 meta::internal_function('invoke_editor_on', <<'__');
 my ($data, %options) = @_;
