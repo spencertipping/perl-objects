@@ -324,8 +324,9 @@ push @{$transient{path}}, @_;
 __
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
-return ls('-a', '^alias::') unless defined $name;
-@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)}) : retrieve("alias::$name") || "Undefined alias $name";
+@_ ? @stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)})
+            : retrieve("alias::$name") // "Undefined alias $name"
+   : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
 
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
