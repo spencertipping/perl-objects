@@ -551,8 +551,11 @@ exec(@_) unless fork;
 
 __
 meta::function('shell', <<'__');
+my ($options, @arguments) = separate_options(@_);
+$transient{repl_prefix} = $$options{'--repl-prefix'};
+
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
-around_hook('shell', sub {shell::repl()});
+around_hook('shell', sub {shell::repl(%$options)});
 
 __
 meta::function('size', <<'__');
@@ -915,10 +918,11 @@ my @others  = grep ! /^-/,   @parseable;
 my @singles = map /-(.{2,})/ ? map("-$_", split(//, $1)) : $_, @singles;
 
 my %options;
-  $options{$1} = $2 for grep /^([^=]+)=(.*)$/, @longs;
-++$options{$_}      for grep ! /=/, @singles, @longs;
+/^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
+++$options{$_} for grep ! /=/, @singles, @longs;
 
 ({%options}, @others, @_);
+
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
 meta::internal_function('table_display', <<'__');
@@ -982,8 +986,9 @@ sub prompt {
   my $name    = $options{name} // ::name();
 
   my $indicators = join '', map &{"::$_"}(), ::select_keys('--namespace' => 'indicator');
+  my $prefix     = $transient{repl_prefix} // '';
 
-  "\033[1;32m$name\033[0;0m$indicators "}
+  "$prefix\033[1;32m$name\033[0;0m$indicators "}
 
 sub repl {
   my %options = @_;
