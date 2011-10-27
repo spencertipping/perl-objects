@@ -8,7 +8,7 @@
 
 IFS=$'\n'
 
-for file in $(find "$@"); do
+for file in $(find "$@" | sort); do
   [[ -L "$file" || -d "$file" ]] && continue
   identity=$(is-perl-object --no-query "$file")
   case $? in
