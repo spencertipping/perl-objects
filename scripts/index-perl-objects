@@ -9,7 +9,7 @@
 IFS=$'\n'
 
 for file in $(find "$@"); do
-  [[ -L "$file" ]] && continue
+  [[ -L "$file" || -d "$file" ]] && continue
   identity=$(is-perl-object "$file") || continue
   echo $identity "$file"
 done
