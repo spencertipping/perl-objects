@@ -1,0 +1,15 @@
+#!/bin/bash
+# Lists all Perl objects under the current directory, along with their
+# identities. Identities are in the first column for easy processing.
+# Symlinks are not included.
+#
+# Usage:
+# index-perl-objects [find-arguments]
+
+IFS=$'\n'
+
+for file in $(find "$@"); do
+  [[ -L "$file" ]] && continue
+  identity=$(is-perl-object "$file") || continue
+  echo $identity "$file"
+done
