@@ -12,6 +12,14 @@
 # cause an ID to be generated for that object, in which case it will rewrite
 # itself if possible.
 
+# To prevent this script from querying the object, you can use the --no-query
+# or -n arguments.
+
+if [[ $1 == '-n' || $1 == '--no-query' ]]; then
+  no_query=$1
+  shift
+fi
+
 magic=$(head -n2 "$1" | tail -n1 | awk '{print $2}')
 if [[ $magic == '99aeabc9ec7fe80b1b39f5e53dc7e49e' ]]; then
   identity_line="$(grep "^meta::data('permanent-identity'" "$1")"
@@ -19,11 +27,13 @@ if [[ $magic == '99aeabc9ec7fe80b1b39f5e53dc7e49e' ]]; then
   if [[ $? == 0 ]]; then
     echo "$identity_line" | tail -c36 | head -c32
     echo
-  else
+    exit 0
+  elif [[ ! "$no_query" ]]; then
     "./$1" identity
+    exit 0
+  else
+    exit 2
   fi
-
-  exit 0
 else
   exit 1
 fi

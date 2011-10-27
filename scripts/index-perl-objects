@@ -10,6 +10,6 @@ IFS=$'\n'
 
 for file in $(find "$@"); do
   [[ -L "$file" || -d "$file" ]] && continue
-  identity=$(is-perl-object "$file") || continue
+  identity=$(is-perl-object --no-query "$file") || continue
   echo $identity "$file"
 done
