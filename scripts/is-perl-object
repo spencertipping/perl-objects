@@ -20,7 +20,7 @@ if [[ $1 == '-n' || $1 == '--no-query' ]]; then
   shift
 fi
 
-magic=$(head -n2 "$1" | tail -n1 | awk '{print $2}')
+magic=$(head -c64 "$1" | tail -n1 | awk '{print $2}')
 if [[ $magic == '99aeabc9ec7fe80b1b39f5e53dc7e49e' ]]; then
   identity_line="$(grep "^meta::data('permanent-identity'" "$1")"
 
