@@ -334,8 +334,9 @@ push @{$transient{path}}, @_;
 __
 meta::function('alias', <<'__');
 my ($name, @stuff) = @_;
-return ls('-a', '^alias::') unless defined $name;
-@stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)}) : retrieve("alias::$name") || "Undefined alias $name";
+@_ ? @stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)})
+            : retrieve("alias::$name") // "Undefined alias $name"
+   : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
 
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
@@ -667,14 +668,18 @@ exec(@_) unless fork;
 
 __
 meta::function('shell', <<'__');
+my ($options, @arguments) = separate_options(@_);
+$transient{repl_prefix} = $$options{'--repl-prefix'};
+
 terminal::cc(retrieve('data::current-continuation')) if length $data{'data::current-continuation'};
-around_hook('shell', sub {shell::repl()});
+around_hook('shell', sub {shell::repl(%$options)});
 
 __
 meta::function('size', <<'__');
 my $size = 0;
 $size += length $data{$_} for keys %data;
-sprintf "% 7d % 7d", length(serialize()), $size;
+sprintf "% 7d % 7d % 7d", length(serialize()), $size, length(serialize('-up'));
+
 __
 meta::function('snapshot', <<'__');
 my ($name) = @_;
@@ -1031,10 +1036,11 @@ my @others  = grep ! /^-/,   @parseable;
 my @singles = map /-(.{2,})/ ? map("-$_", split(//, $1)) : $_, @singles;
 
 my %options;
-  $options{$1} = $2 for grep /^([^=]+)=(.*)$/, @longs;
-++$options{$_}      for grep ! /=/, @singles, @longs;
+/^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
+++$options{$_} for grep ! /=/, @singles, @longs;
 
 ({%options}, @others, @_);
+
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
 meta::internal_function('table_display', <<'__');
@@ -1098,8 +1104,9 @@ sub prompt {
   my $name    = $options{name} // ::name();
 
   my $indicators = join '', map &{"::$_"}(), ::select_keys('--namespace' => 'indicator');
+  my $prefix     = $transient{repl_prefix} // '';
 
-  "\033[1;32m$name\033[0;0m$indicators "}
+  "$prefix\033[1;32m$name\033[0;0m$indicators "}
 
 sub repl {
   my %options = @_;
@@ -1139,7 +1146,7 @@ bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               1cf74e7209f32722a79b6e49e3907fd3
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
-function::alias                         fb63bb3836ab968de2ee93f33d1704ec
+function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
@@ -1177,8 +1184,8 @@ function::serialize                     a19ada2d2558ea9da3a7942fb913e15f
 function::serialize-single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           7b2685a4041c25bc495816e472bdace5
-function::shell                         22d25a32ffc3f2855fb7e2aec77c72fb
-function::size                          6cd9a4dd17be87ea2962f8f566a97d11
+function::shell                         a87f389b94713e5855e62241d649d01d
+function::size                          8d4bd7a84ece556717f8ba3bf258d33c
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::state                         8c68044dccae28f33244d0c7e9e9acfb
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
@@ -1215,13 +1222,13 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             8a34d1fe047fe1b40c3d2957c4a789eb
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     da1c2a3a1e03faafe6b4446ebb6bad90
+internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          2c5e6663a8f672e2242a7d3ea3276f09
+library::shell                          6b9f3befb61a01e9132a440601f8ea0a
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
