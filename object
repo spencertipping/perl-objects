@@ -561,7 +561,8 @@ __
 meta::function('size', <<'__');
 my $size = 0;
 $size += length $data{$_} for keys %data;
-sprintf "% 7d % 7d", length(serialize()), $size;
+sprintf "% 7d % 7d % 7d", length(serialize()), $size, length(serialize('-up'));
+
 __
 meta::function('snapshot', <<'__');
 my ($name) = @_;
