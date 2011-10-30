@@ -206,6 +206,14 @@ meta::functor::editable 'sdoc', inherit => 1, extension => sub {
   extension_for(attribute($_[0])) . '.sdoc';
 };
 __
+meta::meta('type::slibrary', <<'__');
+meta::configure 'slibrary', extension => '.pl.sdoc', inherit => 1;
+meta::define_form 'slibrary', sub {
+  my ($name, $value) = @_;
+  meta::eval_in(sdoc("slibrary::$name"), "slibrary::$name");
+};
+
+__
 meta::meta('type::state', <<'__');
 # Allows temporary or long-term storage of states. Nothing particularly insightful
 # is done about compression, so storing alternative states will cause a large
