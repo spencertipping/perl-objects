@@ -562,7 +562,8 @@ my ($filename) = @_;
 # we want to look up the extension in the transients table. The other is that
 # it's a real filename.
 my ($extension)       = $filename =~ /\.sdoc$/io ? $filename =~ /\.(\w+)\.sdoc$/igo : $filename =~ /\.(\w+)$/igo;
-my ($other_extension) = extension_for(attribute($filename));
+my ($other_extension) = extension_for($filename);
+$other_extension =~ s/\.sdoc$//io;
 $other_extension =~ s/^\.//o;
 
 my ($start, $end) = split /,/o, $comments_for_extension{lc($other_extension || $extension)} // $comments_for_extension{''};
