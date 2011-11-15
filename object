@@ -510,6 +510,7 @@ __
 meta::function('rmparent', <<'__');
 # Removes one or more parents.
 my ($options, @parents) = separate_options(@_);
+my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
 for my $parent (@parents) {
   my $keep_parent_around = 0;
@@ -523,7 +524,7 @@ for my $parent (@parents) {
     else {terminal::info("local attribute $name exists and is divergent; use rmparent -D $parent to delete it");
           $keep_parent_around = 1}}
 
-  $keep_parent_around ? terminal::info("not deleting parent::$parent so that you can run rmparent -D $parent if you want to nuke divergent attributes too")
+  $keep_parent_around ? terminal::info("not deleting parent::$parent so that you can run", "rmparent -D $parent if you want to nuke divergent attributes too")
                       : rm("parent::$parent")}
 
 __
