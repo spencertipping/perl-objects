@@ -543,7 +543,7 @@ my %comments_for_extension =
      vim   "      elisp ;     bas  '     ada  --    asm  ;   awk #    bc   #    boo #   tex  %         fss  (*,*)  erl %
      scala //     hx    //    io   //    j    NB.   lua  --  n   //   m    %    php //  sql  --        pov  //     pro %
      r     #      self  ","   tcl  #     texi @c    tk   #   csh #    vala //   vbs '   v    /*,*/     vhdl --     ss  ;;;
-     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /|;
+     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #|;
 
 # No extension suggests a shebang line, which generally requires # to denote a comment.
 $comments_for_extension{''} = '#';
@@ -566,7 +566,7 @@ my ($other_extension) = extension_for($filename);
 $other_extension =~ s/\.sdoc$//io;
 $other_extension =~ s/^\.//o;
 
-my ($start, $end) = split /,/o, $comments_for_extension{lc($other_extension || $extension)} // $comments_for_extension{''};
+my ($start, $end) = split /,/o, $comments_for_extension{lc($other_extension || $extension)} // $comments_for_extension{''} // '#';
 
 join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs retrieve($filename)),
          "\n$start $generated_string $end\n";
