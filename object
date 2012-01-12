@@ -497,8 +497,9 @@ my $result = eval(join ' ', @_);
 $@ ? terminal::error($@) : $result;
 __
 meta::function('rd', <<'__');
-my $pattern = join '|', @_;
-@{$transient{path}} = grep $_ !~ /^$pattern$/, @{$transient{path}};
+if (@_) {my $pattern = join '|', @_;
+         @{$transient{path}} = grep $_ !~ /^$pattern$/, @{$transient{path}}}
+else    {pop @{$transient{path}}}
 
 __
 meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
@@ -688,7 +689,7 @@ __
 meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
 meta::indicator('path', <<'__');
-join "\033[1;30m|\033[0;0m", @{$transient{path}};
+join "\033[1;30m/\033[0;0m", @{$transient{path}};
 
 __
 meta::internal_function('around_hook', <<'__');
@@ -725,7 +726,6 @@ meta::internal_function('attribute_is', <<'__');
 my ($a, %options) = @_;
 my %inherited     = parent_attributes(grep /^parent::/o, sort keys %data) if grep exists $options{$_}, qw/-u -U -d -D/;
 my $criteria      = $options{'--criteria'} || $options{'--namespace'} && "^$options{'--namespace'}::" || '.';
-my $path          = $options{'--path'} ? join('|', @{$options{'--path'}}) : '.';
 
 my %tests = ('-u' => sub {! $inherited{$a}},
              '-d' => sub {$inherited{$a} && fast_hash(retrieve($a)) ne $inherited{$a}},
@@ -735,7 +735,9 @@ my %tests = ('-u' => sub {! $inherited{$a}},
 
 return 0 unless scalar keys %tests == scalar grep ! exists $options{$_}    ||   &{$tests{$_}}(), keys %tests;
 return 0 unless scalar keys %tests == scalar grep ! exists $options{uc $_} || ! &{$tests{$_}}(), keys %tests;
-$a =~ /$criteria/ and $a =~ /$path/;
+
+$a =~ /$_/ || return 0 for @{$options{'--path'}};
+$a =~ /$criteria/;
 
 __
 meta::internal_function('cache', <<'__');
