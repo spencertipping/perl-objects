@@ -849,6 +849,7 @@ meta::internal_function('exported', <<'__');
 my $filename = temporary_name();
 file::write($filename, cat(@_));
 $filename;
+
 __
 meta::internal_function('extension_for', <<'__');
 my $extension = $transient{extension}{namespace($_[0])};
@@ -1193,7 +1194,7 @@ internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
 internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
 internal_function::execute              f0924e087d978ff2ab1e117124db3042
-internal_function::exported             3ec48f01deefa840b52111f2e3f34749
+internal_function::exported             ae35afef7d4762f2818aee5872c75be0
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e

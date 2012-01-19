@@ -775,6 +775,7 @@ meta::internal_function('exported', <<'__');
 my $filename = temporary_name();
 file::write($filename, cat(@_));
 $filename;
+
 __
 meta::internal_function('extension_for', <<'__');
 my $extension = $transient{extension}{namespace($_[0])};

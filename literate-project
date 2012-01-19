@@ -1194,6 +1194,7 @@ meta::internal_function('exported', <<'__');
 my $filename = temporary_name();
 file::write($filename, cat(@_));
 $filename;
+
 __
 meta::internal_function('extension_for', <<'__');
 my $extension = $transient{extension}{namespace($_[0])};
@@ -1503,7 +1504,7 @@ retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                7f5ba514d47ac29a3c226d0e331d9da4
-parent::/home/spencertipping/bin/object  7e0822e858dec820903d3ff8a3cdb499
+parent::/home/spencertipping/bin/object  5788ae36d7790310e3b66d5ddd8b796e
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1572,7 +1573,7 @@ internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
 internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
 internal_function::execute              f0924e087d978ff2ab1e117124db3042
-internal_function::exported             3ec48f01deefa840b52111f2e3f34749
+internal_function::exported             ae35afef7d4762f2818aee5872c75be0
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
@@ -1631,7 +1632,7 @@ meta::parent('development', <<'__');
 parent::./sdoc            8de82eabfbccad0fb8413fa94e79d7cb
 parent::configuration     835c872a2163166e001c4e07b5191353
 parent::notes             a0fab628768fcc76c8b606ea0fdd73fd
-parent::preprocessor      83729a45abab8f152efa9fe20f707659
+parent::preprocessor      3b4cea3c3d232d9cca0496a72968df65
 parent::repository        7bbb6c67563910cc836a91d105750a03
 parent::vim-highlighters  3cd680d083e4f393c53efb58a610e066
 
@@ -1709,7 +1710,7 @@ internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
 internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
 internal_function::execute              f0924e087d978ff2ab1e117124db3042
-internal_function::exported             3ec48f01deefa840b52111f2e3f34749
+internal_function::exported             ae35afef7d4762f2818aee5872c75be0
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
@@ -1764,7 +1765,7 @@ meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::functor::html-templates  2771200f87e9cbfeecfb5f8a0f796f18
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 7e0822e858dec820903d3ff8a3cdb499
+parent::object                 5788ae36d7790310e3b66d5ddd8b796e
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294

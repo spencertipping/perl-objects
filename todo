@@ -950,6 +950,7 @@ meta::internal_function('exported', <<'__');
 my $filename = temporary_name();
 file::write($filename, cat(@_));
 $filename;
+
 __
 meta::internal_function('extension_for', <<'__');
 my $extension = $transient{extension}{namespace($_[0])};
@@ -1234,7 +1235,7 @@ function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  7e0822e858dec820903d3ff8a3cdb499
+parent::/home/spencertipping/bin/object  5788ae36d7790310e3b66d5ddd8b796e
 retriever::html-sdoc                     2a5d5aa45e2d7576f79e045177d8705c
 retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
@@ -1306,7 +1307,7 @@ internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
 internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
 internal_function::execute              f0924e087d978ff2ab1e117124db3042
-internal_function::exported             3ec48f01deefa840b52111f2e3f34749
+internal_function::exported             ae35afef7d4762f2818aee5872c75be0
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
