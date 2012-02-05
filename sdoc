@@ -626,7 +626,7 @@ my ($attribute)   = @_;
 my @paragraphs    = split /\n(?:\s*\n)+/, retrieve($attribute);
 
 my $known_tags    = join '|', qw[html head body meta script style link title div a span input button textarea option select form label iframe blockquote code caption
-                                 table tbody tr td th thead tfoot img h1 h2 h3 h4 h5 h6 li ol ul noscript p pre samp sub sup var canvas audio video];
+                                 table tbody tr td th thead tfoot img h1 h2 h3 h4 h5 h6 li ol ul noscript p pre samp sub sup var canvas audio video strong em];
 my $section_level = 0;
 my @markup;
 
@@ -662,6 +662,7 @@ for (@paragraphs) {
 &$close_section($section_level) while $section_level--;
 
 join "\n", @markup;
+
 __
 meta::function('sdocp', <<'__');
 # Renders an attribute as SDocP. This logic was taken directly from the sdoc script.
