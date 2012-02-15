@@ -496,7 +496,9 @@ $name;
 __
 meta::function('note', <<'__');
 # Creates a note with a given name, useful for jotting things down.
-create("note::$_[0]");
+my $name = join('-', @_);
+create("note::$name");
+
 __
 meta::function('notes', 'ls(\'-a\', \'^note::\');');
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
