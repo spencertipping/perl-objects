@@ -16,7 +16,7 @@ h1, h2, h3, h4, h5, h6 {font-family: 'Ubuntu', sans-serif; font-weight: normal}
 .attributes h1       {font-weight: normal}
 .attributes h1:after {content: '::'; color: #444; font-family: 'Droid Sans Mono', monospace; letter-spacing: -0.2em}
 
-.attributes pre {font-family: 'Droid Sans Mono', monospace; padding: 10px; background: #222; color: #eee}
+.attributes pre {font-family: 'Droid Sans Mono', monospace; padding: 10px; background: #222; color: #eee; width: 192em}
 
 /* Metadata section.*/
 /* Formatting for the author, description, and license.*/
