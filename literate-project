@@ -547,7 +547,7 @@ file::write("$temporary_directory/$filename.tex", $contents);
 
 my $result = table_of_contents() ? system($tex_command) || system($tex_command) || system($pdftex_command) : system($pdftex_command);
 
-associate('data::pdf-output-file', "$temporary_directory/$filename.pdf", execute => 1);
+$transient{pdf_output_file} = "$temporary_directory/$filename.pdf";
 $result;
 
 __
@@ -791,14 +791,14 @@ meta::function('render', <<'__');
 use File::Copy 'copy';
 compile();
 
-my $pdf       = pdf_output_file();
+my $pdf       = $transient{pdf_output_file};
 my $tex       = $pdf;
 my $directory = source_directory();
 my $name      = name();
 
 $tex =~ s/\.pdf$/.tex/;
-copy($pdf, "$directory/$name.pdf") or die "Copy failed: $! $pdf";
-copy($tex, "$directory/$name.tex") or die "Copy failed: $! $pdf";
+copy($pdf, "$directory/$name.pdf") or die $!;
+copy($tex, "$directory/$name.tex") or die $!;
 
 __
 meta::function('rm', <<'__');
@@ -1099,10 +1099,10 @@ hook('after-verify', $result, observed => $observed, expected => $state);
 $result;
 __
 meta::function('view', <<'__');
-my $pdf_reader      = &{'pdf-reader'}();
-my $pdf_output_file = &{'pdf-output-file'}();
+my $pdf_reader = pdf_reader();
 chomp $pdf_reader;
-system("$pdf_reader '$pdf_output_file'");
+system("$pdf_reader '$transient{pdf_output_file}'");
+
 __
 meta::function('vim', <<'__');
 # Installs VIM highlighters.
