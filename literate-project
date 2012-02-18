@@ -716,7 +716,9 @@ $name;
 __
 meta::function('note', <<'__');
 # Creates a note with a given name, useful for jotting things down.
-create("note::$_[0]");
+my $name = join('-', @_);
+create("note::$name");
+
 __
 meta::function('notes', 'ls(\'-a\', \'^note::\');');
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
@@ -795,8 +797,8 @@ my $directory = source_directory();
 my $name      = name();
 
 $tex =~ s/\.pdf$/.tex/;
-copy($pdf, "$directory/$name.pdf") or die "Copy failed: $!";
-copy($tex, "$directory/$name.tex") or die "Copy failed: $!";
+copy($pdf, "$directory/$name.pdf") or die "Copy failed: $! $pdf";
+copy($tex, "$directory/$name.tex") or die "Copy failed: $! $pdf";
 
 __
 meta::function('rm', <<'__');
@@ -904,7 +906,7 @@ my ($attribute)   = @_;
 my @paragraphs    = split /\n(?:\s*\n)+/, retrieve($attribute);
 
 my $known_tags    = join '|', qw[html head body meta script style link title div a span input button textarea option select form label iframe blockquote code caption
-                                 table tbody tr td th thead tfoot img h1 h2 h3 h4 h5 h6 li ol ul noscript p pre samp sub sup var canvas audio video];
+                                 table tbody tr td th thead tfoot img h1 h2 h3 h4 h5 h6 li ol ul noscript p pre samp sub sup var canvas audio video strong em];
 my $section_level = 0;
 my @markup;
 
@@ -940,6 +942,7 @@ for (@paragraphs) {
 &$close_section($section_level) while $section_level--;
 
 join "\n", @markup;
+
 __
 meta::function('sdocp', <<'__');
 # Renders an attribute as SDocP. This logic was taken directly from the sdoc script.
@@ -1492,7 +1495,7 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('./sdoc', <<'__');
 function::sdoc                           f3f3f3127961399a4c38152771c966ab
-function::sdoc-html                      7e7de47fe059a336309a4a0c06856401
+function::sdoc-html                      d000b4fba0e4507c672dbc78af64fa37
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
@@ -1638,7 +1641,7 @@ parent::vim-highlighters  77c9231e0b6ba6e7aa6ed74193c02d2c
 
 __
 meta::parent('notes', <<'__');
-function::note    5e2737593e8d13fc43bb10e97603e53a
+function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
 parent::object    5788ae36d7790310e3b66d5ddd8b796e
