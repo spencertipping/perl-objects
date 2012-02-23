@@ -21,6 +21,8 @@ my %datatypes;
 
 my %locations;          # Maps eval-numbers to attribute names
 
+my $global_data = join '', <DATA>;
+
 sub meta::define_form {
   my ($namespace, $delegate) = @_;
   $datatypes{$namespace} = $delegate;
@@ -249,6 +251,8 @@ my %datatypes;
 
 my %locations;          # Maps eval-numbers to attribute names
 
+my $global_data = join '', <DATA>;
+
 sub meta::define_form {
   my ($namespace, $delegate) = @_;
   $datatypes{$namespace} = $delegate;
@@ -292,7 +296,10 @@ run this script with the 'usage' argument.
 =cut
 
 __
-meta::data('author', 'Spencer Tipping');
+meta::data('author', <<'__');
+Spencer Tipping <spencer@spencertipping.com>
+
+__
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
 MIT License
@@ -374,8 +381,15 @@ die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-
 
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %options, attribute => $name, extension => $extension), execute => 1)});
+
 save() unless $data{'data::edit::no-save'};
 '';
+
+__
+meta::function('edit-self', <<'__');
+$global_data = invoke_editor_on($global_data);
+save();
+
 __
 meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
 meta::function('export', <<'__');
@@ -548,8 +562,9 @@ my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
 my $criteria    = join '|', @criteria;
 my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
-my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__END__']};
+my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
 join "\n", @final_array;
+
 __
 meta::function('serialize-single', <<'__');
 # Serializes a single attribute and optimizes for content.
@@ -589,7 +604,7 @@ __
 meta::function('size', <<'__');
 my $size = 0;
 $size += length $data{$_} for keys %data;
-sprintf "% 7d % 7d % 7d", length(serialize()), $size, length(serialize('-up'));
+sprintf "   full logical  unique    self\n% 7d % 7d % 7d % 7d", length(serialize()), $size, length(serialize('-up')), length $global_data;
 
 __
 meta::function('snapshot', <<'__');
@@ -714,8 +729,9 @@ meta::internal_function('associate', <<'__');
 my ($name, $value, %options) = @_;
 die "Namespace does not exist" unless exists $datatypes{namespace($name)};
 $data{$name} = $value;
-execute($name) if $options{'execute'};
+execute($name) if $options{execute};
 $value;
+
 __
 meta::internal_function('attribute', <<'__');
 my ($name) = @_;
@@ -916,6 +932,7 @@ __
 meta::internal_function('retrieve', <<'__');
 my @results = map defined $data{$_} ? $data{$_} : retrieve_with_hooks($_), @_;
 wantarray ? @results : $results[0];
+
 __
 meta::internal_function('retrieve_with_hooks', <<'__');
 # Uses the hooks defined in $transient{retrievers}, and returns undef if none work.
@@ -1055,6 +1072,11 @@ meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
+meta::retriever('global', <<'__');
+# Returns the global data stashed at the end of this perl object
+$_[0] eq 'self' ? $global_data : undef;
+
+__
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('object', <<'__');
 # Fetch a property from another Perl object. This uses the 'cat' function.
@@ -1070,4 +1092,4 @@ eval $1;
 __
 internal::main();
 
-__END__
+__DATA__
