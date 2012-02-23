@@ -655,7 +655,7 @@ for (@paragraphs) {
   &$code(),   next unless /^\h*[A-Z|]/;
   &$quoted(), next if     /^\h*\|/;
 
-  &$title(), s/^.*\n// if /^(\s*)(\S.*)\.\n([^\n]+)/ and length("$1$2") - 10 < length($3);
+  &$title(), s/^.*\n// if /^(\s*)(\S.*)\.\n([^\n]+)/ and length("$1$2") < 60 and length("$1$2") - 10 < length($3);
   &$paragraph();
 }
 
