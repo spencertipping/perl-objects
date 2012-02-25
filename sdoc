@@ -675,6 +675,42 @@ for (@paragraphs) {
 join "\n", @markup;
 
 __
+meta::function('sdoc-markdown', <<'__');
+# Renders a chunk of SDoc as Markdown. This involves converting quoted and
+# unquoted code and section headings, but not numbered lists.
+
+my ($attribute)   = @_;
+my @paragraphs    = split /\n(?:\s*\n)+/, retrieve($attribute);
+
+my $section_level = 0;
+my @markup;
+
+my $indent        = sub {'  ' x ($_[0] || $section_level)};
+my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm};
+
+my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "\n", join "\n", map &$indent(2) . $_, split /\n/, $_};
+my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, "\n", join "\n", map &$indent(2) . $_, split /\n/, $_};
+
+my $heading       = sub {'#' x $_[0]};
+my $section       = sub {&$unindent(); push @markup, "\n" . &$heading($_[0]) . ' ' . $2};
+
+my $title = sub {
+  my $indentation = (length($1) >> 1) + 1;
+  &$section($indentation);
+  $section_level = $indentation;
+};
+
+for (@paragraphs) {
+  &$code(),   next unless /^\h*[A-Z|]/;
+  &$quoted(), next if     /^\h*\|/;
+
+  &$title(), s/^.*\n// if /^(\s*)(\S.*)\.\n([^\n]+)/ and length("$1$2") < 60 and length("$1$2") - 10 < length($3);
+  push @markup, join "\n", map {&$unindent() and $_} split /\n/, $_;
+}
+
+join "\n", @markup;
+
+__
 meta::function('sdocp', <<'__');
 # Renders an attribute as SDocP. This logic was taken directly from the sdoc script.
 my $attribute = retrieve($_[0]);
