@@ -336,6 +336,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __
+meta::data('permanent-identity', '93194ecf50e38f2adb6e273909e007b5');
 meta::function('ad', <<'__');
 return @{$transient{path}} = () unless @_;
 push @{$transient{path}}, @_;
@@ -1350,7 +1351,7 @@ __
 meta::retriever('bin', <<'__');
 # Compiles a binary text file.
 my $name = $_[0];
-return undef unless $name =~ s/^bin::/binary::/ && exists $data{$name};
+return undef unless $name =~ s/^bin::/binary::/ && defined retrieve($name);
 compile_binary($name);
 
 __
