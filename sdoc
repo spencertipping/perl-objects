@@ -688,8 +688,8 @@ my @markup;
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
 my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "\n", join "\n", map &$indent(2) . $_, split /\n/, $_};
-my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, "\n", join "\n", map &$indent(2) . $_, split /\n/, $_};
+my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "\n", join("\n", map &$indent(2) . $_, split /\n/, $_), "\n"};
+my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, "\n", join("\n", map &$indent(2) . $_, split /\n/, $_), "\n"};
 
 my $heading       = sub {'#' x $_[0]};
 my $section       = sub {&$unindent(); push @markup, "\n" . &$heading($_[0]) . ' ' . $2};
