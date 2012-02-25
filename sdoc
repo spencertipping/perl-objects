@@ -1363,6 +1363,12 @@ sdoc_html($attribute);
 
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
+meta::retriever('markdown-sdoc', <<'__');
+my ($attribute) = @_;
+return undef unless $attribute =~ s/^markdown::/sdoc::/ and exists $data{$attribute};
+sdoc_markdown($attribute);
+
+__
 meta::retriever('object', <<'__');
 # Fetch a property from another Perl object. This uses the 'cat' function.
 return undef unless $_[0] =~ /^object::(.*?)::(.*)$/ && -x $1 && qx|$1 is '$2'|;
