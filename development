@@ -821,11 +821,11 @@ my @markup;
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
 my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "\n", join("\n", map &$indent(2) . $_, split /\n/, $_), "\n"};
-my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, "\n", join("\n", map &$indent(2) . $_, split /\n/, $_), "\n"};
+my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, join("\n", map &$indent(2) . $_, split /\n/, $_)};
+my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join("\n", map &$indent(2) . $_, split /\n/, $_)};
 
 my $heading       = sub {'#' x $_[0]};
-my $section       = sub {&$unindent(); push @markup, "\n" . &$heading($_[0]) . ' ' . $2};
+my $section       = sub {&$unindent(); push @markup, &$heading($_[0]) . ' ' . $2};
 
 my $title = sub {
   my $indentation = (length($1) >> 1) + 1;
@@ -841,7 +841,7 @@ for (@paragraphs) {
   push @markup, join "\n", map {&$unindent() and $_} split /\n/, $_;
 }
 
-join "\n", @markup;
+join "\n\n", @markup;
 
 __
 meta::function('sdocp', <<'__');
@@ -1371,7 +1371,7 @@ meta::message_color('states', 'yellow');
 meta::parent('./sdoc', <<'__');
 function::sdoc                           f0cea831720d18449455a8ed79181727
 function::sdoc-html                      b23152b3f5be696e5bae842ec43fc5a4
-function::sdoc-markdown                  95b79c4f54d9f8d77e67b557cd951c7e
+function::sdoc-markdown                  2f219c0399669b223a6d1bf1829218ff
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
