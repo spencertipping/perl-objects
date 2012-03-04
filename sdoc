@@ -686,10 +686,10 @@ my $section_level = 0;
 my @markup;
 
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
-my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm};
+my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm; $_};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, join("\n", map &$indent(2) . $_, split /\n/, $_)};
-my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join("\n", map &$indent(2) . $_, split /\n/, $_)};
+my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
+my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
 
 my $heading       = sub {'#' x $_[0]};
 my $section       = sub {&$unindent(); push @markup, &$heading($_[0]) . ' ' . $2};
@@ -705,7 +705,7 @@ for (@paragraphs) {
   &$quoted(), next if     /^\h*\|/;
 
   &$title(), s/^.*\n// if /^(\s*)(\S.*)\.\n([^\n]+)/ and length("$1$2") < 60 and length("$1$2") - 10 < length($3);
-  push @markup, join "\n", map {&$unindent() and $_} split /\n/, $_;
+  push @markup, join "\n", map &$unindent(), split /\n/;
 }
 
 join "\n\n", @markup;
