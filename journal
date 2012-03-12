@@ -331,6 +331,7 @@ run this script with the 'usage' argument.
 __
 meta::cache('parent-identification', <<'__');
 /home/spencertipping/bin/notes a9e5975593ed5d90d943ad98405c71e5
+/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
