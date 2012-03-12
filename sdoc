@@ -1352,9 +1352,9 @@ retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 __
 meta::retriever('code-sdoc', <<'__');
 # Lets you specify the SDoc extension manually. For instance:
-# code.js::foo causes sdoc::foo to be SDoc-rendered using Javascript comments.
+# code.js::sdoc::foo causes sdoc::foo to be SDoc-rendered using Javascript comments.
 my ($name) = @_;
-return undef unless $name =~ s/^code\.(\w+)::/sdoc::/ and exists $data{$name};
+return undef unless $name =~ s/^code\.(\w+)::// and defined retrieve($name);
 sdoc($name, $1);
 
 __
@@ -1366,14 +1366,14 @@ $_[0] eq 'self' ? $global_data : undef;
 __
 meta::retriever('html-sdoc', <<'__');
 my ($attribute) = @_;
-return undef unless $attribute =~ s/^html::/sdoc::/ and exists $data{$attribute};
+return undef unless $attribute =~ s/^html::/sdoc::/ and defined retrieve($attribute) || $attribute =~ s/^sdoc::// && defined retrieve($attribute);
 sdoc_html($attribute);
 
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('markdown-sdoc', <<'__');
 my ($attribute) = @_;
-return undef unless $attribute =~ s/^markdown::/sdoc::/ and exists $data{$attribute};
+return undef unless $attribute =~ s/^markdown::/sdoc::/ and defined retrieve($attribute) || $attribute =~ s/^sdoc::// && defined retrieve($attribute);
 sdoc_markdown($attribute);
 
 __
