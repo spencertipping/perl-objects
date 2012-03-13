@@ -816,7 +816,8 @@ defined $transient{encryption_key} ? "\033[1;35m" . substr(fast_hash($transient{
 __
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
 meta::indicator('path', <<'__');
-join "\033[1;30m/\033[0;0m", @{$transient{path}};
+my @highlighted = map join("\033[1;30m|\033[0;0m", split /\|/, $_), @{$transient{path}};
+join "\033[1;30m/\033[0;0m", @highlighted;
 
 __
 meta::internal_function('around_hook', <<'__');
@@ -1300,7 +1301,7 @@ function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
-indicator::path                         9ec891df17cd45895f03a6124f9d065f
+indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
@@ -1379,7 +1380,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         3fc514fc89f90342562105930635d453
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  1f1bf492b56b2f0196b2018b11b8c991
+parent::/home/spencertipping/bin/object  c086f2bf8be5433a968323892538feb6
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __

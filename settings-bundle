@@ -787,7 +787,8 @@ __
 meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
 meta::indicator('locked', 'is_locked() ? "\\033[1;31mlocked\\033[0;0m" : \'\';');
 meta::indicator('path', <<'__');
-join "\033[1;30m/\033[0;0m", @{$transient{path}};
+my @highlighted = map join("\033[1;30m|\033[0;0m", split /\|/, $_), @{$transient{path}};
+join "\033[1;30m/\033[0;0m", @highlighted;
 
 __
 meta::internal_function('around_hook', <<'__');
@@ -1218,7 +1219,7 @@ function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
-indicator::path                         9ec891df17cd45895f03a6124f9d065f
+indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
@@ -1337,7 +1338,7 @@ function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
-indicator::path                         9ec891df17cd45895f03a6124f9d065f
+indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
@@ -1403,7 +1404,7 @@ meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::functor::html-templates  2771200f87e9cbfeecfb5f8a0f796f18
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 1f1bf492b56b2f0196b2018b11b8c991
+parent::object                 c086f2bf8be5433a968323892538feb6
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
