@@ -734,8 +734,9 @@ __
 meta::function('notes', 'ls(\'-a\', \'^note::\');');
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__');
-my $result = eval(join ' ', @_);
-$@ ? terminal::error($@) : $result;
+my @result = eval(join ' ', @_);
+$@ ? terminal::error($@) : wantarray ? @result : $result[0];
+
 __
 meta::function('preprocess', <<'__');
 # Implements a simple preprocessing language.
@@ -1087,12 +1088,12 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my @unknown_targets   = grep ! exists $data{"parent::$_"}, @targets;
   @targets = (@known_targets, @unknown_targets);
 
-  my $save_state        = ! ($$options{'-n'} || $$options{'--no-save'});
-  my $no_parents        =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
-  my $force             =    $$options{'-f'} || $$options{'--force'};
-  my $clobber_divergent =    $$options{'-D'} || $$options{'--clobber-divergent'};
+  my $save_state        = $$options{'-s'} || $$options{'--save'};
+  my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
+  my $force             = $$options{'-f'} || $$options{'--force'};
+  my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  save_state('before-update') if $save_state;
+  save_state('before-update');
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -1126,14 +1127,16 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   cache('parent-identification', %parent_id_cache);
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
-                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state}
+                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
+                 rm('state::before-update') unless $save_state}
   elsif ($force) {hook('update-from-failed', $options, @targets);
                   terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
+                                    'Run "load-state before-update" to undo the update and return to a working state.')}
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
-        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-        return load_state('before-update') if $save_state}});
+        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
+        load_state('before-update');
+        rm('state::before-update')}});
 
 __
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
@@ -1522,7 +1525,8 @@ sub repl {
   my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
-  my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
+  my $output       = $options{output}       || sub {print join("\n", @_), "\n"};
+  my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {&$output(::dangerous('', sub {execute($command)}))})};
 
   length $_ && &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
 
@@ -1551,7 +1555,7 @@ function::sdoc-markdown                  a35a6441dd750466f2d0e636bee2b382
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  1f1bf492b56b2f0196b2018b11b8c991
+parent::/home/spencertipping/bin/object  f27c395fbe39e7c8c523eab51073cd79
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1561,7 +1565,7 @@ retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 __
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                7f5ba514d47ac29a3c226d0e331d9da4
-parent::/home/spencertipping/bin/object  c086f2bf8be5433a968323892538feb6
+parent::/home/spencertipping/bin/object  f27c395fbe39e7c8c523eab51073cd79
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1598,7 +1602,7 @@ function::ls                            01a23d51d5b529e03943bd57e33f92df
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
-function::perl                          a0f341ea54391b63b6195e7992b6a686
+function::perl                          9f9fd744f0ed225ad8fb3b79fa53dd9a
 function::rd                            2adb16d7e819d2e87a27201744a581e7
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
@@ -1616,7 +1620,7 @@ function::state                         8c68044dccae28f33244d0c7e9e9acfb
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   631721c4dc30e11b2023a6703cbcef52
+function::update-from                   06fef658374d482adb2e62fbeed9efb4
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1653,7 +1657,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          6b9f3befb61a01e9132a440601f8ea0a
+library::shell                          f561500cf223df1bf6daf43af93577a5
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
@@ -1688,19 +1692,19 @@ meta::type::configuration                d67e10a128e6b1d958c5b9d3bbe25aa4
 parent::/home/spencertipping/bin/object  293415c4d45c10239298fa46b01cff17
 __
 meta::parent('development', <<'__');
-parent::./sdoc            f3d52fcbfcf5cccc1413aad0c6a3ad88
+parent::./sdoc            2ecd8cb07dc216d9eeaaaff793c40318
 parent::configuration     835c872a2163166e001c4e07b5191353
-parent::notes             fa59abf377aa87f23a76657c1bb22a2c
-parent::preprocessor      4450ebbe2c9d3a70ada4050fcd567907
-parent::repository        9f50b9a9563910cc3e9bc6e2aafb5b2d
-parent::vim-highlighters  9f43562336f10d621ddefd326a989b1d
+parent::notes             b6efc66890cdde2d34373dcf44094a72
+parent::preprocessor      75cf22ed4a7e9f565fd9b8ed2b18fe0c
+parent::repository        72ac1e46563910ccea5c9a025066b6cb
+parent::vim-highlighters  b4e8304583e4f393c53efb58ca5f0ac2
 
 __
 meta::parent('notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    1f1bf492b56b2f0196b2018b11b8c991
+parent::object    f27c395fbe39e7c8c523eab51073cd79
 
 __
 meta::parent('object', <<'__');
@@ -1737,7 +1741,7 @@ function::ls                            01a23d51d5b529e03943bd57e33f92df
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
-function::perl                          a0f341ea54391b63b6195e7992b6a686
+function::perl                          9f9fd744f0ed225ad8fb3b79fa53dd9a
 function::rd                            2adb16d7e819d2e87a27201744a581e7
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
@@ -1755,12 +1759,12 @@ function::state                         8c68044dccae28f33244d0c7e9e9acfb
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   631721c4dc30e11b2023a6703cbcef52
+function::update-from                   06fef658374d482adb2e62fbeed9efb4
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
-indicator::path                         9ec891df17cd45895f03a6124f9d065f
+indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
 internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
@@ -1792,7 +1796,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          6b9f3befb61a01e9132a440601f8ea0a
+library::shell                          f561500cf223df1bf6daf43af93577a5
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
@@ -1826,7 +1830,7 @@ meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::functor::html-templates  2771200f87e9cbfeecfb5f8a0f796f18
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 1f1bf492b56b2f0196b2018b11b8c991
+parent::object                 f27c395fbe39e7c8c523eab51073cd79
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1840,14 +1844,14 @@ __
 meta::parent('repository', <<'__');
 function::dupdate                               3203750417390913ae3892002b53bdc1
 meta::type::cached_dependency                   b9dc0b20c2d3af0deb3b835b20cac4a7
-parent::/home/spencertipping/bin/configuration  fdbaf0bf0013a9591d634c19f4e67618
+parent::/home/spencertipping/bin/configuration  b82229dcd7dc5e9a702e49c04e1d7f8d
 retriever::http                                 a23617a5787de41d1a89ad4496cacce3
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               1f1bf492b56b2f0196b2018b11b8c991
+parent::object               f27c395fbe39e7c8c523eab51073cd79
 
 __
 meta::resource('header', <<'__');

@@ -524,8 +524,9 @@ $name;
 __
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__');
-my $result = eval(join ' ', @_);
-$@ ? terminal::error($@) : $result;
+my @result = eval(join ' ', @_);
+$@ ? terminal::error($@) : wantarray ? @result : $result[0];
+
 __
 meta::function('preprocess', <<'__');
 # Implements a simple preprocessing language.
@@ -713,12 +714,12 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my @unknown_targets   = grep ! exists $data{"parent::$_"}, @targets;
   @targets = (@known_targets, @unknown_targets);
 
-  my $save_state        = ! ($$options{'-n'} || $$options{'--no-save'});
-  my $no_parents        =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
-  my $force             =    $$options{'-f'} || $$options{'--force'};
-  my $clobber_divergent =    $$options{'-D'} || $$options{'--clobber-divergent'};
+  my $save_state        = $$options{'-s'} || $$options{'--save'};
+  my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
+  my $force             = $$options{'-f'} || $$options{'--force'};
+  my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  save_state('before-update') if $save_state;
+  save_state('before-update');
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -752,14 +753,16 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   cache('parent-identification', %parent_id_cache);
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
-                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state}
+                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
+                 rm('state::before-update') unless $save_state}
   elsif ($force) {hook('update-from-failed', $options, @targets);
                   terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
+                                    'Run "load-state before-update" to undo the update and return to a working state.')}
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
-        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-        return load_state('before-update') if $save_state}});
+        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
+        load_state('before-update');
+        rm('state::before-update')}});
 
 __
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
@@ -1121,7 +1124,8 @@ sub repl {
   my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
-  my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
+  my $output       = $options{output}       || sub {print join("\n", @_), "\n"};
+  my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {&$output(::dangerous('', sub {execute($command)}))})};
 
   length $_ && &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
 
@@ -1177,7 +1181,7 @@ function::ls                            01a23d51d5b529e03943bd57e33f92df
 function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
-function::perl                          a0f341ea54391b63b6195e7992b6a686
+function::perl                          9f9fd744f0ed225ad8fb3b79fa53dd9a
 function::rd                            2adb16d7e819d2e87a27201744a581e7
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
@@ -1195,7 +1199,7 @@ function::state                         8c68044dccae28f33244d0c7e9e9acfb
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   631721c4dc30e11b2023a6703cbcef52
+function::update-from                   06fef658374d482adb2e62fbeed9efb4
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1232,7 +1236,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
-library::shell                          6b9f3befb61a01e9132a440601f8ea0a
+library::shell                          f561500cf223df1bf6daf43af93577a5
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
