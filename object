@@ -336,6 +336,20 @@ my ($name, @stuff) = @_;
    : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
 
 __
+meta::function('ancestors', <<'__');
+# Returns an array of ancestors of the given parent. Use --self to get the
+# ancestors of the current object.
+my ($options, @parents) = separate_options(@_);
+
+@parents = grep s/^parent:://, sort keys %data if $$options{'--self'};
+return () unless @parents;
+
+my @immediate = grep $_, map map(/^parent::(\S+)/ && $1, split /\n/, retrieve("parent::$_")), @parents;
+my %results;
+$results{$_} = 1 for @parents, @immediate, ancestors(@immediate);
+sort keys %results;
+
+__
 meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('cc', <<'__');
 # Stashes a quick one-line continuation. (Used to remind me what I was doing.)
@@ -507,8 +521,9 @@ $name;
 __
 meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__');
-my $result = eval(join ' ', @_);
-$@ ? terminal::error($@) : $result;
+my @result = eval(join ' ', @_);
+$@ ? terminal::error($@) : wantarray ? @result : $result[0];
+
 __
 meta::function('rd', <<'__');
 if (@_) {my $pattern = join '|', @_;
@@ -520,12 +535,16 @@ meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^
 meta::function('rm', <<'__');
 around_hook('rm', @_, sub {
   exists $data{$_} or terminal::warning("$_ does not exist") for @_;
-  delete @data{@_}});
+  !! delete @data{@_}});
+
 __
 meta::function('rmparent', <<'__');
 # Removes one or more parents.
 my ($options, @parents) = separate_options(@_);
-my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
+my $clobber_divergent   = $$options{'-D'} || $$options{'--clobber-divergent'};
+my $recursive           = $$options{'-r'} || $$options{'--recursive'};
+
+@parents = (@parents, ancestors(@parents)) if $recursive;
 
 my %parents = map {$_ => 1} @parents;
 my @other_parents = grep !$parents{$_}, grep s/^parent:://, select_keys('--namespace' => 'parent');
@@ -538,6 +557,7 @@ for my $parent (@parents) {
 
   for my $line (split /\n/, retrieve("parent::$parent")) {
     my ($name, $hash) = split /\s+/, $line;
+    next if /^parent::/ and not $recursive;
     next unless exists $data{$name};
 
     my $local_hash = fast_hash(retrieve($name));
@@ -642,12 +662,12 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my @unknown_targets   = grep ! exists $data{"parent::$_"}, @targets;
   @targets = (@known_targets, @unknown_targets);
 
-  my $save_state        = ! ($$options{'-n'} || $$options{'--no-save'});
-  my $no_parents        =    $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
-  my $force             =    $$options{'-f'} || $$options{'--force'};
-  my $clobber_divergent =    $$options{'-D'} || $$options{'--clobber-divergent'};
+  my $save_state        = $$options{'-s'} || $$options{'--save'};
+  my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
+  my $force             = $$options{'-f'} || $$options{'--force'};
+  my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  save_state('before-update') if $save_state;
+  save_state('before-update');
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -681,14 +701,16 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   cache('parent-identification', %parent_id_cache);
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
-                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state}
+                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
+                 rm('state::before-update') unless $save_state}
   elsif ($force) {hook('update-from-failed', $options, @targets);
                   terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                    'Run "load-state before-update" to undo the update and return to a working state.') if $save_state}
+                                    'Run "load-state before-update" to undo the update and return to a working state.')}
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
-        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.") if $save_state;
-        return load_state('before-update') if $save_state}});
+        terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
+        load_state('before-update');
+        rm('state::before-update')}});
 
 __
 meta::function('usage', '"Usage: $0 action [arguments]\\nUnique actions (run \'$0 ls\' to see all actions):" . ls(\'-u\');');
@@ -1050,7 +1072,8 @@ sub repl {
   my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
-  my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {print ::dangerous('', sub {execute($command)}), "\n"})};
+  my $output       = $options{output}       || sub {print join("\n", @_), "\n"};
+  my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {&$output(::dangerous('', sub {execute($command)}))})};
 
   length $_ && &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
 
