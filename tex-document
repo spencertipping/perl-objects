@@ -646,8 +646,9 @@ __
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
-associate($to, retrieve($from));
+associate($to, retrieve($from), execute => 1);
 rm($from);
+
 __
 meta::function('name', <<'__');
 my $name = $0;
@@ -1444,7 +1445,7 @@ function::sdoc-markdown                  a35a6441dd750466f2d0e636bee2b382
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  f27c395fbe39e7c8c523eab51073cd79
+parent::/home/spencertipping/bin/object  5e8c5be71d2d512cca8dfc1677f94466
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1483,7 +1484,7 @@ function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            01a23d51d5b529e03943bd57e33f92df
-function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
+function::mv                            ccd000960db4cf627d9246c43d87ba4c
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          9f9fd744f0ed225ad8fb3b79fa53dd9a
@@ -1602,7 +1603,7 @@ function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            01a23d51d5b529e03943bd57e33f92df
-function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
+function::mv                            ccd000960db4cf627d9246c43d87ba4c
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          9f9fd744f0ed225ad8fb3b79fa53dd9a
@@ -1694,7 +1695,7 @@ meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::functor::html-templates  2771200f87e9cbfeecfb5f8a0f796f18
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 f27c395fbe39e7c8c523eab51073cd79
+parent::object                 5e8c5be71d2d512cca8dfc1677f94466
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294

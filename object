@@ -497,8 +497,9 @@ __
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
-associate($to, retrieve($from));
+associate($to, retrieve($from), execute => 1);
 rm($from);
+
 __
 meta::function('name', <<'__');
 my $name = $0;

@@ -528,8 +528,9 @@ __
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
-associate($to, retrieve($from));
+associate($to, retrieve($from), execute => 1);
 rm($from);
+
 __
 meta::function('name', <<'__');
 my $name = $0;
@@ -1138,7 +1139,7 @@ function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            01a23d51d5b529e03943bd57e33f92df
-function::mv                            4a0e338a6edb89ad1e2c779d51d4d47b
+function::mv                            ccd000960db4cf627d9246c43d87ba4c
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
 function::perl                          9f9fd744f0ed225ad8fb3b79fa53dd9a
