@@ -116,17 +116,6 @@ sub meta::functor::editable {
       return associate($attribute, @new_value ? join(' ', @new_value) : join('', <STDIN>)) if $command eq '=' or $command eq 'import' or $options{default} eq 'import' and not defined $command;
       return retrieve($attribute)}}}
 __
-meta::meta('functor::html-templates', <<'__');
-my @html_elements = qw/html head title meta script style link body div/;    # Very incomplete list
-
-for my $e (@html_elements) {
-  meta::externalize "template::$e", "template::$e", sub {
-    my ($line, $block) = @_;
-    "<$e $line>\n$block\n</$e>";
-  };
-}
-
-__
 meta::meta('functor::tex-templates', <<'__');
 package tex;
 
@@ -1693,7 +1682,6 @@ retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
-meta::functor::html-templates  2771200f87e9cbfeecfb5f8a0f796f18
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
 parent::object                 5e8c5be71d2d512cca8dfc1677f94466
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
@@ -1702,14 +1690,12 @@ template::eval                 1a0e2124a05056be4abc11803883c294
 template::failing_conditional  e3a4523110dd859e828f342185de7c62
 template::include              47b5552d609d97fe7f2522d5c1027014
 template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
-template::script-include       76be051ad116449ddebd10e7c3729afd
-template::style-include        8e5a06b70e1b00379765f319bf6c8066
 
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               f27c395fbe39e7c8c523eab51073cd79
+parent::object               5e8c5be71d2d512cca8dfc1677f94466
 
 __
 meta::resource('header', <<'__');
@@ -1835,20 +1821,6 @@ my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 my $text = join "\n\n", map retrieve($_), split /\s+/, $commands;
 "\n\n$text\n\n";
-__
-meta::template('script-include', <<'__');
-my ($name) = @_;
-my $s      = 'script';
-my $script = retrieve($name);
-"<$s>\n$script\n</$s>";
-
-__
-meta::template('style-include', <<'__');
-my ($name) = @_;
-my $s      = 'style';
-my $style  = retrieve($name);
-"<$s>\n$style\n</$s>";
-
 __
 meta::vim_highlighter('cltex', <<'__');
 " Cleaner TeX
