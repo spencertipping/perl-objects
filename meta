@@ -227,6 +227,8 @@ meta::meta('type::state', <<'__');
 meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __
+meta::alias('er', 'edit sdoc::readme');
+meta::alias('erf', 'edit function::render');
 meta::bootstrap('html', <<'__');
 <html>
   <head>
@@ -1483,14 +1485,14 @@ either case, the contents of the scripts can be licensed independently of the sc
     /usr/bin/vim        # /usr/bin/emacs will also work, but is an inappropriate value ;)
     $
 
-  At this point you should be all set to create an object. The easiest way to do this is to tell `object` that you want a child of it. (This causes your child to stay up-to-date with changes
-  you make to `object` later on.) Here's how to do that:
+  At this point you should be all set to create an object. The easiest way to do this is to tell `object` that you want a child of it. This causes your child to stay up-to-date with changes
+  you make to `object` later on. Here's how to do that:
 
   | $ ./object child my-object
 
   If you run `my-object` you'll enter its shell; at this point you can create and modify its attribute table. Most attributes are inherited from `object`, so it will warn you before you modify
   them. This is a good thing; the logic that overwrites the file in-place is implemented as a series of `function::` and `internal_function::` attributes. If you changed these you could end up
-  with a script that obliterated itself.
+  with a script that obliterated itself. I know this because I've done it a few times.
 
   The `data::` namespace lets you bind data that won't be inherited by child scripts and that won't be evaluated by Perl. This is a good place to stash script-specific data.
 
@@ -1534,6 +1536,14 @@ either case, the contents of the scripts can be licensed independently of the sc
     >
 
   This creates a new entry in the `parent::` namespace and will cause future `update` operations to inherit changes to the given script.
+
+  Data integrity and troubleshooting.
+  These scripts are fairly resilient to breaking changes. For instance, if you write something that prevents a script from functioning correctly, it will refuse to overwrite itself and will
+  instead save a temporary file so that you can figure out what went wrong. A Perl object overwrites itself only when the new copy can hash its contents correctly. Since implementing these
+  checks, I have not lost any data doing normal things with these scripts.
+
+  That being said, your data is probably unsafe until you understand how Perl objects work. I highly recommend reading [Writing Self-Modifying
+  Perl](http://github.com/spencertipping/writing-self-modifying-perl) for this purpose.
 
 __
 internal::main();
