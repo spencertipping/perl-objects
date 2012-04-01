@@ -537,7 +537,7 @@ else    {pop @{$transient{path}}}
 __
 meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
 meta::function('render', <<'__');
-file::write('README.md', 'markdown::readme');
+file::write('README.md', retrieve('markdown::readme'));
 
 __
 meta::function('rm', <<'__');
