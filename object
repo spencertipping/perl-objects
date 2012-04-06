@@ -325,8 +325,10 @@ THE SOFTWARE.
 __
 meta::data('permanent-identity', '99aeabc9ec7fe80b1b39f5e53dc7e49e');
 meta::function('ad', <<'__');
-return @{$transient{path}} = () unless @_;
-push @{$transient{path}}, @_;
+my ($options, @paths) = separate_options(@_);
+@{$transient{path}} = () if $$options{-c};
+return @{$transient{path}} = () unless @paths;
+push @{$transient{path}}, @paths;
 
 __
 meta::function('alias', <<'__');
