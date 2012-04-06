@@ -359,8 +359,10 @@ THE SOFTWARE.
 __
 meta::data('permanent-identity', '62bc8a83ef5d4941cd2c1cdfb57a0320');
 meta::function('ad', <<'__');
-return @{$transient{path}} = () unless @_;
-push @{$transient{path}}, @_;
+my ($options, @paths) = separate_options(@_);
+@{$transient{path}} = () if $$options{-c};
+return @{$transient{path}} = () unless @paths;
+push @{$transient{path}}, @paths;
 
 __
 meta::function('alias', <<'__');
@@ -1293,7 +1295,7 @@ function::sdoc-markdown                  a35a6441dd750466f2d0e636bee2b382
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  5e8c5be71d2d512cca8dfc1677f94466
+parent::/home/spencertipping/bin/object  0a03bcf29e1643817938372427e1c6c4
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1305,7 +1307,7 @@ meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               d22fafa2938ecb0d4728e2958b54ed3d
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
-function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
+function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a

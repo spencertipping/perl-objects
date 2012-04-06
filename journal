@@ -362,8 +362,10 @@ __
 meta::data('permanent-identity', '9837287d488ed173dd183e0b154943b4');
 meta::data('watching', '1');
 meta::function('ad', <<'__');
-return @{$transient{path}} = () unless @_;
-push @{$transient{path}}, @_;
+my ($options, @paths) = separate_options(@_);
+@{$transient{path}} = () if $$options{-c};
+return @{$transient{path}} = () unless @paths;
+push @{$transient{path}}, @paths;
 
 __
 meta::function('alias', <<'__');
@@ -1253,7 +1255,7 @@ meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               d22fafa2938ecb0d4728e2958b54ed3d
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
-function::ad                            77a05d9a6fef7871b2c3e8e94b56870a
+function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
@@ -1385,7 +1387,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         3fc514fc89f90342562105930635d453
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  5e8c5be71d2d512cca8dfc1677f94466
+parent::/home/spencertipping/bin/object  0a03bcf29e1643817938372427e1c6c4
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __
