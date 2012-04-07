@@ -1,7 +1,5 @@
 #!/usr/bin/perl
-# 902333a0bd6ed90ff919fe8477cb4e69 // id
-# 99aeabc9ec7fe80b1b39f5e53dc7e49e // magic
-# 42e67569501ad9930032927bc756a3a4 // state
+# 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -236,6 +234,7 @@ meta::bootstrap('html', <<'__');
 __
 meta::bootstrap('initialization', <<'__');
 #!/usr/bin/perl
+# 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -341,14 +340,6 @@ my ($name, @stuff) = @_;
 @_ ? @stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)})
             : retrieve("alias::$name") // "Undefined alias $name"
    : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
-
-__
-meta::function('bootstrap-with-headers', <<'__');
-my ($shebang, $rest)  = split /\n/, retrieve('bootstrap::initialization'), 2;
-my %headers           = (id => identity(), state => state(), magic => '99aeabc9ec7fe80b1b39f5e53dc7e49e');
-my $formatted_headers = join "\n", map "# $headers{$_} // $_", sort keys %headers;
-
-"$shebang\n$formatted_headers\n$rest";
 
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
@@ -579,7 +570,7 @@ my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
 my $criteria    = join '|', @criteria;
 my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
-my @final_array = @{$partial ? \@attributes : [bootstrap_with_headers(), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
+my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
 join "\n", @final_array;
 
 __
@@ -1098,11 +1089,10 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               acfa47b46a56b538b2ed4ee69eeb4c31
+bootstrap::initialization               d22fafa2938ecb0d4728e2958b54ed3d
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
-function::bootstrap-with-headers        6ab43f998a976236b4868ffe1f638bf0
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
@@ -1138,7 +1128,7 @@ function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::rmparent                      fc2884910a6939a47898a778f277332c
 function::save                          778c0e1043b9c6c96fb8f266f8061624
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
-function::serialize                     a9dcfa09ab4a1aeeaad5e53f7081a1d6
+function::serialize                     a97c7391c635a93b0a710d10eb8cb3cd
 function::serialize-single              aa77af032272f5a2664e21713739a223
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           7b2685a4041c25bc495816e472bdace5
@@ -1212,7 +1202,6 @@ meta::type::state                       84da7d5220471307f1f990c5057d3319
 retriever::file                         3bbc9d8a887a536044bafff1d54def7e
 retriever::global                       4fe8df0cca548075169968772843a156
 retriever::id                           4da6080168d32445150cc4200af7af6e
-retriever::metadata                     f817861639f380b77dce5d9ffe9f0228
 retriever::object                       c7633990b4e01bdc783da7e545799f4f
 retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 
@@ -1224,16 +1213,6 @@ $_[0] eq 'self' ? $global_data : undef;
 
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
-meta::retriever('metadata', <<'__');
-# Retrieves metadata about another self-modifying Perl object.
-# Format is metadata::attribute::/path/to/object.
-return undef unless $_[0] =~ /^metadata::([^:]+)::(.*)$/;
-
-my ($attribute, $file) = ($1, $2);
-(my $header = file::read($file)) =~ s/\n\n.*//s;
-(grep /^# ([^\/]+) \/\/ ([^\/]+)$/ && $2 eq $attribute && ($_ = $1), split /\n/, $header)[0];
-
-__
 meta::retriever('object', <<'__');
 # Fetch a property from another Perl object. This uses the 'cat' function.
 return undef unless $_[0] =~ /^object::(.*?)::(.*)$/ && -x $1 && qx|$1 is '$2'|;
