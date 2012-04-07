@@ -1815,6 +1815,13 @@ return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
 __
 meta::template('item[]', '"\\\\item[$_[0]]";');
+meta::template('logical', <<'__');
+# Creates a logical section that is delimited only by TeX comments.
+my ($name, $body) = @_;
+$body =~ s/^\s*(.*\S)\s*$/\1/;
+"% ${name}\n$body";
+
+__
 meta::template('pinclude', <<'__');
 # Just like the regular include, but makes sure to insert paragraph boundaries
 # (this is required for SDoc to function properly).
@@ -1835,9 +1842,10 @@ elseif exists("b:current_syntax")
   finish
 endif
 
-syn match   cltEofMarker   /<<\s*\w\+/ contained
-syn region  cltLineComment matchgroup=cltCode start=/^\s*- comment / end=/$/ contained
-syn match   cltLine        /^\s*- .*$/ contains=cltEofMarker,cltLineComment
+syn match   cltEofMarker      /<<\s*\w\+/ contained
+syn region  cltLineComment    matchgroup=cltCode start=/^\s*- comment / end=/$/ contained
+syn region  cltLogicalComment matchgroup=cltCode start=/^\s*- logical / end=/<</ contained
+syn match   cltLine           /^\s*- .*$/ contains=cltEofMarker,cltLineComment,cltLogicalComment
 
 syn case match | syn include @cpp           syntax/cpp.vim        | unlet b:current_syntax
 syn case match | syn include @java          syntax/java.vim       | unlet b:current_syntax
@@ -1872,6 +1880,7 @@ hi link cltCode            Special
 hi link cltDocument        Comment
 hi link cltComment         Type
 hi link cltLineComment     Type
+hi link cltLogicalComment  Type
 
 let b:current_syntax = "cltex"
 
