@@ -1,5 +1,7 @@
 #!/usr/bin/perl
-# 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
+# 99aeabc9ec7fe80b1b39f5e53dc7e49e // id
+# 99aeabc9ec7fe80b1b39f5e53dc7e49e // magic
+# 156570ec7ee4ce1c45b0448f193282c4 // state
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -229,7 +231,6 @@ meta::bootstrap('html', <<'__');
 __
 meta::bootstrap('initialization', <<'__');
 #!/usr/bin/perl
-# 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -336,6 +337,14 @@ my ($name, @stuff) = @_;
 @_ ? @stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)})
             : retrieve("alias::$name") // "Undefined alias $name"
    : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
+
+__
+meta::function('bootstrap-with-headers', <<'__');
+my ($shebang, $rest)  = split /\n/, retrieve('bootstrap::initialization'), 2;
+my %headers           = (id => identity(), state => state(), magic => '99aeabc9ec7fe80b1b39f5e53dc7e49e');
+my $formatted_headers = join "\n", map "# $headers{$_} // $_", sort keys %headers;
+
+"$shebang\n$formatted_headers\n$rest";
 
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
@@ -566,7 +575,7 @@ my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
 my $criteria    = join '|', @criteria;
 my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
-my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
+my @final_array = @{$partial ? \@attributes : [bootstrap_with_headers(), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
 join "\n", @final_array;
 
 __
@@ -1086,6 +1095,16 @@ $_[0] eq 'self' ? $global_data : undef;
 
 __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
+meta::retriever('metadata', <<'__');
+# Retrieves metadata about another self-modifying Perl object.
+# Format is metadata::attribute::/path/to/object.
+return undef unless $_[0] =~ /^metadata::([^:]+)::(.*)$/;
+
+my ($attribute, $file) = ($1, $2);
+(my $header = file::read($file)) =~ s/\n\n.*//s;
+(grep /^# ([^\/]+) \/\/ ([^\/]+)$/ && $2 eq $attribute && ($_ = $1), split /\n/, $header)[0];
+
+__
 meta::retriever('object', <<'__');
 # Fetch a property from another Perl object. This uses the 'cat' function.
 return undef unless $_[0] =~ /^object::(.*?)::(.*)$/ && -x $1 && qx|$1 is '$2'|;
