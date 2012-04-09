@@ -619,10 +619,11 @@ chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
 meta::function('state', <<'__');
-my @keys = sort keys %data;
+my @keys = grep !is('-v', $_), sort keys %data;
 my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
+
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
