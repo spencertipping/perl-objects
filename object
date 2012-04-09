@@ -565,7 +565,7 @@ meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
 my $criteria    = join '|', @criteria;
-my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
+my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '-V' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '-V' => 1, '--criteria' => $criteria);
 my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
 join "\n", @final_array;
 
@@ -590,6 +590,7 @@ my $chars     = 2;
 $delimiter = substr($delimiter, 0, $chars);
 
 "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
+
 __
 meta::function('sh', 'system(@_);');
 meta::function('shb', <<'__');
@@ -753,6 +754,7 @@ my $criteria      = $options{'--criteria'} || $options{'--namespace'} && "^$opti
 my %tests = ('-u' => sub {! $inherited{$a}},
              '-d' => sub {$inherited{$a} && fast_hash(retrieve($a)) ne $inherited{$a}},
              '-i' => sub {$transient{inherit}{namespace($a)}},
+             '-v' => sub {$transient{virtual}{namespace($a)}},
              '-s' => sub {$a =~ /^state::/o},
              '-m' => sub {$a =~ /^meta::/o});
 
