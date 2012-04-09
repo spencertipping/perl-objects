@@ -619,7 +619,7 @@ chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
 meta::function('state', <<'__');
-my @keys = grep !is('-v', $_), sort keys %data;
+my @keys = grep !is($_, '-v'), sort keys %data;
 my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
 $hash;
