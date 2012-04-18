@@ -553,7 +553,10 @@ for my $parent (@parents) {
                       : rm("parent::$parent")}
 
 __
-meta::function('save', 'around_hook(\'save\', sub {dangerous(\'\', sub {file::write($0, serialize()); $transient{initial} = state()}) if verify()});');
+meta::function('save', <<'__');
+around_hook('save', sub {dangerous('', sub {file::write($0, serialize('-V')); $transient{initial} = state()}) if verify()});
+
+__
 meta::function('save-state', <<'__');
 # Creates a named copy of the current state and stores it.
 my ($state_name) = @_;
@@ -565,7 +568,7 @@ meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
 my $criteria    = join '|', @criteria;
-my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '-V' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '-V' => 1, '--criteria' => $criteria);
+my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
 my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
 join "\n", @final_array;
 
