@@ -622,7 +622,7 @@ meta::function('state', <<'__');
 my @keys = grep !is($_, '-v'), sort keys %data;
 my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
 $hash = fast_hash("$data{$_}|$hash") for @keys;
-$hash;
+fast_hash("$global_data|$hash");
 
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
