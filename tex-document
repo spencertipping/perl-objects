@@ -1700,7 +1700,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               b23425ebecdd41cce4007aae410aa36e
+parent::object               0a72cc3bd03584f6fb276f272ac3d2d0
 
 __
 meta::resource('header', <<'__');
