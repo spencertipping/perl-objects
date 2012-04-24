@@ -878,19 +878,20 @@ $SIG{'INT'} = sub {snapshot(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::warning("unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+my $function_name = shift(@ARGV) || $default_action;
+my @effective_argv = @ARGV;
 
-around_hook('main-function', $function_name, @ARGV, sub {
+unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+
+around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
-    chomp(my $result = &$function_name(@ARGV));
+    chomp(my $result = &$function_name(@effective_argv));
     print "$result\n" if $result})});
 
 save() unless state() eq $transient{initial};
 
-END {
-  enable();
-}
+END {enable()}
+
 __
 meta::internal_function('invoke_editor_on', <<'__');
 my ($data, %options) = @_;
