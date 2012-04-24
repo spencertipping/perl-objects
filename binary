@@ -912,19 +912,20 @@ $SIG{'INT'} = sub {snapshot(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::warning("unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+my $function_name = shift(@ARGV) || $default_action;
+my @effective_argv = @ARGV;
 
-around_hook('main-function', $function_name, @ARGV, sub {
+unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+
+around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
-    chomp(my $result = &$function_name(@ARGV));
+    chomp(my $result = &$function_name(@effective_argv));
     print "$result\n" if $result})});
 
 save() unless state() eq $transient{initial};
 
-END {
-  enable();
-}
+END {enable()}
+
 __
 meta::internal_function('invoke_editor_on', <<'__');
 my ($data, %options) = @_;
@@ -1193,7 +1194,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          3e290fdcb353c6f842eb5a40f2e575f8
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       f31f2945a19a668d92505f114ab29c78
+internal_function::internal::main       12c18f86d766ffb67b8dc0572985bf98
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
@@ -1277,9 +1278,9 @@ function::rd                            2adb16d7e819d2e87a27201744a581e7
 function::reload                        1589f4cf8374e0011991cb8907afca3e
 function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::rmparent                      fc2884910a6939a47898a778f277332c
-function::save                          778c0e1043b9c6c96fb8f266f8061624
+function::save                          3cbe5c3735ee4ff99cb60ccf68bc8b91
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
-function::serialize                     e08b4ed30b5a27e7d5b3cbce5901996f
+function::serialize                     a97c7391c635a93b0a710d10eb8cb3cd
 function::serialize-single              8bac97e94a1162947d274421053387b0
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           7b2685a4041c25bc495816e472bdace5
@@ -1360,7 +1361,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               0a72cc3bd03584f6fb276f272ac3d2d0
+parent::object               6cad1231e80fb7d26a395611a4932643
 
 __
 meta::retriever('bin', <<'__');

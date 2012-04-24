@@ -983,19 +983,20 @@ $SIG{'INT'} = sub {snapshot(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
-my $function_name = shift(@ARGV) || $default_action || 'usage';
-terminal::warning("unknown action: '$function_name'") and $function_name = 'usage' unless $externalized_functions{$function_name};
+my $function_name = shift(@ARGV) || $default_action;
+my @effective_argv = @ARGV;
 
-around_hook('main-function', $function_name, @ARGV, sub {
+unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+
+around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
-    chomp(my $result = &$function_name(@ARGV));
+    chomp(my $result = &$function_name(@effective_argv));
     print "$result\n" if $result})});
 
 save() unless state() eq $transient{initial};
 
-END {
-  enable();
-}
+END {enable()}
+
 __
 meta::internal_function('invoke_editor_on', <<'__');
 my ($data, %options) = @_;
@@ -1292,7 +1293,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          3e290fdcb353c6f842eb5a40f2e575f8
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       f31f2945a19a668d92505f114ab29c78
+internal_function::internal::main       12c18f86d766ffb67b8dc0572985bf98
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
