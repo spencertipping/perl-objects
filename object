@@ -597,8 +597,8 @@ $delimiter = substr($delimiter, 0, $chars);
 __
 meta::function('sh', 'system(@_);');
 meta::function('shb', <<'__');
-# Backgrounded shell job.
-exec(@_) unless fork;
+# Backgrounded shell.
+with_fork(@_, \&::sh);
 
 __
 meta::function('shell', <<'__');
@@ -1023,6 +1023,31 @@ my $result = eval {&$f($name)};
 terminal::warning("$@ when running with_exported()") if $@;
 unlink $name;
 $result;
+__
+meta::internal_function('with_fork', <<'__');
+my (@args) = @_;
+my $f = pop @args;
+
+return process->new($child_pid) if my $child_pid = fork;
+
+# This is the child process. Disable saving to prevent contention, and then
+# exit with the given status code.
+*::save = sub {};
+exit &$f(@args);
+
+__
+meta::library('process', <<'__');
+package process;
+
+sub new  {my ($class, $pid) = @_; bless \$pid, $class}
+sub kill {my ($self, $signal) = @_; ::kill $signal // 'KILL', $$self; $self->wait()}
+sub term {my ($self) = @_; $self->kill('TERM')}
+sub int  {my ($self) = @_; $self->kill('INT')}
+sub stop {my ($self) = @_; $self->kill('STOP')}
+sub cont {my ($self) = @_; $self->kill('CONT')}
+
+sub wait {my ($self) = @_; ::wait($$self)}
+
 __
 meta::library('shell', <<'__');
 # Functions for shell parsing and execution.
