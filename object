@@ -103,6 +103,19 @@ meta::define_form 'alias', sub {
   };
 };
 __
+meta::meta('type::alias_lambda', <<'__');
+meta::configure 'alias_lambda', inherit => 0;
+meta::define_form 'alias_lambda', sub {
+  my ($name, $value) = @_;
+  meta::externalize $name, "alias_lambda::$name", sub {
+    # Can't pre-tokenize because shell::tokenize doesn't exist until the library::
+    # namespace has been evaluated (which will be after alias_lambda::).
+    my @args = shell::tokenize(@_);
+    shell::run(map /^\$(\d+)$/ ? $args[$1] : /^\@_$/ ? @args : $_, shell::tokenize($value));
+  };
+};
+
+__
 meta::meta('type::bootstrap', <<'__');
 # Bootstrap attributes don't get executed. The reason for this is that because
 # they are serialized directly into the header of the file (and later duplicated
@@ -567,6 +580,16 @@ meta::function('save-state', <<'__');
 my ($state_name) = @_;
 around_hook('save-state', $state_name, sub {
   associate("state::$state_name", current_state(), execute => 1)});
+
+__
+meta::function('select', <<'__');
+# Runs the command on each attribute selected. Selection is done using criteria
+# that are passed into select_keys().
+
+my ($options, @command) = separate_options(@_);
+my @keys = select_keys(%$options);
+
+
 
 __
 meta::function('serialize', <<'__');
