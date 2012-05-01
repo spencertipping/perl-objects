@@ -382,7 +382,7 @@ meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($options, @names) = separate_options(@_);
 
-@names = select_keys('--criteria' => "^$$options{'--prefix'}.*\\W" . join('.*', @names), %$options) if $$options{'--prefix'};
+@names = select_keys('--criteria' => "^$$options{'--prefix'}.*" . join('.*', @names), %$options) if $$options{'--prefix'};
 
 my ($name, @others) = @names;
 die "cannot edit multiple attributes simultaneously (others are @others)" if @others;
