@@ -600,7 +600,7 @@ my %comments_for_extension =
      vim   "      elisp ;     bas  '     ada  --    asm  ;   awk #    bc   #    boo #   tex  %         fss  (*,*)  erl %
      scala //     hx    //    io   //    j    NB.   lua  --  n   //   m    %    php //  sql  --        pov  //     pro %
      r     #      self  ","   tcl  #     texi @c    tk   #   csh #    vala //   vbs '   v    /*,*/     vhdl --     ss  ;;;
-     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #|;
+     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   canard nb[,]|;
 
 # No extension suggests a shebang line, which generally requires # to denote a comment.
 $comments_for_extension{''} = '#';
