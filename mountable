@@ -388,7 +388,7 @@ die "cannot edit multiple attributes simultaneously (others are @others)" if @ot
 my $extension = extension_for($name);
 
 die "$name is virtual or does not exist" unless exists $data{$name};
-die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $options{'-f'};
+die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %options, attribute => $name, extension => $extension), execute => 1)});
@@ -1216,7 +1216,7 @@ function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          ac12f5f65211caf9b14ab1054004c8bc
+function::edit                          5778be977436f7245cf990bf95b6da34
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::export                        2374cd1dbf7616cb38cafba4e171075d

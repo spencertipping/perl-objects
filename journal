@@ -427,7 +427,7 @@ die "cannot edit multiple attributes simultaneously (others are @others)" if @ot
 my $extension = extension_for($name);
 
 die "$name is virtual or does not exist" unless exists $data{$name};
-die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $options{'-f'};
+die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %options, attribute => $name, extension => $extension), execute => 1)});
@@ -1303,7 +1303,7 @@ meta::parent('/home/spencertipping/bin/notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    60965719e80fb7d26024ffe358694229
+parent::object    95fa6ef5120e9a213ad9781a31d69584
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1322,7 +1322,7 @@ function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          ac12f5f65211caf9b14ab1054004c8bc
+function::edit                          5778be977436f7245cf990bf95b6da34
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::export                        2374cd1dbf7616cb38cafba4e171075d
@@ -1446,7 +1446,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         3fc514fc89f90342562105930635d453
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  95fa6ef5120e9a213ad9781a31d69584
+parent::/home/spencertipping/bin/object  208e4b12afe64a14bfd8cacf04181e14
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1464,8 +1464,9 @@ function::clone                         bb42e04e10a8e54e88786b6fbc4fb213
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
+function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          beae8b1d7292e2ce2913199ff32f2501
+function::edit                          ac12f5f65211caf9b14ab1054004c8bc
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::export                        2374cd1dbf7616cb38cafba4e171075d
@@ -1494,7 +1495,7 @@ function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
 function::serialize                     a97c7391c635a93b0a710d10eb8cb3cd
 function::serialize-single              8bac97e94a1162947d274421053387b0
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
-function::shb                           7b2685a4041c25bc495816e472bdace5
+function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
 function::snapshot                      56939a47f2758421669641e15ebd66eb
@@ -1521,7 +1522,7 @@ internal_function::exported             ae35afef7d4762f2818aee5872c75be0
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
-internal_function::file::write          3e290fdcb353c6f842eb5a40f2e575f8
+internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
 internal_function::internal::main       12c18f86d766ffb67b8dc0572985bf98
@@ -1538,7 +1539,10 @@ internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
+internal_function::with_cwd             928bae9caa3cb212f0c5c977ba55166c
 internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
+internal_function::with_fork            b252464d1efd12dc4a5ee6890076b6a9
+library::process                        9fe4e2320eae9f6661a6eb6e777fb6ca
 library::shell                          f561500cf223df1bf6daf43af93577a5
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
