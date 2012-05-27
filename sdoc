@@ -1465,7 +1465,7 @@ __
 meta::retriever('sdoc', 'exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]") : undef;');
 meta::retriever('sdoc-packed', <<'__');
 return undef unless $_[0] =~ /^sdoc-packed::(.*)$/;
-exists $data{$1} ? sdoc_packed($1) : undef;
+exists $data{"sdoc::$1"} ? sdoc_packed("sdoc::$1") : undef;
 
 __
 meta::retriever('sdocp', <<'__');
