@@ -1303,7 +1303,7 @@ meta::parent('/home/spencertipping/bin/notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    95fa6ef5120e9a213ad9781a31d69584
+parent::object    208e4b12afe64a14bfd8cacf04181e14
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1466,7 +1466,7 @@ function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          ac12f5f65211caf9b14ab1054004c8bc
+function::edit                          5778be977436f7245cf990bf95b6da34
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::export                        2374cd1dbf7616cb38cafba4e171075d
