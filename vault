@@ -1102,14 +1102,13 @@ map map(select_keys('--criteria' => "$prefix$_"), grep length && ! /^\s*#/, spli
 
 __
 meta::internal_function('read_password', <<'__');
-use Term::ReadKey;
 my ($prompt) = @_;
 
-ReadMode('noecho');
+sh('stty -echo');
 print $prompt;
-my $result = ReadLine(0);
+my $result = <STDIN>;
 print "\n";
-ReadMode(0);
+sh('stty echo');
 
 $result;
 
@@ -1317,7 +1316,7 @@ internal_function::encrypt               78c174a2fd889bd27007daa244aa1a18
 internal_function::encryption_key        4e2570581b3bea4236f34f7cc4f756a6
 internal_function::iterated_hash         45e6bf146d664a5b3020f34fc8c54151
 internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
-internal_function::read_password         3fc514fc89f90342562105930635d453
+internal_function::read_password         941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
 parent::/home/spencertipping/bin/object  208e4b12afe64a14bfd8cacf04181e14

@@ -1077,14 +1077,13 @@ map map(select_keys('--criteria' => "$prefix$_"), grep length && ! /^\s*#/, spli
 
 __
 meta::internal_function('read_password', <<'__');
-use Term::ReadKey;
 my ($prompt) = @_;
 
-ReadMode('noecho');
+sh('stty -echo');
 print $prompt;
-my $result = ReadLine(0);
+my $result = <STDIN>;
 print "\n";
-ReadMode(0);
+sh('stty echo');
 
 $result;
 
