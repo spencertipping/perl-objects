@@ -821,7 +821,7 @@ $result;
 __
 meta::function('view-contents', <<'__');
 with_contents(sub {
-  with_exported('data::contents', sub {sh("view $_[0]")})});
+  with_exported('data::contents', sub {sh("vim -R $_[0]")})});
 
 __
 meta::indicator('cc', 'length ::retrieve(\'data::current-continuation\') ? "\\033[1;36mcc\\033[0;0m" : \'\';');
