@@ -393,6 +393,7 @@ around_hook('create', $name, $value, sub {
   return edit($name) if exists $data{$name};
   associate($name, defined $value ? $value : '');
   edit($name) unless defined $value});
+
 __
 meta::function('current-state', 'serialize(\'-pS\');');
 meta::function('cwd', <<'__');
@@ -403,19 +404,16 @@ __
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($options, @names) = separate_options(@_);
-
 @names = select_keys('--criteria' => "^$$options{'--prefix'}.*" . join('.*', @names), %$options) if $$options{'--prefix'};
 
 my ($name, @others) = @names;
 die "cannot edit multiple attributes simultaneously (others are @others)" if @others;
-
-my $extension = extension_for($name);
-
 die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
+my $extension = extension_for($name);
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} // '', %options, attribute => $name, extension => $extension), execute => 1)});
+  associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
 
 save() unless $data{'data::edit::no-save'};
 '';
@@ -1191,11 +1189,11 @@ function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
 function::child                         f5764adf0b4e892f147a9b6b68d4816f
 function::clone                         bb42e04e10a8e54e88786b6fbc4fb213
 function::cp                            3fe69d1b58d90045ad520048977538c4
-function::create                        3010d55f4dfa59a998742e07823ed54d
+function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          5778be977436f7245cf990bf95b6da34
+function::edit                          735dbdece3998a4478bec3b7bdc04f03
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::export                        2374cd1dbf7616cb38cafba4e171075d
