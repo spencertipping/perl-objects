@@ -617,8 +617,9 @@ my ($filename, $specified_extension) = @_;
 # we want to look up the extension in the transients table. The other is that
 # it's a real filename.
 my ($extension) = $specified_extension || extension_for($filename) || ($filename =~ /\.sdoc$/io ? $filename =~ /\.(\w+)\.sdoc$/igo : $filename =~ /\.(\w+)$/igo);
+$extension =~ s/^\.//o;
 
-my ($start, $end) = split /,/o, $comments_for_extension{lc($extension)} // $comments_for_extension{''} // '#';
+my ($start, $end) = split /,/o, $comments_for_extension{lc $extension} // $comments_for_extension{''} // '#';
 
 join '', map(is_code($_) || is_blank($_) ? ($_ =~ /^\s*c\n(.*)$/so ? $1 : $_) : comment($_, $start, $end), paragraphs retrieve($filename)),
          "\n" . comment($generated_string, $start, $end) . "\n";
@@ -1457,7 +1458,10 @@ return undef unless $_[0] =~ /^perl::(.*)$/;
 eval $1;
 
 __
-meta::retriever('sdoc', 'exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]") : undef;');
+meta::retriever('sdoc', <<'__');
+exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]", extension_for($_[0])) : undef;
+
+__
 meta::retriever('sdoc-packed', <<'__');
 return undef unless $_[0] =~ /^sdoc-packed::(.*)$/;
 exists $data{"sdoc::$1"} ? sdoc_packed("sdoc::$1") : undef;
