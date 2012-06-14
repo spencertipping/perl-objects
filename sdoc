@@ -609,14 +609,15 @@ sub is_code    {map /^\s*[^A-Z\|\s]/o, @_}
 sub is_blank   {map /^\n/o, @_}
 sub comment    {my ($text, $s, $e) = @_; join "\n", map("$s $_" . (length $e ? " $e" : ''), split /\n/, $text)}
 
-sub paragraphs {map split(/((?:\n\h*){2,})/, $_), @_}
+sub paragraphs {map split(/(\n(?:\h*\n)+)/, $_), @_}
 
 my ($filename, $specified_extension) = @_;
+my $logical_filename = $filename =~ /^sdoc::(.*)$/ ? $1 : $filename;
 
 # Two possibilities here. One is that the filename is an attribute, in which case
 # we want to look up the extension in the transients table. The other is that
 # it's a real filename.
-my ($extension) = $specified_extension || extension_for($filename) || ($filename =~ /\.sdoc$/io ? $filename =~ /\.(\w+)\.sdoc$/igo : $filename =~ /\.(\w+)$/igo);
+my $extension = $specified_extension || extension_for($logical_filename) || ($filename =~ /\.sdoc$/io ? $filename =~ /\.(\w+)\.sdoc$/igo : $filename =~ /\.(\w+)$/igo)[0];
 $extension =~ s/^\.//o;
 
 my ($start, $end) = split /,/o, $comments_for_extension{lc $extension} // $comments_for_extension{''} // '#';
