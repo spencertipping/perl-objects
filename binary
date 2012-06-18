@@ -388,7 +388,7 @@ my $repetition = sub {my $count = $next; $next = 1; $count};
 my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 1)                      for 0 .. 7; chr($total) x &$repetition()};
 my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
 my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
-my $place      = sub {die sprintf "incorrect address at place %h (actual is %h)", $_[0], $offset unless $offset == hex $_[0]; ''};
+my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
