@@ -1464,6 +1464,7 @@ syn case match
 
 syn match bt_line_comment       /#.*/
 syn match bt_binary_octet       /-[01]\{8\}/
+syn match bt_octal_byte         /o[0-3][0-7]\{2\}/
 syn match bt_hex_octet          /[0-9a-f]\{2\}/
 syn match bt_repetition_prefix  -/\d\+/-
 syn match bt_address            -@[0-9a-f]\+-
@@ -1471,6 +1472,7 @@ syn match bt_place              -@![0-9a-f]\+-
 
 hi link bt_line_comment      Comment
 hi link bt_binary_octet      Keyword
+hi link bt_octal_byte        Keyword
 hi link bt_hex_octet         Type
 hi link bt_repetition_prefix Preproc
 hi link bt_address           Preproc
