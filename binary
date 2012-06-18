@@ -393,7 +393,7 @@ my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)"
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#(-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@!?[0-9a-f]{2}|/\d+/)#, $text;
+my @tokens = split m#(-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@!?[0-9a-f]+|/\d+/)#, $text;
 &$emit(/^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/     ? &$until($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   : '') for @tokens;
