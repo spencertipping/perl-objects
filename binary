@@ -376,7 +376,7 @@ for (grep length, @_) {
 __
 meta::function('compile-binary', <<'__');
 # Compiles binary-text to binary output.
-my $text = join '', map split(/\s+/), split /#.*/m, retrieve($_[0]);
+my $text = join ' ', map split(/\s+/), split /#.*/m, retrieve($_[0]);
 my $hex_letters = '0123456789abcdef';
 
 my @output;
