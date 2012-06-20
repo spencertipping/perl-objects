@@ -385,6 +385,7 @@ my $offset     = 0;
 my $next       = 1;
 my $repeat     = sub {$next = $_[0]; ''};                       # Repeaters have no output
 my $repetition = sub {my $count = $next; $next = 1; $count};
+my $ascii      = sub {$_[0]};
 my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 1)                      for 0 .. 7; chr($total) x &$repetition()};
 my $octal      = sub {my $total = 0; $total = ($total << 3) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 2; chr($total) x &$repetition()};
 my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
@@ -393,8 +394,9 @@ my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)"
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#(-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@!?[0-9a-f]+|/\d+/)#, $text;
-&$emit(/^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
+my @tokens = split m#('\S+|-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@!?[0-9a-f]+|/\d+/)#, $text;
+&$emit(/^'(\S+)/        ? &$ascii($1)  :
+       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/     ? &$until($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   : '') for @tokens;
 
@@ -1469,6 +1471,7 @@ syn match bt_hex_octet          /[0-9a-f]\{2\}/
 syn match bt_repetition_prefix  -/\d\+/-
 syn match bt_address            -@[0-9a-f]\+-
 syn match bt_place              -@![0-9a-f]\+-
+syn match bt_ascii              -'\S\+-
 
 hi link bt_line_comment      Comment
 hi link bt_binary_octet      Keyword
@@ -1477,6 +1480,7 @@ hi link bt_hex_octet         Type
 hi link bt_repetition_prefix Preproc
 hi link bt_address           Preproc
 hi link bt_place             Identifier
+hi link bt_ascii             String
 
 __
 internal::main();
