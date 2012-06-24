@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: cf26735edc11cfcc93f89bf3d966816d
+# state: 08b45ce7e7b517d129c8f34c8aaf0252
 # id:    99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -703,6 +703,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
+      my $target_filename = qx(which $target) || $target;
       my %parent_metadata = %{metadata_from($target)};
       terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
