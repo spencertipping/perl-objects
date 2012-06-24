@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  fee65789435e5e79b5014e5a952ed0d3
-# istate: f4a1b668931506488d873acc9fd2fe6c
+# state:  35532f683ce77cfa4688d037480f5249
+# istate: 0e2d5b0e931506488d873acc9fd2fe6c
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -401,13 +401,13 @@ my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 
 my $octal      = sub {my $total = 0; $total = ($total << 3) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 2; chr($total) x &$repetition()};
 my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
 my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
-my $debug      = sub {printf STDERR "$_[0]: 0x%x\n", $offset};
+my $debug      = sub {printf STDERR "%s: 0x%x\n", $_[0], $offset; ''};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#('\S+|-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@[!?]?[0-9a-f]+|/\d+/)#, $text;
-&$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\w+)/         ? &$debug($1) :
+my @tokens = split m#('\S+|-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@\?\S+|@!?[0-9a-f]+|/\d+/)#, $text;
+&$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\S+)/         ? &$debug($1) :
        /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/     ? &$until($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   : '') for @tokens;
