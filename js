@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: 126131e3b40194b81dda68d7deb43d50
-# id:    246bc56c88e8e8daae3737dbb16a2a2c
+# state:  d2f4f0c48a0d844bb6a4aa41621515ca
+# istate: d32194961eb5be381a79bc2db1e661bf
+# id:     246bc56c88e8e8daae3737dbb16a2a2c
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -236,8 +237,9 @@ __
 meta::bootstrap('initialization', <<'__');
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: __STATE
-# id:    __OBJECT_ID
+# state:  __state
+# istate: __istate
+# id:     __id
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -305,7 +307,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', '/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 08b45ce7e7b517d129c8f34c8aaf0252');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e b2ba018d085d82ab1b7d5993c7abe2db');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -415,10 +417,12 @@ meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}))
 meta::function('expanded-bootstrap', <<'__');
 my $bootstrap_text = retrieve('bootstrap::initialization');
 my $state          = state();
+my $istate         = state('-iG');
 my $object_id      = identity();
 
-$bootstrap_text =~ s/__STATE/$state/g;
-$bootstrap_text =~ s/__OBJECT_ID/$object_id/g;
+$bootstrap_text =~ s/__state/$state/g;
+$bootstrap_text =~ s/__istate/$istate/g;
+$bootstrap_text =~ s/__id/$object_id/g;
 
 $bootstrap_text;
 
@@ -666,10 +670,14 @@ chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
 meta::function('state', <<'__');
-my @keys = grep !is($_, '-v'), sort keys %data;
-my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
-$hash = fast_hash("$data{$_}|$hash") for @keys;
-fast_hash("$global_data|$hash");
+my ($options, @attributes) = separate_options(@_);
+@attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
+@attributes = grep is($_, '-iu'), @attributes if $$options{'-i'};
+
+my $hash = fast_hash(fast_hash(scalar @attributes) . join '|', @attributes);
+$hash = fast_hash("$data{$_}|$hash") for @attributes;
+
+$$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
@@ -711,10 +719,10 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{state};
+      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       ++$already_seen{$identity};
-      $parent_state_cache{$identity} = $parent_metadata{state} || join '', qx($target state);
+      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -1178,7 +1186,7 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               61927181e1f025fa36664f2281958c5c
+bootstrap::initialization               170e6ce82d2db886e908918cb132bb4e
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
@@ -1195,7 +1203,7 @@ function::disable                       53b449708cc2ffdefa352e53bb7d847d
 function::edit                          735dbdece3998a4478bec3b7bdc04f03
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
-function::expanded-bootstrap            28a83f9bd25516f5136b688ef9f2ef57
+function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1
 function::export                        2374cd1dbf7616cb38cafba4e171075d
 function::extern                        1290a5223e2824763eecfb3a54961eff
 function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
@@ -1227,11 +1235,11 @@ function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
 function::snapshot                      56939a47f2758421669641e15ebd66eb
-function::state                         88bc24e732c55aac68a103eab96b9e48
+function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   7292f7f518264d78da19617130d47a75
+function::update-from                   008cd77827f54dc10d2dc2ba4d6372d1
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
