@@ -742,9 +742,10 @@ my $hook = shift @_;
 my $f    = pop @_;
 
 hook("before-$hook", @_);
-my $result = &$f(@_);
+my @result = &$f(@_);
 hook("after-$hook", @_);
-$result;
+wantarray ? @result : $result[0];
+
 __
 meta::internal_function('associate', <<'__');
 my ($name, $value, %options) = @_;
