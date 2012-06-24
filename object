@@ -1,7 +1,8 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: 08b45ce7e7b517d129c8f34c8aaf0252
-# id:    99aeabc9ec7fe80b1b39f5e53dc7e49e
+# state:  d0f58619c178aed2415b76a627c90357
+# istate: fad95290b11148ec66a0831c95ca1496
+# id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -232,8 +233,9 @@ __
 meta::bootstrap('initialization', <<'__');
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: __STATE
-# id:    __OBJECT_ID
+# state:  __state
+# istate: __istate
+# id:     __id
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -412,10 +414,12 @@ meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}))
 meta::function('expanded-bootstrap', <<'__');
 my $bootstrap_text = retrieve('bootstrap::initialization');
 my $state          = state();
+my $istate         = state('-iG');
 my $object_id      = identity();
 
-$bootstrap_text =~ s/__STATE/$state/g;
-$bootstrap_text =~ s/__OBJECT_ID/$object_id/g;
+$bootstrap_text =~ s/__state/$state/g;
+$bootstrap_text =~ s/__istate/$istate/g;
+$bootstrap_text =~ s/__id/$object_id/g;
 
 $bootstrap_text;
 
@@ -663,10 +667,14 @@ chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
 meta::function('state', <<'__');
-my @keys = grep !is($_, '-v'), sort keys %data;
-my $hash = fast_hash(fast_hash(scalar @keys) . join '|', @keys);
-$hash = fast_hash("$data{$_}|$hash") for @keys;
-fast_hash("$global_data|$hash");
+my ($options, @attributes) = separate_options(@_);
+@attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
+@attributes = grep is($_, '-iu'), @attributes if $$options{'-i'};
+
+my $hash = fast_hash(fast_hash(scalar @attributes) . join '|', @attributes);
+$hash = fast_hash("$data{$_}|$hash") for @attributes;
+
+$$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
