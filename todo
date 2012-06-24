@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  6bc6b19f0c6b470aeb08a761ba2da9c6
-# istate: 5f3019addf2556234464efc195af236b
+# state:  2fbc60e2ce45a9125a422dcc907c57cc
+# istate: 88ee1ed16d57051a48cc2b09f46a78ad
 # id:     62bc8a83ef5d4941cd2c1cdfb57a0320
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -334,8 +334,8 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', <<'__');
-sdoc a1e8480e579614c01dabeecf0f963bcc
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
+sdoc a1e8480e579614c01dabeecf0f963bcc
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
@@ -1406,23 +1406,6 @@ __
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('sdoc', <<'__');
-function::sdoc            71fa4ee3ae6283a87706e74f9de1de40
-function::sdoc-html       b23152b3f5be696e5bae842ec43fc5a4
-function::sdoc-markdown   a35a6441dd750466f2d0e636bee2b382
-function::sdoc-packed     8ec4975fca7228708baae6ccd241bdbf
-function::sdocp           c3d738d982ba87418a298ff58478a85b
-meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
-meta::type::slibrary      95474943c4a5f8ff17d3cf66ddb7c386
-parent::object            8f920c8ec38cb39e732cbdcc3abc7f93
-retriever::code-sdoc      03b87ff8d1ecf7594db9ca0669fc69a1
-retriever::html-sdoc      8ab7705d03276945b23a71677153233c
-retriever::markdown-sdoc  67c34ba8223ec36a3ae018e411354db2
-retriever::sdoc           75181c270d3a3de6500e5ccdb8208f65
-retriever::sdoc-packed    f7116f96adf2c748ac1991f4d7c1792b
-retriever::sdocp          fcfcf3a7de79d7d863402b9ccfcac3c4
-
-__
 meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               170e6ce82d2db886e908918cb132bb4e
@@ -1546,6 +1529,23 @@ retriever::global                       4fe8df0cca548075169968772843a156
 retriever::id                           4da6080168d32445150cc4200af7af6e
 retriever::object                       c7633990b4e01bdc783da7e545799f4f
 retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
+
+__
+meta::parent('sdoc', <<'__');
+function::sdoc            71fa4ee3ae6283a87706e74f9de1de40
+function::sdoc-html       b23152b3f5be696e5bae842ec43fc5a4
+function::sdoc-markdown   a35a6441dd750466f2d0e636bee2b382
+function::sdoc-packed     8ec4975fca7228708baae6ccd241bdbf
+function::sdocp           c3d738d982ba87418a298ff58478a85b
+meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
+meta::type::slibrary      95474943c4a5f8ff17d3cf66ddb7c386
+parent::object            8f920c8ec38cb39e732cbdcc3abc7f93
+retriever::code-sdoc      03b87ff8d1ecf7594db9ca0669fc69a1
+retriever::html-sdoc      8ab7705d03276945b23a71677153233c
+retriever::markdown-sdoc  67c34ba8223ec36a3ae018e411354db2
+retriever::sdoc           75181c270d3a3de6500e5ccdb8208f65
+retriever::sdoc-packed    f7116f96adf2c748ac1991f4d7c1792b
+retriever::sdocp          fcfcf3a7de79d7d863402b9ccfcac3c4
 
 __
 meta::parent('vim-highlighters', <<'__');
