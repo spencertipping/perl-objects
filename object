@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: 5710238400772a837790592ed64d7a8c
+# state: cf26735edc11cfcc93f89bf3d966816d
 # id:    99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -527,7 +527,7 @@ my ($filename) = @_;
 my %metadata;
 
 # Not using file::read because we only need the first few lines.
-open my($fh), '<', $filename or die "failed to open $filename: $!";
+open my($fh), '<', $filename or return {};
 while (<$fh>) {
   /^#\s*(\w+):\s*(.*)$/ and $metadata{$1} = $2;
   last unless /^#/;
