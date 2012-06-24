@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  6ca3a5ca6d4f8263a2d4d3ea269b50f7
-# istate: 9bf669fbe8d4366f825fed7562b44c27
+# state:  784fcf11fa0bd04b4041825f5384fe75
+# istate: b31c8450cb7b267757347e4f9931b250
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -311,7 +311,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', '/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e5ac795267a874f03f04a496d7936d15');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 42a34e671aa402aed1fe439a175da5a1');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -709,11 +709,12 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   @targets = (@known_targets, @unknown_targets);
 
   my $save_state        = $$options{'-s'} || $$options{'--save'};
+  my $no_state          = $$options{'-S'} || $$options{'--no-state'};
   my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  save_state('before-update');
+  save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -755,10 +756,11 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
                  terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
-                 rm('state::before-update') unless $save_state}
-  elsif ($force) {hook('update-from-failed', $options, @targets);
-                  terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                    'Run "load-state before-update" to undo the update and return to a working state.')}
+                 rm('state::before-update') unless $no_state || $save_state}
+  elsif ($force || $no_state) {hook('update-from-failed', $options, @targets);
+                               terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
+                                                 $no_state ? 'You should attempt to repair this object since no prior state was saved.'
+                                                           : 'Run "load-state before-update" to undo the update and return to a working state.')}
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
         terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
@@ -1243,7 +1245,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   062be1e05bb28bc705cd9c5ec864886b
+function::update-from                   465ce71e4e93d702ae59b942bc9864ce
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

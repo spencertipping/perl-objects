@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  b12431d7fe4cb6ab500d26cb5cf7b568
-# istate: a2ea7b49a147347960059cb5105374c1
+# state:  209da5182758686f3ca834c346937d06
+# istate: 4ce265bd9ebf2747e227c67b57e0237a
 # id:     9837287d488ed173dd183e0b154943b4
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -342,9 +342,9 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b 47c0fb0ffd5cbc3ab5c263164715df6b
-99aeabc9ec7fe80b1b39f5e53dc7e49e e5ac795267a874f03f04a496d7936d15
-a9e5975593ed5d90d943ad98405c71e5 e2ecc7af1bdab012d63212cbd4bba546
+6a38f6fbcf92173ff757305a534a002b 2d3f63abcfcbe8e3680d497ee0ac5d61
+99aeabc9ec7fe80b1b39f5e53dc7e49e 42a34e671aa402aed1fe439a175da5a1
+a9e5975593ed5d90d943ad98405c71e5 367da873804f941ddb984c4885f865d4
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -807,11 +807,12 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   @targets = (@known_targets, @unknown_targets);
 
   my $save_state        = $$options{'-s'} || $$options{'--save'};
+  my $no_state          = $$options{'-S'} || $$options{'--no-state'};
   my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
-  save_state('before-update');
+  save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
     dangerous("updating from $target", sub {
@@ -853,10 +854,11 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
                  terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
-                 rm('state::before-update') unless $save_state}
-  elsif ($force) {hook('update-from-failed', $options, @targets);
-                  terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
-                                    'Run "load-state before-update" to undo the update and return to a working state.')}
+                 rm('state::before-update') unless $no_state || $save_state}
+  elsif ($force || $no_state) {hook('update-from-failed', $options, @targets);
+                               terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
+                                                 $no_state ? 'You should attempt to repair this object since no prior state was saved.'
+                                                           : 'Run "load-state before-update" to undo the update and return to a working state.')}
   else {hook('update-from-failed', $options, @targets);
         terminal::error('Verification failed after the upgrade was complete.');
         terminal::info("$0 has been reverted to its pre-upgrade state.", "If you want to upgrade and keep the failure state, then run 'update-from $target --force'.");
@@ -1354,7 +1356,7 @@ meta::parent('/home/spencertipping/bin/notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    5912227739653d4e3d729a791aeff13f
+parent::object    e0959b6b2c8f0b4138e9acac4ca9d1d3
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1412,7 +1414,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   062be1e05bb28bc705cd9c5ec864886b
+function::update-from                   465ce71e4e93d702ae59b942bc9864ce
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1499,7 +1501,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  2b5682ecb895b257b18100417d4f38e0
+parent::/home/spencertipping/bin/object  e0959b6b2c8f0b4138e9acac4ca9d1d3
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1558,7 +1560,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
+function::update-from                   465ce71e4e93d702ae59b942bc9864ce
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
