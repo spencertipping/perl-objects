@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  bd15decf45ab0133f3911a96ce7c3c37
-# istate: cf49fa39908dc8580a1ee5d9234a2069
+# state:  72fb8e021926c6f1e1169605b51c321c
+# istate: 2f5cf18207a9eabbad297d814b6fe556
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -402,12 +402,13 @@ my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 
 my $octal      = sub {my $total = 0; $total = ($total << 3) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 2; chr($total) x &$repetition()};
 my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
 my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
+my $debug      = sub {printf STDERR "$_[0]: 0x%x\n", $offset};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#('\S+|-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@!?[0-9a-f]+|/\d+/)#, $text;
-&$emit(/^'(\S+)/        ? &$ascii($1)  :
+my @tokens = split m#('\S+|-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@[!?]?[0-9a-f]+|/\d+/)#, $text;
+&$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\w+)/         ? &$debug($1) :
        /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/     ? &$until($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   : '') for @tokens;
@@ -1535,6 +1536,7 @@ syn match bt_hex_octet          /[0-9a-f]\{2\}/
 syn match bt_repetition_prefix  -/\d\+/-
 syn match bt_address            -@[0-9a-f]\+-
 syn match bt_place              -@![0-9a-f]\+-
+syn match bt_debug              -@?\w\+-
 syn match bt_ascii              -'\S\+-
 
 hi link bt_line_comment      Comment
@@ -1544,6 +1546,7 @@ hi link bt_hex_octet         Type
 hi link bt_repetition_prefix Preproc
 hi link bt_address           Preproc
 hi link bt_place             Identifier
+hi link bt_debug             Comment
 hi link bt_ascii             String
 
 __
