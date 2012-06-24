@@ -417,7 +417,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', <<'__');
-./sdoc a1e8480e579614c01dabeecf0f963bcc
+sdoc a1e8480e579614c01dabeecf0f963bcc
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
@@ -1548,7 +1548,7 @@ __
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('./sdoc', <<'__');
+meta::parent('sdoc', <<'__');
 function::sdoc            71fa4ee3ae6283a87706e74f9de1de40
 function::sdoc-html       b23152b3f5be696e5bae842ec43fc5a4
 function::sdoc-markdown   a35a6441dd750466f2d0e636bee2b382
