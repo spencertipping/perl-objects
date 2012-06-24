@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: fd9d493cf6642ed54d2e8d5df241835a
+# state: 17b8d8ce7ac5f59f6badaf66921d9f64
 # id:    3df9de24bc973010ed0e255636d90f3c
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -11,7 +11,7 @@
 # it to spencer@spencertipping.com and I'll see if I can figure out what it
 # does.
 
-# For the benefit of HTML viewers (this is hack):
+# For the benefit of HTML viewers (this is a hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -243,7 +243,7 @@ meta::bootstrap('initialization', <<'__');
 # it to spencer@spencertipping.com and I'll see if I can figure out what it
 # does.
 
-# For the benefit of HTML viewers (this is hack):
+# For the benefit of HTML viewers (this is a hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -301,6 +301,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', '/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 08b45ce7e7b517d129c8f34c8aaf0252');
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
 
@@ -523,6 +524,21 @@ join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @e
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
 
 __
+meta::function('metadata-from', <<'__');
+my ($filename) = @_;
+my %metadata;
+
+# Not using file::read because we only need the first few lines.
+open my($fh), '<', $filename or return {};
+while (<$fh>) {
+  /^#\s*(\w+):\s*(.*)$/ and $metadata{$1} = $2;
+  last unless /^#/;
+}
+close $fh;
+
+\%metadata;
+
+__
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -669,7 +685,8 @@ meta::function('update-from', <<'__');
 
 around_hook('update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
-  my %parent_id_cache = cache('parent-identification');
+  my %parent_id_cache    = cache('parent-identification');
+  my %parent_state_cache = cache('parent-state');
   my %already_seen;
 
   @targets or return;
@@ -688,9 +705,15 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
-      my $identity = $parent_id_cache{$target} ||= join '', qx($target identity);
-      next if $already_seen{$identity};
-      $already_seen{$identity} = 1;
+      my $target_filename = qx(which $target) || $target;
+      my %parent_metadata = %{metadata_from($target)};
+      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+
+      my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
+      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{state};
+
+      ++$already_seen{$identity};
+      $parent_state_cache{$identity} = $parent_metadata{state} || join '', qx($target state);
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -715,6 +738,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       reload()})})}
 
   cache('parent-identification', %parent_id_cache);
+  cache('parent-state',          %parent_state_cache);
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
                  terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
@@ -1161,7 +1185,7 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               dc2b440ab142f3649e6f1f9ddec1e5f5
+bootstrap::initialization               61927181e1f025fa36664f2281958c5c
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
@@ -1192,6 +1216,7 @@ function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            01a23d51d5b529e03943bd57e33f92df
+function::metadata-from                 51f238bfe3d4a0e98df376da46f1f70e
 function::mv                            ccd000960db4cf627d9246c43d87ba4c
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
@@ -1213,7 +1238,7 @@ function::state                         88bc24e732c55aac68a103eab96b9e48
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   06fef658374d482adb2e62fbeed9efb4
+function::update-from                   7292f7f518264d78da19617130d47a75
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

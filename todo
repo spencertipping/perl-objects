@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: a8cf5a2e98c72d3fb35f4e6f65747a07
+# state: c42af0276eb28ad1c2e9e66e91efe8da
 # id:    62bc8a83ef5d4941cd2c1cdfb57a0320
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -11,7 +11,7 @@
 # it to spencer@spencertipping.com and I'll see if I can figure out what it
 # does.
 
-# For the benefit of HTML viewers (this is hack):
+# For the benefit of HTML viewers (this is a hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -274,7 +274,7 @@ meta::bootstrap('initialization', <<'__');
 # it to spencer@spencertipping.com and I'll see if I can figure out what it
 # does.
 
-# For the benefit of HTML viewers (this is hack):
+# For the benefit of HTML viewers (this is a hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -336,6 +336,11 @@ meta::cache('parent-identification', <<'__');
 /home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
+__
+meta::cache('parent-state', <<'__');
+902333a0bd6ed90ff919fe8477cb4e69 e768052f59cf406622900761dac72b09
+99aeabc9ec7fe80b1b39f5e53dc7e49e 08b45ce7e7b517d129c8f34c8aaf0252
+a1e8480e579614c01dabeecf0f963bcc 594c1b5458b68c9b26b7ac151bc4369b
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -554,6 +559,21 @@ my @parent_hashes = map $inherited{$_} || '-', @definitions if $parent_hashes;
 
 join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @externals] : [@definitions],
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
+
+__
+meta::function('metadata-from', <<'__');
+my ($filename) = @_;
+my %metadata;
+
+# Not using file::read because we only need the first few lines.
+open my($fh), '<', $filename or return {};
+while (<$fh>) {
+  /^#\s*(\w+):\s*(.*)$/ and $metadata{$1} = $2;
+  last unless /^#/;
+}
+close $fh;
+
+\%metadata;
 
 __
 meta::function('mv', <<'__');
@@ -878,7 +898,8 @@ meta::function('update-from', <<'__');
 
 around_hook('update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
-  my %parent_id_cache = cache('parent-identification');
+  my %parent_id_cache    = cache('parent-identification');
+  my %parent_state_cache = cache('parent-state');
   my %already_seen;
 
   @targets or return;
@@ -897,9 +918,15 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
-      my $identity = $parent_id_cache{$target} ||= join '', qx($target identity);
-      next if $already_seen{$identity};
-      $already_seen{$identity} = 1;
+      my $target_filename = qx(which $target) || $target;
+      my %parent_metadata = %{metadata_from($target)};
+      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+
+      my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
+      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{state};
+
+      ++$already_seen{$identity};
+      $parent_state_cache{$identity} = $parent_metadata{state} || join '', qx($target state);
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -924,6 +951,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       reload()})})}
 
   cache('parent-identification', %parent_id_cache);
+  cache('parent-state',          %parent_state_cache);
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
                  terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
@@ -1372,7 +1400,7 @@ function::sdoc-packed                    8ec4975fca7228708baae6ccd241bdbf
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  8ecd4bc89456afaa9f0c917238562234
+parent::/home/spencertipping/bin/object  d89859fd6876eebe1b57759111844efe
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1383,7 +1411,7 @@ retriever::sdocp                         fcfcf3a7de79d7d863402b9ccfcac3c4
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               dc2b440ab142f3649e6f1f9ddec1e5f5
+bootstrap::initialization               61927181e1f025fa36664f2281958c5c
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
@@ -1414,6 +1442,7 @@ function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            01a23d51d5b529e03943bd57e33f92df
+function::metadata-from                 51f238bfe3d4a0e98df376da46f1f70e
 function::mv                            ccd000960db4cf627d9246c43d87ba4c
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
@@ -1435,7 +1464,7 @@ function::state                         88bc24e732c55aac68a103eab96b9e48
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   06fef658374d482adb2e62fbeed9efb4
+function::update-from                   7292f7f518264d78da19617130d47a75
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1507,14 +1536,14 @@ retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 __
 meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
-bootstrap::initialization               d22fafa2938ecb0d4728e2958b54ed3d
+bootstrap::initialization               61927181e1f025fa36664f2281958c5c
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
 function::ad                            9220b9dc131f8f79878a6209adfe8ef2
 function::alias                         8eeeeb4e064ef3aba7edf8f254427bc2
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
-function::child                         f5764adf0b4e892f147a9b6b68d4816f
+function::child                         957c1bd528bbe7046442ec15ad9e2095
 function::clone                         bb42e04e10a8e54e88786b6fbc4fb213
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        d65deb895a848b32d3d7ed92e81e8cb0
@@ -1524,6 +1553,7 @@ function::disable                       53b449708cc2ffdefa352e53bb7d847d
 function::edit                          735dbdece3998a4478bec3b7bdc04f03
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
+function::expanded-bootstrap            28a83f9bd25516f5136b688ef9f2ef57
 function::export                        2374cd1dbf7616cb38cafba4e171075d
 function::extern                        1290a5223e2824763eecfb3a54961eff
 function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
@@ -1537,6 +1567,7 @@ function::is                            41564c8f21b12ab80824ac825266d805
 function::load-state                    b6cf278a1f351f316fa6e070359b6081
 function::lock                          5d8db258704e6a8623fac796f62fac02
 function::ls                            01a23d51d5b529e03943bd57e33f92df
+function::metadata-from                 51f238bfe3d4a0e98df376da46f1f70e
 function::mv                            ccd000960db4cf627d9246c43d87ba4c
 function::name                          955ba2d1fe1d67cd78651a4042283b00
 function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
@@ -1547,7 +1578,7 @@ function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::rmparent                      fc2884910a6939a47898a778f277332c
 function::save                          3cbe5c3735ee4ff99cb60ccf68bc8b91
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
-function::serialize                     a97c7391c635a93b0a710d10eb8cb3cd
+function::serialize                     a6513c3e0724f9a1d85847d7002910f1
 function::serialize-single              8bac97e94a1162947d274421053387b0
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           21139548efb79500d9c999dba024ab32
@@ -1558,13 +1589,13 @@ function::state                         88bc24e732c55aac68a103eab96b9e48
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   06fef658374d482adb2e62fbeed9efb4
+function::update-from                   7292f7f518264d78da19617130d47a75
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
 indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
-internal_function::around_hook          7cc876e7c5f78c34654337fc95255587
+internal_function::around_hook          129aaec0550d3de6c00208104c0fdcef
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
 internal_function::attribute_is         d28ac825b3937029386372c560a65775
@@ -1631,7 +1662,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               58367e4fe7322b745f8597c9015780e4
+parent::object               d89859fd6876eebe1b57759111844efe
 
 __
 meta::retriever('code-sdoc', <<'__');
