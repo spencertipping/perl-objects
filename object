@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  067226763354172e28bd9af72e0d9423
-# istate: 86a38fb271818303a9958650b5ea29e5
+# state:  323abbb4eb5f69140e45d51f3c9e10ad
+# istate: ec7516883f304201f36ea640e51d6bec
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -952,8 +952,8 @@ unshift @effective_argv, $function_name and $function_name = 'method_missing' un
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
-    chomp(my $result = &$function_name(@effective_argv));
-    print "$result\n" if $result})});
+    chomp(my @result = &$function_name(@effective_argv));
+    print join("\n", @result), "\n" if @result})});
 
 save() unless state() eq $transient{initial};
 
