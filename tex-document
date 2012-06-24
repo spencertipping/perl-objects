@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3aded0fe05c91bd5764b4d488aa69ec0
-# istate: 57b8ed97698db6baed0d03d8c485eb17
+# state:  c90aeba673a2a15d48db478c613006cf
+# istate: efc27642650352f40c3bbd17b6a781cb
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -424,10 +424,10 @@ preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b afce1a0fe6be2323931aa9029d0b640b
+70dae4b46eb4e06798ec6f38d17d4c7b ed720004df8f7759312bbd1733f2163f
 902333a0bd6ed90ff919fe8477cb4e69 0dcdac344342d0aa6ff13df0e77db080
-99aeabc9ec7fe80b1b39f5e53dc7e49e cf7aa26661d190c3047ad4fd2bea91b0
-a1e8480e579614c01dabeecf0f963bcc d17762b11e9af22e437ec80c0b9169ad
+99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
+a1e8480e579614c01dabeecf0f963bcc 1552aff770e040d5affea7009216c85d
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -1073,12 +1073,14 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
-      ++$already_seen{$identity};
-      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
-
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
       die "skipping unreachable $target" unless $attributes;
+
+      # These need to come after the reachability check so that we retry against
+      # other copies in case something fails.
+      ++$already_seen{$identity};
+      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
 
       for my $to_rm (split /\n/, retrieve("parent::$target")) {
         my ($name, $hash) = split(/\s+/, $to_rm);
@@ -1555,7 +1557,7 @@ function::sdoc-packed                    8ec4975fca7228708baae6ccd241bdbf
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  579ee8f6e2d7aacc2db92517bf6733ba
+parent::/home/spencertipping/bin/object  d17a2788c38cb39ee966010e8752d49e
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1619,7 +1621,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   fb2e2a5050f092b0240e2badb78519f7
+function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1744,7 +1746,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   fb2e2a5050f092b0240e2badb78519f7
+function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1817,7 +1819,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 579ee8f6e2d7aacc2db92517bf6733ba
+parent::object                 d17a2788c38cb39ee966010e8752d49e
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  4f5ee6571eaf178394ac93bc82240d27
-# istate: 77f6d6d8615ca13f46322da13be5297b
+# state:  776d60a3569bb04a98ac04c05f814739
+# istate: 36f13ee292120aaf4531f6bbb9a4dd56
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -311,7 +311,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', '/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e cf7aa26661d190c3047ad4fd2bea91b0');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -727,12 +727,14 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
-      ++$already_seen{$identity};
-      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
-
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
       die "skipping unreachable $target" unless $attributes;
+
+      # These need to come after the reachability check so that we retry against
+      # other copies in case something fails.
+      ++$already_seen{$identity};
+      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
 
       for my $to_rm (split /\n/, retrieve("parent::$target")) {
         my ($name, $hash) = split(/\s+/, $to_rm);
@@ -1248,7 +1250,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   fb2e2a5050f092b0240e2badb78519f7
+function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
