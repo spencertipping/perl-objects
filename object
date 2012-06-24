@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3c15250a4946ffaeba79fcf099c3035e
-# istate: fc48109d1ba651707f9728d36533e49f
+# state:  2a6c3c78e29b150d0a1a24da38333e0f
+# istate: e5ac795267a874f03f04a496d7936d15
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -712,8 +712,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
       my $target_filename = strip(qx(which $target)) || $target;
-      my %parent_metadata = %{metadata_from($target)};
-      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+      my %parent_metadata = %{metadata_from($target_filename)};
+      terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
