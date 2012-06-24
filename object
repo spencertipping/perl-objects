@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  d0f58619c178aed2415b76a627c90357
-# istate: fad95290b11148ec66a0831c95ca1496
+# state:  c7b86dc5a80cc2af0b451adce4e66bc4
+# istate: b2ba018d085d82ab1b7d5993c7abe2db
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -716,10 +716,10 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{state};
+      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       ++$already_seen{$identity};
-      $parent_state_cache{$identity} = $parent_metadata{state} || join '', qx($target state);
+      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
