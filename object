@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
+# state: 28c81149959441289d0b8aa6d3cea0d7
+# id:    99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -230,6 +232,8 @@ __
 meta::bootstrap('initialization', <<'__');
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
+# state: __STATE
+# id:    __OBJECT_ID
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -403,6 +407,17 @@ save();
 
 __
 meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
+meta::function('expanded-bootstrap', <<'__');
+my $bootstrap_text = retrieve('bootstrap::initialization');
+my $state          = state();
+my $object_id      = identity();
+
+$bootstrap_text =~ s/__STATE/$state/g;
+$bootstrap_text =~ s/__OBJECT_ID/$object_id/g;
+
+$bootstrap_text;
+
+__
 meta::function('export', <<'__');
 # Exports data into a text file.
 #   export attr1 attr2 attr3 ... file.txt
@@ -578,7 +593,7 @@ my ($options, @criteria) = separate_options(@_);
 my $partial     = $$options{'-p'};
 my $criteria    = join '|', @criteria;
 my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
-my @final_array = @{$partial ? \@attributes : [retrieve('bootstrap::initialization'), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
+my @final_array = @{$partial ? \@attributes : [expanded_bootstrap(), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
 join "\n", @final_array;
 
 __
