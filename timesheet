@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  171441063a81888a39a529e8772669ba
-# istate: 2b7a88410cb35bc3c039337de357574b
+# state:  4b3b5e976d0d17dda43597e3ef157133
+# istate: 3beb31d1f850f33b7157f2c90f893ee2
 # id:     f0f0939887ede2ecaa8c879aff4a7717
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -307,7 +307,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e fc48109d1ba651707f9728d36533e49f');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e5ac795267a874f03f04a496d7936d15');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -849,8 +849,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
       my $target_filename = strip(qx(which $target)) || $target;
-      my %parent_metadata = %{metadata_from($target)};
-      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+      my %parent_metadata = %{metadata_from($target_filename)};
+      terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
@@ -1384,7 +1384,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
+function::update-from                   062be1e05bb28bc705cd9c5ec864886b
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

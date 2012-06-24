@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ff0eadccfbb627767fd356d857fdcbbd
-# istate: 2106aa4c91eb37d3159885c026f5bf10
+# state:  b364ed1b0f190f29e40394ea572e21e9
+# istate: 1c6b1a4f91eb37d3159885c026f5bf10
 # id:     ad190757af7fd55ea6da941fac1a5124
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -339,8 +339,8 @@ meta::cache('parent-identification', <<'__');
 /home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b 02e98edefb6616528af6083272af2be0
-99aeabc9ec7fe80b1b39f5e53dc7e49e fc48109d1ba651707f9728d36533e49f
+6a38f6fbcf92173ff757305a534a002b 47c0fb0ffd5cbc3ab5c263164715df6b
+99aeabc9ec7fe80b1b39f5e53dc7e49e e5ac795267a874f03f04a496d7936d15
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -812,8 +812,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
       my $target_filename = strip(qx(which $target)) || $target;
-      my %parent_metadata = %{metadata_from($target)};
-      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+      my %parent_metadata = %{metadata_from($target_filename)};
+      terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
@@ -1370,7 +1370,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  5912227739653d4e3d729a791aeff13f
+parent::/home/spencertipping/bin/object  2b5682ecb895b257b18100417d4f38e0
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1429,7 +1429,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
+function::update-from                   062be1e05bb28bc705cd9c5ec864886b
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

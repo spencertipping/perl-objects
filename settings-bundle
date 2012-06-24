@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  d2783cd43148195f913bda2099a20706
-# istate: 6fbaff25012f3babf0090bd27a6b64f2
+# state:  a0e4c4001e1773bb1967ea222e75fcf9
+# istate: de97574a72ef9629a7af88a0367a29f4
 # id:     f29f40d2b47ab782312a207ed9958b13
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -319,8 +319,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b 7736a6295b7496b6f54098c8e0ce3070
-99aeabc9ec7fe80b1b39f5e53dc7e49e fc48109d1ba651707f9728d36533e49f
+70dae4b46eb4e06798ec6f38d17d4c7b d435ab4c1aced9b455a369146d9e8a8e
+99aeabc9ec7fe80b1b39f5e53dc7e49e e5ac795267a874f03f04a496d7936d15
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -788,8 +788,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
       my $target_filename = strip(qx(which $target)) || $target;
-      my %parent_metadata = %{metadata_from($target)};
-      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+      my %parent_metadata = %{metadata_from($target_filename)};
+      terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
@@ -1319,7 +1319,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
+function::update-from                   062be1e05bb28bc705cd9c5ec864886b
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1444,7 +1444,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
+function::update-from                   062be1e05bb28bc705cd9c5ec864886b
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1517,7 +1517,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 5912227739653d4e3d729a791aeff13f
+parent::object                 2b5682ecb895b257b18100417d4f38e0
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
