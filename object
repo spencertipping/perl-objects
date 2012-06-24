@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: 28c81149959441289d0b8aa6d3cea0d7
+# state: 26e62b124bf789f5456af686ed7ca812
 # id:    99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -353,8 +353,10 @@ around_hook('child', @_, sub {
   my ($child_name) = @_;
   clone($child_name);
   enable();
-  qx($child_name update-from $0 -n);
+  qx($child_name update-from $0);
+  terminal::info("$child_name\'s identity is " . join '', qx($child_name identity));
   disable()});
+
 __
 meta::function('clone', <<'__');
 for (grep length, @_) {
