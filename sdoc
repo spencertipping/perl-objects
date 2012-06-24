@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  0c2a10f567c9c44bedc0a46e609ab866
-# istate: 1552aff770e040d5affea7009216c85d
+# state:  0abcabbcf8a6e57fb71c874a5a22a34f
+# istate: 65d7d4ea063a937ed5e8f308eaf5cbdf
 # id:     a1e8480e579614c01dabeecf0f963bcc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -319,7 +319,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', '/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -1216,7 +1216,7 @@ my %options;
 /^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
 ++$options{$_} for grep ! /=/, @singles, @longs;
 
-({%options}, @others, @_);
+({%options}, grep length, @others, @_);
 
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
@@ -1440,7 +1440,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93

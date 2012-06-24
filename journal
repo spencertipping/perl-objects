@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  44d9b36b59ee37b3f80bee7b2e2d53ec
-# istate: df8564714f9600d241813059dba0e7b9
+# state:  8d7f760ccfc1dc3750ec23aa2b0ed4ad
+# istate: 449dd4e524063b07a2af1ed40571cbef
 # id:     9837287d488ed173dd183e0b154943b4
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -342,9 +342,9 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b 38c34772e33d9619636b11070112839f
-99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
-a9e5975593ed5d90d943ad98405c71e5 4b59ef2992a8029e4dbd6775212ccb2d
+6a38f6fbcf92173ff757305a534a002b b1ac94155783c5d09d1634735d302262
+99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5
+a9e5975593ed5d90d943ad98405c71e5 f8fff37492a8029e96b0f4be108367de
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -1219,7 +1219,7 @@ my %options;
 /^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
 ++$options{$_} for grep ! /=/, @singles, @longs;
 
-({%options}, @others, @_);
+({%options}, grep length, @others, @_);
 
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
@@ -1361,7 +1361,7 @@ meta::parent('/home/spencertipping/bin/notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    d17a2788c38cb39ee966010e8752d49e
+parent::object    e7f7793ec38cb39e4bfb7340f4889add
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1450,7 +1450,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
@@ -1506,7 +1506,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  d17a2788c38cb39ee966010e8752d49e
+parent::/home/spencertipping/bin/object  e7f7793ec38cb39e4bfb7340f4889add
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1596,7 +1596,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93

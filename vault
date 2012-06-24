@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  dc5786e83b21579fd4a5b7ff6d69451b
-# istate: aee44c9d91eb37d3159885c026f5bf10
+# state:  3606ac6595c500e3a8f07f3113b60691
+# istate: 1525a0b791eb37d3159885c026f5bf10
 # id:     ad190757af7fd55ea6da941fac1a5124
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -339,8 +339,8 @@ meta::cache('parent-identification', <<'__');
 /home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b 38c34772e33d9619636b11070112839f
-99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
+6a38f6fbcf92173ff757305a534a002b b1ac94155783c5d09d1634735d302262
+99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -1211,7 +1211,7 @@ my %options;
 /^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
 ++$options{$_} for grep ! /=/, @singles, @longs;
 
-({%options}, @others, @_);
+({%options}, grep length, @others, @_);
 
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
@@ -1377,7 +1377,7 @@ internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password         941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  d17a2788c38cb39ee966010e8752d49e
+parent::/home/spencertipping/bin/object  e7f7793ec38cb39e4bfb7340f4889add
 retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1467,7 +1467,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93

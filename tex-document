@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  736485a67c4031ce010b0f25c4f9c979
-# istate: 872c48fb6fccf863919b402bba53a24b
+# state:  9850bbf5c0061f6291f98ee4c10265d3
+# istate: 13d5e37c98534901d9b88351f56535c7
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -424,10 +424,10 @@ preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b ed720004df8f7759312bbd1733f2163f
-902333a0bd6ed90ff919fe8477cb4e69 5c9a7aad9d2ecdcc999143147f535e4c
-99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
-a1e8480e579614c01dabeecf0f963bcc 1552aff770e040d5affea7009216c85d
+70dae4b46eb4e06798ec6f38d17d4c7b 84f33692e130af6c95c7782e3b4db1a3
+902333a0bd6ed90ff919fe8477cb4e69 171d2a559d2ecdcc15f44e7f44a0a3bb
+99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5
+a1e8480e579614c01dabeecf0f963bcc 65d7d4ea063a937ed5e8f308eaf5cbdf
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -1411,7 +1411,7 @@ my %options;
 /^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
 ++$options{$_} for grep ! /=/, @singles, @longs;
 
-({%options}, @others, @_);
+({%options}, grep length, @others, @_);
 
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
@@ -1557,7 +1557,7 @@ function::sdoc-packed                    8ec4975fca7228708baae6ccd241bdbf
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  d17a2788c38cb39ee966010e8752d49e
+parent::/home/spencertipping/bin/object  e7f7793ec38cb39e4bfb7340f4889add
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1652,7 +1652,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
@@ -1777,7 +1777,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
@@ -1819,7 +1819,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 d17a2788c38cb39ee966010e8752d49e
+parent::object                 e7f7793ec38cb39e4bfb7340f4889add
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1831,7 +1831,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               d17a2788c38cb39ee966010e8752d49e
+parent::object               e7f7793ec38cb39e4bfb7340f4889add
 
 __
 meta::resource('header', <<'__');

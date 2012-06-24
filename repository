@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ed1fd25b84971887c2199789cdab5629
-# istate: 4a512d818cda6c64b4abf0c093f16da0
+# state:  02517f8728c75b7afd0931b0bcc81051
+# istate: f89e70a398b7927bb699209051bdcd54
 # id:     05bc3036c343fdb8aec5b0be12a9b19e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -326,8 +326,8 @@ meta::cache('parent-identification', <<'__');
 /home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
-aa772900bb5b925cb84346bd72a4249d 4da78095c18f6b62c7d21d57f5aa3521
+99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5
+aa772900bb5b925cb84346bd72a4249d d1f2b48ac18f6b62578bb370a44c78ed
 __
 meta::configuration('dependencies', <<'__');
 # Dependency configuration; for example:
@@ -1099,7 +1099,7 @@ my %options;
 /^([^=]+)=(.*)$/ and $options{$1} = $2 for @longs;
 ++$options{$_} for grep ! /=/, @singles, @longs;
 
-({%options}, @others, @_);
+({%options}, grep length, @others, @_);
 
 __
 meta::internal_function('strip', 'wantarray ? map {s/^\\s*|\\s*$//g; $_} @_ : $_[0] =~ /^\\s*(.*?)\\s*$/ && $1;');
@@ -1239,7 +1239,7 @@ meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('/home/spencertipping/bin/configuration', <<'__');
 meta::type::configuration                7f5ba514d47ac29a3c226d0e331d9da4
-parent::/home/spencertipping/bin/object  d17a2788c38cb39ee966010e8752d49e
+parent::/home/spencertipping/bin/object  e7f7793ec38cb39e4bfb7340f4889add
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1328,7 +1328,7 @@ internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
 internal_function::retrieve             721a6800f328da05047fd7392758f55d
 internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
 internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     34ec41a6edaa15adde607a0db3ccfa36
+internal_function::separate_options     2dd1026a0f157c7c65bb9f3d18936206
 internal_function::strip                14f490b10ebd519e829d8ae20ea4d536
 internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
