@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  48485dcfc9e3a4dffcb3116131183b1f
-# istate: 42a34e671aa402aed1fe439a175da5a1
+# state:  49065df7d79f86295399a8c47e0b2b41
+# istate: cf7aa26661d190c3047ad4fd2bea91b0
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -703,6 +703,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
   my $save_state        = $$options{'-s'} || $$options{'--save'};
   my $no_state          = $$options{'-S'} || $$options{'--no-state'};
+  my $no_verify         = $$options{'-V'} || $$options{'--no-verify'};
   my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
@@ -747,9 +748,11 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   cache('parent-identification', %parent_id_cache);
   cache('parent-state',          %parent_state_cache);
 
-  if (verify()) {hook('update-from-succeeded', $options, @targets);
-                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
-                 rm('state::before-update') unless $no_state || $save_state}
+  if ($no_verify) {hook('update-from-presumably-succeeded', $options, @targets);
+                   rm('state::before-update') unless $no_state || $save_state}
+  elsif (verify()) {hook('update-from-succeeded', $options, @targets);
+                    terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
+                    rm('state::before-update') unless $no_state || $save_state}
   elsif ($force || $no_state) {hook('update-from-failed', $options, @targets);
                                terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
                                                  $no_state ? 'You should attempt to repair this object since no prior state was saved.'
