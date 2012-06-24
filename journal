@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  875d3f116ba8fa5dd592f0e956d2d504
-# istate: 5a56586e1f6b18ca8e75ba660ae020b2
+# state:  44d9b36b59ee37b3f80bee7b2e2d53ec
+# istate: df8564714f9600d241813059dba0e7b9
 # id:     9837287d488ed173dd183e0b154943b4
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -344,7 +344,7 @@ __
 meta::cache('parent-state', <<'__');
 6a38f6fbcf92173ff757305a534a002b 38c34772e33d9619636b11070112839f
 99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
-a9e5975593ed5d90d943ad98405c71e5 32a172ae4d749dbfa5a980ef7d9ac8f9
+a9e5975593ed5d90d943ad98405c71e5 4b59ef2992a8029e4dbd6775212ccb2d
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -1361,7 +1361,7 @@ meta::parent('/home/spencertipping/bin/notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    579ee8f6e2d7aacc2db92517bf6733ba
+parent::object    d17a2788c38cb39ee966010e8752d49e
 
 __
 meta::parent('/home/spencertipping/bin/object', <<'__');
@@ -1565,7 +1565,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   fb2e2a5050f092b0240e2badb78519f7
+function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

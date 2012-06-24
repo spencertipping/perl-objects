@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  c322eee8ba208b19439c6fd1ca647cf1
-# istate: 6611083d1fa472e60e70192dab80ccd4
+# state:  b45d22d78c7b469e416f54da38473a31
+# istate: 0824ec1b1fa472e663f6a0fadecccdba
 # id:     62bc8a83ef5d4941cd2c1cdfb57a0320
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -340,7 +340,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-902333a0bd6ed90ff919fe8477cb4e69 0dcdac344342d0aa6ff13df0e77db080
+902333a0bd6ed90ff919fe8477cb4e69 5c9a7aad9d2ecdcc999143147f535e4c
 99aeabc9ec7fe80b1b39f5e53dc7e49e e135f46f17a58cb65737ea8917362c3e
 a1e8480e579614c01dabeecf0f963bcc 1552aff770e040d5affea7009216c85d
 __
@@ -1604,7 +1604,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   fb2e2a5050f092b0240e2badb78519f7
+function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1677,7 +1677,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               579ee8f6e2d7aacc2db92517bf6733ba
+parent::object               d17a2788c38cb39ee966010e8752d49e
 
 __
 meta::retriever('code-sdoc', <<'__');
