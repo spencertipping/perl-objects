@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state: 26e62b124bf789f5456af686ed7ca812
+# state: 5710238400772a837790592ed64d7a8c
 # id:    99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -11,7 +11,7 @@
 # it to spencer@spencertipping.com and I'll see if I can figure out what it
 # does.
 
-# For the benefit of HTML viewers (this is hack):
+# For the benefit of HTML viewers (this is a hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -243,7 +243,7 @@ meta::bootstrap('initialization', <<'__');
 # it to spencer@spencertipping.com and I'll see if I can figure out what it
 # does.
 
-# For the benefit of HTML viewers (this is hack):
+# For the benefit of HTML viewers (this is a hack):
 # <div id='cover' style='position: absolute; left: 0; top: 0; width: 10000px; height: 10000px; background: white'></div>
 
 $|++;
@@ -522,6 +522,21 @@ join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @e
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
 
 __
+meta::function('metadata-from', <<'__');
+my ($filename) = @_;
+my %metadata;
+
+# Not using file::read because we only need the first few lines.
+open my($fh), '<', $filename or die "failed to open $filename: $!";
+while (<$fh>) {
+  /^#\s*(\w+):\s*(.*)$/ and $metadata{$1} = $2;
+  last unless /^#/;
+}
+close $fh;
+
+\%metadata;
+
+__
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -668,7 +683,8 @@ meta::function('update-from', <<'__');
 
 around_hook('update-from-invocation', separate_options(@_), sub {
   my ($options, @targets) = @_;
-  my %parent_id_cache = cache('parent-identification');
+  my %parent_id_cache    = cache('parent-identification');
+  my %parent_state_cache = cache('parent-state');
   my %already_seen;
 
   @targets or return;
@@ -687,9 +703,14 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
-      my $identity = $parent_id_cache{$target} ||= join '', qx($target identity);
-      next if $already_seen{$identity};
-      $already_seen{$identity} = 1;
+      my %parent_metadata = %{metadata_from($target)};
+      terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
+
+      my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
+      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{state};
+
+      ++$already_seen{$identity};
+      $parent_state_cache{$identity} = $parent_metadata{state} || join '', qx($target state);
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -714,6 +735,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       reload()})})}
 
   cache('parent-identification', %parent_id_cache);
+  cache('parent-state',          %parent_state_cache);
 
   if (verify()) {hook('update-from-succeeded', $options, @targets);
                  terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
