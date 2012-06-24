@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ced262aa133e68c83b02a499e65178dd
-# istate: fc4848083e4c2c8098f8ba5be17c3732
+# state:  22e9afd3b28fdb662961f5cf7fc16dad
+# istate: afb730ebf4ddbc412a26e5948e360a35
 # id:     62bc8a83ef5d4941cd2c1cdfb57a0320
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -341,8 +341,8 @@ vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
 902333a0bd6ed90ff919fe8477cb4e69 1ce947514f6ff58c19c14233e6cd806b
-99aeabc9ec7fe80b1b39f5e53dc7e49e 42a34e671aa402aed1fe439a175da5a1
-a1e8480e579614c01dabeecf0f963bcc 50311c7e989307f32741f5f6b661b0fe
+99aeabc9ec7fe80b1b39f5e53dc7e49e cf7aa26661d190c3047ad4fd2bea91b0
+a1e8480e579614c01dabeecf0f963bcc d17762b11e9af22e437ec80c0b9169ad
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -918,6 +918,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
   my $save_state        = $$options{'-s'} || $$options{'--save'};
   my $no_state          = $$options{'-S'} || $$options{'--no-state'};
+  my $no_verify         = $$options{'-V'} || $$options{'--no-verify'};
   my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
@@ -962,9 +963,11 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   cache('parent-identification', %parent_id_cache);
   cache('parent-state',          %parent_state_cache);
 
-  if (verify()) {hook('update-from-succeeded', $options, @targets);
-                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
-                 rm('state::before-update') unless $no_state || $save_state}
+  if ($no_verify) {hook('update-from-presumably-succeeded', $options, @targets);
+                   rm('state::before-update') unless $no_state || $save_state}
+  elsif (verify()) {hook('update-from-succeeded', $options, @targets);
+                    terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
+                    rm('state::before-update') unless $no_state || $save_state}
   elsif ($force || $no_state) {hook('update-from-failed', $options, @targets);
                                terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
                                                  $no_state ? 'You should attempt to repair this object since no prior state was saved.'
@@ -1410,7 +1413,7 @@ function::sdoc-packed                    8ec4975fca7228708baae6ccd241bdbf
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  e0959b6b2c8f0b4138e9acac4ca9d1d3
+parent::/home/spencertipping/bin/object  579ee8f6e2d7aacc2db92517bf6733ba
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1474,7 +1477,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   465ce71e4e93d702ae59b942bc9864ce
+function::update-from                   fb2e2a5050f092b0240e2badb78519f7
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  559ca7e5b82d47794048f46d92164e64
-# istate: 3d09e1da551260fd35be8e05f137484a
+# state:  2f7cba2369d69513ef0c1446689d72ff
+# istate: 6d9cd901b8b69b52e7261b8553466780
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -318,7 +318,7 @@ vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
 902333a0bd6ed90ff919fe8477cb4e69 1ce947514f6ff58c19c14233e6cd806b
-99aeabc9ec7fe80b1b39f5e53dc7e49e 42a34e671aa402aed1fe439a175da5a1
+99aeabc9ec7fe80b1b39f5e53dc7e49e cf7aa26661d190c3047ad4fd2bea91b0
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -750,6 +750,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
   my $save_state        = $$options{'-s'} || $$options{'--save'};
   my $no_state          = $$options{'-S'} || $$options{'--no-state'};
+  my $no_verify         = $$options{'-V'} || $$options{'--no-verify'};
   my $no_parents        = $$options{'-P'} || $$options{'--no-parent'} || $$options{'--no-parents'};
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
@@ -794,9 +795,11 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   cache('parent-identification', %parent_id_cache);
   cache('parent-state',          %parent_state_cache);
 
-  if (verify()) {hook('update-from-succeeded', $options, @targets);
-                 terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
-                 rm('state::before-update') unless $no_state || $save_state}
+  if ($no_verify) {hook('update-from-presumably-succeeded', $options, @targets);
+                   rm('state::before-update') unless $no_state || $save_state}
+  elsif (verify()) {hook('update-from-succeeded', $options, @targets);
+                    terminal::info("Successfully updated. Run 'load-state before-update' to undo this change.") if $save_state;
+                    rm('state::before-update') unless $no_state || $save_state}
   elsif ($force || $no_state) {hook('update-from-failed', $options, @targets);
                                terminal::warning('Failed to verify: at this point your object will not save properly, though backup copies will be created.',
                                                  $no_state ? 'You should attempt to repair this object since no prior state was saved.'
@@ -1289,7 +1292,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   465ce71e4e93d702ae59b942bc9864ce
+function::update-from                   fb2e2a5050f092b0240e2badb78519f7
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
