@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  0d83bfefc35873ea397b1129cfc9360f
-# istate: 0b198f9f8380984838b5378a2d70d0a9
+# state:  04c33e678a34a8daef0cbf2699015fb7
+# istate: 37fa2dfd83809848852e7a3c10831181
 # id:     f0f0939887ede2ecaa8c879aff4a7717
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -307,7 +307,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -1100,8 +1100,8 @@ unshift @effective_argv, $function_name and $function_name = 'method_missing' un
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
-    chomp(my $result = &$function_name(@effective_argv));
-    print "$result\n" if $result})});
+    chomp(my @result = &$function_name(@effective_argv));
+    print join("\n", @result), "\n" if @result})});
 
 save() unless state() eq $transient{initial};
 
@@ -1413,7 +1413,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       12c18f86d766ffb67b8dc0572985bf98
+internal_function::internal::main       4bd4381e1e63689984066485ae399f91
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27

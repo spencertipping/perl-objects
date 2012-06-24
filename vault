@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3606ac6595c500e3a8f07f3113b60691
-# istate: 1525a0b791eb37d3159885c026f5bf10
+# state:  8a00218ebd0663c1a9889401c2f99a78
+# istate: 2385f6be1bf7243d08e5abecb1e2a35f
 # id:     ad190757af7fd55ea6da941fac1a5124
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -335,12 +335,12 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', <<'__');
-/home/spencertipping/bin/encrypted 6a38f6fbcf92173ff757305a534a002b
-/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
+encrypted 6a38f6fbcf92173ff757305a534a002b
+object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b b1ac94155783c5d09d1634735d302262
-99aeabc9ec7fe80b1b39f5e53dc7e49e 86a38fb271818303a9958650b5ea29e5
+6a38f6fbcf92173ff757305a534a002b eaad6b8a64090f83ed3db1fbdacf8c97
+99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -1086,8 +1086,8 @@ unshift @effective_argv, $function_name and $function_name = 'method_missing' un
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
-    chomp(my $result = &$function_name(@effective_argv));
-    print "$result\n" if $result})});
+    chomp(my @result = &$function_name(@effective_argv));
+    print join("\n", @result), "\n" if @result})});
 
 save() unless state() eq $transient{initial};
 
@@ -1360,28 +1360,28 @@ __
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('/home/spencertipping/bin/encrypted', <<'__');
-function::forget-key                     36bf6369028c08c9a13be95289d77b66
-function::hidden                         d1cd759e361a05754d92b15c2fb6d7fd
-function::hidden-attributes              7de9ff67b417ab36a4db9b98f81aef5d
-function::hide                           ab14aec00db565eb530cf6a178820189
-function::key                            b6c8cbad3c09db4b6ff8aa13c6d8dd00
-function::secure-shell                   e0f80a0be1f71e231f2a0ab0dce91fb3
-function::unhide                         b7282c974959f39d94d9a4889ce03463
-indicator::key                           689af0d9d3dacfbe96ae4a5bcc997a62
-internal_function::decrypt               8dedd55e473f461fa3b1770c5847aa47
-internal_function::encrypt               78c174a2fd889bd27007daa244aa1a18
-internal_function::encryption_key        4e2570581b3bea4236f34f7cc4f756a6
-internal_function::iterated_hash         45e6bf146d664a5b3020f34fc8c54151
-internal_function::parse_hidden          00edb53a3576b8b096dcd51b15c34aa8
-internal_function::read_password         941f273317a5778ad4b84789a5fa04fc
-meta::type::encrypted                    029a1567ded4f2283b58f189bdb306de
-meta::type::hidden                       ffb46dfadb136932d37a2731fc2a877e
-parent::/home/spencertipping/bin/object  e7f7793ec38cb39e4bfb7340f4889add
-retriever::encrypted                     64b7a84a30242bf1bf7acbbbc3e50736
+meta::parent('encrypted', <<'__');
+function::forget-key               36bf6369028c08c9a13be95289d77b66
+function::hidden                   d1cd759e361a05754d92b15c2fb6d7fd
+function::hidden-attributes        7de9ff67b417ab36a4db9b98f81aef5d
+function::hide                     ab14aec00db565eb530cf6a178820189
+function::key                      b6c8cbad3c09db4b6ff8aa13c6d8dd00
+function::secure-shell             e0f80a0be1f71e231f2a0ab0dce91fb3
+function::unhide                   b7282c974959f39d94d9a4889ce03463
+indicator::key                     689af0d9d3dacfbe96ae4a5bcc997a62
+internal_function::decrypt         8dedd55e473f461fa3b1770c5847aa47
+internal_function::encrypt         78c174a2fd889bd27007daa244aa1a18
+internal_function::encryption_key  4e2570581b3bea4236f34f7cc4f756a6
+internal_function::iterated_hash   45e6bf146d664a5b3020f34fc8c54151
+internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
+internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
+meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
+meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
+parent::object                     8f920c8ec38cb39e732cbdcc3abc7f93
+retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
-meta::parent('/home/spencertipping/bin/object', <<'__');
+meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               170e6ce82d2db886e908918cb132bb4e
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
@@ -1458,7 +1458,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       12c18f86d766ffb67b8dc0572985bf98
+internal_function::internal::main       4bd4381e1e63689984066485ae399f91
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27

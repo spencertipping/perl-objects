@@ -316,7 +316,7 @@ run this script with the 'usage' argument.
 __
 meta::cache('parent-identification', <<'__');
 ./sdoc a1e8480e579614c01dabeecf0f963bcc
-/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
+object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -1261,7 +1261,7 @@ function::sdoc-markdown                  a35a6441dd750466f2d0e636bee2b382
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  5e8c5be71d2d512cca8dfc1677f94466
+parent::object  5e8c5be71d2d512cca8dfc1677f94466
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1269,7 +1269,7 @@ retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
 retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 
 __
-meta::parent('/home/spencertipping/bin/object', <<'__');
+meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               d22fafa2938ecb0d4728e2958b54ed3d
 bootstrap::perldoc                      5793df44bdd2526bb461272924abfd4b
