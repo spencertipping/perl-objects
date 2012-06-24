@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  a0ae43649e24296b8bfd7a313b0e7be0
-# istate: 5fa1f01713655c6435895795ecda6a7b
+# state:  b4c289ff636ee1a0162f90547b6c90a4
+# istate: c2aa699d4bd76bd4a247f5706ed6ded6
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -318,7 +318,7 @@ vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
 902333a0bd6ed90ff919fe8477cb4e69 4802655fd3ef3f822354d939b74e72b7
-99aeabc9ec7fe80b1b39f5e53dc7e49e b2ba018d085d82ab1b7d5993c7abe2db
+99aeabc9ec7fe80b1b39f5e53dc7e49e fc48109d1ba651707f9728d36533e49f
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -758,7 +758,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
-      my $target_filename = qx(which $target) || $target;
+      my $target_filename = strip(qx(which $target)) || $target;
       my %parent_metadata = %{metadata_from($target)};
       terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
@@ -1287,7 +1287,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   008cd77827f54dc10d2dc2ba4d6372d1
+function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

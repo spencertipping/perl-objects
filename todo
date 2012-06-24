@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  b6e168adc3ac21d0ed92ed226b5d1ab8
-# istate: dcf0f05a331c6967538a1418110df936
+# state:  b348757e97292ee4a0166236d01e53bb
+# istate: 2dfffc4efd36d8e47384e6b4dfaa2b3f
 # id:     62bc8a83ef5d4941cd2c1cdfb57a0320
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -341,8 +341,8 @@ vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
 902333a0bd6ed90ff919fe8477cb4e69 4802655fd3ef3f822354d939b74e72b7
-99aeabc9ec7fe80b1b39f5e53dc7e49e b2ba018d085d82ab1b7d5993c7abe2db
-a1e8480e579614c01dabeecf0f963bcc 242de81f1a25269410ce02e3671ea39f
+99aeabc9ec7fe80b1b39f5e53dc7e49e fc48109d1ba651707f9728d36533e49f
+a1e8480e579614c01dabeecf0f963bcc 60f97e5f1438299773ce4806883243ce
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -926,7 +926,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
-      my $target_filename = qx(which $target) || $target;
+      my $target_filename = strip(qx(which $target)) || $target;
       my %parent_metadata = %{metadata_from($target)};
       terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
@@ -1408,7 +1408,7 @@ function::sdoc-packed                    8ec4975fca7228708baae6ccd241bdbf
 function::sdocp                          c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::/home/spencertipping/bin/object  74fb158106e9453344bf761c5fa687a3
+parent::/home/spencertipping/bin/object  5912227739653d4e3d729a791aeff13f
 retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
@@ -1472,7 +1472,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   008cd77827f54dc10d2dc2ba4d6372d1
+function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

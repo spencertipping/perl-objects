@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  721815a1abb128fc69ecba91ac1d7a9a
-# istate: 1d02f5d20e3274ccda717679fedb48c4
+# state:  82c9317f58fd41f8139714bd3ab1213d
+# istate: 02e98edefb6616528af6083272af2be0
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -335,7 +335,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', '/home/spencertipping/bin/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e b2ba018d085d82ab1b7d5993c7abe2db');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e fc48109d1ba651707f9728d36533e49f');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -788,7 +788,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   for my $target (@targets) {
     dangerous("updating from $target", sub {
     around_hook('update-from', $target, sub {
-      my $target_filename = qx(which $target) || $target;
+      my $target_filename = strip(qx(which $target)) || $target;
       my %parent_metadata = %{metadata_from($target)};
       terminal::warning("$target has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
@@ -1369,7 +1369,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   008cd77827f54dc10d2dc2ba4d6372d1
+function::update-from                   b8ba41cff6537c6f3e0a418b00e163e1
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
