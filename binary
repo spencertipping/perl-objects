@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  35532f683ce77cfa4688d037480f5249
-# istate: 0e2d5b0e931506488d873acc9fd2fe6c
+# state:  0ec2a64c9874e3bf3c0b10893fc3238f
+# istate: aee8217336a8219d9ed2cd4d53d30cbf
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -316,8 +316,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-902333a0bd6ed90ff919fe8477cb4e69 537fe84a9d2ecdcc99fb85b30af459c1
-99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec
+902333a0bd6ed90ff919fe8477cb4e69 a60202000f88d34a7672f049a9c52e05
+99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -448,7 +448,7 @@ my $extension = extension_for($name);
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
 
-save() unless $data{'data::edit::no-save'};
+save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
 '';
 
 __
@@ -1255,7 +1255,7 @@ function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          735dbdece3998a4478bec3b7bdc04f03
+function::edit                          6e5bd5f35ff9cf66edd2d2d9943a7b4e
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1
@@ -1367,7 +1367,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object               3dc7a5b337ee134dc2212bfd380760f0
 
 __
 meta::retriever('bin', <<'__');

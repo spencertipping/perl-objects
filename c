@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  140f6e21908a045d85d170066d156acb
-# istate: c42ec3d89e74b584a2a5bc33c5918c40
+# state:  51a28d1daf36b6d8deb2feea91f280ea
+# istate: 66f2444a8a680c45fbbb4efdc94591d0
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -311,7 +311,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -408,7 +408,7 @@ my $extension = extension_for($name);
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
 
-save() unless $data{'data::edit::no-save'};
+save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
 '';
 
 __
@@ -1211,7 +1211,7 @@ function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          735dbdece3998a4478bec3b7bdc04f03
+function::edit                          6e5bd5f35ff9cf66edd2d2d9943a7b4e
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1

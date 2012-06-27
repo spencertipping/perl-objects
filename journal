@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  74d85076c4ed0a6655ea74c832a803c3
-# istate: aefb76ec540f7230261d8bb675b1b48f
+# state:  7e4943fb9b25edec8363cba57bb0417c
+# istate: 2c38e672540f7230a1da34ccc29d19e2
 # id:     9837287d488ed173dd183e0b154943b4
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -341,9 +341,9 @@ notes a9e5975593ed5d90d943ad98405c71e5
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b eaad6b8a64090f83ed3db1fbdacf8c97
-99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec
-a9e5975593ed5d90d943ad98405c71e5 25722e1192a8029ee7b36f261517f7bc
+6a38f6fbcf92173ff757305a534a002b b8953c2d81a0d9f1ca63503f5ad2ae24
+99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812
+a9e5975593ed5d90d943ad98405c71e5 5b08a7836cda563678fff8659df70df2
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -442,7 +442,7 @@ my $extension = extension_for($name);
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
 
-save() unless $data{'data::edit::no-save'};
+save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
 '';
 
 __
@@ -1373,7 +1373,7 @@ internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
-parent::object                     8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object                     3dc7a5b337ee134dc2212bfd380760f0
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1381,7 +1381,7 @@ meta::parent('notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object    3dc7a5b337ee134dc2212bfd380760f0
 
 __
 meta::parent('object', <<'__');
@@ -1400,7 +1400,7 @@ function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          735dbdece3998a4478bec3b7bdc04f03
+function::edit                          6e5bd5f35ff9cf66edd2d2d9943a7b4e
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1

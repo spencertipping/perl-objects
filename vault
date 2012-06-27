@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  8a00218ebd0663c1a9889401c2f99a78
-# istate: 2385f6be1bf7243d08e5abecb1e2a35f
+# state:  fd7c53c70fa5b656bd273229559e6e1d
+# istate: a46509561bf7243d08e5abecb1e2a35f
 # id:     ad190757af7fd55ea6da941fac1a5124
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -339,8 +339,8 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b eaad6b8a64090f83ed3db1fbdacf8c97
-99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec
+6a38f6fbcf92173ff757305a534a002b b8953c2d81a0d9f1ca63503f5ad2ae24
+99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -442,7 +442,7 @@ my $extension = extension_for($name);
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
 
-save() unless $data{'data::edit::no-save'};
+save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
 '';
 
 __
@@ -1377,7 +1377,7 @@ internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
-parent::object                     8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object                     3dc7a5b337ee134dc2212bfd380760f0
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1397,7 +1397,7 @@ function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          735dbdece3998a4478bec3b7bdc04f03
+function::edit                          6e5bd5f35ff9cf66edd2d2d9943a7b4e
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1

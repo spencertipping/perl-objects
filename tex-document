@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  9d3838ef8f9436c7088e5f3b10dbe0c7
-# istate: 6ce88c90698db6baed0d03d8c485eb17
+# state:  d32ce71c1ffed38930eafb5b31f0187d
+# istate: e333fbca2af6c4ea71a9bcb38ca8272a
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -423,10 +423,10 @@ sdoc a1e8480e579614c01dabeecf0f963bcc
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b 581d5d1dad75f13bebc3e2a9b79c1bcd
-902333a0bd6ed90ff919fe8477cb4e69 537fe84a9d2ecdcc99fb85b30af459c1
-99aeabc9ec7fe80b1b39f5e53dc7e49e ec7516883f304201f36ea640e51d6bec
-a1e8480e579614c01dabeecf0f963bcc 0f60bbddcd3f574cc94738d991b6c2ac
+70dae4b46eb4e06798ec6f38d17d4c7b cdb1e173c2cda2da981cf29863a0beeb
+902333a0bd6ed90ff919fe8477cb4e69 a60202000f88d34a7672f049a9c52e05
+99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812
+a1e8480e579614c01dabeecf0f963bcc afb8e7eb4524c014262c84b5ede7ab52
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -544,7 +544,7 @@ my $extension = extension_for($name);
 around_hook('edit', @_, sub {
   associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
 
-save() unless $data{'data::edit::no-save'};
+save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
 '';
 
 __
@@ -1564,7 +1564,7 @@ function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           fd9b58e76c474a8fe93dc3abdccb8857
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          735dbdece3998a4478bec3b7bdc04f03
+function::edit                          6e5bd5f35ff9cf66edd2d2d9943a7b4e
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
 function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1
@@ -1676,7 +1676,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object                 3dc7a5b337ee134dc2212bfd380760f0
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1693,7 +1693,7 @@ function::sdoc-packed     8ec4975fca7228708baae6ccd241bdbf
 function::sdocp           c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary      95474943c4a5f8ff17d3cf66ddb7c386
-parent::object            8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object            3dc7a5b337ee134dc2212bfd380760f0
 retriever::code-sdoc      03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc      8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc  67c34ba8223ec36a3ae018e411354db2
@@ -1705,7 +1705,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               8f920c8ec38cb39e732cbdcc3abc7f93
+parent::object               3dc7a5b337ee134dc2212bfd380760f0
 
 __
 meta::resource('header', <<'__');
