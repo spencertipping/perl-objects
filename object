@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  5f3513fe6d4abbcee090cc72d38e2e31
-# istate: d5bcbc2df886ce170ecfd4a1d2abc812
+# state:  46bc221837824df0a27b4d3a83c5a84a
+# istate: 0f8b07ccc9e0900bea16e157613fe7eb
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -666,6 +666,10 @@ file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
+meta::function('snapshot-if-necessary', <<'__');
+snapshot() if state() ne $transient{initial};
+
+__
 meta::function('state', <<'__');
 my ($options, @attributes) = separate_options(@_);
 @attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
@@ -940,15 +944,15 @@ __
 meta::internal_function('internal::main', <<'__');
 disable();
 
-$SIG{'INT'} = sub {snapshot(); exit 1};
-
+$SIG{'INT'}              = sub {snapshot_if_necessary(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action;
 my @effective_argv = @ARGV;
 
-unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+unshift @effective_argv, $function_name and $function_name = 'method_missing'
+unless exists $externalized_functions{$function_name};
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
