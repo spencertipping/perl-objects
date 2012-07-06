@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  51a28d1daf36b6d8deb2feea91f280ea
-# istate: 66f2444a8a680c45fbbb4efdc94591d0
+# state:  b027e4e1027a2d7e2623d485acb25716
+# istate: b590b4553240fea46b342d29511fd155
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -311,7 +311,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 0f8b07ccc9e0900bea16e157613fe7eb');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -673,6 +673,10 @@ file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
+meta::function('snapshot-if-necessary', <<'__');
+snapshot() if state() ne $transient{initial};
+
+__
 meta::function('state', <<'__');
 my ($options, @attributes) = separate_options(@_);
 @attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
@@ -947,15 +951,15 @@ __
 meta::internal_function('internal::main', <<'__');
 disable();
 
-$SIG{'INT'} = sub {snapshot(); exit 1};
-
+$SIG{'INT'}              = sub {snapshot_if_necessary(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action;
 my @effective_argv = @ARGV;
 
-unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+unshift @effective_argv, $function_name and $function_name = 'method_missing'
+unless exists $externalized_functions{$function_name};
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
@@ -1246,6 +1250,7 @@ function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
 function::snapshot                      56939a47f2758421669641e15ebd66eb
+function::snapshot-if-necessary         1287f82135efdcc94af76dfa88029e4d
 function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
@@ -1272,7 +1277,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       4bd4381e1e63689984066485ae399f91
+internal_function::internal::main       6635b98bd1cc44c0dd4b2f2f2b5f05e6
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27

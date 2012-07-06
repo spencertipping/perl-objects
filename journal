@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  7e4943fb9b25edec8363cba57bb0417c
-# istate: 2c38e672540f7230a1da34ccc29d19e2
+# state:  9c5d03ae0d1f3658d667202ad08a57c3
+# istate: 8ce2d850540f723071b4ae3bc047c7f6
 # id:     9837287d488ed173dd183e0b154943b4
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -341,9 +341,9 @@ notes a9e5975593ed5d90d943ad98405c71e5
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b b8953c2d81a0d9f1ca63503f5ad2ae24
-99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812
-a9e5975593ed5d90d943ad98405c71e5 5b08a7836cda563678fff8659df70df2
+6a38f6fbcf92173ff757305a534a002b bfa09ca6efa2c8fcb5b1446d926746d0
+99aeabc9ec7fe80b1b39f5e53dc7e49e 0f8b07ccc9e0900bea16e157613fe7eb
+a9e5975593ed5d90d943ad98405c71e5 9a98af238b0096dfb82f7d0e27cf238a
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -764,6 +764,10 @@ file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
+meta::function('snapshot-if-necessary', <<'__');
+snapshot() if state() ne $transient{initial};
+
+__
 meta::function('state', <<'__');
 my ($options, @attributes) = separate_options(@_);
 @attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
@@ -1081,15 +1085,15 @@ __
 meta::internal_function('internal::main', <<'__');
 disable();
 
-$SIG{'INT'} = sub {snapshot(); exit 1};
-
+$SIG{'INT'}              = sub {snapshot_if_necessary(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action;
 my @effective_argv = @ARGV;
 
-unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+unshift @effective_argv, $function_name and $function_name = 'method_missing'
+unless exists $externalized_functions{$function_name};
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
@@ -1373,7 +1377,7 @@ internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
-parent::object                     3dc7a5b337ee134dc2212bfd380760f0
+parent::object                     0f0ac3b3f23a7d249803137357b0e598
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1381,7 +1385,7 @@ meta::parent('notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    3dc7a5b337ee134dc2212bfd380760f0
+parent::object    0f0ac3b3f23a7d249803137357b0e598
 
 __
 meta::parent('object', <<'__');
@@ -1435,6 +1439,7 @@ function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
 function::snapshot                      56939a47f2758421669641e15ebd66eb
+function::snapshot-if-necessary         1287f82135efdcc94af76dfa88029e4d
 function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
@@ -1461,7 +1466,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       4bd4381e1e63689984066485ae399f91
+internal_function::internal::main       6635b98bd1cc44c0dd4b2f2f2b5f05e6
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27

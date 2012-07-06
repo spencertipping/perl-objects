@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  9b892c31e8d8a49705434c5927a78f00
-# istate: aacbc93d5230f553cfdeaf5ccaadce35
+# state:  2910398b0f89806d212be5ccfeb69213
+# istate: 5fe6b933f983bec64b4bd3a5c216a63d
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -325,8 +325,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b cdb1e173c2cda2da981cf29863a0beeb
-99aeabc9ec7fe80b1b39f5e53dc7e49e d5bcbc2df886ce170ecfd4a1d2abc812
+70dae4b46eb4e06798ec6f38d17d4c7b bc41494eba741f1fadea8b6c28cf94b9
+99aeabc9ec7fe80b1b39f5e53dc7e49e 0f8b07ccc9e0900bea16e157613fe7eb
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -746,6 +746,10 @@ file::write(my $finalname = temporary_name($name), serialize(), noclobber => 1);
 chmod 0700, $finalname;
 hook('snapshot', $finalname);
 __
+meta::function('snapshot-if-necessary', <<'__');
+snapshot() if state() ne $transient{initial};
+
+__
 meta::function('state', <<'__');
 my ($options, @attributes) = separate_options(@_);
 @attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
@@ -1020,15 +1024,15 @@ __
 meta::internal_function('internal::main', <<'__');
 disable();
 
-$SIG{'INT'} = sub {snapshot(); exit 1};
-
+$SIG{'INT'}              = sub {snapshot_if_necessary(); exit 1};
 $transient{initial}      = state();
 chomp(my $default_action = retrieve('data::default-action'));
 
 my $function_name = shift(@ARGV) || $default_action;
 my @effective_argv = @ARGV;
 
-unshift @effective_argv, $function_name and $function_name = 'method_missing' unless exists $externalized_functions{$function_name};
+unshift @effective_argv, $function_name and $function_name = 'method_missing'
+unless exists $externalized_functions{$function_name};
 
 around_hook('main-function', $function_name, @effective_argv, sub {
   dangerous('', sub {
@@ -1319,6 +1323,7 @@ function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
 function::snapshot                      56939a47f2758421669641e15ebd66eb
+function::snapshot-if-necessary         1287f82135efdcc94af76dfa88029e4d
 function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
@@ -1345,7 +1350,7 @@ internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
-internal_function::internal::main       4bd4381e1e63689984066485ae399f91
+internal_function::internal::main       6635b98bd1cc44c0dd4b2f2f2b5f05e6
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
@@ -1396,7 +1401,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 3dc7a5b337ee134dc2212bfd380760f0
+parent::object                 0f0ac3b3f23a7d249803137357b0e598
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
