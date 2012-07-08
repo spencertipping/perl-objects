@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  e5353cc0006e577b63ef8b83c5f44af3
-# istate: 0bdcab6c59b93702ad6ae3bc009887e3
+# state:  f77fc9f7ae8a4cb6f0aba6a6fead15ce
+# istate: 05e483c9ea3db4532f819fe67bdbbc6f
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -480,7 +480,10 @@ my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 
 for my $o (sort {$a <=> $b} keys %expressions) {
   for my $e (@{$expressions{$o}}) {
-    $_ = $e{e};
+    my $expression = $$e{e};
+    my $size       = $$e{size};
+
+    $_ = $expression;
 
     # Replace these silently; this lets you define a label using a side-effectful
     # expression:
@@ -492,19 +495,19 @@ for my $o (sort {$a <=> $b} keys %expressions) {
     # Complain about these if any are undefined.
     s-:(\w+)-(\$places{'$1'} // die '$1 is not a defined label')-g;
 
-    s/:</$o/g, s/:>/($o + $e{size})/g;
-    s/L([1-9])?([^A-Z]+)/&\$le(($1) || $e{size}, $2)/g;
-    s/B([1-9])?([^A-Z]+)/&\$be(($1) || $e{size}, $2)/g;
+    s/:</$o/g, s/:>/($o + $size)/g;
+    s/L([1-9])?([^A-Z]+)/&\$le(($1) || $size, $2)/g;
+    s/B([1-9])?([^A-Z]+)/&\$be(($1) || $size, $2)/g;
 
     my $result = eval;
-    die "error evaluating $e{e}: $@" if $@;
+    die "error evaluating $_ as $expression: $@" if $@;
 
-    if ($e{size}) {
-      die "result of $_ (as $e{e}) is " . length($result) .
-          " bytes; expected $e{size}"
-          if length($result) != $e{size};
+    if ($size) {
+      die "result of $_ as $expression is " . length($result) .
+          " bytes; expected $size"
+          if length($result) != $size;
 
-      substr($concatenated, $o, $e{size}) = $result;
+      substr($concatenated, $o, $size) = $result;
     }
   }
 }
