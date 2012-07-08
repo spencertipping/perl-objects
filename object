@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  46bc221837824df0a27b4d3a83c5a84a
-# istate: 0f8b07ccc9e0900bea16e157613fe7eb
+# state:  6a3db22945073050a5e33903f0950759
+# istate: 654772ce20ce1b8cd5b2bd41fc9378f0
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -361,12 +361,14 @@ around_hook('child', @_, sub {
 
 __
 meta::function('clone', <<'__');
-for (grep length, @_) {
-  around_hook('clone', $_, sub {
+my ($options, @files) = separate_options(@_);
+for my $file (@files) {
+  around_hook('clone', $file, sub {
     hypothetically(sub {
       rm('data::permanent-identity');
-      file::write($_, serialize(), noclobber => 1);
-      chmod(0700, $_)})})}
+      file::write($file, serialize(), noclobber => 1);
+      chmod(0700, $file)})})}
+
 __
 meta::function('cp', <<'__');
 my $from = shift @_;
@@ -470,7 +472,11 @@ dangerous('', sub {&$_(@args)}) for grep /^hook::${hook}::/, sort keys %data;
 @args;
 __
 meta::function('hooks', 'join "\\n", sort keys %{$transient{active_hooks}};');
-meta::function('identity', 'retrieve(\'data::permanent-identity\') || associate(\'data::permanent-identity\', fast_hash(rand() . name() . serialize()));');
+meta::function('identity', <<'__');
+retrieve('data::permanent-identity') or
+associate('data::permanent-identity', fast_hash(join '|', map rand(), 1 .. 32));
+
+__
 meta::function('import', <<'__');
 my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
@@ -929,17 +935,23 @@ $hash = ($hash ^ ($_ & 0xffff) ^ ($_ >> 16)) * $fnv_prime % $modulus for unpack 
 $hash;
 __
 meta::internal_function('hypothetically', <<'__');
-# Applies a temporary state and returns a serialized representation.
-# The original state is restored after this, regardless of whether the
-# temporary state was successful.
+# Allows you to make changes to the data without committing them.
+# Usage:
+#
+# hypothetically(sub {
+#   ...
+# });
+#
+# Changes to %data made inside the sub {} are discarded.
 
 my %data_backup   = %data;
 my ($side_effect) = @_;
-my $return_value  = eval {&$side_effect()};
+my @result        = eval {&$side_effect()};
 %data = %data_backup;
 
 die $@ if $@;
-$return_value;
+wantarray ? @result : $result[0];
+
 __
 meta::internal_function('internal::main', <<'__');
 disable();
