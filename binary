@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  29dd5468db73ae8202f46ac10f719f67
-# istate: 2edfdaff0a7cdd2ff98f9ba5fc4c2b46
+# state:  ff105ee3940c4c140f151b5d38cdc3f0
+# istate: bca2a28e597c13be51f7e173aa8a558b
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -456,7 +456,7 @@ my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters
 my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
 my $debug      = sub {printf STDERR "%s: 0x%x\n", $_[0], $offset; ''};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
-my $label      = sub {die sprintf "label %s is defined twice" if exists $labels{$_[0]}; $labels{$_[0]} = $offset; ''};
+my $label      = sub {die sprintf "label %s is defined twice" if exists $places{$_[0]}; $places{$_[0]} = $offset; ''};
 my $expression = sub {$expression_sizes{$offset} = $_[0]; $expressions{$offset} = $_[1]; 'E' x $_[0]};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
