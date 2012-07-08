@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  80e741611d0e563328210c711bb34e3c
-# istate: fe51e1d2037ffa05ad735616f8fdaf40
+# state:  abddb80f20266509171cd5084f367829
+# istate: a2512e28df1f8a822fd6e76b1fa8ccf3
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -482,8 +482,8 @@ for my $o (sort {$a <=> $b} keys %expressions) {
   $_ = $expressions{$o};
   s/:(\w+)/\$places{'\1'}/g;
   s/:\</$o/g, s/:\>/($o + $expression_sizes{$o})/g;
-  s/<L(\d)([^A-Z]+)/&\$le(\1, \2)/g;
-  s/<B(\d)([^A-Z]+)/&\$be(\1, \2)/g;
+  s/<L([1-9])?([^A-Z]+)/&\$le(\1 || $expression_sizes{$o}, \2)/g;
+  s/<B([1-9])?([^A-Z]+)/&\$be(\1 || $expression_sizes{$o}, \2)/g;
 
   my $result = eval;
   die "error evaluating $expressions{$o}: $@" if $@;
@@ -1513,10 +1513,10 @@ syn match bt_ascii              -'\S\+-
 syn match bt_label              /::\w\+/
 
 syn region bt_expression        matchgroup=bt_expression_bracket start=/:\d\[/ end=/]/
-syn match  bt_label_ref         /:\w\+/  contained containedin=bt_expression
-syn match  bt_here              /:</     contained containedin=bt_expression
-syn match  bt_there             /:>/     contained containedin=bt_expression
-syn match  bt_endian            /[BL]\d/ contained containedin=bt_expression
+syn match  bt_label_ref         /:\w\+/       contained containedin=bt_expression
+syn match  bt_here              /:</          contained containedin=bt_expression
+syn match  bt_there             /:>/          contained containedin=bt_expression
+syn match  bt_endian            /[BL][1-9]\?/ contained containedin=bt_expression
 syn match  bt_perl_number       /0x[0-9a-f]\+\|0[0-7]\+\|\d\+/ contained containedin=bt_expression
 
 hi link bt_line_comment      Comment
