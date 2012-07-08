@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  f77fc9f7ae8a4cb6f0aba6a6fead15ce
-# istate: 05e483c9ea3db4532f819fe67bdbbc6f
+# state:  beafd87fec09715a28b1b227bbc02b77
+# istate: 315b598aea3db4532f819fe67bdbbc6f
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1550,8 +1550,8 @@ hi link bt_ascii             String
 
 hi link bt_label              Identifier
 hi link bt_expression_bracket Special
-hi link bt_label_ref          Type
-hi link bt_label_definition   Identifier
+hi link bt_label_ref          Identifier
+hi link bt_label_definition   Type
 hi link bt_here               Keyword
 hi link bt_there              Keyword
 hi link bt_endian             Special
