@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  5fd99a04be0a0ecff0907786fa438767
-# istate: 2e6714e4416205e8b1d02a1c68d5cb17
+# state:  09fc0e7589d3c112adaae219de3d0da4
+# istate: 0c7cb5ec07684e3e55e8cc7070d53d07
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -481,7 +481,10 @@ my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 
 for my $o (sort {$a <=> $b} keys %expressions) {
   $_ = $expressions{$o};
-  s/:(\w+)/\$places{'\1'}/g;
+
+  exists $places{$1} or die "$1 is not a defined label"
+  for s/:(\w+)/\$places{'\1'}/g;
+
   s/:</$o/g, s/:>/($o + $expression_sizes{$o})/g;
   s/L([1-9])?([^A-Z]+)/&\$le((\1) || $expression_sizes{$o}, \2)/g;
   s/B([1-9])?([^A-Z]+)/&\$be((\1) || $expression_sizes{$o}, \2)/g;
