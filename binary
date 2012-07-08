@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ff105ee3940c4c140f151b5d38cdc3f0
-# istate: bca2a28e597c13be51f7e173aa8a558b
+# state:  f32fff9020023a8bbd8ab6baa39cccfc
+# istate: e6893a9bcbda042c56a9a52a1639762a
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -462,7 +462,7 @@ my $expression = sub {$expression_sizes{$offset} = $_[0]; $expressions{$offset} 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
 my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | @\?\S+ |
-                      @!?[0-9a-f]+ | /\d+/ | ::\w+ | :\d*\[[\]]+\])#x, $text;
+                      @!?[0-9a-f]+ | /\d+/ | ::\w+ | :\d*\[[^\]]+\])#x, $text;
 
 &$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\S+)/          ? &$debug($1) :
        /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/  ? &$octal($1) :
