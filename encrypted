@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  462f5a73edb347ebd7ab66592309e140
-# istate: bfa09ca6efa2c8fcb5b1446d926746d0
+# state:  f7922b1c91d60c22291169f5a1243319
+# istate: d5d1e3f6f220e248a908a57dd77c1783
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -335,7 +335,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 0f8b07ccc9e0900bea16e157613fe7eb');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 654772ce20ce1b8cd5b2bd41fc9378f0');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -392,12 +392,14 @@ around_hook('child', @_, sub {
 
 __
 meta::function('clone', <<'__');
-for (grep length, @_) {
-  around_hook('clone', $_, sub {
+my ($options, @files) = separate_options(@_);
+for my $file (@files) {
+  around_hook('clone', $file, sub {
     hypothetically(sub {
       rm('data::permanent-identity');
-      file::write($_, serialize(), noclobber => 1);
-      chmod(0700, $_)})})}
+      file::write($file, serialize(), noclobber => 1);
+      chmod(0700, $file)})})}
+
 __
 meta::function('cp', <<'__');
 my $from = shift @_;
@@ -521,7 +523,11 @@ dangerous('', sub {&$_(@args)}) for grep /^hook::${hook}::/, sort keys %data;
 @args;
 __
 meta::function('hooks', 'join "\\n", sort keys %{$transient{active_hooks}};');
-meta::function('identity', 'retrieve(\'data::permanent-identity\') || associate(\'data::permanent-identity\', fast_hash(rand() . name() . serialize()));');
+meta::function('identity', <<'__');
+retrieve('data::permanent-identity') or
+associate('data::permanent-identity', fast_hash(join '|', map rand(), 1 .. 32));
+
+__
 meta::function('import', <<'__');
 my $name = pop @_;
 associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>)); 
@@ -1035,17 +1041,23 @@ $hash = ($hash ^ ($_ & 0xffff) ^ ($_ >> 16)) * $fnv_prime % $modulus for unpack 
 $hash;
 __
 meta::internal_function('hypothetically', <<'__');
-# Applies a temporary state and returns a serialized representation.
-# The original state is restored after this, regardless of whether the
-# temporary state was successful.
+# Allows you to make changes to the data without committing them.
+# Usage:
+#
+# hypothetically(sub {
+#   ...
+# });
+#
+# Changes to %data made inside the sub {} are discarded.
 
 my %data_backup   = %data;
 my ($side_effect) = @_;
-my $return_value  = eval {&$side_effect()};
+my @result        = eval {&$side_effect()};
 %data = %data_backup;
 
 die $@ if $@;
-$return_value;
+wantarray ? @result : $result[0];
+
 __
 meta::internal_function('internal::main', <<'__');
 disable();
@@ -1335,7 +1347,7 @@ function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
 function::child                         957c1bd528bbe7046442ec15ad9e2095
-function::clone                         bb42e04e10a8e54e88786b6fbc4fb213
+function::clone                         a06ac1639a58e2b9433412920d472846
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
@@ -1351,7 +1363,7 @@ function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
 function::hash                          6ee131d093e95b80039b4df9c7c84a02
 function::hook                          675cdb98b5dd8567bdd5a02ead6184b5
 function::hooks                         3d989899c616f7440429a2d9bf1cc44b
-function::identity                      6523885762fcc2f354fc25cf6ed126ce
+function::identity                      94041fcf04989fccfe1b8e54171bf603
 function::import                        5d0f0634cbd01274f2237717507198a2
 function::initial-state                 03d8ed608855a723124e79ca184d8e73
 function::is                            41564c8f21b12ab80824ac825266d805
@@ -1402,7 +1414,7 @@ internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          460e2343283eb9fd0e1815389f4e07e6
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
-internal_function::hypothetically       b83e3f894a6df8623ccd370515dfd976
+internal_function::hypothetically       1ce03d85e21d0e97f650ffdf46bbac53
 internal_function::internal::main       6635b98bd1cc44c0dd4b2f2f2b5f05e6
 internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
