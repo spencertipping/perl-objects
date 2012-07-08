@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  fae38cfe05c337ee62382552ab6e6863
-# istate: 7b495336f10d5998f600839d672ff716
+# state:  5fd99a04be0a0ecff0907786fa438767
+# istate: 2e6714e4416205e8b1d02a1c68d5cb17
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -476,8 +476,8 @@ my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | @\?\S+ |
 # results contain repetitions of the byte 'E'.
 my $concatenated = join '', @output;
 
-my $le = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
-my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255),         0 .. $_[0] - 1};
+my $le = sub {join '', map chr($_[1] >> $_ * 8 & 255),         0 .. $_[0] - 1};
+my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 
 for my $o (sort {$a <=> $b} keys %expressions) {
   $_ = $expressions{$o};
