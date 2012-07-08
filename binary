@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  37063a00d7bfffdf83f0ce89df899992
-# istate: a9249dae4fa5af2c47b8e49d3fa63d2d
+# state:  2b17c9bb2fdf5a05204e9787c07795bc
+# istate: 8baee3deaff665e433f79a11dcd86b81
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -485,19 +485,14 @@ for my $o (sort {$a <=> $b} keys %expressions) {
 
     $_ = $expression;
 
-    # Replace these silently; this lets you define a label using a side-effectful
-    # expression:
-    #
-    # :[::foo = 0x100]
-
-    s/::([^' ]+)/\$places{'$1'}/g;
-
-    # Complain about these if any are undefined.
-    s-:([^' ]+)-(\$places{'$1'} // die '$1 is not a defined label')-g;
-
     s/:</$o/g, s/:>/($o + $size)/g;
+
     s/L([1-9])?(.+)/&\$le(($1) || $size, $2)/g;
     s/B([1-9])?(.+)/&\$be(($1) || $size, $2)/g;
+
+    # :: is unchecked, : is checked
+    s/::([^' ]+)/\$places{'$1'}/g;
+    s-:([^' ]+)-(\$places{'$1'} // die '$1 is not a defined label')-g;
 
     my $result = eval;
     die "error evaluating $_ as $expression: $@" if $@;
