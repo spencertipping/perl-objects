@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  6a3db22945073050a5e33903f0950759
-# istate: 654772ce20ce1b8cd5b2bd41fc9378f0
+# state:  4ccdb4aadb585d6a1e6b0b6c75b77372
+# istate: 6ae770c53c8d71e9d53a74bffc921f9b
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -365,7 +365,10 @@ my ($options, @files) = separate_options(@_);
 for my $file (@files) {
   around_hook('clone', $file, sub {
     hypothetically(sub {
+      # Assign a new object identity.
       rm('data::permanent-identity');
+      identity();
+
       file::write($file, serialize(), noclobber => 1);
       chmod(0700, $file)})})}
 
