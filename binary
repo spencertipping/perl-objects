@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  abddb80f20266509171cd5084f367829
-# istate: a2512e28df1f8a822fd6e76b1fa8ccf3
+# state:  29dd5468db73ae8202f46ac10f719f67
+# istate: 2edfdaff0a7cdd2ff98f9ba5fc4c2b46
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -410,7 +410,7 @@ meta::function('compile-binary', <<'__');
 #
 # Assembler:
 # /::(\w\+)/            <- create label \1 pointing to next byte offset
-# /:\d\+\[([^\]]+)\]/   <- insert bytes resulting from expression evaluation
+# /:\d*\[([^\]]+)\]/    <- insert bytes resulting from expression evaluation
 #
 # The assembler gives you a language you can use to evaluate expressions. It's
 # ultimately a preprocessor transform to Perl; that is, a few string
@@ -431,7 +431,8 @@ meta::function('compile-binary', <<'__');
 # are sign-extended to the requested byte width.
 #
 # You can use 0 width to evaluate an expression with no output; that is, some
-# form of side-effect.
+# form of side-effect. In this case, the bracketed expression's value is ignored
+# and no length check occurs.
 #
 # Note that all expressions are evaluated after the basic image has been
 # generated. This allows you to use forward references to labels.
@@ -461,15 +462,15 @@ my $expression = sub {$expression_sizes{$offset} = $_[0]; $expressions{$offset} 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
 my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | @\?\S+ |
-                      @!?[0-9a-f]+ | /\d+/ | ::\w+ | :\d\[[\]]+\])#x, $text;
+                      @!?[0-9a-f]+ | /\d+/ | ::\w+ | :\d*\[[\]]+\])#x, $text;
 
 &$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\S+)/          ? &$debug($1) :
        /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/  ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/      ? &$until($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/       ? &$hex($_)   :
 
-       /^::(\w+)/           ? &$label($1)          :
-       /^:(\d)\[([^\]]+)\]/ ? &$expression($1, $2) : '') for @tokens;
+       /^::(\w+)/            ? &$label($1)          :
+       /^:(\d*)\[([^\]]+)\]/ ? &$expression($1, $2) : '') for @tokens;
 
 # Now go through and evaluate every expression. Right now the spaces for the
 # results contain repetitions of the byte 'E'.
@@ -487,11 +488,14 @@ for my $o (sort {$a <=> $b} keys %expressions) {
 
   my $result = eval;
   die "error evaluating $expressions{$o}: $@" if $@;
-  die "result of $expressions{$o} is " . length($result) .
-      " bytes; expected $expression_sizes{$o}"
-      if length($result) != $expression_sizes{$o};
 
-  substr($concatenated, $o, $expression_sizes{$o}) = $result;
+  if ($expression_sizes{$o}) {
+    die "result of $expressions{$o} is " . length($result) .
+        " bytes; expected $expression_sizes{$o}"
+        if length($result) != $expression_sizes{$o};
+
+    substr($concatenated, $o, $expression_sizes{$o}) = $result;
+  }
 }
 
 $concatenated;
@@ -1512,7 +1516,7 @@ syn match bt_ascii              -'\S\+-
 
 syn match bt_label              /::\w\+/
 
-syn region bt_expression        matchgroup=bt_expression_bracket start=/:\d\[/ end=/]/
+syn region bt_expression        matchgroup=bt_expression_bracket start=/:\d*\[/ end=/]/
 syn match  bt_label_ref         /:\w\+/       contained containedin=bt_expression
 syn match  bt_here              /:</          contained containedin=bt_expression
 syn match  bt_there             /:>/          contained containedin=bt_expression
