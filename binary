@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  1d7ed1ca4be81f239b654575069c843d
-# istate: a6e3b764c17271612640df6edf49b7cb
+# state:  267a1e93a639ecbc6270492c155b9c1c
+# istate: 8ea652c03c072ae23a0bf313e3991fd4
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -496,6 +496,7 @@ for my $o (sort {$a <=> $b} keys %expressions) {
     my (\$be, \$le, \$places) = \@_;
     $_
   }};
+  die "error compiling $_ as $expressions{$o}: $@" if $@;
 
   # It's important to give the generator a modifiable reference to %places. This
   # way expressions can side-effectfully define new labels with arbitrary
