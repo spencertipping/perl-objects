@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  0eed425920c3910d0f00f54d1001da71
-# istate: f938942d698db6baed0d03d8c485eb17
+# state:  7c029453b7e1701cd522a19acc7b2642
+# istate: 069365f32af6c4ea71a9bcb38ca8272a
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -423,7 +423,7 @@ sdoc a1e8480e579614c01dabeecf0f963bcc
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b 4d003f3fbb97a7b69a2172415864fa96
+70dae4b46eb4e06798ec6f38d17d4c7b c1206a81092e5ce22267bbd74981485d
 902333a0bd6ed90ff919fe8477cb4e69 ddfdd081247cac098af00ce79198d1fd
 99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
 a1e8480e579614c01dabeecf0f963bcc 7735c8c339814d357b2825e7eb3425ee
@@ -1699,6 +1699,7 @@ meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
 parent::object                 1eb57805f5368d0d6692124a93814e73
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
+template::def                  92f0cd3353dc6dcd4f0ee3ffca7fd928
 template::eval                 1a0e2124a05056be4abc11803883c294
 template::failing_conditional  e3a4523110dd859e828f342185de7c62
 template::include              47b5552d609d97fe7f2522d5c1027014
@@ -1835,6 +1836,50 @@ meta::section('main', <<'__');
 
 __
 meta::template('comment', '\'\';     # A mechanism for line or block comments.');
+meta::template('def', <<'__');
+# Define a new template. Analogous to the C preprocessor's #define directive.
+# For example:
+#
+# - def foo x, y, z << end
+#   hello $x, $y, and $z!
+#   This is an ${x}message.
+# - end
+#
+# You can then use that template immediately:
+#
+# - foo 3, 4, 5
+#
+# Interpolation is achieved by evaling a Perl heredoc; the usual caveats apply.
+# A variable called $body is automatically bound to the body contents if there
+# are any; for example:
+#
+# - def named x << end
+#   name $x {
+#   $body
+#   }
+# - end
+#
+# - named 'foo' << end
+#   woohoo
+# - end
+
+my ($name, $formals) = split /\s+/, $_[0], 2;
+my @formals          = split /,\s*/, $formals;
+my $body             = $_[1];
+
+my $formal_list        = join(', ', map "\$$_", @formals);
+my $parameter_bindings = "my ($formal_list) = split /,\\s*/, \$_[0]";
+my $body_binding       = "my \$body = \$_[1]";
+my $heredoc_delimiter  = state();
+
+meta::externalize "template::$name", "- def $name @formals",
+  "sub {\n$parameter_bindings;\n$body_binding;\n" .
+  "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+
+# No output from this template.
+'';
+
+__
 meta::template('eval', <<'__');
 my $result = eval $_[0];
 terminal::warning("Error during template evaluation: $@") if $@;
