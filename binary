@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  7b92b7bb06be0a5d05ecd5da3fcd4719
-# istate: e73e4ab2e0ee6387be6a63b1633dae74
+# state:  1d7ed1ca4be81f239b654575069c843d
+# istate: a6e3b764c17271612640df6edf49b7cb
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -482,16 +482,28 @@ my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 for my $o (sort {$a <=> $b} keys %expressions) {
   $_ = $expressions{$o};
 
-  s/::(\w+)/\$places{'\1'}/g;
+  s/::(\w+)/\$\$places{'\1'}/g;
 
   exists $places{$1} or die "$expressions{$o}: $1 is not a defined label"
-  for s/:(\w+)/\$places{'\1'}/g;
+  for s/:(\w+)/\$\$places{'\1'}/g;
 
   s/:</$o/g, s/:>/($o + $expression_sizes{$o})/g;
   s/L([1-9])?([^A-Z]+)/&\$le((\1) || $expression_sizes{$o}, \2)/g;
   s/B([1-9])?([^A-Z]+)/&\$be((\1) || $expression_sizes{$o}, \2)/g;
 
-  my $result = eval;
+  # Generate a thunk that sets up locals for the result.
+  my $result_generator = eval qq{sub {
+    my (\$be, \$le, \$places) = \@_;
+    $_
+  }};
+
+  # It's important to give the generator a modifiable reference to %places. This
+  # way expressions can side-effectfully define new labels with arbitrary
+  # values:
+  #
+  # :[::foo = 0xf00]
+
+  my $result = eval {&$result_generator($be, $le, \%places)};
   die "error evaluating $expressions{$o}: $@" if $@;
 
   if ($expression_sizes{$o}) {
