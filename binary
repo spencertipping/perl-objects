@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3e0e4de7c5ca9a183d172282e9543061
-# istate: 16bcec5c859f04054aec8a70e5bd623d
+# state:  7d8512e467cb8601e7a64be99b0a1c54
+# istate: fac61e8736a8219d9ed2cd4d53d30cbf
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -391,7 +391,22 @@ for my $file (@files) {
 
 __
 meta::function('compile-binary', <<'__');
-# Compiles binary-text to binary output.
+# Compiles binary-text to binary output. The binary-text is tokenized and then
+# compiled, where each token is one of the following:
+#
+# Literal:
+# /[0-9a-f]{2}/         <- single byte in hex
+# /o[0-3][0-7]{2}/      <- single byte in octal
+# /-[01]{8}/            <- single byte in binary
+# /'\S+/                <- bytes in ASCII
+#
+# Placement:
+# /@![0-9a-f]+/         <- place assertion (die unless next byte is at place)
+# /@[0-9a-f]+/          <- place seek (emit null bytes until next byte is place)
+#
+# Repetition:
+# /\/(\d+)\//           <- repeat next byte \1 times
+
 my $text = join ' ', map split(/\s+/), split /#.*/m, retrieve($_[0]);
 my $hex_letters = '0123456789abcdef';
 
