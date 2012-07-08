@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  84bef5f84cb7ca6a51b067dfd3277505
-# istate: 39d3d84194660340695b5a6a037cc2f7
+# state:  80e741611d0e563328210c711bb34e3c
+# istate: fe51e1d2037ffa05ad735616f8fdaf40
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1510,6 +1510,15 @@ syn match bt_place              -@![0-9a-f]\+-
 syn match bt_debug              -@?\w\+-
 syn match bt_ascii              -'\S\+-
 
+syn match bt_label              /::\w\+/
+
+syn region bt_expression        matchgroup=bt_expression_bracket start=/:\d\[/ end=/]/
+syn match  bt_label_ref         /:\w\+/  contained containedin=bt_expression
+syn match  bt_here              /:</     contained containedin=bt_expression
+syn match  bt_there             /:>/     contained containedin=bt_expression
+syn match  bt_endian            /[BL]\d/ contained containedin=bt_expression
+syn match  bt_perl_number       /0x[0-9a-f]\+\|0[0-7]\+\|\d\+/ contained containedin=bt_expression
+
 hi link bt_line_comment      Comment
 hi link bt_binary_octet      Keyword
 hi link bt_octal_byte        Keyword
@@ -1519,6 +1528,14 @@ hi link bt_address           Preproc
 hi link bt_place             Identifier
 hi link bt_debug             Comment
 hi link bt_ascii             String
+
+hi link bt_label              Identifier
+hi link bt_expression_bracket Special
+hi link bt_label_ref          Type
+hi link bt_here               Keyword
+hi link bt_there              Keyword
+hi link bt_endian             Special
+hi link bt_perl_number        Number
 
 __
 internal::main();
