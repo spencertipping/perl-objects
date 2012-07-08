@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  09fc0e7589d3c112adaae219de3d0da4
-# istate: 0c7cb5ec07684e3e55e8cc7070d53d07
+# state:  7b92b7bb06be0a5d05ecd5da3fcd4719
+# istate: e73e4ab2e0ee6387be6a63b1633dae74
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -419,7 +419,7 @@ meta::function('compile-binary', <<'__');
 # matches the number before the open bracket. Here are the preprocessor
 # transformations:
 #
-# s/:(\w+)/$places{'\1'}/g              <- label references
+# s/::?(\w+)/$places{'\1'}/g            <- label references
 # s/:</$o/g                             <- offset at beginning of expression
 # s/:>/($o + $expression_sizes{$o})/g   <- offset at end of expression
 # s/L(\d)([^A-Z]*)/&$le(\1, \2)/g       <- little-endian integer encoding
@@ -482,7 +482,9 @@ my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 for my $o (sort {$a <=> $b} keys %expressions) {
   $_ = $expressions{$o};
 
-  exists $places{$1} or die "$1 is not a defined label"
+  s/::(\w+)/\$places{'\1'}/g;
+
+  exists $places{$1} or die "$expressions{$o}: $1 is not a defined label"
   for s/:(\w+)/\$places{'\1'}/g;
 
   s/:</$o/g, s/:>/($o + $expression_sizes{$o})/g;
@@ -1520,6 +1522,7 @@ syn match bt_ascii              -'\S\+-
 syn match bt_label              /::\w\+/
 
 syn region bt_expression        matchgroup=bt_expression_bracket start=/:\d*\[/ end=/]/
+syn match  bt_label_definition  /::\w\+/      contained containedin=bt_expression
 syn match  bt_label_ref         /:\w\+/       contained containedin=bt_expression
 syn match  bt_here              /:</          contained containedin=bt_expression
 syn match  bt_there             /:>/          contained containedin=bt_expression
@@ -1539,6 +1542,7 @@ hi link bt_ascii             String
 hi link bt_label              Identifier
 hi link bt_expression_bracket Special
 hi link bt_label_ref          Type
+hi link bt_label_definition   Identifier
 hi link bt_here               Keyword
 hi link bt_there              Keyword
 hi link bt_endian             Special
