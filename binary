@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  f32fff9020023a8bbd8ab6baa39cccfc
-# istate: e6893a9bcbda042c56a9a52a1639762a
+# state:  87c187f8100e1a577d2302fad636d6ad
+# istate: 84051a84cfbebe4aaf53b6c73c6e9fbd
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -482,9 +482,9 @@ my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255),         0 .. $_[0] - 1};
 for my $o (sort {$a <=> $b} keys %expressions) {
   $_ = $expressions{$o};
   s/:(\w+)/\$places{'\1'}/g;
-  s/:\</$o/g, s/:\>/($o + $expression_sizes{$o})/g;
-  s/<L([1-9])?([^A-Z]+)/&\$le(\1 || $expression_sizes{$o}, \2)/g;
-  s/<B([1-9])?([^A-Z]+)/&\$be(\1 || $expression_sizes{$o}, \2)/g;
+  s/:</$o/g, s/:>/($o + $expression_sizes{$o})/g;
+  s/L([1-9])?([^A-Z]+)/&\$le(\1 || $expression_sizes{$o}, \2)/g;
+  s/B([1-9])?([^A-Z]+)/&\$be(\1 || $expression_sizes{$o}, \2)/g;
 
   my $result = eval;
   die "error evaluating $expressions{$o}: $@" if $@;
