@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ff1a516cf86e51772da974d945fc6e4a
-# istate: c1206a81092e5ce22267bbd74981485d
+# state:  79e3681156088d8353fe4e0570d41d8d
+# istate: c836bdf70b43abfd4a2e2440100a5f8f
 # id:     70dae4b46eb4e06798ec6f38d17d4c7b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1456,8 +1456,10 @@ my $body_binding       = "my \$body = \$_[1]";
 my $heredoc_delimiter  = state();
 
 meta::externalize "template::$name", "- def $name @formals",
-  "sub {\n$parameter_bindings;\n$body_binding;\n" .
-  "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+  eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
+       "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+
+die $@ if $@;
 
 # No output from this template.
 '';
