@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  75b1dae2c3e29c241dfedc094e576736
-# istate: 65573531a016e165e8ac88c8270bd15c
+# state:  255bc51e23a9f5888340127dafeee849
+# istate: ae38b57108a4e12ca6b31deb0aa1800c
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -491,8 +491,8 @@ for my $o (sort {$a <=> $b} keys %expressions) {
 
   # Complain about these if any are undefined.
   for my $label (s/:(\w+)/\$places{'$1'}/g) {
-    die "$expressions{$o}: $label is not a defined label"
-    unless exists $places{$label};
+    die "$expressions{$o}: $1 is not a defined label"
+    unless exists $places{$1};
   }
 
   s/:</$o/g, s/:>/($o + $expression_sizes{$o})/g;
