@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  2b17c9bb2fdf5a05204e9787c07795bc
-# istate: 8baee3deaff665e433f79a11dcd86b81
+# state:  948b3dcb80eac4d16a91f916420ba46a
+# istate: 78b8637d85c49386339c614106100448
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -487,12 +487,12 @@ for my $o (sort {$a <=> $b} keys %expressions) {
 
     s/:</$o/g, s/:>/($o + $size)/g;
 
-    s/L([1-9])?(.+)/&\$le(($1) || $size, $2)/g;
-    s/B([1-9])?(.+)/&\$be(($1) || $size, $2)/g;
-
     # :: is unchecked, : is checked
     s/::([^' ]+)/\$places{'$1'}/g;
     s-:([^' ]+)-(\$places{'$1'} // die '$1 is not a defined label')-g;
+
+    s/L([1-9])?(.+)/&\$le(($1) || $size, $2)/g;
+    s/B([1-9])?(.+)/&\$be(($1) || $size, $2)/g;
 
     my $result = eval;
     die "error evaluating $_ as $expression: $@" if $@;
