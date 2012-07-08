@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  328dd47535b9ff39283c0233013e89ad
-# istate: eeb61c936a79a3186e6542eff782e929
+# state:  e5353cc0006e577b63ef8b83c5f44af3
+# istate: 0bdcab6c59b93702ad6ae3bc009887e3
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -421,7 +421,7 @@ meta::function('compile-binary', <<'__');
 #
 # s/::?(\w+)/$places{'\1'}/g            <- label references
 # s/:</$o/g                             <- offset at beginning of expression
-# s/:>/($o + $expression_sizes{$o})/g   <- offset at end of expression
+# s/:>/($o + $e{size})/g                <- offset at end of expression
 # s/L(\d)([^A-Z]*)/&$le(\1, \2)/g       <- little-endian integer encoding
 # s/B(\d)([^A-Z]*)/&$be(\1, \2)/g       <- big-endian integer encoding
 #
@@ -442,7 +442,6 @@ my $hex_letters = '0123456789abcdef';
 
 my %places;
 my %expressions;
-my %expression_sizes;
 my @output;
 
 my $offset     = 0;
@@ -457,7 +456,7 @@ my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
 my $debug      = sub {printf STDERR "%s: 0x%x\n", $_[0], $offset; ''};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
 my $label      = sub {die sprintf "label %s is defined twice" if exists $places{$_[0]}; $places{$_[0]} = $offset; ''};
-my $expression = sub {$expression_sizes{$offset} = $_[0]; $expressions{$offset} = $_[1]; 'E' x $_[0]};
+my $expression = sub {push @{$expressions{$offset} ||= []}, {size => $_[0], e => $_[1]}; 'E' x $_[0]};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
@@ -480,32 +479,33 @@ my $le = sub {join '', map chr($_[1] >> $_ * 8 & 255),         0 .. $_[0] - 1};
 my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 
 for my $o (sort {$a <=> $b} keys %expressions) {
-  $_ = $expressions{$o};
+  for my $e (@{$expressions{$o}}) {
+    $_ = $e{e};
 
-  # Replace these silently; this lets you define a label using a side-effectful
-  # expression:
-  #
-  # :[::foo = 0x100]
+    # Replace these silently; this lets you define a label using a side-effectful
+    # expression:
+    #
+    # :[::foo = 0x100]
 
-  s/::(\w+)/\$places{'\1'}/g;
+    s/::(\w+)/\$places{'$1'}/g;
 
-  # Complain about these if any are undefined.
-  s-:(\w+)
-   -(\$places{'$1'} // die '$expressions{$o}: $1 is not a defined label')-xg;
+    # Complain about these if any are undefined.
+    s-:(\w+)-(\$places{'$1'} // die '$1 is not a defined label')-g;
 
-  s/:</$o/g, s/:>/($o + $expression_sizes{$o})/g;
-  s/L([1-9])?([^A-Z]+)/&\$le((\1) || $expression_sizes{$o}, \2)/g;
-  s/B([1-9])?([^A-Z]+)/&\$be((\1) || $expression_sizes{$o}, \2)/g;
+    s/:</$o/g, s/:>/($o + $e{size})/g;
+    s/L([1-9])?([^A-Z]+)/&\$le(($1) || $e{size}, $2)/g;
+    s/B([1-9])?([^A-Z]+)/&\$be(($1) || $e{size}, $2)/g;
 
-  my $result = eval;
-  die "error evaluating $expressions{$o}: $@" if $@;
+    my $result = eval;
+    die "error evaluating $e{e}: $@" if $@;
 
-  if ($expression_sizes{$o}) {
-    die "result of $expressions{$o} is " . length($result) .
-        " bytes; expected $expression_sizes{$o}"
-        if length($result) != $expression_sizes{$o};
+    if ($e{size}) {
+      die "result of $_ (as $e{e}) is " . length($result) .
+          " bytes; expected $e{size}"
+          if length($result) != $e{size};
 
-    substr($concatenated, $o, $expression_sizes{$o}) = $result;
+      substr($concatenated, $o, $e{size}) = $result;
+    }
   }
 }
 
