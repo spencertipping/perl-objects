@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  c61c7dc66cc2d15c87fc8315e356c60b
-# istate: b3b376631c79e926ef04c6a9f8d50069
+# state:  8ce9b2e05f31b9356af4777b87fb5efe
+# istate: 0a35bc9b724ea8f6d74d86a06ac04ed5
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -325,8 +325,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b c1206a81092e5ce22267bbd74981485d
-99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
+70dae4b46eb4e06798ec6f38d17d4c7b 53b0cb450de5040cedbfedd7521ab104
+99aeabc9ec7fe80b1b39f5e53dc7e49e e024d1ddb534961d35855863dea1e160
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -801,6 +801,9 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
+  my $can_skip_already_seen = !($$options{'-K'} || $$options{'--no-skip'}) &&
+                              !$force && !$clobber_divergent;
+
   save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
@@ -811,7 +814,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
+      next if $can_skip_already_seen and
+              $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -1343,7 +1347,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
+function::update-from                   10461f1e23b645c1a64f69eabef61b4f
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1416,10 +1420,10 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 1eb57805f5368d0d6692124a93814e73
+parent::object                 b9a2def7969dcd4b475cae3f95be98d3
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
-template::def                  92f0cd3353dc6dcd4f0ee3ffca7fd928
+template::def                  6298278ca5c461d4380ff02498a6103d
 template::eval                 1a0e2124a05056be4abc11803883c294
 template::failing_conditional  e3a4523110dd859e828f342185de7c62
 template::include              47b5552d609d97fe7f2522d5c1027014
@@ -1488,8 +1492,10 @@ my $body_binding       = "my \$body = \$_[1]";
 my $heredoc_delimiter  = state();
 
 meta::externalize "template::$name", "- def $name @formals",
-  "sub {\n$parameter_bindings;\n$body_binding;\n" .
-  "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+  eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
+       "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+
+die $@ if $@;
 
 # No output from this template.
 '';

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  b6048afcc142a723e0026a0083fa17b2
-# istate: 972ab2fd1bf7243d08e5abecb1e2a35f
+# state:  1f91001c23c794f93e9fb3907ea1967f
+# istate: 2803cfa51bf7243d08e5abecb1e2a35f
 # id:     ad190757af7fd55ea6da941fac1a5124
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -339,8 +339,8 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b cf2e24d441dee81893bf5f01178c04e2
-99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
+6a38f6fbcf92173ff757305a534a002b 20523eb771e6f3a39759f5444f8989cd
+99aeabc9ec7fe80b1b39f5e53dc7e49e e024d1ddb534961d35855863dea1e160
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -821,6 +821,9 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
+  my $can_skip_already_seen = !($$options{'-K'} || $$options{'--no-skip'}) &&
+                              !$force && !$clobber_divergent;
+
   save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
@@ -831,7 +834,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
+      next if $can_skip_already_seen and
+              $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -1396,7 +1400,7 @@ internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
-parent::object                     1eb57805f5368d0d6692124a93814e73
+parent::object                     b9a2def7969dcd4b475cae3f95be98d3
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1456,7 +1460,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
+function::update-from                   10461f1e23b645c1a64f69eabef61b4f
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  948b3dcb80eac4d16a91f916420ba46a
-# istate: 78b8637d85c49386339c614106100448
+# state:  9dd8243fab9b077df9507d9e34c7f3cb
+# istate: 7e72ae1430d87643a2a55158cf460b2a
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -316,8 +316,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-902333a0bd6ed90ff919fe8477cb4e69 ddfdd081247cac098af00ce79198d1fd
-99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
+902333a0bd6ed90ff919fe8477cb4e69 4b7a49bce518dff6d986099a732538cf
+99aeabc9ec7fe80b1b39f5e53dc7e49e e024d1ddb534961d35855863dea1e160
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -858,6 +858,9 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
+  my $can_skip_already_seen = !($$options{'-K'} || $$options{'--no-skip'}) &&
+                              !$force && !$clobber_divergent;
+
   save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
@@ -868,7 +871,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
+      next if $can_skip_already_seen and
+              $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -1404,7 +1408,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
+function::update-from                   10461f1e23b645c1a64f69eabef61b4f
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1477,7 +1481,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               1eb57805f5368d0d6692124a93814e73
+parent::object               b9a2def7969dcd4b475cae3f95be98d3
 
 __
 meta::retriever('bin', <<'__');

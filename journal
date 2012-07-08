@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  35bb9fd392acc8b07319e3f8d08e9aba
-# istate: 6aab177a540f723072a176e33085a320
+# state:  179a2f7b8ff3813d563a76333f66c7db
+# istate: f08cfe2e540f7230f83b6cdd46ac4aa6
 # id:     9837287d488ed173dd183e0b154943b4
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -341,9 +341,9 @@ notes a9e5975593ed5d90d943ad98405c71e5
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b cf2e24d441dee81893bf5f01178c04e2
-99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
-a9e5975593ed5d90d943ad98405c71e5 4471aca86a04a4d75c21cf5090c71011
+6a38f6fbcf92173ff757305a534a002b 20523eb771e6f3a39759f5444f8989cd
+99aeabc9ec7fe80b1b39f5e53dc7e49e e024d1ddb534961d35855863dea1e160
+a9e5975593ed5d90d943ad98405c71e5 2ed219fe3e2003006818ddfa52aaf396
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -825,6 +825,9 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
+  my $can_skip_already_seen = !($$options{'-K'} || $$options{'--no-skip'}) &&
+                              !$force && !$clobber_divergent;
+
   save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
@@ -835,7 +838,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
+      next if $can_skip_already_seen and
+              $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -1392,7 +1396,7 @@ internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
-parent::object                     1eb57805f5368d0d6692124a93814e73
+parent::object                     b9a2def7969dcd4b475cae3f95be98d3
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1400,7 +1404,7 @@ meta::parent('notes', <<'__');
 function::note    c6d52ffe73cd48cd95fdc561c59d9f63
 function::notes   7229b326ac8686b2db6de98496bc7527
 meta::type::note  f81bea58841a438e4ee34608ab4f54c0
-parent::object    1eb57805f5368d0d6692124a93814e73
+parent::object    b9a2def7969dcd4b475cae3f95be98d3
 
 __
 meta::parent('object', <<'__');
@@ -1459,7 +1463,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
+function::update-from                   10461f1e23b645c1a64f69eabef61b4f
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3

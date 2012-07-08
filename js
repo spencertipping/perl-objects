@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  eef40031cf323db2b54bb7758773c458
-# istate: fdcbc2ad9f07ec07b783f8c5c2c0a287
+# state:  ba91897870a1f9baf6c817fd4d68ed08
+# istate: 477caa79b2ebeb2830dd68391c90c424
 # id:     246bc56c88e8e8daae3737dbb16a2a2c
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -307,7 +307,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e024d1ddb534961d35855863dea1e160');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -724,6 +724,9 @@ around_hook('update-from-invocation', separate_options(@_), sub {
   my $force             = $$options{'-f'} || $$options{'--force'};
   my $clobber_divergent = $$options{'-D'} || $$options{'--clobber-divergent'};
 
+  my $can_skip_already_seen = !($$options{'-K'} || $$options{'--no-skip'}) &&
+                              !$force && !$clobber_divergent;
+
   save_state('before-update') unless $no_state;
 
   for my $target (@targets) {
@@ -734,7 +737,8 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       terminal::warning("$target_filename has no externally visible metadata (makes updating slower)") unless $parent_metadata{id};
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
-      next if $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
+      next if $can_skip_already_seen and
+              $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
       my %divergent;
@@ -1266,7 +1270,7 @@ function::state                         ef2051d9fe0684044d0f3df752e0c949
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   6d72dd26078dd6ef11dbb021bd3d4997
+function::update-from                   10461f1e23b645c1a64f69eabef61b4f
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
