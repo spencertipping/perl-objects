@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  baeb0c883a087da6cc3769d75e122e4e
-# istate: 83565cf38882be896854c5f9692e0763
+# state:  0eed425920c3910d0f00f54d1001da71
+# istate: f938942d698db6baed0d03d8c485eb17
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -423,10 +423,10 @@ sdoc a1e8480e579614c01dabeecf0f963bcc
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b d25145c918aa4794e069b221610363ca
-902333a0bd6ed90ff919fe8477cb4e69 4e809d8e76d1f3b9339a5724461a957e
-99aeabc9ec7fe80b1b39f5e53dc7e49e 654772ce20ce1b8cd5b2bd41fc9378f0
-a1e8480e579614c01dabeecf0f963bcc d52cd1fc5efafdec2bb18f7d524514c3
+70dae4b46eb4e06798ec6f38d17d4c7b 4d003f3fbb97a7b69a2172415864fa96
+902333a0bd6ed90ff919fe8477cb4e69 ddfdd081247cac098af00ce79198d1fd
+99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
+a1e8480e579614c01dabeecf0f963bcc 7735c8c339814d357b2825e7eb3425ee
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -488,7 +488,10 @@ my ($options, @files) = separate_options(@_);
 for my $file (@files) {
   around_hook('clone', $file, sub {
     hypothetically(sub {
+      # Assign a new object identity.
       rm('data::permanent-identity');
+      identity();
+
       file::write($file, serialize(), noclobber => 1);
       chmod(0700, $file)})})}
 
@@ -1574,7 +1577,7 @@ function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
 function::child                         957c1bd528bbe7046442ec15ad9e2095
-function::clone                         a06ac1639a58e2b9433412920d472846
+function::clone                         d03e474252c7283e184f2ecddde33137
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
@@ -1693,7 +1696,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 a37424dde13ac2d896d5d1f6c48603d7
+parent::object                 1eb57805f5368d0d6692124a93814e73
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294
@@ -1710,7 +1713,7 @@ function::sdoc-packed     8ec4975fca7228708baae6ccd241bdbf
 function::sdocp           c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary      95474943c4a5f8ff17d3cf66ddb7c386
-parent::object            a37424dde13ac2d896d5d1f6c48603d7
+parent::object            1eb57805f5368d0d6692124a93814e73
 retriever::code-sdoc      03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc      8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc  67c34ba8223ec36a3ae018e411354db2
@@ -1722,7 +1725,7 @@ __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
 meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
-parent::object               a37424dde13ac2d896d5d1f6c48603d7
+parent::object               1eb57805f5368d0d6692124a93814e73
 
 __
 meta::resource('header', <<'__');

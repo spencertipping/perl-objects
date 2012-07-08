@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  6488e3d63625fead1112e904646a58ab
-# istate: 008ce2f91bf7243d08e5abecb1e2a35f
+# state:  b6048afcc142a723e0026a0083fa17b2
+# istate: 972ab2fd1bf7243d08e5abecb1e2a35f
 # id:     ad190757af7fd55ea6da941fac1a5124
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -339,8 +339,8 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b d5d1e3f6f220e248a908a57dd77c1783
-99aeabc9ec7fe80b1b39f5e53dc7e49e 654772ce20ce1b8cd5b2bd41fc9378f0
+6a38f6fbcf92173ff757305a534a002b cf2e24d441dee81893bf5f01178c04e2
+99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -406,7 +406,10 @@ my ($options, @files) = separate_options(@_);
 for my $file (@files) {
   around_hook('clone', $file, sub {
     hypothetically(sub {
+      # Assign a new object identity.
       rm('data::permanent-identity');
+      identity();
+
       file::write($file, serialize(), noclobber => 1);
       chmod(0700, $file)})})}
 
@@ -1393,7 +1396,7 @@ internal_function::parse_hidden    00edb53a3576b8b096dcd51b15c34aa8
 internal_function::read_password   941f273317a5778ad4b84789a5fa04fc
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 ffb46dfadb136932d37a2731fc2a877e
-parent::object                     a37424dde13ac2d896d5d1f6c48603d7
+parent::object                     1eb57805f5368d0d6692124a93814e73
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 
 __
@@ -1407,7 +1410,7 @@ function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
 function::child                         957c1bd528bbe7046442ec15ad9e2095
-function::clone                         a06ac1639a58e2b9433412920d472846
+function::clone                         d03e474252c7283e184f2ecddde33137
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c

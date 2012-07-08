@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  f1f89227f4adf4825d9bfb5d5c7e66b5
-# istate: a1817bfc11db2cc3dfb68fb62e296037
+# state:  db3f413757628ee442ce066120d2e94d
+# istate: 623704e6d6c5ced331693f842dd8041d
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -325,8 +325,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b d25145c918aa4794e069b221610363ca
-99aeabc9ec7fe80b1b39f5e53dc7e49e 654772ce20ce1b8cd5b2bd41fc9378f0
+70dae4b46eb4e06798ec6f38d17d4c7b 4d003f3fbb97a7b69a2172415864fa96
+99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -391,7 +391,10 @@ my ($options, @files) = separate_options(@_);
 for my $file (@files) {
   around_hook('clone', $file, sub {
     hypothetically(sub {
+      # Assign a new object identity.
       rm('data::permanent-identity');
+      identity();
+
       file::write($file, serialize(), noclobber => 1);
       chmod(0700, $file)})})}
 
@@ -1294,7 +1297,7 @@ function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
 function::child                         957c1bd528bbe7046442ec15ad9e2095
-function::clone                         a06ac1639a58e2b9433412920d472846
+function::clone                         d03e474252c7283e184f2ecddde33137
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
@@ -1413,7 +1416,7 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 a37424dde13ac2d896d5d1f6c48603d7
+parent::object                 1eb57805f5368d0d6692124a93814e73
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::eval                 1a0e2124a05056be4abc11803883c294

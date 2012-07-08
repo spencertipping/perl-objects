@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  249048384756ffd6b21d5c28e0c3c9f0
-# istate: 5245673b976f0cedb589ff555d626cb6
+# state:  eef40031cf323db2b54bb7758773c458
+# istate: fdcbc2ad9f07ec07b783f8c5c2c0a287
 # id:     246bc56c88e8e8daae3737dbb16a2a2c
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -307,7 +307,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 654772ce20ce1b8cd5b2bd41fc9378f0');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 6ae770c53c8d71e9d53a74bffc921f9b');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -368,7 +368,10 @@ my ($options, @files) = separate_options(@_);
 for my $file (@files) {
   around_hook('clone', $file, sub {
     hypothetically(sub {
+      # Assign a new object identity.
       rm('data::permanent-identity');
+      identity();
+
       file::write($file, serialize(), noclobber => 1);
       chmod(0700, $file)})})}
 
@@ -1217,7 +1220,7 @@ function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
 function::child                         957c1bd528bbe7046442ec15ad9e2095
-function::clone                         a06ac1639a58e2b9433412920d472846
+function::clone                         d03e474252c7283e184f2ecddde33137
 function::cp                            3fe69d1b58d90045ad520048977538c4
 function::create                        d65deb895a848b32d3d7ed92e81e8cb0
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
