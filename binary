@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  7d8512e467cb8601e7a64be99b0a1c54
-# istate: fac61e8736a8219d9ed2cd4d53d30cbf
+# state:  84bef5f84cb7ca6a51b067dfd3277505
+# istate: 39d3d84194660340695b5a6a037cc2f7
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -400,16 +400,48 @@ meta::function('compile-binary', <<'__');
 # /-[01]{8}/            <- single byte in binary
 # /'\S+/                <- bytes in ASCII
 #
-# Placement:
+# Placement (low-level):
 # /@![0-9a-f]+/         <- place assertion (die unless next byte is at place)
 # /@[0-9a-f]+/          <- place seek (emit null bytes until next byte is place)
+# /@\?(\w\+)/           <- debugging: print \1 followed by its location
 #
 # Repetition:
 # /\/(\d+)\//           <- repeat next byte \1 times
+#
+# Assembler:
+# /::(\w\+)/            <- create label \1 pointing to next byte offset
+# /:\d\+\[([^\]]+)\]/   <- insert bytes resulting from expression evaluation
+#
+# The assembler gives you a language you can use to evaluate expressions. It's
+# ultimately a preprocessor transform to Perl; that is, a few string
+# substitutions are made and then Perl evaluates the result, dropping that into
+# the generated image. The assembler dies unless the expression's byte size
+# matches the number before the open bracket. Here are the preprocessor
+# transformations:
+#
+# s/:(\w+)/$places{'\1'}/g              <- label references
+# s/:</$o/g                             <- offset at beginning of expression
+# s/:>/($o + $expression_sizes{$o})/g   <- offset at end of expression
+# s/L(\d)([^A-Z]*)/&$le(\1, \2)/g       <- little-endian integer encoding
+# s/B(\d)([^A-Z]*)/&$be(\1, \2)/g       <- big-endian integer encoding
+#
+# Little-endian and big-endian encoders take a numeric argument indicating how
+# many bytes should be encoded. This number is limited only by Perl's numerical
+# precision, and by the fact that you have only one digit to specify it. Results
+# are sign-extended to the requested byte width.
+#
+# You can use 0 width to evaluate an expression with no output; that is, some
+# form of side-effect.
+#
+# Note that all expressions are evaluated after the basic image has been
+# generated. This allows you to use forward references to labels.
 
 my $text = join ' ', map split(/\s+/), split /#.*/m, retrieve($_[0]);
 my $hex_letters = '0123456789abcdef';
 
+my %places;
+my %expressions;
+my %expression_sizes;
 my @output;
 
 my $offset     = 0;
@@ -423,16 +455,46 @@ my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters
 my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
 my $debug      = sub {printf STDERR "%s: 0x%x\n", $_[0], $offset; ''};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
+my $label      = sub {die sprintf "label %s is defined twice" if exists $labels{$_[0]}; $labels{$_[0]} = $offset; ''};
+my $expression = sub {$expression_sizes{$offset} = $_[0]; $expressions{$offset} = $_[1]; 'E' x $_[0]};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#('\S+|-[01]{8}|o[0-3][0-7]{2}|[0-9a-f]{2}|@\?\S+|@!?[0-9a-f]+|/\d+/)#, $text;
-&$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\S+)/         ? &$debug($1) :
-       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
-       /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/     ? &$until($1) :
-       /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   : '') for @tokens;
+my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | @\?\S+ |
+                      @!?[0-9a-f]+ | /\d+/ | ::\w+ | :\d\[[\]]+\])#x, $text;
 
-join '', @output;
+&$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\S+)/          ? &$debug($1) :
+       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/  ? &$octal($1) :
+       /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/      ? &$until($1) :
+       /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/       ? &$hex($_)   :
+
+       /^::(\w+)/           ? &$label($1)          :
+       /^:(\d)\[([^\]]+)\]/ ? &$expression($1, $2) : '') for @tokens;
+
+# Now go through and evaluate every expression. Right now the spaces for the
+# results contain repetitions of the byte 'E'.
+my $concatenated = join '', @output;
+
+my $le = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
+my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255),         0 .. $_[0] - 1};
+
+for my $o (sort {$a <=> $b} keys %expressions) {
+  $_ = $expressions{$o};
+  s/:(\w+)/\$places{'\1'}/g;
+  s/:\</$o/g, s/:\>/($o + $expression_sizes{$o})/g;
+  s/<L(\d)([^A-Z]+)/&\$le(\1, \2)/g;
+  s/<B(\d)([^A-Z]+)/&\$be(\1, \2)/g;
+
+  my $result = eval;
+  die "error evaluating $expressions{$o}: $@" if $@;
+  die "result of $expressions{$o} is " . length($result) .
+      " bytes; expected $expression_sizes{$o}"
+      if length($result) != $expression_sizes{$o};
+
+  substr($concatenated, $o, $expression_sizes{$o}) = $result;
+}
+
+$concatenated;
 
 __
 meta::function('cp', <<'__');
