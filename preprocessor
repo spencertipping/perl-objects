@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  9c5b1df732972bb62ba110502291e4b0
-# istate: 544c9a2f3ec7505a3c97868049fbe62a
+# state:  0d86c62e739c560a4d74e832033c1c58
+# istate: 406b66e1ee15bc4cd3dbca435b9ebd63
 # id:     70dae4b46eb4e06798ec6f38d17d4c7b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1478,16 +1478,17 @@ my $plural = $$options{'--plural'} || $$options{'-p'};
 die "- def $name: cannot use formal parameters with the -p option"
 if $plural && @formals;
 
-$plural ? meta::externalize "template::$name", "- def $name @formals",
-            eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
-                 "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}"
-
-        : meta::externalize "template::$name", "- def -p $name",
+$plural ? meta::externalize "template::$name", "- def -p $name",
             eval "sub {\n$body_binding;\n" .
                  "join \"\\n\", map <<$heredoc_delimiter, " .
                                     "split /,\\s*/, \$_[0];\n" .
                  "$body\n" .
-                 "$heredoc_delimiter\n}";
+                 "$heredoc_delimiter\n}"
+
+        : meta::externalize "template::$name", "- def $name @formals",
+            eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
+                 "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+
 die $@ if $@;
 
 # No output from this template.
