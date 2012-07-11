@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  d30f552552cff792aa9e35829dd2c6a8
-# istate: 53b0cb450de5040cedbfedd7521ab104
+# state:  9c5b1df732972bb62ba110502291e4b0
+# istate: 544c9a2f3ec7505a3c97868049fbe62a
 # id:     70dae4b46eb4e06798ec6f38d17d4c7b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1449,20 +1449,45 @@ meta::template('def', <<'__');
 # - named 'foo' << end
 #   woohoo
 # - end
+#
+# You can define a "plural" form like this:
+#
+# - def -p say_hi_to << end
+#   Hi $_!
+# - end
+#
+# - say_hi_to Foo, Bar, Baz
+#
+# Plural forms still have the $body variable (which doesn't change across
+# arguments), but they can't take formal parameters.
 
-my ($name, $formals) = split /\s+/, $_[0], 2;
-my @formals          = split /,\s*/, $formals;
-my $body             = $_[1];
+my ($options, $name, @args) = separate_options(split /\s+/, $_[0]);
+my @formals                 = map split(/,\s*/), @args;
+my $body                    = $_[1];
 
-my $formal_list        = join(', ', map "\$$_", @formals);
-my $parameter_bindings = "my ($formal_list) = split /,\\s*/, \$_[0]";
-my $body_binding       = "my \$body = \$_[1]";
-my $heredoc_delimiter  = state();
+my $formal_list             = join(', ', map "\$$_", @formals);
+my $parameter_bindings      = "my ($formal_list) = split /,\\s*/, \$_[0]";
+my $body_binding            = "my \$body = \$_[1]";
+my $heredoc_delimiter       = state();
 
-meta::externalize "template::$name", "- def $name @formals",
-  eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
-       "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+# This will work great unless you put large hexadecimal barewords on otherwise
+# blank lines in your code. At that point there's a 2^-128 chance that it will
+# bomb out horribly.
+my $plural = $$options{'--plural'} || $$options{'-p'};
 
+die "- def $name: cannot use formal parameters with the -p option"
+if $plural && @formals;
+
+$plural ? meta::externalize "template::$name", "- def $name @formals",
+            eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
+                 "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}"
+
+        : meta::externalize "template::$name", "- def -p $name",
+            eval "sub {\n$body_binding;\n" .
+                 "join \"\\n\", map <<$heredoc_delimiter, " .
+                                    "split /,\\s*/, \$_[0];\n" .
+                 "$body\n" .
+                 "$heredoc_delimiter\n}";
 die $@ if $@;
 
 # No output from this template.
