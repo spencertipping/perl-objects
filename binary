@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  9dd8243fab9b077df9507d9e34c7f3cb
-# istate: 7e72ae1430d87643a2a55158cf460b2a
+# state:  8de051b1d10ea5890d577497495f8b0e
+# istate: df2c609f23f138397515f28d792091ba
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -437,7 +437,7 @@ meta::function('compile-binary', <<'__');
 # Note that all expressions are evaluated after the basic image has been
 # generated. This allows you to use forward references to labels.
 
-my $text = join ' ', map split(/\s+/), split /#.*/m, retrieve($_[0]);
+my $text = join ' ', map split(/\s+/), split /(?:\s|^)#.*/m, retrieve($_[0]);
 my $hex_letters = '0123456789abcdef';
 
 my %places;
