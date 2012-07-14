@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  8ce9b2e05f31b9356af4777b87fb5efe
-# istate: 0a35bc9b724ea8f6d74d86a06ac04ed5
+# state:  378f8c46b35a4c35e5bfb5b8eec4f01b
+# istate: 0a1e36162ba012f0a963006cd36f1559
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -325,8 +325,8 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b 53b0cb450de5040cedbfedd7521ab104
-99aeabc9ec7fe80b1b39f5e53dc7e49e e024d1ddb534961d35855863dea1e160
+70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
+99aeabc9ec7fe80b1b39f5e53dc7e49e 20cbfd8b1bd09b6a60c0eea0f9ca525d
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -443,9 +443,22 @@ save();
 __
 meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
 meta::function('expanded-bootstrap', <<'__');
+# Write headers into the bootstrap section. There is some subtle stuff going on
+# here with the istate header. The idea is to provide other objects a very quick
+# way to see whether our state has changed, but we don't want false positives.
+# We would get a false positive if, for instance, we included the contents of
+# parent:: attributes in the istate hash. The reason is that the parent::
+# attribute contains a hash of every attribute provided by that parent, so any
+# change in the parent would impact the istate of the child.
+#
+# The best way to deal with this is to treat parent:: attributes as being
+# opaque; we record their existence or nonexistence, but we don't record their
+# contents. We also look only at inheritable and unique attributes and fail to
+# consider global state.
+
 my $bootstrap_text = retrieve('bootstrap::initialization');
 my $state          = state();
-my $istate         = state('-iG');
+my $istate         = state('-iGP');
 my $object_id      = identity();
 
 $bootstrap_text =~ s/__state/$state/g;
@@ -700,7 +713,9 @@ around_hook('save-state', $state_name, sub {
 __
 meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
-my $partial     = $$options{'-p'};
+delete $$options{'-P'};
+
+my $partial     = delete $$options{'-p'};
 my $criteria    = join '|', @criteria;
 my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
 my @final_array = @{$partial ? \@attributes : [expanded_bootstrap(), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
@@ -763,9 +778,13 @@ meta::function('state', <<'__');
 my ($options, @attributes) = separate_options(@_);
 @attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
 @attributes = grep is($_, '-iu'), @attributes if $$options{'-i'};
+@attributes = grep is($_, '-P'),  @attributes if $$options{'-P'};
 
 my $hash = fast_hash(fast_hash(scalar @attributes) . join '|', @attributes);
 $hash = fast_hash("$data{$_}|$hash") for @attributes;
+
+$hash = fast_hash(join '|', $hash, grep s/^parent:://, sort keys %data)
+if $$options{'-P'};
 
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 
@@ -815,6 +834,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $can_skip_already_seen and
+              exists $data{"parent::$target"} and
               $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
@@ -824,7 +844,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       # These need to come after the reachability check so that we retry against
       # other copies in case something fails.
       ++$already_seen{$identity};
-      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
+      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iPG);
 
       for my $to_rm (split /\n/, retrieve("parent::$target")) {
         my ($name, $hash) = split(/\s+/, $to_rm);
@@ -921,6 +941,7 @@ my %tests = ('-u' => sub {! $inherited{$a}},
              '-d' => sub {$inherited{$a} && fast_hash(retrieve($a)) ne $inherited{$a}},
              '-i' => sub {$transient{inherit}{namespace($a)}},
              '-v' => sub {$transient{virtual}{namespace($a)}},
+             '-p' => sub {$a =~ /^parent::/o},
              '-s' => sub {$a =~ /^state::/o},
              '-m' => sub {$a =~ /^meta::/o});
 
@@ -1310,7 +1331,7 @@ function::disable                       53b449708cc2ffdefa352e53bb7d847d
 function::edit                          6e5bd5f35ff9cf66edd2d2d9943a7b4e
 function::edit-self                     71790df00f941ed9b56e17f789b93871
 function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
-function::expanded-bootstrap            7ea5eb3e6a715cddcdfd85ae688286e1
+function::expanded-bootstrap            bd76713aa911d4a92936824dac06caf5
 function::export                        2374cd1dbf7616cb38cafba4e171075d
 function::extern                        1290a5223e2824763eecfb3a54961eff
 function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
@@ -1335,7 +1356,7 @@ function::rm                            6f6fd7a6c25558eb469d78ea888f8551
 function::rmparent                      fc2884910a6939a47898a778f277332c
 function::save                          3cbe5c3735ee4ff99cb60ccf68bc8b91
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
-function::serialize                     a6513c3e0724f9a1d85847d7002910f1
+function::serialize                     b43eb453b21c03b062efc37441bc2bf0
 function::serialize-single              8bac97e94a1162947d274421053387b0
 function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
 function::shb                           21139548efb79500d9c999dba024ab32
@@ -1343,11 +1364,11 @@ function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
 function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::snapshot-if-necessary         1287f82135efdcc94af76dfa88029e4d
-function::state                         ef2051d9fe0684044d0f3df752e0c949
+function::state                         cf8a6613eaca36c2e80139508d0d86c5
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        ac391dc90e507e7586c81850e7c2ecdd
-function::update-from                   10461f1e23b645c1a64f69eabef61b4f
+function::update-from                   57d565d7ba8f5a196b6aa35a102f71f4
 function::usage                         5bdd370f5a56cfbf199e08d398091444
 function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
@@ -1356,7 +1377,7 @@ indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
 internal_function::around_hook          129aaec0550d3de6c00208104c0fdcef
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
-internal_function::attribute_is         d28ac825b3937029386372c560a65775
+internal_function::attribute_is         218083f309e9d94af11f8059f4c03ba7
 internal_function::cache                eb9da45580a9ac0882baf98acd2ecd60
 internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
 internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
@@ -1420,10 +1441,10 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 b9a2def7969dcd4b475cae3f95be98d3
+parent::object                 4426dd6f4aebae284447047265132c82
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
-template::def                  6298278ca5c461d4380ff02498a6103d
+template::def                  0575aedbacf922d77f3419b817b7d579
 template::eval                 1a0e2124a05056be4abc11803883c294
 template::failing_conditional  e3a4523110dd859e828f342185de7c62
 template::include              47b5552d609d97fe7f2522d5c1027014
@@ -1481,19 +1502,45 @@ meta::template('def', <<'__');
 # - named 'foo' << end
 #   woohoo
 # - end
+#
+# You can define a "plural" form like this:
+#
+# - def -p say_hi_to << end
+#   Hi $_!
+# - end
+#
+# - say_hi_to Foo, Bar, Baz
+#
+# Plural forms still have the $body variable (which doesn't change across
+# arguments), but they can't take formal parameters.
 
-my ($name, $formals) = split /\s+/, $_[0], 2;
-my @formals          = split /,\s*/, $formals;
-my $body             = $_[1];
+my ($options, $name, @args) = separate_options(split /\s+/, $_[0]);
+my @formals                 = map split(/,\s*/), @args;
+my $body                    = $_[1];
 
-my $formal_list        = join(', ', map "\$$_", @formals);
-my $parameter_bindings = "my ($formal_list) = split /,\\s*/, \$_[0]";
-my $body_binding       = "my \$body = \$_[1]";
-my $heredoc_delimiter  = state();
+my $formal_list             = join(', ', map "\$$_", @formals);
+my $parameter_bindings      = "my ($formal_list) = split /,\\s*/, \$_[0]";
+my $body_binding            = "my \$body = \$_[1]";
+my $heredoc_delimiter       = state();
 
-meta::externalize "template::$name", "- def $name @formals",
-  eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
-       "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
+# This will work great unless you put large hexadecimal barewords on otherwise
+# blank lines in your code. At that point there's a 2^-128 chance that it will
+# bomb out horribly.
+my $plural = $$options{'--plural'} || $$options{'-p'};
+
+die "- def $name: cannot use formal parameters with the -p option"
+if $plural && @formals;
+
+$plural ? meta::externalize "template::$name", "- def -p $name",
+            eval "sub {\n$body_binding;\n" .
+                 "join \"\\n\", map <<$heredoc_delimiter, " .
+                                    "split /,\\s*/, \$_[0];\n" .
+                 "$body\n" .
+                 "$heredoc_delimiter\n}"
+
+        : meta::externalize "template::$name", "- def $name @formals",
+            eval "sub {\n$parameter_bindings;\n$body_binding;\n" .
+                 "<<$heredoc_delimiter\n$body\n$heredoc_delimiter\n}";
 
 die $@ if $@;
 
