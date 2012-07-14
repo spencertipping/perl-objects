@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  2bcc940a96ff07f0f501288663c90932
-# istate: e024d1ddb534961d35855863dea1e160
+# state:  32875c7c8363bc762e59933fd6edaba1
+# istate: 93815d3e909a63026e570226d51027f2
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -417,9 +417,22 @@ save();
 __
 meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
 meta::function('expanded-bootstrap', <<'__');
+# Write headers into the bootstrap section. There is some subtle stuff going on
+# here with the istate header. The idea is to provide other objects a very quick
+# way to see whether our state has changed, but we don't want false positives.
+# We would get a false positive if, for instance, we included the contents of
+# parent:: attributes in the istate hash. The reason is that the parent::
+# attribute contains a hash of every attribute provided by that parent, so any
+# change in the parent would impact the istate of the child.
+#
+# The best way to deal with this is to treat parent:: attributes as being
+# opaque; we record their existence or nonexistence, but we don't record their
+# contents. We also look only at inheritable and unique attributes and fail to
+# consider global state.
+
 my $bootstrap_text = retrieve('bootstrap::initialization');
 my $state          = state();
-my $istate         = state('-iG');
+my $istate         = state('-iGP');
 my $object_id      = identity();
 
 $bootstrap_text =~ s/__state/$state/g;
@@ -683,9 +696,13 @@ meta::function('state', <<'__');
 my ($options, @attributes) = separate_options(@_);
 @attributes = grep !is($_, '-v'), sort keys %data unless @attributes;
 @attributes = grep is($_, '-iu'), @attributes if $$options{'-i'};
+@attributes = grep is($_, '-P'),  @attributes if $$options{'-P'};
 
 my $hash = fast_hash(fast_hash(scalar @attributes) . join '|', @attributes);
 $hash = fast_hash("$data{$_}|$hash") for @attributes;
+
+$hash = fast_hash(join '|', grep s/^parent:://, sort keys %data)
+if $$options{'-P'};
 
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 
@@ -735,6 +752,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
 
       my $identity = $parent_id_cache{$target} ||= $parent_metadata{id} || join '', qx($target identity);
       next if $can_skip_already_seen and
+              exists $data{"parent::$target"} and
               $already_seen{$identity} || $parent_state_cache{$identity} eq $parent_metadata{istate};
 
       my $attributes = join '', qx($target ls -ahiu);
@@ -841,6 +859,7 @@ my %tests = ('-u' => sub {! $inherited{$a}},
              '-d' => sub {$inherited{$a} && fast_hash(retrieve($a)) ne $inherited{$a}},
              '-i' => sub {$transient{inherit}{namespace($a)}},
              '-v' => sub {$transient{virtual}{namespace($a)}},
+             '-p' => sub {$a =~ /^parent::/o},
              '-s' => sub {$a =~ /^state::/o},
              '-m' => sub {$a =~ /^meta::/o});
 
