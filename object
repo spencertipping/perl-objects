@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3cef5442037646b26c8ad09b0a7fa7e9
-# istate: 131a3bcb7d1616765c5d93c95782c640
+# state:  5f69fbf29389ab34251bb40f69ee521f
+# istate: 20cbfd8b1bd09b6a60c0eea0f9ca525d
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -633,7 +633,9 @@ around_hook('save-state', $state_name, sub {
 __
 meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
-my $partial     = $$options{'-p'};
+delete $$options{'-P'};
+
+my $partial     = delete $$options{'-p'};
 my $criteria    = join '|', @criteria;
 my @attributes  = map serialize_single($_), select_keys(%$options, '-m' => 1, '--criteria' => $criteria), select_keys(%$options, '-M' => 1, '--criteria' => $criteria);
 my @final_array = @{$partial ? \@attributes : [expanded_bootstrap(), @attributes, 'internal::main();', '', '__DATA__', $global_data]};
@@ -762,7 +764,7 @@ around_hook('update-from-invocation', separate_options(@_), sub {
       # These need to come after the reachability check so that we retry against
       # other copies in case something fails.
       ++$already_seen{$identity};
-      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iG);
+      $parent_state_cache{$identity} = $parent_metadata{istate} || join '', qx($target state -iPG);
 
       for my $to_rm (split /\n/, retrieve("parent::$target")) {
         my ($name, $hash) = split(/\s+/, $to_rm);
