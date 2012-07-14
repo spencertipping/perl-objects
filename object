@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  32875c7c8363bc762e59933fd6edaba1
-# istate: 93815d3e909a63026e570226d51027f2
+# state:  3cef5442037646b26c8ad09b0a7fa7e9
+# istate: 131a3bcb7d1616765c5d93c95782c640
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -701,7 +701,7 @@ my ($options, @attributes) = separate_options(@_);
 my $hash = fast_hash(fast_hash(scalar @attributes) . join '|', @attributes);
 $hash = fast_hash("$data{$_}|$hash") for @attributes;
 
-$hash = fast_hash(join '|', grep s/^parent:://, sort keys %data)
+$hash = fast_hash(join '|', $hash, grep s/^parent:://, sort keys %data)
 if $$options{'-P'};
 
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
