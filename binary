@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  60ffcd08d45da01562aa29a556926eba
-# istate: d537c43c808b7406b4ec9e72cc41d18e
+# state:  54e557cfb9e7cdc31371af3f546a1ae8
+# istate: 72357050e5a4792419569e6e8c61b3b3
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -219,7 +219,11 @@ meta::configure 'state', inherit => 0, extension => '.pl';
 meta::define_form 'state', \&meta::bootstrap::implementation;
 __
 meta::meta('type::vim_highlighter', <<'__');
-meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
+# Vim highlighters don't need to be inherited. The reason is that they are most
+# often configured from the parent object using the 'vim' function. They are
+# rarely sent to anyone else and configured after the fact.
+
+meta::configure 'vim_highlighter', extension => '.vim', inherit => 0;
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 
 __
@@ -316,7 +320,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-902333a0bd6ed90ff919fe8477cb4e69 d68948b20d89140aaa40a657dcb04585
+902333a0bd6ed90ff919fe8477cb4e69 5bb14b94b33b7e5f476e5ce905d81e6f
 99aeabc9ec7fe80b1b39f5e53dc7e49e 20cbfd8b1bd09b6a60c0eea0f9ca525d
 __
 meta::data('author', <<'__');
@@ -1501,7 +1505,7 @@ retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
-meta::type::vim_highlighter  27990fddb6d7bd383b55dbdfee0d148d
+meta::type::vim_highlighter  2a74673e7c2c9093acbbaa2a562eb905
 parent::object               4426dd6f4aebae284447047265132c82
 
 __
