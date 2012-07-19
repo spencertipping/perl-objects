@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  54e557cfb9e7cdc31371af3f546a1ae8
-# istate: 72357050e5a4792419569e6e8c61b3b3
+# state:  f174a2d20746d2b0e925ae22090d59ca
+# istate: 515d0c8be8ab353120d66fe9a80a5a3c
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -432,7 +432,8 @@ meta::function('compile-binary', <<'__');
 # Little-endian and big-endian encoders take a numeric argument indicating how
 # many bytes should be encoded. This number is limited only by Perl's numerical
 # precision, and by the fact that you have only one digit to specify it. Results
-# are sign-extended to the requested byte width.
+# are sign-extended to the requested byte width. An error occurs if the value
+# produces a signed overflow given its width.
 #
 # You can use 0 width to evaluate an expression with no output; that is, some
 # form of side-effect. In this case, the bracketed expression's value is ignored
@@ -479,6 +480,12 @@ my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | @\?\S+ |
 # results contain repetitions of the byte 'E'.
 my $concatenated = join '', @output;
 
+my $check_overflow = sub {
+  my ($upper, $lower) = ((1 << $_[0] * 8 - 1) - 1, -(1 << $_[0] * 8 - 1));
+  die "$_[1] signed-overflows $_[0] bytes ($lower, $upper)"
+  unless $_[1] <= $upper and $_[1] >= $lower;
+  @_};
+
 my $le = sub {join '', map chr($_[1] >> $_ * 8 & 255),         0 .. $_[0] - 1};
 my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 
@@ -495,8 +502,8 @@ for my $o (sort {$a <=> $b} keys %expressions) {
     s/::([^' ]+)/\$places{'$1'}/g;
     s-:([^' ]+)-(\$places{'$1'} // die '$1 is not a defined label')-g;
 
-    s/L([1-9])?(.+)/&\$le(($1) || $size, $2)/g;
-    s/B([1-9])?(.+)/&\$be(($1) || $size, $2)/g;
+    s/L([1-9])?(.+)/&\$le(&\$check_overflow(($1) || $size, $2))/g;
+    s/B([1-9])?(.+)/&\$be(&\$check_overflow(($1) || $size, $2))/g;
 
     my $result = eval;
     die "error evaluating $_ as $expression: $@" if $@;
