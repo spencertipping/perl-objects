@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  13851e8acc2b38dfc9b736124579408f
-# istate: 9e7e25adba932020b6da456c1e5b95f9
+# state:  90536cbeffab5a306b4101317a1340db
+# istate: 6addea4cdee8cae0ff75ffe3bbbaf8ee
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -407,14 +407,14 @@ meta::function('compile-binary', <<'__');
 # Placement (low-level):
 # /@![0-9a-f]+/         <- place assertion (die unless next byte is at place)
 # /@[0-9a-f]+/          <- place seek (emit null bytes until next byte is place)
-# /@\?(\w\+)/           <- debugging: print \1 followed by its location
+# /@\?(\w\+)/           <- debugging: print $1 followed by its location
 # /@:[0-9a-f]+/         <- alignment: emit \0 until next byte is multiple of n
 #
 # Repetition:
-# /\/(\d+)\//           <- repeat next byte \1 times
+# /\/(\d+)\//           <- repeat next byte $1 times
 #
 # Assembler:
-# /::([^' ]\+)/         <- create label \1 pointing to next byte offset
+# /::([^' ]\+)/         <- create label $1 pointing to next byte offset
 # /:\d*\[([^\]]+)\]/    <- insert bytes resulting from expression evaluation
 #
 # The assembler gives you a language you can use to evaluate expressions. It's
@@ -426,9 +426,9 @@ meta::function('compile-binary', <<'__');
 #
 # s/:</$o/g                             <- offset at beginning of expression
 # s/:>/($o + $e{size})/g                <- offset at end of expression
-# s/::?([^' ]+)/$places{'\1'}/g         <- label references
-# s/L(\d)?(.*)/&$le(\1, \2)/g           <- little-endian integer encoding
-# s/B(\d)?(.*)/&$be(\1, \2)/g           <- big-endian integer encoding
+# s/::?([^' ]+)/$places{'$1'}/g         <- label references
+# s/L(\d)?(.*)/&$le($1, $2)/g           <- little-endian integer encoding
+# s/B(\d)?(.*)/&$be($1, $2)/g           <- big-endian integer encoding
 #
 # Little-endian and big-endian encoders take a numeric argument indicating how
 # many bytes should be encoded. This number is limited only by Perl's numerical
@@ -443,7 +443,9 @@ meta::function('compile-binary', <<'__');
 # Note that all expressions are evaluated after the basic image has been
 # generated. This allows you to use forward references to labels.
 
-my $text = join ' ', map split(/\s+/), split /(?:\s|^)#.*/m, retrieve($_[0]);
+my ($options, @stuff) = separate_options(@_);
+
+my $text = join ' ', map split(/\s+/), split /(?:\s|^)#.*/m, cat(@stuff);
 my $hex_letters = '0123456789abcdef';
 
 my %places;
@@ -520,6 +522,9 @@ for my $o (sort {$a <=> $b} keys %expressions) {
     }
   }
 }
+
+# Bwoop bwoop bwoop egregious hack alert
+$transient{compile_binary_places} = \%places if $$options{'--save-places'};
 
 $concatenated;
 
