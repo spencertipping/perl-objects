@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  4fd90f8718fcf2328b9ad4371dcf952d
-# istate: 1fe724733f473932ba748d1cb82a3ffd
+# state:  13851e8acc2b38dfc9b736124579408f
+# istate: 9e7e25adba932020b6da456c1e5b95f9
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -455,11 +455,11 @@ my $next       = 1;
 my $repeat     = sub {$next = $_[0]; ''};                       # Repeaters have no output
 my $repetition = sub {my $count = $next; $next = 1; $count};
 my $ascii      = sub {$_[0]};
-my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 1)                      for 0 .. 7; chr($total) x &$repetition()};
-my $octal      = sub {my $total = 0; $total = ($total << 3) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 2; chr($total) x &$repetition()};
-my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
+my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 1)                         for 0 .. 7; chr($total) x &$repetition()};
+my $octal      = sub {my $total = 0; $total = ($total << 3) + index($hex_letters,    substr($_[0], $_, 1)) for 0 .. 2; chr($total) x &$repetition()};
+my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, lc substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
 my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
-my $align      = sub {my $width = hex $_[0]; "\0" x ($offset % $width && $width - $offset % $width)};
+my $align      = sub {my $width = hex $_[0]; "\0" x (($width - $offset % $width) % $width)};
 my $debug      = sub {printf STDERR "%s: 0x%x\n", $_[0], $offset; ''};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
 my $label      = sub {die sprintf "label %s is defined twice" if exists $places{$_[0]}; $places{$_[0]} = $offset; ''};
@@ -467,14 +467,14 @@ my $expression = sub {push @{$expressions{$offset} ||= []}, {size => $_[0], e =>
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | @\?\S+ |
-                      @[:!]?[0-9a-f]+ | /\d+/ | ::\S+ | :\d*\[[^\]]+\])#x, $text;
+my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | \@\?\S+ |
+                      /\d+/ | ::\S+ | :\d*\[[^\]]+\] | \@[!:]?[0-9a-f]+)#x, $text;
 
-&$emit(/^'(\S+)/        ? &$ascii($1)  : /^@\?(\S+)/          ? &$debug($1) :
-       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/  ? &$octal($1) :
-       /^@!([0-9a-f]+)/ ? &$place($1)  : /^@([0-9a-f]+)/      ? &$until($1) :
-       /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/       ? &$hex($_)   :
-                                         /^@:([0-9a-f]+)/     ? &$align($1) :
+&$emit(/^'(\S+)/        ? &$ascii($1)  : /^\@\?(\S+)/        ? &$debug($1) :
+       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
+       /^@!([0-9a-f]+)/ ? &$place($1)  : /^\@([0-9a-f]+)/    ? &$until($1) :
+                                         /^\@:([0-9a-f]+)/   ? &$align($1) :
+       /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   :
 
        /^::(\S+)/            ? &$label($1)          :
        /^:(\d*)\[([^\]]+)\]/ ? &$expression($1, $2) : '') for @tokens;
