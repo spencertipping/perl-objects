@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  fc2955ec21420f30c9fc61d7e1f870ee
+# state:  c462dc9fbc155809c2c79be4291233c6
 # istate: 83c459713e87ee1edac2da71ca30bc42
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
@@ -319,7 +319,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e751299077fed8d3daeea167054f2d59');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 193f2627155758877c09a128d74c7405');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -680,7 +680,8 @@ $delimiter = substr($delimiter, 0, $chars);
 
 __
 meta::function('sh', <<'__');
-system(@_);
+around_hook('sh', @_, sub {
+  system(@_)});
 
 __
 meta::function('shb', <<'__');
@@ -1296,7 +1297,7 @@ function::save                          3cbe5c3735ee4ff99cb60ccf68bc8b91
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
 function::serialize                     b43eb453b21c03b062efc37441bc2bf0
 function::serialize-single              8bac97e94a1162947d274421053387b0
-function::sh                            6e2e988bf05f3d75e45ed4950be9d267
+function::sh                            606c52e96d07868041822e88c6289f20
 function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645

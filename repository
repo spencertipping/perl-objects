@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  228591614e264fe146d8a2b34014c413
+# state:  06e137d9ce0baf10907efb90d7c51b10
 # istate: 44576e3c1bfc946819f0e8ed6c5dc11c
 # id:     05bc3036c343fdb8aec5b0be12a9b19e
 
@@ -326,7 +326,7 @@ configuration aa772900bb5b925cb84346bd72a4249d
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-99aeabc9ec7fe80b1b39f5e53dc7e49e e751299077fed8d3daeea167054f2d59
+99aeabc9ec7fe80b1b39f5e53dc7e49e 193f2627155758877c09a128d74c7405
 aa772900bb5b925cb84346bd72a4249d bddf5e1e4eafaffe6ae70c0216f97d52
 __
 meta::configuration('dependencies', <<'__');
@@ -714,7 +714,8 @@ $delimiter = substr($delimiter, 0, $chars);
 
 __
 meta::function('sh', <<'__');
-system(@_);
+around_hook('sh', @_, sub {
+  system(@_)});
 
 __
 meta::function('shb', <<'__');
@@ -1335,7 +1336,7 @@ function::save                          3cbe5c3735ee4ff99cb60ccf68bc8b91
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
 function::serialize                     b43eb453b21c03b062efc37441bc2bf0
 function::serialize-single              8bac97e94a1162947d274421053387b0
-function::sh                            6e2e988bf05f3d75e45ed4950be9d267
+function::sh                            606c52e96d07868041822e88c6289f20
 function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645

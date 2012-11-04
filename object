@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3fa5a27b829db2c573cba606f3449f06
-# istate: e751299077fed8d3daeea167054f2d59
+# state:  28f649009deab1459928483f9e04aac3
+# istate: 193f2627155758877c09a128d74c7405
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -665,7 +665,8 @@ $delimiter = substr($delimiter, 0, $chars);
 
 __
 meta::function('sh', <<'__');
-system(@_);
+around_hook('sh', @_, sub {
+  system(@_)});
 
 __
 meta::function('shb', <<'__');
