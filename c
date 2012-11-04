@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  7e5ae301ef04694425726eb0e02a0bd8
-# istate: 53cf2a552bdb00e2f22f7edf78a2e0bf
+# state:  fc2955ec21420f30c9fc61d7e1f870ee
+# istate: 83c459713e87ee1edac2da71ca30bc42
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -123,6 +123,10 @@ meta::meta('type::cache', <<'__');
 meta::configure 'cache', inherit => 0;
 meta::define_form 'cache', \&meta::bootstrap::implementation;
 __
+meta::meta('type::cc', <<'__');
+meta::functor::editable 'cc', extension => '.cc', inherit => 1;
+
+__
 meta::meta('type::data', 'meta::functor::editable \'data\', extension => \'\', inherit => 0, default => \'cat\';');
 meta::meta('type::function', <<'__');
 meta::configure 'function', extension => '.pl', inherit => 1;
@@ -133,6 +137,10 @@ meta::define_form 'function', sub {
 __
 meta::meta('type::h', <<'__');
 meta::functor::editable 'h', extension => '.h', inherit => 1;
+
+__
+meta::meta('type::hh', <<'__');
+meta::functor::editable 'hh', extension => '.hh', inherit => 1;
 
 __
 meta::meta('type::hook', <<'__');
@@ -311,7 +319,7 @@ run this script with the 'usage' argument.
 
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 20cbfd8b1bd09b6a60c0eea0f9ca525d');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e751299077fed8d3daeea167054f2d59');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -671,7 +679,10 @@ $delimiter = substr($delimiter, 0, $chars);
 "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 
 __
-meta::function('sh', 'system(@_);');
+meta::function('sh', <<'__');
+system(@_);
+
+__
 meta::function('shb', <<'__');
 # Backgrounded shell.
 with_fork(@_, \&::sh);
@@ -842,7 +853,7 @@ my $f    = pop @_;
 
 hook("before-$hook", @_);
 my @result = &$f(@_);
-hook("after-$hook", @_);
+hook("after-$hook", @_, @result);
 wantarray ? @result : $result[0];
 
 __
@@ -1285,7 +1296,7 @@ function::save                          3cbe5c3735ee4ff99cb60ccf68bc8b91
 function::save-state                    5af59ebc4ad8965767e4dc106d3b557e
 function::serialize                     b43eb453b21c03b062efc37441bc2bf0
 function::serialize-single              8bac97e94a1162947d274421053387b0
-function::sh                            1b2f542ca9dd63ad437058b7f6f61aac
+function::sh                            6e2e988bf05f3d75e45ed4950be9d267
 function::shb                           21139548efb79500d9c999dba024ab32
 function::shell                         a87f389b94713e5855e62241d649d01d
 function::size                          69f6ab4a100c6ef05d4d41510004d645
@@ -1301,7 +1312,7 @@ function::verify                        0c0cc1dfeab7d705919df122f7850a4f
 indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
 indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
 indicator::path                         b5e2cb524caa0283f713a0ddf9f4c162
-internal_function::around_hook          129aaec0550d3de6c00208104c0fdcef
+internal_function::around_hook          bb96dd1fd6f1a887f45e1a665ef6eb8f
 internal_function::associate            55f202ffdbc6b9005e53d3e82f5f9bfe
 internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
 internal_function::attribute_is         218083f309e9d94af11f8059f4c03ba7

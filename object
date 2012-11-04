@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  5f69fbf29389ab34251bb40f69ee521f
-# istate: 20cbfd8b1bd09b6a60c0eea0f9ca525d
+# state:  3fa5a27b829db2c573cba606f3449f06
+# istate: e751299077fed8d3daeea167054f2d59
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -664,7 +664,10 @@ $delimiter = substr($delimiter, 0, $chars);
 "$meta_function('$invocation', <<'$delimiter');\n$contents\n$delimiter";
 
 __
-meta::function('sh', 'system(@_);');
+meta::function('sh', <<'__');
+system(@_);
+
+__
 meta::function('shb', <<'__');
 # Backgrounded shell.
 with_fork(@_, \&::sh);
@@ -835,7 +838,7 @@ my $f    = pop @_;
 
 hook("before-$hook", @_);
 my @result = &$f(@_);
-hook("after-$hook", @_);
+hook("after-$hook", @_, @result);
 wantarray ? @result : $result[0];
 
 __
