@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  561652ed6b029daa3f3fbbc7667720d5
-# istate: dc33b10238e896bad155335a5e119e2e
+# state:  b40a390f764608a47863e0a8619d5f5a
+# istate: 8f486ea0548e44d6eb8c341b7f2410a7
 # id:     a1e8480e579614c01dabeecf0f963bcc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -652,12 +652,12 @@ meta::function('sdoc', <<'__');
 # name as the first argument and returns the processed text.
 
 my %comments_for_extension = 
-  qw|c     /*,*/  cpp   //    cc   //    h    //    java //  py  #    rb   #    pl  #   pm   #         ml   (*,*)  js  //
+  qw|c     /*,*/  cpp   //    cc   //    h    /*,*/ java //  py  #    rb   #    pl  #   pm   #         ml   (*,*)  js  //
      hs    --     sh    #     lisp ;;;   lsp  ;;;   s    #   scm ;;;  sc   ;;;  as  //  html <!--,-->  mli  (*,*)  cs  //
      vim   "      elisp ;     bas  '     ada  --    asm  ;   awk #    bc   #    boo #   tex  %         fss  (*,*)  erl %
      scala //     hx    //    io   //    j    NB.   lua  --  n   //   m    %    php //  sql  --        pov  //     pro %
      r     #      self  ","   tcl  #     texi @c    tk   #   csh #    vala //   vbs '   v    /*,*/     vhdl --     ss  ;;;
-     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   canard nb[,]|;
+     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   hh   //   canard nb[,]|;
 
 # No extension suggests a shebang line, which generally requires # to denote a comment.
 $comments_for_extension{''} = '#';
