@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ea2ab875615fa34a1d022787e69cf3af
-# istate: 12535fd45833873aaee0ec5e51941889
+# state:  ce28dadce5da7f640d2fac6373f1ec05
+# istate: bb1a8ece94424334bc1597712d73907c
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -90,12 +90,13 @@ sub template {
     my $append         = $line =~ s/^\h*>>\h*//o;
 
     $line =~ s/\s+.*$//o;
-    file::write(&{'::source-directory'}() . "/$line", ($append && "\n") . $block, mkpath => 1, append => $append);
+    file::write($line, ($append && "\n") . $block, mkpath => 1, append => $append);
     "\\lstset{caption={$line" . ($append && ' (continued)') . "},name={$line}}\\begin{${name}code}\n$block \\end{${name}code}";
   };
 
   meta::externalize_template $name, $implementation;
 }
+
 __
 meta::meta('functor::editable', <<'__');
 # An editable type. This creates a type whose default action is to open an editor
