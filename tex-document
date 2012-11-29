@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ce28dadce5da7f640d2fac6373f1ec05
+# state:  5524b4da0aa4fe96ed2e642e5ac5ec64
 # istate: bb1a8ece94424334bc1597712d73907c
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
@@ -431,7 +431,7 @@ meta::cache('parent-state', <<'__');
 70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
 902333a0bd6ed90ff919fe8477cb4e69 5bb14b94b33b7e5f476e5ce905d81e6f
 99aeabc9ec7fe80b1b39f5e53dc7e49e 193f2627155758877c09a128d74c7405
-a1e8480e579614c01dabeecf0f963bcc dc33b10238e896bad155335a5e119e2e
+a1e8480e579614c01dabeecf0f963bcc 8f486ea0548e44d6eb8c341b7f2410a7
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -838,12 +838,12 @@ meta::function('sdoc', <<'__');
 # name as the first argument and returns the processed text.
 
 my %comments_for_extension = 
-  qw|c     /*,*/  cpp   //    cc   //    h    //    java //  py  #    rb   #    pl  #   pm   #         ml   (*,*)  js  //
+  qw|c     /*,*/  cpp   //    cc   //    h    /*,*/ java //  py  #    rb   #    pl  #   pm   #         ml   (*,*)  js  //
      hs    --     sh    #     lisp ;;;   lsp  ;;;   s    #   scm ;;;  sc   ;;;  as  //  html <!--,-->  mli  (*,*)  cs  //
      vim   "      elisp ;     bas  '     ada  --    asm  ;   awk #    bc   #    boo #   tex  %         fss  (*,*)  erl %
      scala //     hx    //    io   //    j    NB.   lua  --  n   //   m    %    php //  sql  --        pov  //     pro %
      r     #      self  ","   tcl  #     texi @c    tk   #   csh #    vala //   vbs '   v    /*,*/     vhdl --     ss  ;;;
-     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   canard nb[,]|;
+     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   hh   //   canard nb[,]|;
 
 # No extension suggests a shebang line, which generally requires # to denote a comment.
 $comments_for_extension{''} = '#';
@@ -1741,14 +1741,14 @@ template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
 
 __
 meta::parent('sdoc', <<'__');
-function::sdoc            71fa4ee3ae6283a87706e74f9de1de40
+function::sdoc            d6a19db89256ca4ca2929f376418d0e9
 function::sdoc-html       b23152b3f5be696e5bae842ec43fc5a4
 function::sdoc-markdown   a35a6441dd750466f2d0e636bee2b382
 function::sdoc-packed     8ec4975fca7228708baae6ccd241bdbf
 function::sdocp           c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary      95474943c4a5f8ff17d3cf66ddb7c386
-parent::object            4426dd6f4aebae284447047265132c82
+parent::object            ebb8e79a91caff215bc922627253af9e
 retriever::code-sdoc      03b87ff8d1ecf7594db9ca0669fc69a1
 retriever::html-sdoc      8ab7705d03276945b23a71677153233c
 retriever::markdown-sdoc  67c34ba8223ec36a3ae018e411354db2
