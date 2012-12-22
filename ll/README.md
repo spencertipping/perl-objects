@@ -10,6 +10,7 @@ If you want a script that works, I recommend using [object](../object).
 
 These scripts are a work in progress.
 
+- `tiny`: the smallest self-modifying Perl file I know how to write. Must be edited by hand.
 - `persistent`: the smallest error-detecting Perl object that shares any architecture with `../object`.
   This object cannot be inherited from because it doesn't define the `cat` function.
 - `small`: a version of `../object` with a number of interactive features removed.
