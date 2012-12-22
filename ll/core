@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  510c291c194795fac093d3aed17ef159
-# istate: 30beea0595a04af4302bf0407f92de7d
+# state:  a508c4b7f5c10203a18963055ceaaeed
+# istate: 36fe122ace8e836b556688b0392a9a65
 # id:     3ac63f36b4b7fbd0851fbd9876e080bf
 
 $|++;
@@ -233,11 +233,6 @@ around_hook('create', $name, $value, sub {
 
 __
 meta::function('current-state', 'serialize(\'-pS\');');
-meta::function('cwd', <<'__');
-use Cwd qw/getcwd/;
-getcwd();
-
-__
 meta::function('disable', 'hook(\'disable\', chmod_self(sub {$_[0] & 0666}));');
 meta::function('edit', <<'__');
 my ($options, @names) = separate_options(@_);
@@ -387,12 +382,6 @@ meta::function('parents', 'join "\\n", grep s/^parent:://o, sort keys %data;');
 meta::function('perl', <<'__');
 my @result = eval(join ' ', @_);
 $@ ? terminal::error($@) : wantarray ? @result : $result[0];
-
-__
-meta::function('rd', <<'__');
-if (@_) {my $pattern = join '|', @_;
-         @{$transient{path}} = grep $_ !~ /^$pattern$/, @{$transient{path}}}
-else    {pop @{$transient{path}}}
 
 __
 meta::function('reload', 'around_hook(\'reload\', sub {execute($_) for grep ! /^bootstrap::/, keys %data});');
