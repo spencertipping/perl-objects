@@ -1254,21 +1254,6 @@ __
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
-meta::parent('sdoc', <<'__');
-function::sdoc                           b2f9066417ce3368f093796e1180e9b2
-function::sdoc-html                      b23152b3f5be696e5bae842ec43fc5a4
-function::sdoc-markdown                  a35a6441dd750466f2d0e636bee2b382
-function::sdocp                          c3d738d982ba87418a298ff58478a85b
-meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
-meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
-parent::object  5e8c5be71d2d512cca8dfc1677f94466
-retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
-retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
-retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
-retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
-retriever::sdocp                         330694ea14a23bb04b65c761075cd946
-
-__
 meta::parent('object', <<'__');
 bootstrap::html                         f44dd03cb0c904b3a5f69fbda5f018d0
 bootstrap::initialization               d22fafa2938ecb0d4728e2958b54ed3d
@@ -1386,6 +1371,21 @@ retriever::global                       4fe8df0cca548075169968772843a156
 retriever::id                           4da6080168d32445150cc4200af7af6e
 retriever::object                       c7633990b4e01bdc783da7e545799f4f
 retriever::perl                         f41938e6dbad317f62abffc1e4d28cca
+
+__
+meta::parent('sdoc', <<'__');
+function::sdoc                           b2f9066417ce3368f093796e1180e9b2
+function::sdoc-html                      b23152b3f5be696e5bae842ec43fc5a4
+function::sdoc-markdown                  a35a6441dd750466f2d0e636bee2b382
+function::sdocp                          c3d738d982ba87418a298ff58478a85b
+meta::type::sdoc                         22cd7315641d38c9d536344e83c36bed
+meta::type::slibrary                     95474943c4a5f8ff17d3cf66ddb7c386
+parent::object  5e8c5be71d2d512cca8dfc1677f94466
+retriever::code-sdoc                     03b87ff8d1ecf7594db9ca0669fc69a1
+retriever::html-sdoc                     8ab7705d03276945b23a71677153233c
+retriever::markdown-sdoc                 67c34ba8223ec36a3ae018e411354db2
+retriever::sdoc                          662061e9e41491e2a1debd6862ccf1e7
+retriever::sdocp                         330694ea14a23bb04b65c761075cd946
 
 __
 meta::retriever('code-sdoc', <<'__');
