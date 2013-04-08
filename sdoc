@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  7e9c24001657637f79e0b63a5178a139
-# istate: 90cdc63edab17d487580ef23a408a7da
+# state:  0d471402b5f2b68ed9dedf0434b51858
+# istate: 6a1b66304cbd4a94a05b0ef78f1e1bf4
 # id:     a1e8480e579614c01dabeecf0f963bcc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -724,6 +724,7 @@ meta::function('sdoc-markdown', <<'__');
 # unquoted code and section headings, but not numbered lists.
 
 my ($attribute)   = @_;
+my $extension     = extension_for($attribute =~ /^sdoc::(.*)$/g) || ($attribute =~ /.*?\.([^\.]+)(?:\.sdoc)?$/gi)[0];
 my @paragraphs    = split /\n(?:\s*\n)+/, retrieve($attribute);
 
 my $section_level = 0;
@@ -732,7 +733,7 @@ my @markup;
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
 my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm; $_};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
+my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "```$extension\n$_\n```"};
 my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
 
 my $heading       = sub {'#' x $_[0]};
