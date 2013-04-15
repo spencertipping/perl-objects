@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  e6ae5ef2f3602aaab43234e36476fd1c
-# istate: 13d3013b77dc0268499bab45dad28870
+# state:  ea4de7b5127aef5b8daef986534013ae
+# istate: 39f70215e806554b2130e45f1ad9c776
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -50,7 +50,6 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-
 meta::meta('configure', <<'__');
 # A function to configure transients. Transients can be used to store any number of
 # different things, but one of the more common usages is type descriptors.
@@ -403,7 +402,7 @@ meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
 save();
 __
-meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
+meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | ($_[0] & 0444) >> 2}));');
 meta::function('expanded-bootstrap', <<'__');
 # Write headers into the bootstrap section. There is some subtle stuff going on
 # here with the istate header. The idea is to provide other objects a very quick
