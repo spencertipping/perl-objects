@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  c5ecc496b0b1e782618f0f60e1fe9eb3
+# state:  a9973de37d057326fe7ea3b43e1fc846
 # istate: dcacd5ef1e0cf804adac5c3c48dd86f6
 # id:     6a38f6fbcf92173ff757305a534a002b
 
@@ -327,7 +327,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 13d3013b77dc0268499bab45dad28870');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 39f70215e806554b2130e45f1ad9c776');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -430,7 +430,7 @@ meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
 save();
 __
-meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
+meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | ($_[0] & 0444) >> 2}));');
 meta::function('expanded-bootstrap', <<'__');
 # Write headers into the bootstrap section. There is some subtle stuff going on
 # here with the istate header. The idea is to provide other objects a very quick
@@ -1318,7 +1318,7 @@ function::cwd                           12833315b8bea35754ae9dabe45dfde8
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
 function::edit                          20bb4117e5662906ad661a5f19e007d0
 function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
-function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
+function::enable                        2c08b091a96f80277dd2619c27221f48
 function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c
 function::export                        2374cd1dbf7616cb38cafba4e171075d
 function::extern                        1290a5223e2824763eecfb3a54961eff

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  54b2b870c55e5abd0cb7b4c3b8374cda
+# state:  cd0624f4738668f52bdc66b282cdddae
 # istate: 63c9da6c30d7e4263da9844f0f842cb5
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
@@ -419,8 +419,8 @@ __
 meta::cache('parent-state', <<'__');
 70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
 902333a0bd6ed90ff919fe8477cb4e69 8d4ebdc5d3e901edca2bec5d546d6f7f
-99aeabc9ec7fe80b1b39f5e53dc7e49e 13d3013b77dc0268499bab45dad28870
-a1e8480e579614c01dabeecf0f963bcc 90cdc63edab17d487580ef23a408a7da
+99aeabc9ec7fe80b1b39f5e53dc7e49e 39f70215e806554b2130e45f1ad9c776
+a1e8480e579614c01dabeecf0f963bcc 6a1b66304cbd4a94a05b0ef78f1e1bf4
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -543,7 +543,7 @@ meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
 save();
 __
-meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
+meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | ($_[0] & 0444) >> 2}));');
 meta::function('expanded-bootstrap', <<'__');
 # Write headers into the bootstrap section. There is some subtle stuff going on
 # here with the istate header. The idea is to provide other objects a very quick
@@ -904,6 +904,7 @@ meta::function('sdoc-markdown', <<'__');
 # unquoted code and section headings, but not numbered lists.
 
 my ($attribute)   = @_;
+my $extension     = extension_for($attribute =~ /^sdoc::(.*)$/g) || ($attribute =~ /.*?\.([^\.]+)(?:\.sdoc)?$/gi)[0];
 my @paragraphs    = split /\n(?:\s*\n)+/, retrieve($attribute);
 
 my $section_level = 0;
@@ -912,7 +913,7 @@ my @markup;
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
 my $unindent      = sub {my $spaces = '  ' x ($section_level - 1); s/^$spaces//gm; $_};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
+my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "```$extension\n$_\n```"};
 my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
 
 my $heading       = sub {'#' x $_[0]};
@@ -1552,7 +1553,7 @@ function::cwd                           12833315b8bea35754ae9dabe45dfde8
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
 function::edit                          20bb4117e5662906ad661a5f19e007d0
 function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
-function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
+function::enable                        2c08b091a96f80277dd2619c27221f48
 function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c
 function::export                        2374cd1dbf7616cb38cafba4e171075d
 function::extern                        1290a5223e2824763eecfb3a54961eff
@@ -1675,12 +1676,12 @@ __
 meta::parent('sdoc', <<'__');
 function::sdoc            4aac070122ecdc43b5a9d09baab005e6
 function::sdoc-html       1bacf037ce7cad1b6339120e2eeab87f
-function::sdoc-markdown   547a74975c881294b712e4285a9476bc
+function::sdoc-markdown   885b3a873eff28ebe2d9f41c88c62fdd
 function::sdoc-packed     77ed0b1b297675176ba12fe8820284ee
 function::sdocp           c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary      11af20c9992afa7ecaa370b2694823de
-parent::object            20c70a494394d86d886f9f03e94e330b
+parent::object            24eb27a5802fad8187b7a07b00297e21
 retriever::code-sdoc      0096df7bf3836f5834205298823ef0f3
 retriever::html-sdoc      05a3a1c747d4690741e663d34417bd32
 retriever::markdown-sdoc  f5aa8c4df39f34a58d75439c926e48c1

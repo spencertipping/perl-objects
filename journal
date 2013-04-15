@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  097c3d125fd48d7af85a00ef7afd4365
+# state:  91ba5c3b1fe9249fc15f3947b140483b
 # istate: a99b8c01e00e68204817c2b5dc107a48
 # id:     9837287d488ed173dd183e0b154943b4
 
@@ -334,7 +334,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
 6a38f6fbcf92173ff757305a534a002b dcacd5ef1e0cf804adac5c3c48dd86f6
-99aeabc9ec7fe80b1b39f5e53dc7e49e 13d3013b77dc0268499bab45dad28870
+99aeabc9ec7fe80b1b39f5e53dc7e49e 39f70215e806554b2130e45f1ad9c776
 a9e5975593ed5d90d943ad98405c71e5 ab9da1fb51db73a98ebc54d2e92dd8ae
 __
 meta::data('author', 'Spencer Tipping');
@@ -440,7 +440,7 @@ meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
 save();
 __
-meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | $_[0] >> 2}));');
+meta::function('enable', 'hook(\'enable\', chmod_self(sub {$_[0] | ($_[0] & 0444) >> 2}));');
 meta::function('entry', <<'__');
 use Time::Piece;
 my $time = localtime;
@@ -1374,7 +1374,7 @@ function::cwd                           12833315b8bea35754ae9dabe45dfde8
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
 function::edit                          20bb4117e5662906ad661a5f19e007d0
 function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
-function::enable                        7de1cedc36841f5de8f9fdfbc3b65097
+function::enable                        2c08b091a96f80277dd2619c27221f48
 function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c
 function::export                        2374cd1dbf7616cb38cafba4e171075d
 function::extern                        1290a5223e2824763eecfb3a54961eff

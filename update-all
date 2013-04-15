@@ -1,3 +1,6 @@
 #!/bin/bash
-update_one=$(fn obj './$obj update -SV')
-repeat 3 $(fn "ls *.html | map $update_one")
+for (( i = 0; i < 3; ++i )); do
+  for file in *.html; do
+    ./$file update -SV
+  done
+done
