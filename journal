@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  91ba5c3b1fe9249fc15f3947b140483b
+# state:  302acf27c6f35cf7c89301b607fca61a
 # istate: a99b8c01e00e68204817c2b5dc107a48
 # id:     9837287d488ed173dd183e0b154943b4
 
@@ -153,7 +153,10 @@ meta::define_form 'function', sub {
   meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
 };
 __
-meta::meta('type::hidden', 'meta::functor::editable \'hidden\', extension => \'\', inherit => 1, default => \'edit\';');
+meta::meta('type::hidden', <<'__');
+meta::configure 'hidden', extension => '', inherit => 1;
+meta::define_form 'hidden', \&meta::bootstrap::implementation;
+__
 meta::meta('type::hook', <<'__');
 meta::configure 'hook', extension => '.pl', inherit => 0, trim => 1;
 meta::define_form 'hook', sub {
@@ -333,7 +336,7 @@ notes a9e5975593ed5d90d943ad98405c71e5
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b dcacd5ef1e0cf804adac5c3c48dd86f6
+6a38f6fbcf92173ff757305a534a002b 9fd0addc19252728171787e75b12d6e7
 99aeabc9ec7fe80b1b39f5e53dc7e49e 39f70215e806554b2130e45f1ad9c776
 a9e5975593ed5d90d943ad98405c71e5 ab9da1fb51db73a98ebc54d2e92dd8ae
 __
@@ -1346,8 +1349,8 @@ internal_function::iterated_hash   f647d6e0973b25ecadeac5c1192aa03d
 internal_function::parse_hidden    28a7b8ac3783f3315c9fac05b1c1ed61
 internal_function::read_password   532e3a75ff4a16b9ebe7c7578f2bf442
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
-meta::type::hidden                 aef9579c56aa3bcd93f47ff92144c6f1
-parent::object                     20c70a494394d86d886f9f03e94e330b
+meta::type::hidden                 d775f4567fbb8e4502b99636e52f109f
+parent::object                     24eb27a5802fad8187b7a07b00297e21
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 __
 meta::parent('notes', <<'__');

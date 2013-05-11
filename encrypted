@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  a9973de37d057326fe7ea3b43e1fc846
-# istate: dcacd5ef1e0cf804adac5c3c48dd86f6
+# state:  2c44ab9fe316ebd63fad32a2fed711ba
+# istate: 9fd0addc19252728171787e75b12d6e7
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -153,7 +153,10 @@ meta::define_form 'function', sub {
   meta::externalize $name, "function::$name", meta::eval_in("sub {\n$value\n}", "function::$name");
 };
 __
-meta::meta('type::hidden', 'meta::functor::editable \'hidden\', extension => \'\', inherit => 1, default => \'edit\';');
+meta::meta('type::hidden', <<'__');
+meta::configure 'hidden', extension => '', inherit => 1;
+meta::define_form 'hidden', \&meta::bootstrap::implementation;
+__
 meta::meta('type::hook', <<'__');
 meta::configure 'hook', extension => '.pl', inherit => 0, trim => 1;
 meta::define_form 'hook', sub {
