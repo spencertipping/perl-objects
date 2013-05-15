@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  2c44ab9fe316ebd63fad32a2fed711ba
-# istate: 9fd0addc19252728171787e75b12d6e7
+# state:  aec6260d6fc943a1e28669fd1fffb5c3
+# istate: 837817d58a8181e9a9d40cd362bf3da4
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -515,6 +515,7 @@ meta::function('hide', <<'__');
 exists $data{$_} or die "$_ doesn't exist; not hiding anything" for @_;
 associate("encrypted::$_", encrypt(retrieve($_))), rm($_) for @_;
 __
+meta::function('hide-all', 'dangerous(\'\', sub {hide($_)}) for hidden_attributes(\'^\');');
 meta::function('hook', <<'__');
 my ($hook, @args) = @_;
 $transient{active_hooks}{$hook} = 1;
@@ -661,14 +662,15 @@ around_hook('save-state', $state_name, sub {
   associate("state::$state_name", current_state(), execute => 1)});
 __
 meta::function('secure-shell', <<'__');
-# Unhide hidden attributes, then hide them when the user exits the shell.
-# The list of attributes is recomputed because the user may have added one
-# during the shell session, and we want to catch that.
+associate('hook::before-save::secure-shell-encrypt', 'hide_all()')
+  unless exists $data{'hook::before-save::secure-shell-encrypt'};
+associate('hook::after-save::secure-shell-decrypt', 'unhide_all()')
+  unless exists $data{'hook::after-save::secure-shell-decrypt'};
 
-dangerous('', sub {unhide($_)}) for grep s/^encrypted:://, hidden_attributes('^encrypted::');
+unhide_all();
 reload();
 shell();
-dangerous('', sub {hide($_)}) for hidden_attributes('^');
+hide_all();
 __
 meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
@@ -748,6 +750,7 @@ meta::function('unhide', <<'__');
 exists $data{"encrypted::$_"} or die "encrypted::$_ doesn't exist; not unhiding anything" for @_;
 associate($_, decrypt(retrieve("encrypted::$_"))), rm("encrypted::$_") for @_;
 __
+meta::function('unhide-all', 'dangerous(\'\', sub {unhide($_)}) for grep s/^encrypted:://, hidden_attributes(\'^encrypted::\');');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', 'update_from(@_, grep s/^parent:://o, sort keys %data);');
 meta::function('update-from', <<'__');
