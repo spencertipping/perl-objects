@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  25e9df6977333727acf6fe58be860510
+# state:  1352e861ad9898ae23c2294d094e396c
 # istate: 4e4f353dbb9acbf7abebba4fcc1de72d
 # id:     ad190757af7fd55ea6da941fac1a5124
 
@@ -154,7 +154,7 @@ meta::define_form 'function', sub {
 };
 __
 meta::meta('type::hidden', <<'__');
-meta::configure 'hidden', extension => '', inherit => 1;
+meta::configure 'hidden', extension => '', inherit => 1, trim => 1;
 meta::define_form 'hidden', \&meta::bootstrap::implementation;
 __
 meta::meta('type::hook', <<'__');
@@ -334,8 +334,8 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b 9fd0addc19252728171787e75b12d6e7
-99aeabc9ec7fe80b1b39f5e53dc7e49e 39f70215e806554b2130e45f1ad9c776
+6a38f6fbcf92173ff757305a534a002b 91b7f02b04b8f6ddb9c4a91877054a51
+99aeabc9ec7fe80b1b39f5e53dc7e49e e2f06df7146319d974347ec4e1f8a82e
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -384,6 +384,11 @@ meta::function('cc', <<'__');
 @_ ? associate('data::current-continuation', hook('set-cc', join(' ', @_))) : retrieve('data::current-continuation');
 __
 meta::function('ccc', 'rm(\'data::current-continuation\');');
+meta::function('cd', <<'__');
+my ($options, @stuff) = separate_options(@_);
+my @new_stuff = map "${_}::", @stuff;
+ad(%$options, @new_stuff);
+__
 meta::function('child', <<'__');
 around_hook('child', @_, sub {
   my ($child_name) = @_;
@@ -526,6 +531,7 @@ meta::function('hide', <<'__');
 exists $data{$_} or die "$_ doesn't exist; not hiding anything" for @_;
 associate("encrypted::$_", encrypt(retrieve($_))), rm($_) for @_;
 __
+meta::function('hide-all', 'dangerous(\'\', sub {hide($_)}) for hidden_attributes(\'^\');');
 meta::function('hook', <<'__');
 my ($hook, @args) = @_;
 $transient{active_hooks}{$hook} = 1;
@@ -672,14 +678,15 @@ around_hook('save-state', $state_name, sub {
   associate("state::$state_name", current_state(), execute => 1)});
 __
 meta::function('secure-shell', <<'__');
-# Unhide hidden attributes, then hide them when the user exits the shell.
-# The list of attributes is recomputed because the user may have added one
-# during the shell session, and we want to catch that.
+associate('hook::before-save::secure-shell-encrypt', 'hide_all()')
+  unless exists $data{'hook::before-save::secure-shell-encrypt'};
+associate('hook::after-save::secure-shell-decrypt', 'unhide_all()')
+  unless exists $data{'hook::after-save::secure-shell-decrypt'};
 
-dangerous('', sub {unhide($_)}) for grep s/^encrypted:://, hidden_attributes('^encrypted::');
+unhide_all();
 reload();
 shell();
-dangerous('', sub {hide($_)}) for hidden_attributes('^');
+hide_all();
 __
 meta::function('serialize', <<'__');
 my ($options, @criteria) = separate_options(@_);
@@ -762,11 +769,17 @@ if $$options{'-P'};
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
+meta::function('u', <<'__');
+my ($options, $count) = separate_options(@_);
+$count //= 1;
+rd() while $count--;
+__
 meta::function('unhide', <<'__');
 # Decrypts attributes.
 exists $data{"encrypted::$_"} or die "encrypted::$_ doesn't exist; not unhiding anything" for @_;
 associate($_, decrypt(retrieve("encrypted::$_"))), rm("encrypted::$_") for @_;
 __
+meta::function('unhide-all', 'dangerous(\'\', sub {unhide($_)}) for grep s/^encrypted:://, hidden_attributes(\'^encrypted::\');');
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', 'update_from(@_, grep s/^parent:://o, sort keys %data);');
 meta::function('update-from', <<'__');
@@ -1341,9 +1354,11 @@ function::forget-key               35e0063b52e33a3ec03b8da9575d669b
 function::hidden                   d1cd759e361a05754d92b15c2fb6d7fd
 function::hidden-attributes        54946cbb7f0f09b7db45203421488e6f
 function::hide                     4b3215f97e09c29a9d9c66b2764fbcd0
+function::hide-all                 175e3816ec5242ba4614f32ccb802e56
 function::key                      b29195a4b010df6a243cdafd7aa18df1
-function::secure-shell             6e97823ea89aa1253e527382c5bf3512
+function::secure-shell             54d9eaf22e6696fad259876b89c9f2b5
 function::unhide                   83549250fe9328942b6ff226b7c282b5
+function::unhide-all               ad594e3cdc9b70b949830ede09a424fe
 indicator::key                     3ff3cde22ec719017e77db538c123b15
 internal_function::decrypt         90ecebd340bc304747c4fc2b78326cab
 internal_function::encrypt         e37a03aa2a24955e453e9f6e44ac96d9
@@ -1352,7 +1367,7 @@ internal_function::iterated_hash   f647d6e0973b25ecadeac5c1192aa03d
 internal_function::parse_hidden    28a7b8ac3783f3315c9fac05b1c1ed61
 internal_function::read_password   532e3a75ff4a16b9ebe7c7578f2bf442
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
-meta::type::hidden                 d775f4567fbb8e4502b99636e52f109f
+meta::type::hidden                 7981d1c42f1057e15662b92d1bcbf11a
 parent::object                     24eb27a5802fad8187b7a07b00297e21
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 __
@@ -1365,6 +1380,7 @@ function::alias                         719b3df46720217d69911974c6bdc50f
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
+function::cd                            eb75ec9133248c3e5b70141c7907f0cd
 function::child                         e5acd8aeb16262c3f2a52f6f64344d30
 function::clone                         e30a067adfa6fee67abe8d7afd8b1527
 function::cp                            3fe69d1b58d90045ad520048977538c4
@@ -1410,6 +1426,7 @@ function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::snapshot-if-necessary         68123e0e46509d9e56073683e1e023eb
 function::state                         49b9310d43ef765345f080a23b929f15
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
+function::u                             bead4267f15c6709e775d5b3547e6a6d
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        f98ac65a795279cdbe67d6f3a5a05e42
 function::update-from                   5d73d698fc55121c98bb6d7d3623ca53

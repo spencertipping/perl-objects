@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ea4de7b5127aef5b8daef986534013ae
-# istate: 39f70215e806554b2130e45f1ad9c776
+# state:  bc16e8c1761f8797b0d46a5c5def22ca
+# istate: e2f06df7146319d974347ec4e1f8a82e
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -343,6 +343,11 @@ meta::function('cc', <<'__');
 @_ ? associate('data::current-continuation', hook('set-cc', join(' ', @_))) : retrieve('data::current-continuation');
 __
 meta::function('ccc', 'rm(\'data::current-continuation\');');
+meta::function('cd', <<'__');
+my ($options, @stuff) = separate_options(@_);
+my @new_stuff = map "${_}::", @stuff;
+ad(%$options, @new_stuff);
+__
 meta::function('child', <<'__');
 around_hook('child', @_, sub {
   my ($child_name) = @_;
@@ -677,6 +682,11 @@ if $$options{'-P'};
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
+meta::function('u', <<'__');
+my ($options, $count) = separate_options(@_);
+$count //= 1;
+rd() while $count--;
+__
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', 'update_from(@_, grep s/^parent:://o, sort keys %data);');
 meta::function('update-from', <<'__');

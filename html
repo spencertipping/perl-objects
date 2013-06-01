@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  c2d96d97c09a12093fb9271a3dd491f0
+# state:  b88b92e4770cb791bccc10ad1a3c984e
 # istate: a2f92446c1957947f847c939fdae3750
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
@@ -320,7 +320,7 @@ preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
 70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
-99aeabc9ec7fe80b1b39f5e53dc7e49e 39f70215e806554b2130e45f1ad9c776
+99aeabc9ec7fe80b1b39f5e53dc7e49e e2f06df7146319d974347ec4e1f8a82e
 __
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
@@ -368,6 +368,11 @@ meta::function('cc', <<'__');
 @_ ? associate('data::current-continuation', hook('set-cc', join(' ', @_))) : retrieve('data::current-continuation');
 __
 meta::function('ccc', 'rm(\'data::current-continuation\');');
+meta::function('cd', <<'__');
+my ($options, @stuff) = separate_options(@_);
+my @new_stuff = map "${_}::", @stuff;
+ad(%$options, @new_stuff);
+__
 meta::function('child', <<'__');
 around_hook('child', @_, sub {
   my ($child_name) = @_;
@@ -756,6 +761,11 @@ if $$options{'-P'};
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
+meta::function('u', <<'__');
+my ($options, $count) = separate_options(@_);
+$count //= 1;
+rd() while $count--;
+__
 meta::function('unlock', 'hook(\'unlock\', chmod_self(sub {$_[0] | 0200}));');
 meta::function('update', 'update_from(@_, grep s/^parent:://o, sort keys %data);');
 meta::function('update-from', <<'__');
@@ -1272,6 +1282,7 @@ function::alias                         719b3df46720217d69911974c6bdc50f
 function::cat                           f684de6c8776617a437b76009114f52e
 function::cc                            12ea9176e388400704d823433c209b7a
 function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
+function::cd                            eb75ec9133248c3e5b70141c7907f0cd
 function::child                         e5acd8aeb16262c3f2a52f6f64344d30
 function::clone                         e30a067adfa6fee67abe8d7afd8b1527
 function::cp                            3fe69d1b58d90045ad520048977538c4
@@ -1317,6 +1328,7 @@ function::snapshot                      56939a47f2758421669641e15ebd66eb
 function::snapshot-if-necessary         68123e0e46509d9e56073683e1e023eb
 function::state                         49b9310d43ef765345f080a23b929f15
 function::touch                         3991b1b7c7187566f50e5e58ce01fa06
+function::u                             bead4267f15c6709e775d5b3547e6a6d
 function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
 function::update                        f98ac65a795279cdbe67d6f3a5a05e42
 function::update-from                   5d73d698fc55121c98bb6d7d3623ca53
