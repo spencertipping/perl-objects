@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  0ca4da9beea9921a225dc5f7dcedd8d6
-# istate: ab5c9b0b33a6a25d855e6ea0e73632ff
+# state:  04bce25483f0f7b8ea0f4ba8c0b07f0b
+# istate: 53a3afe2d7ad4234b270ac41ec84c283
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -302,6 +302,7 @@ Spencer Tipping <spencer@spencertipping.com>
 
 __
 meta::data('default-action', 'shell');
+meta::data('file-nuke-backend', 'shred');
 meta::data('license', <<'__');
 MIT License
 Copyright (c) 2010 Spencer Tipping
@@ -898,6 +899,14 @@ $hashes[0]  ^= $hashes[8];
 
 sprintf '%08x' x 4, @hashes[0 .. 3];
 __
+meta::internal_function('file::nuke', <<'__');
+# Nukes a file with the preferred mechanism.
+my ($file)  = @_;
+my $backend = eval {file_nuke_backend()} // 'shred';
+return system("shred -u '$file'") if $backend eq 'shred';
+return unlink $file if $backend eq 'unlink';
+die "unknown file::nuke backend: $backend";
+__
 meta::internal_function('file::read', <<'__');
 my $name = shift;
 open my($handle), "<", $name;
@@ -983,7 +992,7 @@ file::write($filename, $data);
 system("$editor $options '$filename'");
 
 my $result = file::read($filename);
-unlink $filename;
+file::nuke($filename);
 $result;
 __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
@@ -1110,7 +1119,7 @@ my $f      = pop @_;
 my $name   = exported(@_);
 my $result = eval {&$f($name)};
 terminal::warning("$@ when running with_exported()") if $@;
-unlink $name;
+file::nuke($name);
 $result;
 __
 meta::internal_function('with_fork', <<'__');
