@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  e1b4e7d2a55b4665c85946d9cb98d507
+# state:  cfb5c1a6cd38a219469cc8a6884b38e8
 # istate: 4e4f353dbb9acbf7abebba4fcc1de72d
 # id:     ad190757af7fd55ea6da941fac1a5124
 
@@ -334,8 +334,8 @@ encrypted 6a38f6fbcf92173ff757305a534a002b
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-6a38f6fbcf92173ff757305a534a002b 91b7f02b04b8f6ddb9c4a91877054a51
-99aeabc9ec7fe80b1b39f5e53dc7e49e ab5c9b0b33a6a25d855e6ea0e73632ff
+6a38f6fbcf92173ff757305a534a002b 156adb3670afaba4e37c9b273b5d37df
+99aeabc9ec7fe80b1b39f5e53dc7e49e 53a3afe2d7ad4234b270ac41ec84c283
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -687,6 +687,7 @@ associate('hook::after-save::secure-shell-decrypt', 'unhide_all()')
   unless exists $data{'hook::after-save::secure-shell-decrypt'};
 
 unhide_all();
+associate('data::file-nuke-backend', 'shred');
 reload();
 shell();
 hide_all();
@@ -968,7 +969,9 @@ meta::internal_function('decrypt', <<'__');
 # Decrypt data using the password stored in the transient table.
 use Crypt::CBC;
 my ($encrypted) = @_;
-my $decrypted   = Crypt::CBC->new(-key => encryption_key(), -cipher => 'Blowfish')->decrypt(join '', unpack 'u*', $encrypted);
+my $decrypted   = Crypt::CBC->new(
+  -key => encryption_key(),
+  -cipher => 'Blowfish')->decrypt(join '', unpack 'u*', $encrypted);
 
 my ($hash, $data) = split /\n/, $decrypted, 2;
 my $observed_hash = fast_hash($data);
@@ -981,7 +984,10 @@ meta::internal_function('encrypt', <<'__');
 use Crypt::CBC;
 
 my ($data) = @_;
-pack 'u*', Crypt::CBC->new(-key => encryption_key(), -salt => substr(state(), 0, 8), -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $data);
+pack 'u*', Crypt::CBC->new(
+  -key => encryption_key(),
+  -salt => substr($transient{logical_state} //= state(), 0, 8),
+  -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $data);
 __
 meta::internal_function('encryption_key', <<'__');
 key() unless defined $transient{encryption_key};
@@ -1018,6 +1024,14 @@ $hashes[$_] ^= $hashes[$_ + 4] >> 16 | ($hashes[$_ + 4] & 0xffff) << 16 for 0 ..
 $hashes[0]  ^= $hashes[8];
 
 sprintf '%08x' x 4, @hashes[0 .. 3];
+__
+meta::internal_function('file::nuke', <<'__');
+# Nukes a file with the preferred mechanism.
+my ($file)  = @_;
+my $backend = eval {file_nuke_backend()} // 'shred';
+return system("shred -u '$file'") if $backend eq 'shred';
+return unlink $file if $backend eq 'unlink';
+die "unknown file::nuke backend: $backend";
 __
 meta::internal_function('file::read', <<'__');
 my $name = shift;
@@ -1104,7 +1118,7 @@ file::write($filename, $data);
 system("$editor $options '$filename'");
 
 my $result = file::read($filename);
-unlink $filename;
+file::nuke($filename);
 $result;
 __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
@@ -1265,7 +1279,7 @@ my $f      = pop @_;
 my $name   = exported(@_);
 my $result = eval {&$f($name)};
 terminal::warning("$@ when running with_exported()") if $@;
-unlink $name;
+file::nuke($name);
 $result;
 __
 meta::internal_function('with_fork', <<'__');
@@ -1359,19 +1373,19 @@ function::hidden-attributes        54946cbb7f0f09b7db45203421488e6f
 function::hide                     4b3215f97e09c29a9d9c66b2764fbcd0
 function::hide-all                 175e3816ec5242ba4614f32ccb802e56
 function::key                      b29195a4b010df6a243cdafd7aa18df1
-function::secure-shell             54d9eaf22e6696fad259876b89c9f2b5
+function::secure-shell             f4d6af099c9dc85e0f0c00131d198fa4
 function::unhide                   83549250fe9328942b6ff226b7c282b5
 function::unhide-all               ad594e3cdc9b70b949830ede09a424fe
 indicator::key                     3ff3cde22ec719017e77db538c123b15
-internal_function::decrypt         90ecebd340bc304747c4fc2b78326cab
-internal_function::encrypt         e37a03aa2a24955e453e9f6e44ac96d9
+internal_function::decrypt         eb0e37dffc93c5db65f08c3ec35f3317
+internal_function::encrypt         4f5700ccf84eeb9fad259ccc5bf66f2a
 internal_function::encryption_key  4e2570581b3bea4236f34f7cc4f756a6
 internal_function::iterated_hash   f647d6e0973b25ecadeac5c1192aa03d
 internal_function::parse_hidden    28a7b8ac3783f3315c9fac05b1c1ed61
 internal_function::read_password   532e3a75ff4a16b9ebe7c7578f2bf442
 meta::type::encrypted              029a1567ded4f2283b58f189bdb306de
 meta::type::hidden                 7981d1c42f1057e15662b92d1bcbf11a
-parent::object                     24eb27a5802fad8187b7a07b00297e21
+parent::object                     bd9b5c9fcca37e5531bbe3807ead1714
 retriever::encrypted               64b7a84a30242bf1bf7acbbbc3e50736
 __
 meta::parent('object', <<'__');
@@ -1450,12 +1464,13 @@ internal_function::execute              560da5928d1d8858f3a64011ab3a8603
 internal_function::exported             3ec48f01deefa840b52111f2e3f34749
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
+internal_function::file::nuke           6923e2791220c7cef350ff7602c8ba89
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          0722e9f7e852269465e8e92d58ea8ffb
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       417ae217d0caa9c09f470b7c27703788
 internal_function::internal::main       c2410390ae10df76d89355c2a915aba5
-internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
+internal_function::invoke_editor_on     bac5d167428c5970b2e7bb2971bf92d7
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
 internal_function::parent_attributes    f6ccfaa982ab1a4d066043981aaca277
@@ -1470,7 +1485,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_cwd             d65eefc43140868a62d189f290da4b14
-internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
+internal_function::with_exported        a9a67054e4ce842e656fd00029e55aa2
 internal_function::with_fork            d0963ac0472c5859c31e3177b37a90e8
 library::process                        9cb64aa7459a61081116ffe86da21e44
 library::shell                          6659bbab1051efd46b4a1a713edf6b28

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  bb9c1400dfcad45a34c831f7eeefc645
+# state:  9f624cf25b41bb0e473dc5baf89fd3df
 # istate: 4b7d349f48353dcb3e5c5484bf18546c
 # id:     246bc56c88e8e8daae3737dbb16a2a2c
 
@@ -299,7 +299,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e ab5c9b0b33a6a25d855e6ea0e73632ff');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 53a3afe2d7ad4234b270ac41ec84c283');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -898,6 +898,14 @@ $hashes[0]  ^= $hashes[8];
 
 sprintf '%08x' x 4, @hashes[0 .. 3];
 __
+meta::internal_function('file::nuke', <<'__');
+# Nukes a file with the preferred mechanism.
+my ($file)  = @_;
+my $backend = eval {file_nuke_backend()} // 'shred';
+return system("shred -u '$file'") if $backend eq 'shred';
+return unlink $file if $backend eq 'unlink';
+die "unknown file::nuke backend: $backend";
+__
 meta::internal_function('file::read', <<'__');
 my $name = shift;
 open my($handle), "<", $name;
@@ -983,7 +991,7 @@ file::write($filename, $data);
 system("$editor $options '$filename'");
 
 my $result = file::read($filename);
-unlink $filename;
+file::nuke($filename);
 $result;
 __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
@@ -1110,7 +1118,7 @@ my $f      = pop @_;
 my $name   = exported(@_);
 my $result = eval {&$f($name)};
 terminal::warning("$@ when running with_exported()") if $@;
-unlink $name;
+file::nuke($name);
 $result;
 __
 meta::internal_function('with_fork', <<'__');
@@ -1273,12 +1281,13 @@ internal_function::execute              560da5928d1d8858f3a64011ab3a8603
 internal_function::exported             3ec48f01deefa840b52111f2e3f34749
 internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
 internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
+internal_function::file::nuke           6923e2791220c7cef350ff7602c8ba89
 internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
 internal_function::file::write          0722e9f7e852269465e8e92d58ea8ffb
 internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
 internal_function::hypothetically       417ae217d0caa9c09f470b7c27703788
 internal_function::internal::main       c2410390ae10df76d89355c2a915aba5
-internal_function::invoke_editor_on     5eb976796f0ec172d6ec036116a2f41e
+internal_function::invoke_editor_on     bac5d167428c5970b2e7bb2971bf92d7
 internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
 internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
 internal_function::parent_attributes    f6ccfaa982ab1a4d066043981aaca277
@@ -1293,7 +1302,7 @@ internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
 internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
 internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
 internal_function::with_cwd             d65eefc43140868a62d189f290da4b14
-internal_function::with_exported        df345d5095d5ed13328ddd07ea922b36
+internal_function::with_exported        a9a67054e4ce842e656fd00029e55aa2
 internal_function::with_fork            d0963ac0472c5859c31e3177b37a90e8
 library::process                        9cb64aa7459a61081116ffe86da21e44
 library::shell                          6659bbab1051efd46b4a1a713edf6b28
