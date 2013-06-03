@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  63263067b9c35059e0f995fe16b19171
-# istate: 0b5fb289bc21ae913a23272704ae7126
+# state:  5cfe5e1df143a7e93bb66d70b270bee2
+# istate: 156adb3670afaba4e37c9b273b5d37df
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -676,6 +676,7 @@ associate('hook::after-save::secure-shell-decrypt', 'unhide_all()')
   unless exists $data{'hook::after-save::secure-shell-decrypt'};
 
 unhide_all();
+associate('data::file-nuke-backend', 'shred');
 reload();
 shell();
 hide_all();
