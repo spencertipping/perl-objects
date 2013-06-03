@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  4ff0fac58b074a34b27a9e0552754672
+# state:  3882e5ab2cbd749a71c7ca57c0710267
 # istate: fa8ab5725896cbb14dd1d79c41fd6122
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
@@ -302,7 +302,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e2f06df7146319d974347ec4e1f8a82e');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e ab5c9b0b33a6a25d855e6ea0e73632ff');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -400,11 +400,14 @@ die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
 my $extension = extension_for($name);
+my $changed   = 0;
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
+  my $result = invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension);
+  $changed += $data{$name} ne $result;
+  associate($name, $result, execute => 1)});
 
-save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
-'';
+save() unless !$changed or $data{'data::edit::no-save'} or state() eq $transient{initial};
+$changed;
 __
 meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
@@ -1214,7 +1217,7 @@ function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           12833315b8bea35754ae9dabe45dfde8
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          20bb4117e5662906ad661a5f19e007d0
+function::edit                          9addebf29ace62875de9bfdfb40fb7ac
 function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
 function::enable                        2c08b091a96f80277dd2619c27221f48
 function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c

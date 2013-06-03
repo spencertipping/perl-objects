@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  1eac52bce420e5c57b13f5a13ee7eeed
-# istate: 91b7f02b04b8f6ddb9c4a91877054a51
+# state:  63263067b9c35059e0f995fe16b19171
+# istate: 0b5fb289bc21ae913a23272704ae7126
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -330,7 +330,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e2f06df7146319d974347ec4e1f8a82e');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e ab5c9b0b33a6a25d855e6ea0e73632ff');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -428,11 +428,14 @@ die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
 my $extension = extension_for($name);
+my $changed   = 0;
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
+  my $result = invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension);
+  $changed += $data{$name} ne $result;
+  associate($name, $result, execute => 1)});
 
-save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
-'';
+save() unless !$changed or $data{'data::edit::no-save'} or state() eq $transient{initial};
+$changed;
 __
 meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
@@ -942,7 +945,9 @@ meta::internal_function('decrypt', <<'__');
 # Decrypt data using the password stored in the transient table.
 use Crypt::CBC;
 my ($encrypted) = @_;
-my $decrypted   = Crypt::CBC->new(-key => encryption_key(), -cipher => 'Blowfish')->decrypt(join '', unpack 'u*', $encrypted);
+my $decrypted   = Crypt::CBC->new(
+  -key => encryption_key(),
+  -cipher => 'Blowfish')->decrypt(join '', unpack 'u*', $encrypted);
 
 my ($hash, $data) = split /\n/, $decrypted, 2;
 my $observed_hash = fast_hash($data);
@@ -955,7 +960,10 @@ meta::internal_function('encrypt', <<'__');
 use Crypt::CBC;
 
 my ($data) = @_;
-pack 'u*', Crypt::CBC->new(-key => encryption_key(), -salt => substr(state(), 0, 8), -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $data);
+pack 'u*', Crypt::CBC->new(
+  -key => encryption_key(),
+  -salt => substr($transient{logical_state} //= state(), 0, 8),
+  -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $data);
 __
 meta::internal_function('encryption_key', <<'__');
 key() unless defined $transient{encryption_key};
@@ -1333,7 +1341,7 @@ function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           12833315b8bea35754ae9dabe45dfde8
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          20bb4117e5662906ad661a5f19e007d0
+function::edit                          9addebf29ace62875de9bfdfb40fb7ac
 function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
 function::enable                        2c08b091a96f80277dd2619c27221f48
 function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c

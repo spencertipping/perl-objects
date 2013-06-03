@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  356c30a0168931afc5e990c3deb5fba5
+# state:  3be304c613806585c4b32fe28e65caf2
 # istate: 3e1f000829aca2354cbb23d8e3350f51
 # id:     05bc3036c343fdb8aec5b0be12a9b19e
 
@@ -320,7 +320,7 @@ configuration aa772900bb5b925cb84346bd72a4249d
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-99aeabc9ec7fe80b1b39f5e53dc7e49e e2f06df7146319d974347ec4e1f8a82e
+99aeabc9ec7fe80b1b39f5e53dc7e49e ab5c9b0b33a6a25d855e6ea0e73632ff
 aa772900bb5b925cb84346bd72a4249d fa6bb843aea7148c0fb4515cb54da5dc
 __
 meta::configuration('dependencies', <<'__');
@@ -444,11 +444,14 @@ die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
 my $extension = extension_for($name);
+my $changed   = 0;
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
+  my $result = invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension);
+  $changed += $data{$name} ne $result;
+  associate($name, $result, execute => 1)});
 
-save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
-'';
+save() unless !$changed or $data{'data::edit::no-save'} or state() eq $transient{initial};
+$changed;
 __
 meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
@@ -1262,7 +1265,7 @@ function::create                        3010d55f4dfa59a998742e07823ed54d
 function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
 function::cwd                           12833315b8bea35754ae9dabe45dfde8
 function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          20bb4117e5662906ad661a5f19e007d0
+function::edit                          9addebf29ace62875de9bfdfb40fb7ac
 function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
 function::enable                        2c08b091a96f80277dd2619c27221f48
 function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c
