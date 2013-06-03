@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  bc16e8c1761f8797b0d46a5c5def22ca
-# istate: e2f06df7146319d974347ec4e1f8a82e
+# state:  0ca4da9beea9921a225dc5f7dcedd8d6
+# istate: ab5c9b0b33a6a25d855e6ea0e73632ff
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -397,11 +397,14 @@ die "$name is virtual or does not exist" unless exists $data{$name};
 die "$name is inherited; use 'edit $name -f' to edit anyway" unless is($name, '-u') || is($name, '-d') || exists $$options{'-f'};
 
 my $extension = extension_for($name);
+my $changed   = 0;
 around_hook('edit', @_, sub {
-  associate($name, invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension), execute => 1)});
+  my $result = invoke_editor_on($data{$name} // '', %$options, attribute => $name, extension => $extension);
+  $changed += $data{$name} ne $result;
+  associate($name, $result, execute => 1)});
 
-save() unless $data{'data::edit::no-save'} or state() eq $transient{initial};
-'';
+save() unless !$changed or $data{'data::edit::no-save'} or state() eq $transient{initial};
+$changed;
 __
 meta::function('edit-self', <<'__');
 $global_data = invoke_editor_on($global_data);
