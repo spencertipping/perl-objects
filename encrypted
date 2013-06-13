@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  64637ae71bddeab8a5ca9b51dedf9e13
-# istate: 156adb3670afaba4e37c9b273b5d37df
+# state:  4517d13433a1de546668bed8fe12aa10
+# istate: 8661a084ae7e94019f070931a6968bde
 # id:     6a38f6fbcf92173ff757305a534a002b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -945,26 +945,38 @@ __
 meta::internal_function('decrypt', <<'__');
 # Decrypt data using the password stored in the transient table.
 use Crypt::CBC;
+use IO::Uncompress::Bunzip2 qw/bunzip2/;
+
 my ($encrypted) = @_;
 my $decrypted   = Crypt::CBC->new(
-  -key => encryption_key(),
+  -key    => encryption_key(),
   -cipher => 'Blowfish')->decrypt(join '', unpack 'u*', $encrypted);
 
 my ($hash, $data) = split /\n/, $decrypted, 2;
-my $observed_hash = fast_hash($data);
+return $data if fast_hash($data) eq $hash;
 
-die 'decrypted data fails integrity check' unless $observed_hash eq $hash;
-$data;
+# If we didn't get the right content, try uncompressing the data first.
+my $uncompressed = '';
+bunzip2 \$data => \$uncompressed;
+return $uncompressed if fast_hash($uncompressed) eq $hash;
+
+die 'decrypted data fails integrity check';
 __
 meta::internal_function('encrypt', <<'__');
-# Encrypt data with a hash to make sure that it gets decrypted properly.
+# Encrypt data with a hash to make sure that it gets decrypted properly. We
+# also compress the data prior to encryption, but the hash always describes the
+# real content. This allows us to modify the content encoding and still remain
+# backward-compatible.
 use Crypt::CBC;
+use IO::Compress::Bzip2 qw/bzip2/;
 
 my ($data) = @_;
+my $compressed = '';
+bzip2 \$data => \$compressed;
 pack 'u*', Crypt::CBC->new(
-  -key => encryption_key(),
-  -salt => substr($transient{logical_state} //= state(), 0, 8),
-  -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $data);
+  -key    => encryption_key(),
+  -salt   => substr($transient{logical_state} //= state(), 0, 8),
+  -cipher => 'Blowfish')->encrypt(fast_hash($data) . "\n" . $compressed);
 __
 meta::internal_function('encryption_key', <<'__');
 key() unless defined $transient{encryption_key};
