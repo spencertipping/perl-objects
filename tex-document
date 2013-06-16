@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  da1c93a56751f66245fe6de25eaf4d4f
-# istate: b38e4630c99c2fb74913d726404b238d
+# state:  2c711f020a5a61f708c879705df1dd87
+# istate: 48bc80fb40c2ea3ae4e9c10047f6e81d
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -162,7 +162,7 @@ my $fframe_template = tex::template_for {
 };
 &$fframe_template(tex::id('fframe'));
 __
-meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource perl ruby/;');
+meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource perl ruby python/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
 meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize description item/);');
 meta::meta('template::math', <<'__');
