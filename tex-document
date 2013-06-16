@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  8d6288ce48999fd7e157677b3f5ecd31
-# istate: 63c9da6c30d7e4263da9844f0f842cb5
+# state:  ec3e4fb98a04ce2cc704d92d6aa70b28
+# istate: f9596c3484b8aa67eb8cc123abab845b
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1735,6 +1735,7 @@ meta::resource('header-languages', <<'__');
 \lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
 \lstnewenvironment{perlcode}      {\lstset{language=perl}}{}
 \lstnewenvironment{rubycode}      {\lstset{language=ruby}}{}
+\lstnewenvironment{rubycode}      {\lstset{language=python}}{}
 
 __
 meta::resource('header-listings', <<'__');
@@ -1942,6 +1943,7 @@ syn case match | syn include @javascript    syntax/javascript.vim | unlet b:curr
 syn case match | syn include @html          syntax/html.vim       | unlet b:current_syntax
 syn case match | syn include @perl          syntax/perl.vim       | unlet b:current_syntax
 syn case match | syn include @ruby          syntax/ruby.vim       | unlet b:current_syntax
+syn case match | syn include @python        syntax/python.vim     | unlet b:current_syntax
 
 syn case match
 
@@ -1952,10 +1954,11 @@ syn region  cltJavascript  matchgroup=cltCode start=/^\z(\s*\)- javascript .*<<\
 syn region  cltHtml        matchgroup=cltCode start=/^\z(\s*\)- html .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@html
 syn region  cltPerl        matchgroup=cltCode start=/^\z(\s*\)- perl .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@perl
 syn region  cltRuby        matchgroup=cltCode start=/^\z(\s*\)- ruby .*<<\s*\z(\w\+\)$/       end=/^\z1- \z2$/ contains=@ruby
+syn region  cltPython      matchgroup=cltCode start=/^\z(\s*\)- python .*<<\s*\z(\w\+\)$/     end=/^\z1- \z2$/ contains=@python
 syn region  cltResource    matchgroup=cltCode start=/^\z(\s*\)- resource .*<<\s*\z(\w\+\)$/   end=/^\z1- \z2$/
 syn region  cltComment     matchgroup=cltCode start=/^\z(\s*\)- comment .*<<\s*\z(\w\+\)$/    end=/^\z1- \z2$/
 
-syn cluster cltStuff       add=cltCpp,cltJava,cltAsm,cltJavascript,cltHtml,cltResource,cltComment,cltLine,cltPerl,cltRuby
+syn cluster cltStuff       add=cltCpp,cltJava,cltAsm,cltJavascript,cltHtml,cltResource,cltComment,cltLine,cltPerl,cltRuby,cltPython
 
 syn region  cltDocument    start=/\%^/ end=/\%$/ contains=@cltStuff
 
