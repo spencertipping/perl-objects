@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  ec3e4fb98a04ce2cc704d92d6aa70b28
-# istate: f9596c3484b8aa67eb8cc123abab845b
+# state:  da1c93a56751f66245fe6de25eaf4d4f
+# istate: b38e4630c99c2fb74913d726404b238d
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1735,7 +1735,7 @@ meta::resource('header-languages', <<'__');
 \lstnewenvironment{htmlcode}      {\lstset{language=html}}{}
 \lstnewenvironment{perlcode}      {\lstset{language=perl}}{}
 \lstnewenvironment{rubycode}      {\lstset{language=ruby}}{}
-\lstnewenvironment{rubycode}      {\lstset{language=python}}{}
+\lstnewenvironment{pythoncode}    {\lstset{language=python}}{}
 
 __
 meta::resource('header-listings', <<'__');
