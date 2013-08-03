@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  2c711f020a5a61f708c879705df1dd87
+# state:  efe1d58132734f178f0275bba689ea32
 # istate: 48bc80fb40c2ea3ae4e9c10047f6e81d
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
@@ -420,7 +420,7 @@ meta::cache('parent-state', <<'__');
 70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
 902333a0bd6ed90ff919fe8477cb4e69 8d4ebdc5d3e901edca2bec5d546d6f7f
 99aeabc9ec7fe80b1b39f5e53dc7e49e 53a3afe2d7ad4234b270ac41ec84c283
-a1e8480e579614c01dabeecf0f963bcc 6a1b66304cbd4a94a05b0ef78f1e1bf4
+a1e8480e579614c01dabeecf0f963bcc 7629b0f3a5144001db7d2a1aa4dc41ea
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
@@ -817,7 +817,8 @@ my %comments_for_extension =
      vim   "      elisp ;     bas  '     ada  --    asm  ;   awk #    bc   #    boo #   tex  %         fss  (*,*)  erl %
      scala //     hx    //    io   //    j    NB.   lua  --  n   //   m    %    php //  sql  --        pov  //     pro %
      r     #      self  ","   tcl  #     texi @c    tk   #   csh #    vala //   vbs '   v    /*,*/     vhdl --     ss  ;;;
-     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   hh   //   ps  %   canard nb[,]|;
+     haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   hh   //   ps  %   canard nb[,]   x    /*,*/  xr  /*,*/
+     xu    /*,*/  xn    /*,*/ xbn  /*,*/ xs   /*,*/|;
 
 # No extension suggests a shebang line, which generally requires # to denote a comment.
 $comments_for_extension{''} = '#';
@@ -1698,14 +1699,14 @@ template::include              47b5552d609d97fe7f2522d5c1027014
 template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
 __
 meta::parent('sdoc', <<'__');
-function::sdoc            4aac070122ecdc43b5a9d09baab005e6
+function::sdoc            7077d342bdab4d54cbcd865af84ee41c
 function::sdoc-html       1bacf037ce7cad1b6339120e2eeab87f
 function::sdoc-markdown   885b3a873eff28ebe2d9f41c88c62fdd
 function::sdoc-packed     77ed0b1b297675176ba12fe8820284ee
 function::sdocp           c3d738d982ba87418a298ff58478a85b
 meta::type::sdoc          22cd7315641d38c9d536344e83c36bed
 meta::type::slibrary      11af20c9992afa7ecaa370b2694823de
-parent::object            24eb27a5802fad8187b7a07b00297e21
+parent::object            bd9b5c9fcca37e5531bbe3807ead1714
 retriever::code-sdoc      0096df7bf3836f5834205298823ef0f3
 retriever::html-sdoc      05a3a1c747d4690741e663d34417bd32
 retriever::markdown-sdoc  f5aa8c4df39f34a58d75439c926e48c1
