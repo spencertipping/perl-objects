@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  efe1d58132734f178f0275bba689ea32
-# istate: 48bc80fb40c2ea3ae4e9c10047f6e81d
+# state:  89c56f90820e01b1c51c34a75bfbc86e
+# istate: 972b55041059cf0d284a0f557e252926
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -274,6 +274,11 @@ __
 meta::meta('type::parent', <<'__');
 meta::define_form 'parent', \&meta::bootstrap::implementation;
 meta::configure 'parent', extension => '', inherit => 1, trim => 1;
+__
+meta::meta('type::psection', <<'__');
+# Perl TeX section (separated out to help vim syntax highlighter)
+meta::functor::editable 'psection', extension => '.perltex', inherit => 0,
+                                    default => 'edit';
 __
 meta::meta('type::resource', 'meta::functor::editable \'resource\', extension => \'.cltex\', inherit => 1, default => \'edit\';');
 meta::meta('type::retriever', <<'__');
@@ -1975,6 +1980,28 @@ hi link cltLineComment     Type
 hi link cltLogicalComment  Type
 
 let b:current_syntax = "cltex"
+
+__
+meta::vim_highlighter('perltex', <<'__');
+" Literate Perl in TeX
+" Maintainer: Spencer Tipping <spencer@spencertipping.com>
+
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
+
+runtime syntax/perl.vim
+
+syn case match
+syn match  pltPreprocessor /^\s*- .*$/ containedin=pltImpliedComment
+syn region pltImpliedComment matchgroup=pltPreprocessor start=/\%^\|^\s*- end$/ end=/^\s*- perl.*$\|\%$/ keepend containedin=ALL
+
+hi link pltImpliedComment Comment
+hi link pltPreprocessor   PreProc
+
+let b:current_syntax = "perltex"
 
 __
 internal::main();

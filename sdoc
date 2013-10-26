@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  bfa3c492982b9a1928bab90433237597
-# istate: 7629b0f3a5144001db7d2a1aa4dc41ea
+# state:  b247bd15b8c540a7962760ede2c43ed7
+# istate: 42f59fa30230dcbfbaae09269d2cbc94
 # id:     a1e8480e579614c01dabeecf0f963bcc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -638,7 +638,7 @@ my %comments_for_extension =
      scala //     hx    //    io   //    j    NB.   lua  --  n   //   m    %    php //  sql  --        pov  //     pro %
      r     #      self  ","   tcl  #     texi @c    tk   #   csh #    vala //   vbs '   v    /*,*/     vhdl --     ss  ;;;
      haml  -#     sass  /*,*/ scss /*,*/ css  /*,*/ fig  /   waul #   hh   //   ps  %   canard nb[,]   x    /*,*/  xr  /*,*/
-     xu    /*,*/  xn    /*,*/ xbn  /*,*/ xs   /*,*/|;
+     xu    /*,*/  xn    /*,*/ xbn  /*,*/ xs   /*,*/ m4   dnl|;
 
 # No extension suggests a shebang line, which generally requires # to denote a comment.
 $comments_for_extension{''} = '#';
