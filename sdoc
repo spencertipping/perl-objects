@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  24f37d79f093831f683e54b9411016e2
-# istate: 8a3d349ca60d0eee87886550a7e849c1
+# state:  05d523b2c6a1d674c0f0f73c35fccce3
+# istate: 28d4c8a6dd79cd7fd34449a08f1b6f01
 # id:     a1e8480e579614c01dabeecf0f963bcc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -732,7 +732,8 @@ meta::function('sdoc-markdown', <<'__');
 # Renders a chunk of SDoc as Markdown. This involves converting quoted and
 # unquoted code and section headings, but not numbered lists.
 
-my ($attribute, $adjust) = @_;
+my ($attribute, %options) = @_;
+my ($adjust, $quote_code) = @options{qw/adjust quote_code/};
 $adjust //= 0;
 
 my $extension     = extension_for($attribute =~ /^sdoc::(.*)$/g) || ($attribute =~ /.*?\.([^\.]+)(?:\.sdoc)?$/gi)[0];
@@ -744,7 +745,8 @@ my @markup;
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
 my $unindent      = sub {my $spaces = '  ' x ($section_level - $adjust - 1); s/^$spaces//gm; $_};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "```$extension\n$_\n```"};
+my $code          = sub {goto &$quoted if $quote_code;
+                         &$unindent(); s/^c\n//;                   push @markup, "```$extension\n$_\n```"};
 my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join("\n", map &$indent(2) . $_, split /\n/)};
 
 my $heading       = sub {'#' x $_[0]};
@@ -778,7 +780,8 @@ meta::function('sdoc-pod', <<'__');
 
 use List::Util qw/min/;
 
-my ($attribute, $adjust) = @_;
+my ($attribute, %options) = @_;
+my ($adjust, $quote_code) = @options{qw/adjust quote_code/};
 $adjust //= 0;
 
 my $extension     = extension_for($attribute =~ /^sdoc::(.*)$/g) || ($attribute =~ /.*?\.([^\.]+)(?:\.sdoc)?$/gi)[0];
@@ -790,7 +793,8 @@ my @markup;
 my $indent        = sub {'  ' x ($_[0] || $section_level)};
 my $unindent      = sub {my $spaces = '  ' x ($section_level - $adjust - 1); s/^$spaces//gm; $_};
 
-my $code          = sub {&$unindent(); s/^c\n//;                   push @markup, "=cut\n\n$_\n\n=pod"};
+my $code          = sub {goto &$quoted if $quote_code;
+                         &$unindent(); s/^c\n//;                   push @markup, "=cut\n\n$_\n\n=pod"};
 my $quoted        = sub {&$unindent(); s/^\|(\s?)/ \1/; s/^  //mg; push @markup, join "\n", map "  $_", split /\n/};
 my $section       = sub {&$unindent(); push @markup, "=head$_[0] $2"};
 
@@ -1572,10 +1576,11 @@ __
 meta::retriever('id', '$_[0] =~ /^id::/ ? substr($_[0], 4) : undef;');
 meta::retriever('markdown-sdoc', <<'__');
 my ($attribute) = @_;
-return undef unless $attribute =~ s/^markdown(?:\.(\d+))?::/sdoc::/;
-my $adjust = $1;
+return undef unless $attribute =~ s/^markdown(?:\.(\d+))?(\.q)?::/sdoc::/;
+my ($adjust, $quote_code) = ($1, $2);
 return undef unless defined retrieve($attribute) || $attribute =~ s/^sdoc::// && defined retrieve($attribute);
-sdoc_markdown($attribute);
+sdoc_markdown($attribute, adjust     => $adjust,
+                          quote_code => $quote_code);
 __
 meta::retriever('object', <<'__');
 # Fetch a property from another Perl object. This uses the 'cat' function.
@@ -1589,11 +1594,12 @@ eval $1;
 __
 meta::retriever('pod-sdoc', <<'__');
 my ($attribute) = @_;
-return undef unless $attribute =~ s/^pod(?:\.(\d+))?::/sdoc::/;
-my $adjust = $1 || 0;
+return undef unless $attribute =~ s/^pod(?:\.(\d+))?(\.q)?::/sdoc::/;
+my ($adjust, $quote_code) = ($1, $2);
 
 return undef unless defined retrieve($attribute) || $attribute =~ s/^sdoc::// && defined retrieve($attribute);
-sdoc_pod($attribute, $adjust);
+sdoc_pod($attribute, adjust     => $adjust,
+                     quote_code => $quote_code);
 __
 meta::retriever('sdoc', 'exists $data{"sdoc::$_[0]"} ? sdoc("sdoc::$_[0]", extension_for($_[0])) : undef;');
 meta::retriever('sdoc-packed', <<'__');
