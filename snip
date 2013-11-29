@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  b5eacc9b2ebb3239a814628b20820736
-# istate: 8392425bd329014fe0d6db29f5e8abdf
+# state:  348e84201b15319b6f831d02ab0c6231
+# istate: bb55eebf8b1815ee8a41eb6f7b17bc2e
 # id:     cfa86a2afc148d72040e2f12de2fb145
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -456,18 +456,6 @@ my $name = pop @_;
 file::write($name, join "\n", retrieve(@_));
 __
 meta::function('extern', '&{$_[0]}(retrieve(@_[1 .. $#_]));');
-meta::function('go', <<'__');
-# Activates snip recording mode
-return if $transient{recording_mode};
-
-$_ eq 'method-missing' or
-$_ eq 'last' or
-$_ eq 'redo' or delete $externalized_functions{$_}
-for keys %externalized_functions;
-
-$transient{recording_mode} = 1;
-terminal::info('recording mode active');
-__
 meta::function('grep', <<'__');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
@@ -600,8 +588,6 @@ meta::function('method-missing', <<'__');
 # Special cases: / = search, % = count words
 return apropos(@_) if $_[0] =~ s/^\///;
 return lw(@_) if $_[0] =~ s/^%//;
-
-go();
 
 # Record the words into the main log along with a timestamp.
 associate('data::log',
