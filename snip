@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  f2d0a75d963bde277d97724ca078800b
-# istate: e8a9b9ff0c9d275767814d9cc9ee2bf5
-# id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
+# state:  745285a103020b4fe4b79887a895c673
+# istate: 849d3544932c0570e9951b1e70bb82cc
+# id:     cfa86a2afc148d72040e2f12de2fb145
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
 # really gnarly). If you're curious what it's made of, I recommend reading
@@ -297,6 +297,8 @@ run this script with the 'usage' argument.
 
 =cut
 __
+meta::cache('parent-identification', '/home/spencertipping/r/initiative/perl-objects/object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e8a9b9ff0c9d275767814d9cc9ee2bf5');
 meta::data('author', <<'__');
 Spencer Tipping <spencer@spencertipping.com>
 
@@ -325,7 +327,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __
-meta::data('permanent-identity', '99aeabc9ec7fe80b1b39f5e53dc7e49e');
+meta::data('permanent-identity', 'cfa86a2afc148d72040e2f12de2fb145');
 meta::function('ad', <<'__');
 my ($options, @paths) = separate_options(@_);
 @{$transient{path}} = () if $$options{-c};
@@ -337,6 +339,15 @@ my ($name, @stuff) = @_;
 @_ ? @stuff ? around_hook('alias', @_, sub {associate("alias::$name", join(' ', @stuff), execute => 1)})
             : retrieve("alias::$name") // "Undefined alias $name"
    : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
+__
+meta::function('apropos', <<'__');
+# Searches through notes for the given word prefix, sorting by date.
+my %match;
+++$match{$_} for @_;
+
+for (split /\n/, retrieve('data::log')) {
+  print "$_\n" if grep $match{$_}, split /\s+/;
+}
 __
 meta::function('cat', 'join "\\n", retrieve(@_);');
 meta::function('cc', <<'__');
@@ -445,6 +456,11 @@ my $name = pop @_;
 file::write($name, join "\n", retrieve(@_));
 __
 meta::function('extern', '&{$_[0]}(retrieve(@_[1 .. $#_]));');
+meta::function('go', <<'__');
+# Activates snip recording mode
+delete $externalized_functions{$_} for keys %externalized_functions;
+terminal::info('recording mode active');
+__
 meta::function('grep', <<'__');
 # Looks through attributes for a pattern. Usage is grep pattern [options], where
 # [options] is the format as provided to select_keys.
@@ -539,6 +555,19 @@ my @parent_hashes = map $inherited{$_} || '-', @definitions if $parent_hashes;
 join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @externals] : [@definitions],
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
 __
+meta::function('lw', <<'__');
+# Most common words by prefix(es)
+my @prefixes = map qr/^$_.*/, @_;
+my @words    = split /\s+/, retrieve('data::log') =~ s/^.*?\t//rmg;
+
+my %counts;
+for my $w (@words) {
+  ++$counts{$w} if grep $w =~ /$_/, @prefixes;
+}
+
+printf "%5d: %s\n", $counts{$_}, $_
+for sort {$counts{$b} - $counts{$a}} keys %counts;
+__
 meta::function('metadata-from', <<'__');
 my ($filename) = @_;
 my %metadata;
@@ -552,6 +581,21 @@ while (<$fh>) {
 close $fh;
 
 \%metadata;
+__
+meta::function('method-missing', <<'__');
+# Special cases: / = search, % = count words
+return apropos(@_) if $_[0] =~ s/^\///;
+return lw(@_) if $_[0] =~ s/^%//;
+
+# Record the words into the main log along with a timestamp.
+associate('data::log',
+          join("\n", split(/\n/, retrieve('data::log')),
+                     timestamp() . "\t" . join ' ', @_),
+          execute => 1);
+
+my $line_count = split /\n/, retrieve('data::log');
+print "notes: $line_count\n";
+'';
 __
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
@@ -684,6 +728,10 @@ $hash = fast_hash(join '|', $hash, grep s/^parent:://, sort keys %data)
 if $$options{'-P'};
 
 $$options{'-G'} ? $hash : fast_hash("$global_data|$hash");
+__
+meta::function('timestamp', <<'__');
+use Time::Piece;
+Time::Piece->new->strftime('%Y.%m%d.%H%M');
 __
 meta::function('touch', 'associate($_, \'\') for @_;');
 meta::function('u', <<'__');
@@ -1210,6 +1258,135 @@ __
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
+meta::parent('/home/spencertipping/r/initiative/perl-objects/object', <<'__');
+bootstrap::html                         66b779578ac8b63db9b910931f5435f6
+bootstrap::initialization               03d3fde57935dfda65c369bf02e750e9
+bootstrap::perldoc                      b27489e0e570796019f591b08c98c43a
+function::ad                            bcb317074915a656129f5355604bc152
+function::alias                         719b3df46720217d69911974c6bdc50f
+function::cat                           f684de6c8776617a437b76009114f52e
+function::cc                            12ea9176e388400704d823433c209b7a
+function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
+function::cd                            eb75ec9133248c3e5b70141c7907f0cd
+function::child                         e5acd8aeb16262c3f2a52f6f64344d30
+function::clone                         e30a067adfa6fee67abe8d7afd8b1527
+function::cp                            3fe69d1b58d90045ad520048977538c4
+function::create                        3010d55f4dfa59a998742e07823ed54d
+function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
+function::cwd                           12833315b8bea35754ae9dabe45dfde8
+function::disable                       53b449708cc2ffdefa352e53bb7d847d
+function::edit                          9addebf29ace62875de9bfdfb40fb7ac
+function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
+function::enable                        2c08b091a96f80277dd2619c27221f48
+function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c
+function::export                        2374cd1dbf7616cb38cafba4e171075d
+function::extern                        1290a5223e2824763eecfb3a54961eff
+function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
+function::hash                          6ee131d093e95b80039b4df9c7c84a02
+function::hook                          675cdb98b5dd8567bdd5a02ead6184b5
+function::hooks                         3d989899c616f7440429a2d9bf1cc44b
+function::identity                      beb93f8ea57fcc8454661f9dd057645f
+function::import                        114e09cf19f50ad92e268bb4227e145f
+function::initial-state                 03d8ed608855a723124e79ca184d8e73
+function::is                            e9103d343e6ef7142e3c537478158dc1
+function::load-state                    970fba79b585e5638914a423bbeecf12
+function::lock                          5d8db258704e6a8623fac796f62fac02
+function::ls                            b2d40715eddbc2c0da299b54a0b53523
+function::metadata-from                 b4f02937a7c80157e468bd9dbfcaf975
+function::mv                            8b9d7817efbe38dff95aa99f3b51f32e
+function::name                          955ba2d1fe1d67cd78651a4042283b00
+function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
+function::perl                          6d3994ec69c238535f4daed6658537fd
+function::rd                            c41059d11d888922cfc5cbae92495632
+function::reload                        1589f4cf8374e0011991cb8907afca3e
+function::rm                            6f6fd7a6c25558eb469d78ea888f8551
+function::rmparent                      e33a3a1e4f8f4156850d695fdfa7cf0d
+function::save                          31f22a1bb7250567f236b6eab8e661b5
+function::save-state                    fe99cbdb228608102ab6d55373146118
+function::serialize                     133b52d4a95bee8ec397cffa25adfb30
+function::serialize-single              0e1be51cdc0c8bcd94105a65c002e83f
+function::sh                            b3bcea16a756d15b5de588a90198a0c2
+function::shb                           9ee9d251ac3667f69e43d71d1073de01
+function::shell                         e56eec74bb95a5d3cea974fd66acb433
+function::size                          593810a7ce46e5a42584991b9c30d94c
+function::snapshot                      56939a47f2758421669641e15ebd66eb
+function::snapshot-if-necessary         68123e0e46509d9e56073683e1e023eb
+function::state                         49b9310d43ef765345f080a23b929f15
+function::touch                         3991b1b7c7187566f50e5e58ce01fa06
+function::u                             bead4267f15c6709e775d5b3547e6a6d
+function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
+function::update                        f98ac65a795279cdbe67d6f3a5a05e42
+function::update-from                   5d73d698fc55121c98bb6d7d3623ca53
+function::usage                         5bdd370f5a56cfbf199e08d398091444
+function::verify                        0c0cc1dfeab7d705919df122f7850a4f
+indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
+indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
+indicator::path                         f7fc4b6dbc761995d991697a39e3e5ea
+internal_function::around_hook          091ece60ac5ec692e49d95b447d070c1
+internal_function::associate            0ac272611ee95f9cef89fc8676886abc
+internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
+internal_function::attribute_is         e93028037a8d673aa4a1abfe1b70cccb
+internal_function::cache                eb9da45580a9ac0882baf98acd2ecd60
+internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
+internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
+internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
+internal_function::execute              560da5928d1d8858f3a64011ab3a8603
+internal_function::exported             3ec48f01deefa840b52111f2e3f34749
+internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
+internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
+internal_function::file::nuke           6923e2791220c7cef350ff7602c8ba89
+internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
+internal_function::file::write          0722e9f7e852269465e8e92d58ea8ffb
+internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
+internal_function::hypothetically       417ae217d0caa9c09f470b7c27703788
+internal_function::internal::main       c2410390ae10df76d89355c2a915aba5
+internal_function::invoke_editor_on     bac5d167428c5970b2e7bb2971bf92d7
+internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
+internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
+internal_function::parent_attributes    f6ccfaa982ab1a4d066043981aaca277
+internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
+internal_function::retrieve             8a34d1fe047fe1b40c3d2957c4a789eb
+internal_function::retrieve_trimmed     ec9b2139757974d1e3149dd0f5acc393
+internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
+internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
+internal_function::separate_options     ae9043c4790e79013f1481b05f76d5df
+internal_function::strip                7169402db5f2f19e6b2411c30f2006e1
+internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
+internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
+internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
+internal_function::with_cwd             d65eefc43140868a62d189f290da4b14
+internal_function::with_exported        a9a67054e4ce842e656fd00029e55aa2
+internal_function::with_fork            d0963ac0472c5859c31e3177b37a90e8
+library::process                        9cb64aa7459a61081116ffe86da21e44
+library::shell                          7d7aa21e89fc1e67fc1db976ac0ddb72
+library::terminal                       7e2d045782405934a9614fe04bcfe559
+message_color::cc                       2218ef0f7425de5c717762ffb100eb43
+message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
+message_color::states                   ac66eeeff487b5f43f88a78ea18b3d56
+meta::configure                         69c2e727c124521d074fde21f8bbc4db
+meta::externalize                       1a1f89e195408cd3911a898bf15b9f0b
+meta::functor::editable                 48246c608f363de66511400e00b26164
+meta::type::alias                       763587003448d1b7ddb2e287a52907d5
+meta::type::bootstrap                   3baa75727784ea678d9dc1a6e1fb25f7
+meta::type::cache                       2f093a1c4b0babc3a6678717f200d234
+meta::type::data                        120e1649a468d3b3fd3fb783b4168499
+meta::type::function                    a7eacad143e6353d4d3550d977330ffc
+meta::type::hook                        49c580ff8ab284e2b7e288f350a50ad9
+meta::type::inc                         d151f7a09366d906cf06de3dc109a2d2
+meta::type::indicator                   ad120d47ee3650141c9c8da6c349ba8c
+meta::type::internal_function           610adc3ec948ab7cc38662891a078d88
+meta::type::library                     7a26afd979d35ceac7b775764f569780
+meta::type::message_color               4a162012064f1dc472df1f9d8ff632f5
+meta::type::meta                        c4a2b36b99de12d647828c12bdbea408
+meta::type::parent                      28f7345e1438d6b8ef0e0dc7e6640910
+meta::type::retriever                   a130f44d2fdac5cfc62baa07578c39ab
+meta::type::state                       f4e27d3dc999ae7f7f530677c823554b
+retriever::file                         3bbc9d8a887a536044bafff1d54def7e
+retriever::global                       73c667c53b5f4422d215392129f3ed18
+retriever::id                           4da6080168d32445150cc4200af7af6e
+retriever::object                       d70d593ada2f108b2909a9fc24c4f63e
+retriever::perl                         58a2d30d05c22bf6b4461d93ae46f361
+__
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('global', <<'__');
 # Returns the global data stashed at the end of this perl object
