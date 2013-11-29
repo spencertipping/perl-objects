@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  9f624cf25b41bb0e473dc5baf89fd3df
+# state:  b7c73a5b0777e925046deb1cca809021
 # istate: 4b7d349f48353dcb3e5c5484bf18546c
 # id:     246bc56c88e8e8daae3737dbb16a2a2c
 
@@ -299,7 +299,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 53a3afe2d7ad4234b270ac41ec84c283');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e8a9b9ff0c9d275767814d9cc9ee2bf5');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -1158,8 +1158,12 @@ sub parse {
 
 sub execute {
   my %command = %{$_[0]};
-  die "undefined command: $command{function}" unless exists $externalized_functions{$command{function}};
-  &{"::$command{function}"}(@{$command{args}})}
+  if (exists $externalized_functions{$command{function}})
+    {&{"::$command{function}"}(@{$command{args}})}
+  elsif (exists $externalized_functions{'method-missing'})
+    {::method_missing($command{function}, @{$command{args}})}
+  else
+    {die "undefined command: $command{function}"}}
 
 sub run {execute(parse(tokenize(@_)))}
 
@@ -1183,7 +1187,7 @@ sub repl {
   my $autocomplete = $options{autocomplete} || sub {[sort(keys %data), grep !/-/, sort keys %externalized_functions]};
   my $prompt       = $options{prompt}       || \&prompt;
   my $parse        = $options{parse}        || sub {parse(tokenize(@_))};
-  my $output       = $options{output}       || sub {print join("\n", @_), "\n"};
+  my $output       = $options{output}       || sub {print join("\n", @_), "\n" if grep length, @_};
   my $command      = $options{command}      || sub {my ($command) = @_; ::around_hook('shell-command', $command, sub {&$output(::dangerous('', sub {execute($command)}))})};
 
   length $_ && &$command(&$parse($_)) while ($attribs->{completion_word} = &$autocomplete(), defined($_ = $term->readline(&$prompt())))}
@@ -1305,7 +1309,7 @@ internal_function::with_cwd             d65eefc43140868a62d189f290da4b14
 internal_function::with_exported        a9a67054e4ce842e656fd00029e55aa2
 internal_function::with_fork            d0963ac0472c5859c31e3177b37a90e8
 library::process                        9cb64aa7459a61081116ffe86da21e44
-library::shell                          6659bbab1051efd46b4a1a713edf6b28
+library::shell                          7d7aa21e89fc1e67fc1db976ac0ddb72
 library::terminal                       7e2d045782405934a9614fe04bcfe559
 message_color::cc                       2218ef0f7425de5c717762ffb100eb43
 message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
