@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  348e84201b15319b6f831d02ab0c6231
-# istate: bb55eebf8b1815ee8a41eb6f7b17bc2e
+# state:  1af10e47a0ef24b7cbfd416a92f29bc4
+# istate: 8214c0a3bec03b13acf64e9baabe1766
 # id:     cfa86a2afc148d72040e2f12de2fb145
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -341,7 +341,7 @@ my ($name, @stuff) = @_;
    : table_display([select_keys('--namespace' => 'alias')], [map retrieve($_), select_keys('--namespace' => 'alias')]);
 __
 meta::function('apropos', <<'__');
-# Searches through notes for the given word prefix, sorting by date.
+# Searches through notes for the given word, sorting by date.
 my %match;
 ++$match{$_} for @_;
 
@@ -586,14 +586,16 @@ close $fh;
 __
 meta::function('method-missing', <<'__');
 # Special cases: / = search, % = count words
-return apropos(@_) if $_[0] =~ s/^\///;
-return lw(@_) if $_[0] =~ s/^%//;
+return apropos(@_)           if $_[0] =~ s/^\///;
+return lw(@_)                if $_[0] =~ s/^%//;
+return retrieve('data::log') if $_[0] eq '?';
 
 # Record the words into the main log along with a timestamp.
 associate('data::log',
           join("\n", split(/\n/, retrieve('data::log')),
                      timestamp() . "\t" . join ' ', @_),
           execute => 1);
+save();
 
 my $line_count = split /\n/, retrieve('data::log');
 print "notes: $line_count\n";
