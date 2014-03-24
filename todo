@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  fe2cf7aa5e2efb10a5cda949037b80d5
+# state:  75f73cb9e7addc40c6354727adc4300d
 # istate: b63584f1cde31191b9d7cc04c734d7ae
 # id:     62bc8a83ef5d4941cd2c1cdfb57a0320
 
@@ -237,11 +237,7 @@ meta::define_form 'todo', sub {
     &{'todo-summary'}("todo::$name") if $_[0] eq 'show'}};
 __
 meta::meta('type::vim_highlighter', <<'__');
-# Vim highlighters don't need to be inherited. The reason is that they are most
-# often configured from the parent object using the 'vim' function. They are
-# rarely sent to anyone else and configured after the fact.
-
-meta::configure 'vim_highlighter', extension => '.vim', inherit => 0;
+meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 __
 meta::bootstrap('html', <<'__');
@@ -335,7 +331,7 @@ sdoc a1e8480e579614c01dabeecf0f963bcc
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-902333a0bd6ed90ff919fe8477cb4e69 8d4ebdc5d3e901edca2bec5d546d6f7f
+902333a0bd6ed90ff919fe8477cb4e69 c95a8082ead9d770f119bedbc2159743
 99aeabc9ec7fe80b1b39f5e53dc7e49e e8a9b9ff0c9d275767814d9cc9ee2bf5
 a1e8480e579614c01dabeecf0f963bcc 28d4c8a6dd79cd7fd34449a08f1b6f01
 __
@@ -1632,8 +1628,8 @@ retriever::sdocp          bb733b4bf092d4405d24b509d52eb193
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
-meta::type::vim_highlighter  38829105cbe400cb36d45357882c77fd
-parent::object               20c70a494394d86d886f9f03e94e330b
+meta::type::vim_highlighter  24fef13e4ba4faa67f4a0a4d19d19cc2
+parent::object               bc622153cca37e5531bbe380ee06d388
 __
 meta::retriever('code-sdoc', <<'__');
 # Lets you specify the SDoc extension manually. For instance:

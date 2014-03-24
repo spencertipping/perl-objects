@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  490d2da0cf533e517a8150383a349ae5
-# istate: 972b55041059cf0d284a0f557e252926
+# state:  d1b83762eafdb13f0dff139a89d64580
+# istate: 00cc35d0aa33db024dff3996cb4b4f5d
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -323,11 +323,7 @@ meta::define_form 'template', sub {
 };
 __
 meta::meta('type::vim_highlighter', <<'__');
-# Vim highlighters don't need to be inherited. The reason is that they are most
-# often configured from the parent object using the 'vim' function. They are
-# rarely sent to anyone else and configured after the fact.
-
-meta::configure 'vim_highlighter', extension => '.vim', inherit => 0;
+meta::configure 'vim_highlighter', extension => '.vim', inherit => 1;
 meta::define_form 'vim_highlighter', \&meta::bootstrap::implementation;
 __
 meta::bootstrap('html', <<'__');
@@ -423,7 +419,7 @@ vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
 70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
-902333a0bd6ed90ff919fe8477cb4e69 8d4ebdc5d3e901edca2bec5d546d6f7f
+902333a0bd6ed90ff919fe8477cb4e69 c95a8082ead9d770f119bedbc2159743
 99aeabc9ec7fe80b1b39f5e53dc7e49e e8a9b9ff0c9d275767814d9cc9ee2bf5
 a1e8480e579614c01dabeecf0f963bcc 28d4c8a6dd79cd7fd34449a08f1b6f01
 __
@@ -1786,8 +1782,8 @@ retriever::sdocp          bb733b4bf092d4405d24b509d52eb193
 __
 meta::parent('vim-highlighters', <<'__');
 function::vim                cf9e37026f6cd1499a6dd258fbbcd060
-meta::type::vim_highlighter  38829105cbe400cb36d45357882c77fd
-parent::object               20c70a494394d86d886f9f03e94e330b
+meta::type::vim_highlighter  24fef13e4ba4faa67f4a0a4d19d19cc2
+parent::object               bc622153cca37e5531bbe380ee06d388
 __
 meta::resource('header', <<'__');
 - include resource::header-packages
@@ -2069,11 +2065,17 @@ elseif exists("b:current_syntax")
   finish
 endif
 
+syn include @xh syntax/xh.vim
+if exists("b:current_syntax")
+  unlet b:current_syntax
+endif
+
 runtime syntax/perl.vim
 
 syn case match
 syn match  pltPreprocessor /^\s*- .*$/ containedin=pltImpliedComment
 syn region pltImpliedComment matchgroup=pltPreprocessor start=/\%^\|^\s*- end$/ end=/^\s*- perl.*$\|\%$/ keepend containedin=ALL
+syn region pltXhRegion       matchgroup=pltPreprocessor start=/^\s*- xh.*$/ end=/^\s*- end$/ contained containedin=pltImpliedComment contains=@xh keepend
 
 hi link pltImpliedComment Comment
 hi link pltPreprocessor   PreProc
