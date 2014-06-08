@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  8dc30f2200eb4314adfb9e1bcfc76bc6
-# istate: e25c4729aff094da49d7b9903452bcea
+# state:  fa5e3ea685a4f8d5ad05facfc0d38cb8
+# istate: 73adea6f7a3b98d82535eb4939a32abc
 # id:     70dae4b46eb4e06798ec6f38d17d4c7b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1508,6 +1508,13 @@ meta::template('include', <<'__');
 my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
+__
+meta::template('include!', <<'__');
+my ($commands) = @_;
+return '' if template::failing_conditional($commands);
+join "\n", map retrieve($_) // die "include!: not found: $_",
+               split /\s+/, $commands;
+
 __
 meta::template('pinclude', <<'__');
 # Just like the regular include, but makes sure to insert paragraph boundaries

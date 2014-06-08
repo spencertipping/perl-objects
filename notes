@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  3c74b42afa39e3116969477876293e4d
+# state:  21b96cd786a73c2999ae6992b54dcb86
 # istate: ab9da1fb51db73a98ebc54d2e92dd8ae
 # id:     a9e5975593ed5d90d943ad98405c71e5
 
@@ -1218,6 +1218,7 @@ __
 meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
+meta::note('default', '');
 meta::parent('object', <<'__');
 bootstrap::html                         66b779578ac8b63db9b910931f5435f6
 bootstrap::initialization               03d3fde57935dfda65c369bf02e750e9

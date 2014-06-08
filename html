@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  7d795cfea0810489b5d575fc2a3373f5
+# state:  8b811f0ce32e76834d59e98be5b900f4
 # istate: a2f92446c1957947f847c939fdae3750
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
@@ -319,7 +319,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b e25c4729aff094da49d7b9903452bcea
+70dae4b46eb4e06798ec6f38d17d4c7b 73adea6f7a3b98d82535eb4939a32abc
 99aeabc9ec7fe80b1b39f5e53dc7e49e e8a9b9ff0c9d275767814d9cc9ee2bf5
 __
 meta::data('author', <<'__');
@@ -1420,13 +1420,14 @@ __
 meta::parent('preprocessor', <<'__');
 function::preprocess           ab5526a02ff417d4c162357dc327e7c4
 meta::type::template           bc4b0c80b5efc716b19e99b832c22bf3
-parent::object                 4426dd6f4aebae284447047265132c82
+parent::object                 bc622153cca37e5531bbe380ee06d388
 retriever::pp                  3b5f5c5d30c5a04f72056dedaacfe7b7
 template::comment              dfe273d2dad3d8159b847545e4e5c309
 template::def                  0575aedbacf922d77f3419b817b7d579
 template::eval                 1a0e2124a05056be4abc11803883c294
 template::failing_conditional  e3a4523110dd859e828f342185de7c62
 template::include              47b5552d609d97fe7f2522d5c1027014
+template::include!             09081b2cdb15bf511228d527b0d2576d
 template::pinclude             c07ff79bf8d642cceaa9ef844bfcb189
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
@@ -1538,6 +1539,13 @@ meta::template('include', <<'__');
 my ($commands) = @_;
 return '' if template::failing_conditional($commands);
 join "\n", map retrieve($_), split /\s+/, $commands;
+__
+meta::template('include!', <<'__');
+my ($commands) = @_;
+return '' if template::failing_conditional($commands);
+join "\n", map retrieve($_) // die "include!: not found: $_",
+               split /\s+/, $commands;
+
 __
 meta::template('pinclude', <<'__');
 # Just like the regular include, but makes sure to insert paragraph boundaries
