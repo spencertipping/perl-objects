@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  e30e389d8fbb8553657d65ba2c59c6e1
-# istate: 00cc35d0aa33db024dff3996cb4b4f5d
+# state:  acbe7b767da60fce4e73fea0c3e896d9
+# istate: 2d1e6b6bf30f630c20db6ff32ebabbe3
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -154,7 +154,7 @@ sub id {
 };
 __
 meta::meta('template::beamer', <<'__');
-tex::template tex::id(qw/frame pause item block alertblock exampleblock/);
+tex::template tex::id(qw/frame pause block alertblock exampleblock/);
 
 my $fframe_template = tex::template_for {
   my ($name, $line, $block) = @_;
@@ -164,7 +164,10 @@ my $fframe_template = tex::template_for {
 __
 meta::meta('template::code', 'code::template $_ for qw/java cpp asm javascript html resource perl ruby python/;');
 meta::meta('template::document', 'tex::template tex::id(qw/document tableofcontents maketitle title author date abstract documentclass verbatim/);');
-meta::meta('template::enumeration', 'tex::template tex::id(qw/enumerate itemize description item/);');
+meta::meta('template::enumeration', <<'__');
+tex::template tex::id(qw/enumerate itemize description/);
+tex::labeled_template tex::id(qw/item/);
+__
 meta::meta('template::math', <<'__');
 tex::template align => 'align*', nalign => 'align';
 tex::template tex::id(qw/theorem proof lemma corollary conjecture definition proposition/);
@@ -1990,7 +1993,13 @@ join "\n", map retrieve($_) // die "include!: not found: $_",
                split /\s+/, $commands;
 
 __
-meta::template('item[]', '"\\\\item[$_[0]]";');
+meta::template('item[]', <<'__');
+my ($line, $block) = @_;
+my ($name, $label) = split /\h*\|\h*/, $line;
+"\\item[$name]" . (length $label ? "\\label{$label}" : '')
+                . (length $block ? "\n$block" : '');
+
+__
 meta::template('logical', <<'__');
 # Creates a logical section that is delimited only by TeX comments.
 my ($name, $body) = @_;
