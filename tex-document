@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  acbe7b767da60fce4e73fea0c3e896d9
-# istate: 2d1e6b6bf30f630c20db6ff32ebabbe3
+# state:  d9145dd6aa98eb1c8ece36160a4da63f
+# istate: ef6c6c900b779d7791bd77bd93b1080f
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -149,8 +149,8 @@ sub id {
 # specification of a label name after a pipe character.
 *labeled_template = template_for {
   my ($name, $line, undef) = @_;
-  my ($real_stuff, $label) = split /\h*\|\h*/, $line;
-  "\\$name\{$real_stuff\}" . ($label && "\\label{$label}");
+  my ($real_stuff, $label) = split /\h*\|\h*/, $line, 2;
+  "\\$name\{$real_stuff\}" . template::label($label);
 };
 __
 meta::meta('template::beamer', <<'__');
@@ -1823,7 +1823,24 @@ meta::resource('header-packages', <<'__');
 \usepackage{amsmath,amssymb,amsthm,pxfonts,listings,color}
 \usepackage[colorlinks]{hyperref}
 __
-meta::resource('header-refs', '\\newcommand{\\Ref}[2]{\\hyperref[#2]{#1 \\ref*{#2}}}');
+meta::resource('header-refs', <<'__');
+\newcommand{\Ref}[2]{\hyperref[#2]{#1 \ref*{#2}}}
+
+% Shamelessly swiped from
+% http://compgroups.net/comp.text.tex/using-ref-and-label-so-that-ref-points-to-the-l/245066
+\makeatletter
+\newcommand*{\Label}[2]{%
+  \@bsphack
+  \begingroup
+    \label{#1-original}%
+    \def\@currentlabel{#2 [\ref{#1-original}]}%
+    \label{#1}%
+  \endgroup
+  \@esphack
+}
+\makeatother
+
+__
 meta::resource('header-resource', '\\lstnewenvironment{resourcecode}{}{}');
 meta::retriever('code-sdoc', <<'__');
 # Lets you specify the SDoc extension manually. For instance:
@@ -1995,9 +2012,17 @@ join "\n", map retrieve($_) // die "include!: not found: $_",
 __
 meta::template('item[]', <<'__');
 my ($line, $block) = @_;
-my ($name, $label) = split /\h*\|\h*/, $line;
-"\\item[$name]" . (length $label ? "\\label{$label}" : '')
+my ($name, $label) = split /\h*\|\h*/, $line, 2;
+"\\item[$name]" . template::label($label)
                 . (length $block ? "\n$block" : '');
+
+__
+meta::template('label', <<'__');
+my ($line) = @_;
+my ($tex_label, $nominal_label) = split /\h*\|\h*/, $line;
+
+length $nominal_label ? "\\Label{$tex_label}{$nominal_label}"
+                      : "\\label{$tex_label}" if length $line;
 
 __
 meta::template('logical', <<'__');
