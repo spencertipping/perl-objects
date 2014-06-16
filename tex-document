@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  d9145dd6aa98eb1c8ece36160a4da63f
-# istate: ef6c6c900b779d7791bd77bd93b1080f
+# state:  e245d28725807319ce4edeedd64e7782
+# istate: 9322515dd6f9fc690fdc42c248755d1a
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1833,7 +1833,7 @@ meta::resource('header-refs', <<'__');
   \@bsphack
   \begingroup
     \label{#1-original}%
-    \def\@currentlabel{#2 [\ref{#1-original}]}%
+    \def\@currentlabel{#2}%
     \label{#1}%
   \endgroup
   \@esphack
