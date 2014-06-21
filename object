@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  f2d0a75d963bde277d97724ca078800b
-# istate: e8a9b9ff0c9d275767814d9cc9ee2bf5
+# state:  en+XxWlggceHrHh/JJoo8fAVTeLm7LKLS+2EOX3NYdM
+# istate: holS25TrO+3fs32MO59ho89mpKn8EBmiLLfcl/XpCSU
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -539,20 +539,6 @@ my @parent_hashes = map $inherited{$_} || '-', @definitions if $parent_hashes;
 join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @externals] : [@definitions],
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
 __
-meta::function('metadata-from', <<'__');
-my ($filename) = @_;
-my %metadata;
-
-# Not using file::read because we only need the first few lines.
-open my($fh), '<', $filename or return {};
-while (<$fh>) {
-  /^#\s*(\w+):\s*(.*)$/ and $metadata{$1} = $2;
-  last unless /^#/;
-}
-close $fh;
-
-\%metadata;
-__
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
 die "'$from' does not exist" unless exists $data{$from};
@@ -886,18 +872,8 @@ $extension = &$extension($_[0]) if ref $extension eq 'CODE';
 $extension || '';
 __
 meta::internal_function('fast_hash', <<'__');
-my ($data)     = @_;
-my $piece_size = length($data) >> 3;
-
-my @pieces     = (substr($data, $piece_size * 8) . length($data), map(substr($data, $piece_size * $_, $piece_size), 0 .. 7));
-my @hashes     = (fnv_hash($pieces[0]));
-
-push @hashes, fnv_hash($pieces[$_ + 1] . $hashes[$_]) for 0 .. 7;
-
-$hashes[$_] ^= $hashes[$_ + 4] >> 16 | ($hashes[$_ + 4] & 0xffff) << 16 for 0 .. 3;
-$hashes[0]  ^= $hashes[8];
-
-sprintf '%08x' x 4, @hashes[0 .. 3];
+use Digest::SHA qw/sha256_base64/;
+sha256_base64(@_);
 __
 meta::internal_function('file::nuke', <<'__');
 # Nukes a file with the preferred mechanism.
@@ -996,6 +972,20 @@ file::nuke($filename);
 $result;
 __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
+meta::internal_function('metadata_from', <<'__');
+my ($filename) = @_;
+my %metadata;
+
+# Not using file::read because we only need the first few lines.
+open my($fh), '<', $filename or return {};
+while (<$fh>) {
+  $metadata{$1} = $2 if /^#\s*(\w+):\s*(.*)$/;
+  last unless /^#/;
+}
+close $fh;
+
+\%metadata;
+__
 meta::internal_function('namespace', <<'__');
 my ($name) = @_;
 $name =~ s/::.*$//;

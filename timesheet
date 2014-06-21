@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  1611780caa03a7238caee4daa115b71d
-# istate: 2bc134ccdc0fe407ff235ad28149e693
+# state:  f/iD/La2OWEnlZZldTOEiQn87x208o4VgHlWpKCYLHw
+# istate: HPAM8sPK74beUQX+Gdd5QHqP9nB7lmTSvnvn1QRO/To
 # id:     f0f0939887ede2ecaa8c879aff4a7717
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -299,7 +299,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e e8a9b9ff0c9d275767814d9cc9ee2bf5');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e holS25TrO+3fs32MO59ho89mpKn8EBmiLLfcl/XpCSU');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -544,20 +544,6 @@ my @parent_hashes = map $inherited{$_} || '-', @definitions if $parent_hashes;
 
 join "\n", map strip($_), split /\n/, table_display($external ? [grep length, @externals] : [@definitions],
                                                     $sizes ? ([@sizes]) : (), $flags ? ([@flags]) : (), $hashes ? ([@hashes]) : (), $parent_hashes ? ([@parent_hashes]) : ());
-__
-meta::function('metadata-from', <<'__');
-my ($filename) = @_;
-my %metadata;
-
-# Not using file::read because we only need the first few lines.
-open my($fh), '<', $filename or return {};
-while (<$fh>) {
-  /^#\s*(\w+):\s*(.*)$/ and $metadata{$1} = $2;
-  last unless /^#/;
-}
-close $fh;
-
-\%metadata;
 __
 meta::function('mv', <<'__');
 my ($from, $to) = @_;
@@ -1022,18 +1008,8 @@ $extension = &$extension($_[0]) if ref $extension eq 'CODE';
 $extension || '';
 __
 meta::internal_function('fast_hash', <<'__');
-my ($data)     = @_;
-my $piece_size = length($data) >> 3;
-
-my @pieces     = (substr($data, $piece_size * 8) . length($data), map(substr($data, $piece_size * $_, $piece_size), 0 .. 7));
-my @hashes     = (fnv_hash($pieces[0]));
-
-push @hashes, fnv_hash($pieces[$_ + 1] . $hashes[$_]) for 0 .. 7;
-
-$hashes[$_] ^= $hashes[$_ + 4] >> 16 | ($hashes[$_ + 4] & 0xffff) << 16 for 0 .. 3;
-$hashes[0]  ^= $hashes[8];
-
-sprintf '%08x' x 4, @hashes[0 .. 3];
+use Digest::SHA qw/sha256_base64/;
+sha256_base64(@_);
 __
 meta::internal_function('file::nuke', <<'__');
 # Nukes a file with the preferred mechanism.
@@ -1132,6 +1108,20 @@ file::nuke($filename);
 $result;
 __
 meta::internal_function('is_locked', '!((stat($0))[2] & 0222);');
+meta::internal_function('metadata_from', <<'__');
+my ($filename) = @_;
+my %metadata;
+
+# Not using file::read because we only need the first few lines.
+open my($fh), '<', $filename or return {};
+while (<$fh>) {
+  $metadata{$1} = $2 if /^#\s*(\w+):\s*(.*)$/;
+  last unless /^#/;
+}
+close $fh;
+
+\%metadata;
+__
 meta::internal_function('namespace', <<'__');
 my ($name) = @_;
 $name =~ s/::.*$//;
@@ -1347,133 +1337,133 @@ meta::message_color('cc', '36');
 meta::message_color('state', 'purple');
 meta::message_color('states', 'yellow');
 meta::parent('object', <<'__');
-bootstrap::html                         66b779578ac8b63db9b910931f5435f6
-bootstrap::initialization               03d3fde57935dfda65c369bf02e750e9
-bootstrap::perldoc                      b27489e0e570796019f591b08c98c43a
-function::ad                            bcb317074915a656129f5355604bc152
-function::alias                         719b3df46720217d69911974c6bdc50f
-function::cat                           f684de6c8776617a437b76009114f52e
-function::cc                            12ea9176e388400704d823433c209b7a
-function::ccc                           d151a9793edd83f80fb880b7f0ab9b34
-function::cd                            eb75ec9133248c3e5b70141c7907f0cd
-function::child                         e5acd8aeb16262c3f2a52f6f64344d30
-function::clone                         e30a067adfa6fee67abe8d7afd8b1527
-function::cp                            3fe69d1b58d90045ad520048977538c4
-function::create                        3010d55f4dfa59a998742e07823ed54d
-function::current-state                 6f03f86f1901e9ef07fdb5d4079a914c
-function::cwd                           12833315b8bea35754ae9dabe45dfde8
-function::disable                       53b449708cc2ffdefa352e53bb7d847d
-function::edit                          9addebf29ace62875de9bfdfb40fb7ac
-function::edit-self                     08e8695218a2d01fc608e3ad066ba15a
-function::enable                        2c08b091a96f80277dd2619c27221f48
-function::expanded-bootstrap            46d8e0b43646d3c32de0057077da607c
-function::export                        2374cd1dbf7616cb38cafba4e171075d
-function::extern                        1290a5223e2824763eecfb3a54961eff
-function::grep                          55c3cea8ff4ec2403be2a9d948e59f14
-function::hash                          6ee131d093e95b80039b4df9c7c84a02
-function::hook                          675cdb98b5dd8567bdd5a02ead6184b5
-function::hooks                         3d989899c616f7440429a2d9bf1cc44b
-function::identity                      beb93f8ea57fcc8454661f9dd057645f
-function::import                        114e09cf19f50ad92e268bb4227e145f
-function::initial-state                 03d8ed608855a723124e79ca184d8e73
-function::is                            e9103d343e6ef7142e3c537478158dc1
-function::load-state                    970fba79b585e5638914a423bbeecf12
-function::lock                          5d8db258704e6a8623fac796f62fac02
-function::ls                            b2d40715eddbc2c0da299b54a0b53523
-function::metadata-from                 b4f02937a7c80157e468bd9dbfcaf975
-function::mv                            8b9d7817efbe38dff95aa99f3b51f32e
-function::name                          955ba2d1fe1d67cd78651a4042283b00
-function::parents                       3da9e63b5aae9e2f5dcc946a86d166aa
-function::perl                          6d3994ec69c238535f4daed6658537fd
-function::rd                            c41059d11d888922cfc5cbae92495632
-function::reload                        1589f4cf8374e0011991cb8907afca3e
-function::rm                            6f6fd7a6c25558eb469d78ea888f8551
-function::rmparent                      e33a3a1e4f8f4156850d695fdfa7cf0d
-function::save                          31f22a1bb7250567f236b6eab8e661b5
-function::save-state                    fe99cbdb228608102ab6d55373146118
-function::serialize                     133b52d4a95bee8ec397cffa25adfb30
-function::serialize-single              0e1be51cdc0c8bcd94105a65c002e83f
-function::sh                            b3bcea16a756d15b5de588a90198a0c2
-function::shb                           9ee9d251ac3667f69e43d71d1073de01
-function::shell                         e56eec74bb95a5d3cea974fd66acb433
-function::size                          593810a7ce46e5a42584991b9c30d94c
-function::snapshot                      56939a47f2758421669641e15ebd66eb
-function::snapshot-if-necessary         68123e0e46509d9e56073683e1e023eb
-function::state                         49b9310d43ef765345f080a23b929f15
-function::touch                         3991b1b7c7187566f50e5e58ce01fa06
-function::u                             bead4267f15c6709e775d5b3547e6a6d
-function::unlock                        b4aac02f7f3fb700acf4acfd9b180ceb
-function::update                        f98ac65a795279cdbe67d6f3a5a05e42
-function::update-from                   5d73d698fc55121c98bb6d7d3623ca53
-function::usage                         5bdd370f5a56cfbf199e08d398091444
-function::verify                        0c0cc1dfeab7d705919df122f7850a4f
-indicator::cc                           3db7509c521ee6abfedd33d5f0148ed3
-indicator::locked                       fc2b4f4ca0d6a334b9ac423d06c8f18c
-indicator::path                         f7fc4b6dbc761995d991697a39e3e5ea
-internal_function::around_hook          091ece60ac5ec692e49d95b447d070c1
-internal_function::associate            0ac272611ee95f9cef89fc8676886abc
-internal_function::attribute            dd6f010f9688977464783f60f5b6d3dd
-internal_function::attribute_is         e93028037a8d673aa4a1abfe1b70cccb
-internal_function::cache                eb9da45580a9ac0882baf98acd2ecd60
-internal_function::chmod_self           2035e861eedab55ba0a9f6f5a068ca70
-internal_function::dangerous            46c4baaa214ab3d05af43e28083d5141
-internal_function::debug_trace          0faf9d9f4159d72dfe4481f6f3607ce1
-internal_function::execute              560da5928d1d8858f3a64011ab3a8603
-internal_function::exported             3ec48f01deefa840b52111f2e3f34749
-internal_function::extension_for        9de8261d69cc93e9b92072b89c89befd
-internal_function::fast_hash            ee5eba48f837fda0fe472645fdd8899a
-internal_function::file::nuke           6923e2791220c7cef350ff7602c8ba89
-internal_function::file::read           e647752332c8e05e81646a3ff98f9a8e
-internal_function::file::write          0722e9f7e852269465e8e92d58ea8ffb
-internal_function::fnv_hash             c36d56f1e13a60ae427afc43ba025afc
-internal_function::hypothetically       417ae217d0caa9c09f470b7c27703788
-internal_function::internal::main       c2410390ae10df76d89355c2a915aba5
-internal_function::invoke_editor_on     bac5d167428c5970b2e7bb2971bf92d7
-internal_function::is_locked            da12ced6aa38295251f7e748ffd22925
-internal_function::namespace            784d2e96003550681a4ae02b8d6d0a27
-internal_function::parent_attributes    f6ccfaa982ab1a4d066043981aaca277
-internal_function::parent_ordering      57b6da88f76b59f3fed9abfa61280e5e
-internal_function::retrieve             8a34d1fe047fe1b40c3d2957c4a789eb
-internal_function::retrieve_trimmed     ec9b2139757974d1e3149dd0f5acc393
-internal_function::retrieve_with_hooks  0f1b0220ccd973d57a2e96ff00458cf2
-internal_function::select_keys          a5e3532ec6d58151d0ee24416ea1e2b5
-internal_function::separate_options     ae9043c4790e79013f1481b05f76d5df
-internal_function::strip                7169402db5f2f19e6b2411c30f2006e1
-internal_function::table_display        d575f4dc873b2e0be5bd7352047fd904
-internal_function::temporary_name       6f548d101fc68356515ffd0fc9ae0c93
-internal_function::translate_backtrace  d77a56d608473b3cd8a3c6cb84185e10
-internal_function::with_cwd             d65eefc43140868a62d189f290da4b14
-internal_function::with_exported        a9a67054e4ce842e656fd00029e55aa2
-internal_function::with_fork            d0963ac0472c5859c31e3177b37a90e8
-library::process                        9cb64aa7459a61081116ffe86da21e44
-library::shell                          7d7aa21e89fc1e67fc1db976ac0ddb72
-library::terminal                       7e2d045782405934a9614fe04bcfe559
-message_color::cc                       2218ef0f7425de5c717762ffb100eb43
-message_color::state                    03621cd6ac0b1a40d703f41e26c5807f
-message_color::states                   ac66eeeff487b5f43f88a78ea18b3d56
-meta::configure                         69c2e727c124521d074fde21f8bbc4db
-meta::externalize                       1a1f89e195408cd3911a898bf15b9f0b
-meta::functor::editable                 48246c608f363de66511400e00b26164
-meta::type::alias                       763587003448d1b7ddb2e287a52907d5
-meta::type::bootstrap                   3baa75727784ea678d9dc1a6e1fb25f7
-meta::type::cache                       2f093a1c4b0babc3a6678717f200d234
-meta::type::data                        120e1649a468d3b3fd3fb783b4168499
-meta::type::function                    a7eacad143e6353d4d3550d977330ffc
-meta::type::hook                        49c580ff8ab284e2b7e288f350a50ad9
-meta::type::inc                         d151f7a09366d906cf06de3dc109a2d2
-meta::type::indicator                   ad120d47ee3650141c9c8da6c349ba8c
-meta::type::internal_function           610adc3ec948ab7cc38662891a078d88
-meta::type::library                     7a26afd979d35ceac7b775764f569780
-meta::type::message_color               4a162012064f1dc472df1f9d8ff632f5
-meta::type::meta                        c4a2b36b99de12d647828c12bdbea408
-meta::type::parent                      28f7345e1438d6b8ef0e0dc7e6640910
-meta::type::retriever                   a130f44d2fdac5cfc62baa07578c39ab
-meta::type::state                       f4e27d3dc999ae7f7f530677c823554b
-retriever::file                         3bbc9d8a887a536044bafff1d54def7e
-retriever::global                       73c667c53b5f4422d215392129f3ed18
-retriever::id                           4da6080168d32445150cc4200af7af6e
-retriever::object                       d70d593ada2f108b2909a9fc24c4f63e
-retriever::perl                         58a2d30d05c22bf6b4461d93ae46f361
+bootstrap::html                         /9nKOzNlCVjt5KpPCw6ktpNdorICJPOmdsxw8gRbQgs
+bootstrap::initialization               TvbsjnluOC8KVyAVtB4a6Yzd+QlZ0Caz+PywmbS+RsE
+bootstrap::perldoc                      Yun55m+nTQKU5l0UCuImJQGrDnrhsJ18adHGKgtzQ6M
+function::ad                            TDzQEoFVHn4cxoMC1v2lQtvbymt7TDA+fzzf8ZdKBTY
+function::alias                         76cEB7oBB2F8XdFTKnJy1lDh45nPgZ0c0xeoQUesLDk
+function::cat                           6DwhwhDw7GTCE8Ll4Hwi13L3agMbCK7nbX0tDdC4MNU
+function::cc                            YUoFsxNwVjmiHsdz9J7A13fBhp0++EiinFxETzF8+3g
+function::ccc                           T3ySqmDsgIDdk55Fm4agtCEe1OOYWihhUcfiPtTupAs
+function::cd                            cH/fs1az9tELnBgTC7JW/eb/ZSsf7s+K8Os8cMCeEG8
+function::child                         y8XMjuUj//66Rj5jSs4HdEn1SqEIT1UVO6/2zb12Ln8
+function::clone                         3ImmJEgQg9iM1gqe/hfKBFBm/Ky0HR/+xWj6XLXF3xk
+function::cp                            +586T+V2LWthllDZvvTJzGNtngNo5c1pcS36XgTh1gs
+function::create                        EG9exU+k3oTxSMX2TJHp660yAjhAe7+KZd4qBC1+vR8
+function::current-state                 BPu6xpOyr3Ns0vYdawRlNxsmeRPITGp1bm0QtMaXFw4
+function::cwd                           kUuYtqZpgzhXPJOe4f+SLRCFTG+tNl5j8p7+0yqE6C0
+function::disable                       ETVjo3v6gmGncp7YgrEmQiDlF7GTHP0EX3yMOsn0M98
+function::edit                          QgBU/tNoicpE+PHlVDKuUZ5vn5Da36GrycIxE0MwbA0
+function::edit-self                     CnLk1bZDZ7VYrDQlYzfHXZ1aP5+0FrGCRBU1CUhel5I
+function::enable                        uj6pBBIjv0ahKWcnbyL1IU4bsvDQqVJrQt6LrsUMzc4
+function::expanded-bootstrap            ngkWm7nFPxTICYZLKkdsabU4dFOpRBuvlpXdJsOvUGU
+function::export                        a/OWMZFsFsvHwnlvCBEZMg8WhZ9IP9ZwqJZBj7Garq8
+function::extern                        EG6Lhkqo4xNy3xxWJgDv22Ij987xFAYgtwSXWNzwgDw
+function::grep                          V4XnzOTDllwCW/e2EMuFITuX/q6stdhIQaCCOPo6ob4
+function::hash                          +KkJP3kfAnYIXy1BBSEDdfzhnLpQPqz52RJpwgk+OCc
+function::hook                          rhEyOmCy+ZDyO727aPXfTrEtkOOGaGKcezlkYf9BK0k
+function::hooks                         2rZQUo7p9iu9gmM4wR+G6/RukNXgAk+ZcFepCgnfef8
+function::identity                      6+JeD3ohDjevZF5UG7V3iRFkxIwp4KwwibpVc9dwcm4
+function::import                        4TKj8ayYsR8EtPFO+Jv3FK2Rv4j4uTAOC77twB9GBkE
+function::initial-state                 E45KKMXa7YYzleuQNeMa+2XTkvSxKw40KaWN0lHLhV0
+function::is                            R4wqjFaGUQnk3q8Ru9HEoyuoiTd0nEXs8655T50bO3I
+function::load-state                    eLPBMJvlKzYr+6ZrhVj3kwYhpyxc9NS6veacMaV3sLk
+function::lock                          rgtPo1uxq+ZA8QVPi2hstfNkbTojY7P7S4KmEwad/J4
+function::ls                            qrAno4J3gk8dgDQv2/uX4Tf2Togs4RA6ijzCGuyCS4U
+function::mv                            oGOOV1RR5dS32B/rTSJI2w/8FEt7LbMwDfMMZwjpqLY
+function::name                          CJWkv4fyzTENKSfoZBLH4yjeaP9YkzqCiNcsULOibaE
+function::parents                       PvAkixp0hXE4Q/1z7CKPil5BLkSGdGwMfg6QCGgW0EY
+function::perl                          pOOr9RtVKIQI6kNIDkC1HmsIDll4TPio8OM3Cmi3htE
+function::rd                            HC6cTSNHAtUtreuzLHKP6HkkDTCgI4gkzTY7t9EO//Q
+function::reload                        FK+ITbNziplYOjLH/y5f4MzIJOaq/dQlHJ2CLp3+RDo
+function::rm                            EwSp4uAK0uVy4lCYpJYvd0qu12q24rIlEiDUbfcW+YA
+function::rmparent                      3RgK0wVGkKinmoqBJ0fZEyv72qWiL6a3unkz3etJC+M
+function::save                          k2yC8b9dcIeXDeKmNQbxMY8j7svl4kyLoG+XAJY/E/8
+function::save-state                    KyoEB2NXy0ko1IYUVujXqEfbNbsoDckiKjwn8+zjvxs
+function::serialize                     C0ZKGKNZKobNO0kmIPR2x0gXt6ic2YkCBCrCWqApodQ
+function::serialize-single              bOoEGNxf7jcYMAbvT4n492g5aUQ9e+umiaYC574Re6E
+function::sh                            PA9Q/R+AEXXCDtU8QIPNFbZr/iITh4DXEG6EWY6n4DM
+function::shb                           /COiQpKD0k/4B4/fnj1q1GtH+Z+ZQV0fJUwX6kSseks
+function::shell                         vmp2+XW/dSS4KbXsVcimZAzAuJloTDaQASZgG0Y07Dg
+function::size                          UFrBxczp+lDNQsbGtXE7IlZULMMP2NWLqJQsUvHlr1Y
+function::snapshot                      zTuPSITfomNBxxegaGuSzov/JMWJ3vUWGqAAbYx/MsY
+function::snapshot-if-necessary         V2hG5mBuDkIzwasK2iNJt5v+7iK2yAYD1/Omir19AmM
+function::state                         EmD3LgRcBLmEIu1loHDBwhS+F73W0KLjm9mRNws0BVI
+function::touch                         MvxEZzMCnQsgc44DzkQmPpuY/gVpZjNIVGgAqznIUPE
+function::u                             hxjOve/ti/MyoyBAl/1EkoXIEAB/4bOdIh8eXM3oNJs
+function::unlock                        ab+C+O37Wm9wHXqiOaF+0uwd3asIzlcJcChqOpFqiwk
+function::update                        67tiKQo3l50gnH1KAXcfUH6tf/tB3K64UEM2lKrcge4
+function::update-from                   ZnceaN1aTEkye6SRPhI/eLnjd56gyBdAAC74YAzKkbI
+function::usage                         ITBRGF9rUVDwVE+YpFc2XXNeU2tD+IJKuvUGzqp30BA
+function::verify                        nRZZh97ekQOHcDQUnxrHxMhybS2RlZifwYbH56KrL3M
+indicator::cc                           2ikhlSjKzneE/3j6mqjUwNQe7gyTJ6IP39JuZJXB8ow
+indicator::locked                       ZtHtnMoF2VDZ6rNdzy8JHnnrO71UXJgLN+OUoiQr9Fs
+indicator::path                         XVIgNhtNzG44gG2fWuZOsKqfInEUa7hFABIN1mkM6S4
+internal_function::around_hook          zWPc/eIWZMVUXDctAd/u34J1WA40nlbh8SvBx2tE2VA
+internal_function::associate            aRtHj4eVjuRHamUSAHaI9DVezimcdFaqFkva+dz0x7M
+internal_function::attribute            T4JEqOUYjMzssdVwV/rdgAhvr0Vz9TQUo0noTdeBLxw
+internal_function::attribute_is         O+KJhA7B6+N7gkDV2ajInPi947wIMEDHzAaRvWqB0a0
+internal_function::cache                H0Rgkwopfv+3kVOCYBuUrh32L0pwHwBzy3LK6jhG2nU
+internal_function::chmod_self           jwP33VbXCB7ZGtZ6rAm3ITeudyt+gq8wdkK/JYFvu8c
+internal_function::dangerous            hpmVjFqxl2K7Kn+JMjADIOB4ZRwpsNKjulPWkUnwqng
+internal_function::debug_trace          Py4lyrgkcj9TD3WxREcAOIu5qSk5ovMw/NJX/hsezMw
+internal_function::execute              u5QsUyqazbIXg102zvkkR9c+U70uoAExjjTtRVss4SI
+internal_function::exported             lt+j/oJ17agFjOp8QSeb2GN3j4iwEOqMulXaoAj91rI
+internal_function::extension_for        VeNEZFjlo6u8rC3yvntP4xu/xpjW36Rq3PCPqlkjTiI
+internal_function::fast_hash            BP8vJF0piDed/aGYR1H8SLjk9XqoGdhjpOH3wqUEFLU
+internal_function::file::nuke           vRgROFbL2G7rrwziDIcamYLXWb4Sd6q325jGfqSk1f0
+internal_function::file::read           ZxBqZsMZZRuLMQp8Sy//ZsoAvriDebjYLGAX7p7AxXg
+internal_function::file::write          nMg2QO30cjzzI8/maAYtxQ76Ny3Tn0+67CX7xPkMu64
+internal_function::fnv_hash             N2uv6uAkri1qLYjFmFOzWITS8UX0nj29kSN/Y1Z2+MM
+internal_function::hypothetically       5h4k5A1NACvCeZF+auxnVnBOTfHvGYMINpFARejGqAA
+internal_function::internal::main       MJVtZ4FOaoIiqG+CM+fMjVugUyU7+S6xLeirkoamEzU
+internal_function::invoke_editor_on     T6uVYs1mq/VotsBwgqfn3aCoJD6JIG9+jp5M7y38ciw
+internal_function::is_locked            EN0WP8v+JfHjxrEUDR5BMAJ4pMfNwj3UgG7zuj3B+yU
+internal_function::metadata_from        fdIYuVCLs5te7JJdp7n2GhcSZRhZBp9O9hDdFZ3MV1s
+internal_function::namespace            D7UfKyyYZ1slZZyaS28hIt8a68jkI3ELBaddROXOHug
+internal_function::parent_attributes    R4t2hz0vRzfeLwj0BJWd6tIG92nhwgnJ0ghbwM9+074
+internal_function::parent_ordering      jYxqyDRm6Gp0MgwofcisBAy0mFiD+TzRO4kGUo0AfW8
+internal_function::retrieve             x/cC8A6IVrv7cGYc06LjgxCmn9bXFKUIWx12NXRJP8U
+internal_function::retrieve_trimmed     zCzstBKNEuJKINlRSdyhF8TA812YClYWNPh6b3mhtXc
+internal_function::retrieve_with_hooks  Ed7iEFKqmGXxS3JPwmygtLjlOhycYvGsGlxNt3m2vk4
+internal_function::select_keys          Kpg0B01VaBHfRb1YeI3/J8KpycHwXi1c0VdLNYkagqQ
+internal_function::separate_options     qvGsY0MQiEVjugLRXbi/QfHvEI+3kQr+7jDZMbapfX4
+internal_function::strip                jnRBmqPwpXGicECRagXsULSsEzBuO19OHHxvE0R4zVA
+internal_function::table_display        qe/73ZK9+GlMti8pCl/CPvcJYK5q5moMUiXzDgKqoJg
+internal_function::temporary_name       I6v0e9aXFvCgVCeVSb84b22rwrAIOX2ywYdcr44s3Vg
+internal_function::translate_backtrace  n8iPtziEsVmBboZKnIsoUXc3mbe1RLOKJFenszUeHus
+internal_function::with_cwd             DCrQF2lCsAa/lbEA3i1fimbTRS//b/L4qxicIsxg+Tg
+internal_function::with_exported        sFgG++rvoIvOTTIZ2QlxgblZQ7R2W9kHUn48wVvIxXI
+internal_function::with_fork            fB68GdZBM7LfsOmfVsCLBv2+blwEpLgg5aXOphf7P7E
+library::process                        27/7yTUHKovr2X+dF2BhebepYF81cYQA1z9Ku97kiKk
+library::shell                          z9Whrvl2xc4VLK7zIYdiYnODlXqrNXY1h3TWWNip4z4
+library::terminal                       Iw5HMLpx/iJYD3QzZEU7GMDAsEGK700ormCZ+biuDz0
+message_color::cc                       dqUIh9jxwukwF1VCiZCtgUee4hwltDIVz1JFQeBQMmk
+message_color::state                    jgobCtpCFyiG/RKX4lq/mfFDlqlACsvV8g2iAonP8C8
+message_color::states                   xoWiybqyNczdKrDqkigaUhyKrzeJVJPQgAcOoA/H9dc
+meta::configure                         wNvmS+fdr/xIUde0ah7ZA51enuGxvC34oW+5c+xeXIM
+meta::externalize                       SAxyF6wDNTRSGW2MB+K/k5/kvjykbj5X/xtTandqrQI
+meta::functor::editable                 YCK6idpseu9YEyQOH/VIRmaixSpD2Fh9/Zae85p3Z5o
+meta::type::alias                       GXKpeJdADYWyo/tSo2INXijrQlakqaBtfPEHcOI5BGI
+meta::type::bootstrap                   pvkTkoPACRd4InQ7QezB82EYxJJMhbvFZKPGJeN44R0
+meta::type::cache                       R/GhPTCblttoS9U3XHP/UnmfQAv3pH9Q4Wt0oCKWTlc
+meta::type::data                        r27u83LwuNHMNErij+j31pmG0/YiHc9Cz0JS3g0AKPA
+meta::type::function                    +aTLimxYFh3zNR3AwTblpHo32WMmzet3MgkvTQNfU7I
+meta::type::hook                        ivXS9PJvGTKPUaGpYgAqV2dam2DMKwIj5GFUBHstKIg
+meta::type::inc                         utWgF45+/EOqDQ+Yiez7nwDBcBacz+oxdzX3G6AKxHs
+meta::type::indicator                   0kZ6fU5Gw7XVjKac1A6kna6UOwjWiJB2nTtM+bWYFS8
+meta::type::internal_function           i5Z/e6riR0QCY6XoP1PZNGqe29wUhWMP2iNbpMakhT0
+meta::type::library                     2LKXPuOHFk8JgPJF4c/PDwpbg+jWK4/E+jeZaZd+fQY
+meta::type::message_color               pxp5xSe9bUnOdskJ78dpsSeJO17phMFhVyT12w/YCGA
+meta::type::meta                        E78aF6OgcaZMsgJiEo3sIPzmwen+ib/V8iFLEE2rHaU
+meta::type::parent                      MH85O3I0OH6/ZemosX9G8TmHGyWVcR2TPR9LTp8WldU
+meta::type::retriever                   3YDISpeCeZ0ymbeXkLIhryRyK1R7fYA8SZkQxwD1d7c
+meta::type::state                       cy3e7h9soIZRo3LkUS85L+6Pz9s2pf4LKBwY7La/YII
+retriever::file                         lOSZ5sIxv78zFrly1i7NEp608wPPnFvPLcAwja2WmyI
+retriever::global                       RQa5dsjawOzXJqAEeMc1PWKmWZqEZYnEtbseQDph3kk
+retriever::id                           uWjP6vgjXeyfpsYSJVVeS5MxmFgSAcyDWvK42znkd9c
+retriever::object                       /qBb5wkKa+URfmjZ3iQFnol8IgPV9lF0UOi6PmIfLWw
+retriever::perl                         DD0+Y+2YiFJ997xsJ33MrySz5MDYb2FTx9SckMnfgPI
 __
 meta::retriever('file', '-f $_[0] ? file::read($_[0]) : undef;');
 meta::retriever('global', <<'__');
