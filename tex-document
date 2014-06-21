@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  e245d28725807319ce4edeedd64e7782
-# istate: 9322515dd6f9fc690fdc42c248755d1a
+# state:  ee204e753b5793c9b4bab180a3b95906
+# istate: 47e01812f99468c660f6a6a0d016733e
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -2112,12 +2112,24 @@ if exists("b:current_syntax")
   unlet b:current_syntax
 endif
 
+syn include @js syntax/caterwaul.vim
+if exists("b:current_syntax")
+  unlet b:current_syntax
+endif
+
+syn include @html syntax/html.vim
+if exists("b:current_syntax")
+  unlet b:current_syntax
+endif
+
 runtime syntax/perl.vim
 
 syn case match
 syn match  pltPreprocessor /^\s*- .*$/ containedin=pltImpliedComment
 syn region pltImpliedComment matchgroup=pltPreprocessor start=/\%^\|^\s*- end$/ end=/^\s*- perl.*$\|\%$/ keepend containedin=ALL
 syn region pltXhRegion       matchgroup=pltPreprocessor start=/^\s*- xh.*$/ end=/^\s*- end$/ contained containedin=pltImpliedComment contains=@xh keepend
+syn region pltJsRegion       matchgroup=pltPreprocessor start=/^\s*- js.*$/ end=/^\s*- end$/ contained containedin=pltImpliedComment contains=@js keepend
+syn region pltHtmlRegion     matchgroup=pltPreprocessor start=/^\s*- html.*$/ end=/^\s*- end$/ contained containedin=pltImpliedComment contains=@html keepend
 
 hi link pltImpliedComment Comment
 hi link pltPreprocessor   PreProc
