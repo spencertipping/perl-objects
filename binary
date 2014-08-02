@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  lHxkS4EgaQC5BXqjaQu0NFBGt1wETCedPkKhO1G41+A
-# istate: e9Cqm+CIgtB67N4oGfdPpNU+sPqTh2l1EN3+z+1QWAM
+# state:  VowGTqiv11XwX9x8xLYNvfvlnCaEofYl8wnmLcFrdEg
+# istate: TTLIBvt6m3uMWX8CHZkf7D8EAQQlXqo/5bbxu6UDDxI
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -391,6 +391,7 @@ meta::function('compile-binary', <<'__');
 # /o[0-3][0-7]{2}/      <- single byte in octal
 # /-[01]{8}/            <- single byte in binary
 # /'\S+/                <- bytes in ASCII
+# /".*"/                <- bytes in ASCII
 #
 # Placement (low-level):
 # /@![0-9a-f]+/         <- place assertion (die unless next byte is at place)
@@ -440,11 +441,14 @@ my %places;
 my %expressions;
 my @output;
 
+my %escapes    = (n => "\n", r => "\r", t => "\t");
+
 my $offset     = 0;
 my $next       = 1;
 my $repeat     = sub {$next = $_[0]; ''};                       # Repeaters have no output
 my $repetition = sub {my $count = $next; $next = 1; $count};
 my $ascii      = sub {$_[0]};
+my $str        = sub {$_[0] =~ s|\\(.)|$escapes{$1} // $1|gre};
 my $binary     = sub {my $total = 0; $total = ($total << 1) + substr($_[0], $_, 1)                         for 0 .. 7; chr($total) x &$repetition()};
 my $octal      = sub {my $total = 0; $total = ($total << 3) + index($hex_letters,    substr($_[0], $_, 1)) for 0 .. 2; chr($total) x &$repetition()};
 my $hex        = sub {my $total = 0; $total = ($total << 4) + index($hex_letters, lc substr($_[0], $_, 1)) for 0 .. 1; chr($total) x &$repetition()};
@@ -457,14 +461,15 @@ my $expression = sub {push @{$expressions{$offset} ||= []}, {size => $_[0], e =>
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#('\S+ | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | \@\?\S+ |
+my @tokens = split m#('\S+ | "(?:[^"\\]|\\.)*" | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | \@\?\S+ |
                       /\d+/ | ::\S+ | :\d*\[[^\]]+\] | \@[!:]?[0-9a-f]+)#x, $text;
 
-&$emit(/^'(\S+)/        ? &$ascii($1)  : /^\@\?(\S+)/        ? &$debug($1) :
-       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/ ? &$octal($1) :
-       /^@!([0-9a-f]+)/ ? &$place($1)  : /^\@([0-9a-f]+)/    ? &$until($1) :
-                                         /^\@:([0-9a-f]+)/   ? &$align($1) :
-       /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/      ? &$hex($_)   :
+&$emit(/^'(\S+)/        ? &$ascii($1)  : /^"((?:[^"\\]|\\.)*)"/ ? &$str($1) :
+                                         /^\@\?(\S+)/           ? &$debug($1) :
+       /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/    ? &$octal($1) :
+       /^@!([0-9a-f]+)/ ? &$place($1)  : /^\@([0-9a-f]+)/       ? &$until($1) :
+                                         /^\@:([0-9a-f]+)/      ? &$align($1) :
+       /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/         ? &$hex($_)   :
 
        /^::(\S+)/            ? &$label($1)          :
        /^:(\d*)\[([^\]]+)\]/ ? &$expression($1, $2) : '') for @tokens;
@@ -1523,6 +1528,8 @@ syn match bt_align              -@:[0-9a-f]\+-
 syn match bt_place              -@![0-9a-f]\+-
 syn match bt_debug              -@?\w\+-
 syn match bt_ascii              -'\S\+-
+syn match bt_string             -"\([^\\]\|\\.\)*"- contains=bt_escape
+syn match bt_escape             /\\[nrt"\\]/ contained
 
 syn match bt_label              /::\S\+/
 
@@ -1544,6 +1551,8 @@ hi link bt_place             Identifier
 hi link bt_align             Identifier
 hi link bt_debug             Comment
 hi link bt_ascii             String
+hi link bt_string            String
+hi link bt_escape            Special
 
 hi link bt_label              Identifier
 hi link bt_expression_bracket Special
