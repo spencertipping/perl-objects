@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  cl2/PztDmjx/a1tnxwweDAYBg0puMY3YoaemFskGA5c
-# istate: MHEhvoXoAiuUuBUTWdP4zyNGbQf7AtGGSj1GrhlwjUo
+# state:  jTVO8q+q5pRNfnY1maSVFDttBfRhG0M47b7amBPYag4
+# istate: Sl4eYelMBuB/t95T8djy22tSRWnTWxettvVniTnluo0
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -437,7 +437,7 @@ my ($options, @stuff) = separate_options(@_);
 
 sub not_thirds {my $i = 0; grep $i++ % 3 != 2, @_}
 
-my $text = join "\n", not_thirds split /(?:\s|^)#.*|(<<\s*(\w+)\n[\s\S]*?\n\s*\2\n)/m, cat(@stuff);
+my $text        = join "\n", cat(@stuff);
 my $hex_letters = '0123456789abcdef';
 
 my %places;
@@ -465,20 +465,21 @@ my $expression = sub {push @{$expressions{$offset} ||= []}, {size => $_[0], e =>
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
 my @tokens = not_thirds
-             split m#(<<\s*(\w+)\n[\s\S]*?\n\s*\2\n | '\S+ | "(?:[^"\\]|\\.)*" | -[01]{8} | o[0-3][0-7]{2} |
-                      [0-9a-f]{2} | \@\?\S+ | /\d+/ | ::\S+ | :\d*\[[^\]]+\] | \@[!:]?[0-9a-f]+)#x, $text;
+             split m%( <<\h*(\w+)\n[\s\S]*?\n\h*\2\n | '\S+ | "(?:[^"\\]|\\.)*" | -[01]{8} | o[0-3][0-7]{2} |
+                       \#.* | [0-9a-f]{2} | \@\?\S+ | /\d+/ | ::\S+ | :\d*\[[^\]]+\] | \@[!:]?[0-9a-f]+ )%x, $text;
 
-&$emit(/^<<\s*(\w+)\n([\s\S]*?)\n\s*\1\n/                       ? &$str($2) :
-       /^'(\S+)/        ? &$ascii($1)  : /^"((?:[^"\\]|\\.)*)"/ ? &$str($1) :
+($$options{-v} && print STDERR "$_\n"),
+&$emit(/^<<\h*(\w+)\n([\s\S]*?)\n\h*\1\n/                       ? &$ascii($2) :
+       /^'(\S+)/        ? &$ascii($1)  : /^"((?:[^"\\]|\\.)*)"/ ? &$str($1)   :
                                          /^\@\?(\S+)/           ? &$debug($1) :
        /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/    ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^\@([0-9a-f]+)/       ? &$until($1) :
                                          /^\@:([0-9a-f]+)/      ? &$align($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/         ? &$hex($_)   :
 
-       /^::([^\s;]+)/             ? &$label($1)          :
-       /^:(\d*)\[([^\]]+)\]/      ? &$expression($1, $2) :
-       /^#.*$/ || /^\s+$/ || /^$/ ? ''                   :
+       /^::([^\s;]+)/        ? &$label($1)          :
+       /^:(\d*)\[([^\]]+)\]/ ? &$expression($1, $2) :
+       /^#/ || /^\s*$/       ? ''                   :
 
        die "unknown binary text expression: $_") for @tokens;
 
