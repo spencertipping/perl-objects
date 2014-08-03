@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  VowGTqiv11XwX9x8xLYNvfvlnCaEofYl8wnmLcFrdEg
-# istate: TTLIBvt6m3uMWX8CHZkf7D8EAQQlXqo/5bbxu6UDDxI
+# state:  cl2/PztDmjx/a1tnxwweDAYBg0puMY3YoaemFskGA5c
+# istate: MHEhvoXoAiuUuBUTWdP4zyNGbQf7AtGGSj1GrhlwjUo
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -391,7 +391,8 @@ meta::function('compile-binary', <<'__');
 # /o[0-3][0-7]{2}/      <- single byte in octal
 # /-[01]{8}/            <- single byte in binary
 # /'\S+/                <- bytes in ASCII
-# /".*"/                <- bytes in ASCII
+# /".*"/                <- bytes in ASCII, with \n, \t, etc escapes
+# <<\s*(\w+)\n.*?\n\1   <- bytes in ASCII, no escaped values
 #
 # Placement (low-level):
 # /@![0-9a-f]+/         <- place assertion (die unless next byte is at place)
@@ -434,7 +435,9 @@ meta::function('compile-binary', <<'__');
 
 my ($options, @stuff) = separate_options(@_);
 
-my $text = join ' ', map split(/\s+/), split /(?:\s|^)#.*/m, cat(@stuff);
+sub not_thirds {my $i = 0; grep $i++ % 3 != 2, @_}
+
+my $text = join "\n", not_thirds split /(?:\s|^)#.*|(<<\s*(\w+)\n[\s\S]*?\n\s*\2\n)/m, cat(@stuff);
 my $hex_letters = '0123456789abcdef';
 
 my %places;
@@ -456,23 +459,28 @@ my $until      = sub {my $address = hex $_[0]; "\0" x ($address - $offset)};
 my $align      = sub {my $width = hex $_[0]; "\0" x (($width - $offset % $width) % $width)};
 my $debug      = sub {printf STDERR "%s: 0x%x\n", $_[0], $offset; ''};
 my $place      = sub {die sprintf "incorrect address at place %x (actual is %x)", hex $_[0], $offset unless $offset == hex $_[0]; ''};
-my $label      = sub {die sprintf "label %s is defined twice" if exists $places{$_[0]}; $places{$_[0]} = $offset; ''};
+my $label      = sub {die sprintf "label %s is already defined as %x", $_[0], $places{$_[0]} if exists $places{$_[0]}; $places{$_[0]} = $offset; ''};
 my $expression = sub {push @{$expressions{$offset} ||= []}, {size => $_[0], e => $_[1]}; 'E' x $_[0]};
 
 my $emit       = sub {my ($s) = @_; $offset += length $s; push @output, $s};
 
-my @tokens = split m#('\S+ | "(?:[^"\\]|\\.)*" | -[01]{8} | o[0-3][0-7]{2} | [0-9a-f]{2} | \@\?\S+ |
-                      /\d+/ | ::\S+ | :\d*\[[^\]]+\] | \@[!:]?[0-9a-f]+)#x, $text;
+my @tokens = not_thirds
+             split m#(<<\s*(\w+)\n[\s\S]*?\n\s*\2\n | '\S+ | "(?:[^"\\]|\\.)*" | -[01]{8} | o[0-3][0-7]{2} |
+                      [0-9a-f]{2} | \@\?\S+ | /\d+/ | ::\S+ | :\d*\[[^\]]+\] | \@[!:]?[0-9a-f]+)#x, $text;
 
-&$emit(/^'(\S+)/        ? &$ascii($1)  : /^"((?:[^"\\]|\\.)*)"/ ? &$str($1) :
+&$emit(/^<<\s*(\w+)\n([\s\S]*?)\n\s*\1\n/                       ? &$str($2) :
+       /^'(\S+)/        ? &$ascii($1)  : /^"((?:[^"\\]|\\.)*)"/ ? &$str($1) :
                                          /^\@\?(\S+)/           ? &$debug($1) :
        /^-([01]{8})/    ? &$binary($1) : /^o([0-3][0-7]{2})/    ? &$octal($1) :
        /^@!([0-9a-f]+)/ ? &$place($1)  : /^\@([0-9a-f]+)/       ? &$until($1) :
                                          /^\@:([0-9a-f]+)/      ? &$align($1) :
        /^\/(\d+)\//     ? &$repeat($1) : /^[0-9a-f]{2}/         ? &$hex($_)   :
 
-       /^::(\S+)/            ? &$label($1)          :
-       /^:(\d*)\[([^\]]+)\]/ ? &$expression($1, $2) : '') for @tokens;
+       /^::([^\s;]+)/             ? &$label($1)          :
+       /^:(\d*)\[([^\]]+)\]/      ? &$expression($1, $2) :
+       /^#.*$/ || /^\s+$/ || /^$/ ? ''                   :
+
+       die "unknown binary text expression: $_") for @tokens;
 
 # Now go through and evaluate every expression. Right now the spaces for the
 # results contain repetitions of the byte 'E'.
@@ -1528,6 +1536,7 @@ syn match bt_align              -@:[0-9a-f]\+-
 syn match bt_place              -@![0-9a-f]\+-
 syn match bt_debug              -@?\w\+-
 syn match bt_ascii              -'\S\+-
+syn region bt_ascii             matchgroup=bt_heredoc start=/<<\s*\z(\w\+\)$/ end=/^\s*\z1$/
 syn match bt_string             -"\([^\\]\|\\.\)*"- contains=bt_escape
 syn match bt_escape             /\\[nrt"\\]/ contained
 
@@ -1551,6 +1560,7 @@ hi link bt_place             Identifier
 hi link bt_align             Identifier
 hi link bt_debug             Comment
 hi link bt_ascii             String
+hi link bt_heredoc           Special
 hi link bt_string            String
 hi link bt_escape            Special
 
