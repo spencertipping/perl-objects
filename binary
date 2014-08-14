@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  jTVO8q+q5pRNfnY1maSVFDttBfRhG0M47b7amBPYag4
-# istate: Sl4eYelMBuB/t95T8djy22tSRWnTWxettvVniTnluo0
+# state:  YkRPymq6CiTv18wKRLsDH2n5Qv0s0vbS+AWBrXDGD0k
+# istate: V9kLg/ZfUqKXuV72VbEFnKaosGNafOP70xNuVRJaf2Y
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1537,7 +1537,7 @@ syn match bt_align              -@:[0-9a-f]\+-
 syn match bt_place              -@![0-9a-f]\+-
 syn match bt_debug              -@?\w\+-
 syn match bt_ascii              -'\S\+-
-syn region bt_ascii             matchgroup=bt_heredoc start=/<<\s*\z(\w\+\)$/ end=/^\s*\z1$/
+syn region bt_ascii             matchgroup=bt_heredoc start=/<<\s*\z(\w\+\)$/ end=/^\s*\(-\s*\)\?\z1$/
 syn match bt_string             -"\([^\\]\|\\.\)*"- contains=bt_escape
 syn match bt_escape             /\\[nrt"\\]/ contained
 
