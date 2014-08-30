@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  mioOxAQwBwLu3RT5PUlUfj6Fu3NSfTUOPQLr/KwBuMg
+# state:  JiSPgpPjrA8/w2DjWVyqT4dUARPa/hL+jrBhptjHUp0
 # istate: r/XuS0NmAOK5ctQCiJapfDA6ij7HcGK1LDWOA1k6ttI
 # id:     d6b8b54aecc42ae92c7a8c570c5559fc
 
@@ -421,7 +421,7 @@ sdoc a1e8480e579614c01dabeecf0f963bcc
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b fw9V6/hZL5+6RKmYAPZBHMDPPf8lSRCnfrvK9+u1H/I
+70dae4b46eb4e06798ec6f38d17d4c7b aVkS5uQvv85hgzS3VDzMTfOKCXBPxJ8n+FHe2wroaCc
 902333a0bd6ed90ff919fe8477cb4e69 a2UfhjT/gGzuzJhjQpPzYghjO5CQH4FkK/o/GudHAo8
 99aeabc9ec7fe80b1b39f5e53dc7e49e holS25TrO+3fs32MO59ho89mpKn8EBmiLLfcl/XpCSU
 a1e8480e579614c01dabeecf0f963bcc TBP4VqMuHSrBGYCiWy55lQf/m9n+oFaFNxsHIxBGCnQ
@@ -1750,7 +1750,7 @@ parent::object                 4vJJossUOfKUL2MiuYrqO9z+DK0xvPSw3lOcXwFdu2E
 retriever::pp                  9la40Aol4Q7whkseOeOSByfjW/BzvMg4KThB6onv7fw
 template::comment              Q0To1pu8fZ9GuKpTR5R85/OUDQPomqhoHvJHDCwklNQ
 template::def                  w1j2n7Dtwc1kIhyH4kdYf3PU4/XKDXeL6EQjdZGGMsI
-template::eval                 wNXnX1UzyIjymSNHKQerkztEab3k4n7xn1b1cj53s80
+template::eval                 X4oZfu11/AhIuw2x/jZPwNvxUNeU2yhdhmowc9gLPiE
 template::failing_conditional  dcTs2GkHghjI0ymFxNUW4jVHnvghSd4o1Unetur07oA
 template::include              DO+8i6ZyEffTITDndTmpbIawHeNZNnA+HLUGY72xWO8
 template::include!             g1BkMwjb+IPd0bi9wjTM2dx9EQqtMxrgmF7bHPkjA+U
@@ -1978,9 +1978,17 @@ die $@ if $@;
 
 __
 meta::template('eval', <<'__');
-my $result = eval $_[0];
-terminal::warning("Error during template evaluation: $@") if $@;
-$result;
+my ($line, $block) = @_;
+if (length $block) {
+  my $result = eval $block;
+  die "failed to template::eval $block (line was $line): $@" if $@;
+  $result;
+} else {
+  my $result = eval $line;
+  die "failed to template::eval $line: $@" if $@;
+  $result;
+}
+
 __
 meta::template('failing_conditional', <<'__');
 my ($commands)    = @_;

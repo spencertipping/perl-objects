@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  YkRPymq6CiTv18wKRLsDH2n5Qv0s0vbS+AWBrXDGD0k
-# istate: V9kLg/ZfUqKXuV72VbEFnKaosGNafOP70xNuVRJaf2Y
+# state:  au6NjYoncoQJi/uEitDvO1IQ0L3vPO1GGz8784BgUdo
+# istate: HiVfwevwdquAaTINpxuBkloRabW2NbCE+9O+x4X6yZw
 # id:     93194ecf50e38f2adb6e273909e007b5
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -499,7 +499,7 @@ my $be = sub {join '', map chr($_[1] >> $_ * 8 & 255), reverse 0 .. $_[0] - 1};
 for my $o (sort {$a <=> $b} keys %expressions) {
   for my $e (@{$expressions{$o}}) {
     my $expression = $$e{e};
-    my $size       = $$e{size};
+    my $size       = $$e{size} || 0;
 
     $_ = $expression;
 
@@ -1538,7 +1538,7 @@ syn match bt_place              -@![0-9a-f]\+-
 syn match bt_debug              -@?\w\+-
 syn match bt_ascii              -'\S\+-
 syn region bt_ascii             matchgroup=bt_heredoc start=/<<\s*\z(\w\+\)$/ end=/^\s*\(-\s*\)\?\z1$/
-syn match bt_string             -"\([^\\]\|\\.\)*"- contains=bt_escape
+syn match bt_string             -"\([^\\"]\|\\.\)*"- contains=bt_escape
 syn match bt_escape             /\\[nrt"\\]/ contained
 
 syn match bt_label              /::\S\+/

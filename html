@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  8DBmDVOmtpPZGLWeW8toMGxeQt2eUdFisIIIWTq83NE
+# state:  /i7nwT31i1Og+8NAdEha2XBMdXJKzkxTHlREB/VBMBQ
 # istate: meHZFmAwxnAfhe7ZSkAbS+jIBthp6BKaYZPokn40nbk
 # id:     1df113f7cef70e75214a2f28ca266c5e
 
@@ -319,7 +319,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 preprocessor 70dae4b46eb4e06798ec6f38d17d4c7b
 __
 meta::cache('parent-state', <<'__');
-70dae4b46eb4e06798ec6f38d17d4c7b fw9V6/hZL5+6RKmYAPZBHMDPPf8lSRCnfrvK9+u1H/I
+70dae4b46eb4e06798ec6f38d17d4c7b aVkS5uQvv85hgzS3VDzMTfOKCXBPxJ8n+FHe2wroaCc
 99aeabc9ec7fe80b1b39f5e53dc7e49e holS25TrO+3fs32MO59ho89mpKn8EBmiLLfcl/XpCSU
 __
 meta::data('author', <<'__');
@@ -1414,7 +1414,7 @@ parent::object                 4vJJossUOfKUL2MiuYrqO9z+DK0xvPSw3lOcXwFdu2E
 retriever::pp                  9la40Aol4Q7whkseOeOSByfjW/BzvMg4KThB6onv7fw
 template::comment              Q0To1pu8fZ9GuKpTR5R85/OUDQPomqhoHvJHDCwklNQ
 template::def                  w1j2n7Dtwc1kIhyH4kdYf3PU4/XKDXeL6EQjdZGGMsI
-template::eval                 wNXnX1UzyIjymSNHKQerkztEab3k4n7xn1b1cj53s80
+template::eval                 X4oZfu11/AhIuw2x/jZPwNvxUNeU2yhdhmowc9gLPiE
 template::failing_conditional  dcTs2GkHghjI0ymFxNUW4jVHnvghSd4o1Unetur07oA
 template::include              DO+8i6ZyEffTITDndTmpbIawHeNZNnA+HLUGY72xWO8
 template::include!             g1BkMwjb+IPd0bi9wjTM2dx9EQqtMxrgmF7bHPkjA+U
@@ -1515,9 +1515,17 @@ die $@ if $@;
 
 __
 meta::template('eval', <<'__');
-my $result = eval $_[0];
-terminal::warning("Error during template evaluation: $@") if $@;
-$result;
+my ($line, $block) = @_;
+if (length $block) {
+  my $result = eval $block;
+  die "failed to template::eval $block (line was $line): $@" if $@;
+  $result;
+} else {
+  my $result = eval $line;
+  die "failed to template::eval $line: $@" if $@;
+  $result;
+}
+
 __
 meta::template('failing_conditional', <<'__');
 my ($commands)    = @_;

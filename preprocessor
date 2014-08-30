@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  LzH57qf2GvTBxJKSWpZdWZD7yxF5PR5fQiSdbuwd9LA
-# istate: fw9V6/hZL5+6RKmYAPZBHMDPPf8lSRCnfrvK9+u1H/I
+# state:  QGBvCQ2Ol4ojSjlUuZu/wtAlE5WonvuYJhkEICoEj3c
+# istate: aVkS5uQvv85hgzS3VDzMTfOKCXBPxJ8n+FHe2wroaCc
 # id:     70dae4b46eb4e06798ec6f38d17d4c7b
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1484,9 +1484,17 @@ die $@ if $@;
 
 __
 meta::template('eval', <<'__');
-my $result = eval $_[0];
-terminal::warning("Error during template evaluation: $@") if $@;
-$result;
+my ($line, $block) = @_;
+if (length $block) {
+  my $result = eval $block;
+  die "failed to template::eval $block (line was $line): $@" if $@;
+  $result;
+} else {
+  my $result = eval $line;
+  die "failed to template::eval $line: $@" if $@;
+  $result;
+}
+
 __
 meta::template('failing_conditional', <<'__');
 my ($commands)    = @_;
