@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  6SR2i51PHBdb4PhMOq8Tj1ZJp3c6QduD2N9SfXdMx0U
-# istate: SCD9oYKLMF3t2cAyrImGM9ParsmGGL1p2EXKOHtAoyk
+# state:  wS/S67mVGX3VXC78ORgOBU6swe6OPzfWz0K7J6b4iao
+# istate: kRf2LCMc+5z7j2X5WrUjCAMSfE90AMjq3Fx+4kF42Fo
 # id:     8/VKcpjoUxvDAwHIFC1OXKU12MYgAyOKoxVawHMlxhs
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -1573,17 +1573,17 @@ setlocal iskeyword=33-90,92,94-127
 
 syn match ledger_comment /#.*/ contains=@Spell
 
-syn match ledger_date          /^\s*[0-9]\{4\}\.[0-9]\{4\}/ nextgroup=ledger_adjust        skipwhite
-syn match ledger_adjust        /\s\w\+/                     nextgroup=ledger_units         skipwhite contained
-syn match ledger_units         /\/\?\w*/                    nextgroup=ledger_op                      contained
-syn match ledger_op            /:/                          nextgroup=ledger_amount                  contained
-syn match ledger_amount        /[-+]\?[0-9]\+\(\.[0-9]\)\?/ nextgroup=ledger_adjust                  contained
+syn match ledger_date          /^\s*[0-9]\{4\}\.[0-9]\{4\}/   nextgroup=ledger_adjust        skipwhite
+syn match ledger_adjust        /\s\w\+/                       nextgroup=ledger_units         skipwhite contained
+syn match ledger_units         /\/\?\w*/                      nextgroup=ledger_op                      contained
+syn match ledger_op            /:/                            nextgroup=ledger_amount                  contained
+syn match ledger_amount        /[-+]\?[0-9]\+\(\.[0-9]\+\)\?/ nextgroup=ledger_adjust                  contained
 
-syn match ledger_status        /^\s*[.0-9]*>/               nextgroup=ledger_account_state skipwhite
-syn match ledger_account_state /\s\w\+/                     nextgroup=ledger_account_units skipwhite contained
-syn match ledger_account_units /\/\?\w*/                    nextgroup=ledger_account_op              contained
-syn match ledger_account_op    /:/                          nextgroup=ledger_account_value           contained
-syn match ledger_account_value /[-+]\?[0-9]\+\(\.[0-9]\)\?/ nextgroup=ledger_account_state           contained
+syn match ledger_status        /^\s*[.0-9]*>/                 nextgroup=ledger_account_state skipwhite
+syn match ledger_account_state /\s\w\+/                       nextgroup=ledger_account_units skipwhite contained
+syn match ledger_account_units /\/\?\w*/                      nextgroup=ledger_account_op              contained
+syn match ledger_account_op    /:/                            nextgroup=ledger_account_value           contained
+syn match ledger_account_value /[-+]\?[0-9]\+\(\.[0-9]\+\)\?/ nextgroup=ledger_account_state           contained
 
 hi link ledger_comment  Comment
 hi link ledger_date     Keyword
