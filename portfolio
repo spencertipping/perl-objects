@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  wS/S67mVGX3VXC78ORgOBU6swe6OPzfWz0K7J6b4iao
+# state:  I7a8oxEalijxksRqw/Wqk4U77+l7mt7pWBbBrTv2RC0
 # istate: kRf2LCMc+5z7j2X5WrUjCAMSfE90AMjq3Fx+4kF42Fo
 # id:     8/VKcpjoUxvDAwHIFC1OXKU12MYgAyOKoxVawHMlxhs
 
@@ -307,6 +307,7 @@ run this script with the 'usage' argument.
 __
 meta::cache('parent-identification', <<'__');
 /home/spencertipping/r/initiative/perl-objects/object 99aeabc9ec7fe80b1b39f5e53dc7e49e
+object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
