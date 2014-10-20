@@ -4,3 +4,7 @@ for (( i = 0; i < 3; ++i )); do
     ./$file update -SV
   done
 done
+
+for file in *.html; do
+  ./$file journal > ${file%%.html}-journal.pl
+done
