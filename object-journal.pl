@@ -5,11 +5,11 @@ die "usage: $0 output-file (where output-file doesn't exist yet)"
 my $output = $ARGV[0];
 open my $fh, "> $output" 
   or die "failed to open output file $ARGV[0]: $!";
-$fh->print <<'bKzByiYHrCPlM/jm5LTsiKiCxiOQDrql6guGQVxPVgA';
+$fh->print <<'X6DmNR4f0rjUQPxcvSiwGTCa8mAr0UM1LfzNzgiwDXY';
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  bKzByiYHrCPlM/jm5LTsiKiCxiOQDrql6guGQVxPVgA
-# istate: vn6IaB8HbqRG8OhD2TkFAh93pW/sYPP6EH7zaFuPda0
+# state:  X6DmNR4f0rjUQPxcvSiwGTCa8mAr0UM1LfzNzgiwDXY
+# istate: RgUs2DW4smtKi3R92ZZIqo077bXN99l65ByFCh39WbA
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -497,7 +497,10 @@ associate('data::permanent-identity', fast_hash(join '|', map rand(), 1 .. 32));
 __
 meta::function('import', <<'__');
 my $name = pop @_;
-associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>));
+my $namespace = 'meta::' . namespace($name);
+my $attribute = attribute($name);
+&$namespace($attribute, @_ ? join '', map file::read($_), @_
+                           : join '', <STDIN>);
 __
 meta::function('initial-state', '$transient{initial};');
 meta::function('is', <<'__');
@@ -1275,6 +1278,6 @@ internal::main();
 
 __DATA__
 
-bKzByiYHrCPlM/jm5LTsiKiCxiOQDrql6guGQVxPVgA
+X6DmNR4f0rjUQPxcvSiwGTCa8mAr0UM1LfzNzgiwDXY
 close $fh;
 chmod 0700, $output;

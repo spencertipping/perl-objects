@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  FDfkmeekEuoI4SFyQAH1p5UrvXG9mBUqDfNEhuLMvPE
+# state:  vsW0xE/2u4JEqShya1/VxsBQPdiQvLXEXfV25esYNRc
 # istate: cRaMA+3PkPF3YfP8xFLWLwFXSPIApaNwYXBAGefddlk
 # id:     9837287d488ed173dd183e0b154943b4
 
@@ -337,7 +337,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
 6a38f6fbcf92173ff757305a534a002b VZZ/EmURm86+v0XJi2+jG3K34/vrHInfXF1d0UPZf4k
-99aeabc9ec7fe80b1b39f5e53dc7e49e vn6IaB8HbqRG8OhD2TkFAh93pW/sYPP6EH7zaFuPda0
+99aeabc9ec7fe80b1b39f5e53dc7e49e RgUs2DW4smtKi3R92ZZIqo077bXN99l65ByFCh39WbA
 a9e5975593ed5d90d943ad98405c71e5 21rFW0cbMFtbY56uoN16l/ZlsJxAHKK431eTvQChPI4
 __
 meta::data('author', 'Spencer Tipping');
@@ -556,7 +556,10 @@ associate('data::permanent-identity', fast_hash(join '|', map rand(), 1 .. 32));
 __
 meta::function('import', <<'__');
 my $name = pop @_;
-associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>));
+my $namespace = 'meta::' . namespace($name);
+my $attribute = attribute($name);
+&$namespace($attribute, @_ ? join '', map file::read($_), @_
+                           : join '', <STDIN>);
 __
 meta::function('initial-state', '$transient{initial};');
 meta::function('is', <<'__');
@@ -1469,7 +1472,7 @@ function::hash                          +KkJP3kfAnYIXy1BBSEDdfzhnLpQPqz52RJpwgk+
 function::hook                          rhEyOmCy+ZDyO727aPXfTrEtkOOGaGKcezlkYf9BK0k
 function::hooks                         2rZQUo7p9iu9gmM4wR+G6/RukNXgAk+ZcFepCgnfef8
 function::identity                      6+JeD3ohDjevZF5UG7V3iRFkxIwp4KwwibpVc9dwcm4
-function::import                        4TKj8ayYsR8EtPFO+Jv3FK2Rv4j4uTAOC77twB9GBkE
+function::import                        9HGjc6wuWn6+ElU//UxgjcG8dTo4aml/Bs117zcBdXY
 function::initial-state                 E45KKMXa7YYzleuQNeMa+2XTkvSxKw40KaWN0lHLhV0
 function::is                            R4wqjFaGUQnk3q8Ru9HEoyuoiTd0nEXs8655T50bO3I
 function::journal                       x4zLMyhSRotanzZQXb2H2hdCVADixqREcsFJjehPv5I

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  JaygV5dRfgb5Lmo2n0DIjl7EjPxCfykALlLHsS5v9qU
+# state:  Zj7w7Tm1T525xGqzb5HioIc/x7VL+zARMn6CUpSCIUE
 # istate: L3U2Fc/1v/l5imG8S1kB3Wepu+piU+KIKS6XkUoaJSc
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
@@ -302,7 +302,7 @@ run this script with the 'usage' argument.
 =cut
 __
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e vn6IaB8HbqRG8OhD2TkFAh93pW/sYPP6EH7zaFuPda0');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e RgUs2DW4smtKi3R92ZZIqo077bXN99l65ByFCh39WbA');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
 meta::data('license', <<'__');
@@ -491,7 +491,10 @@ associate('data::permanent-identity', fast_hash(join '|', map rand(), 1 .. 32));
 __
 meta::function('import', <<'__');
 my $name = pop @_;
-associate($name, @_ ? join('', map(file::read($_), @_)) : join('', <STDIN>));
+my $namespace = 'meta::' . namespace($name);
+my $attribute = attribute($name);
+&$namespace($attribute, @_ ? join '', map file::read($_), @_
+                           : join '', <STDIN>);
 __
 meta::function('initial-state', '$transient{initial};');
 meta::function('is', <<'__');
@@ -1277,7 +1280,7 @@ function::hash                          +KkJP3kfAnYIXy1BBSEDdfzhnLpQPqz52RJpwgk+
 function::hook                          rhEyOmCy+ZDyO727aPXfTrEtkOOGaGKcezlkYf9BK0k
 function::hooks                         2rZQUo7p9iu9gmM4wR+G6/RukNXgAk+ZcFepCgnfef8
 function::identity                      6+JeD3ohDjevZF5UG7V3iRFkxIwp4KwwibpVc9dwcm4
-function::import                        4TKj8ayYsR8EtPFO+Jv3FK2Rv4j4uTAOC77twB9GBkE
+function::import                        9HGjc6wuWn6+ElU//UxgjcG8dTo4aml/Bs117zcBdXY
 function::initial-state                 E45KKMXa7YYzleuQNeMa+2XTkvSxKw40KaWN0lHLhV0
 function::is                            R4wqjFaGUQnk3q8Ru9HEoyuoiTd0nEXs8655T50bO3I
 function::journal                       x4zLMyhSRotanzZQXb2H2hdCVADixqREcsFJjehPv5I
