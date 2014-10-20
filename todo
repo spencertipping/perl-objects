@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  NWUtxuJLe0LStbaxfxV3RrGl+FxED/il4Tk7W+nwucQ
+# state:  IfSEY1ZlawHZx4AvVi/M1OEQFLoZaTtZ6kSo98MgKN4
 # istate: BnvHsipa3yI+F7R+TshQWTMzptacSr54FmGg8wX4Nrc
 # id:     62bc8a83ef5d4941cd2c1cdfb57a0320
 
@@ -50,9 +50,9 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-eval `perl object serialize -p`; die $@ if $@;
-eval `perl sdoc serialize -p`; die $@ if $@;
-eval `perl vim-highlighters serialize -p`; die $@ if $@;
+eval `object serialize -p`; die $@ if $@;
+eval `sdoc serialize -p`; die $@ if $@;
+eval `vim-highlighters serialize -p`; die $@ if $@;
 meta::meta('type::todo', <<'__');
 # Todo lists are special cases of SDoc syntax.
 meta::configure 'todo', inherit => 0, extension => '.sdoc';
@@ -106,7 +106,7 @@ function::rm                            EwSp4uAK0uVy4lCYpJYvd0qu12q24rIlEiDUbfcW
 function::rmparent                      3RgK0wVGkKinmoqBJ0fZEyv72qWiL6a3unkz3etJC+M
 function::save                          r7HLe7LppWXiaooOuUztnOK04LpIb+ck3bEvQ2SzY14
 function::save-state                    KyoEB2NXy0ko1IYUVujXqEfbNbsoDckiKjwn8+zjvxs
-function::serialize                     fpr8J5+lJ6NJGTVizsyEjq6wbTS+YecLVVnBAAkIB9k
+function::serialize                     wGWkVgwClONRAAC0P+m5biPd+tJTjtrYWQa8VS3XL8Y
 function::serialize-single              bOoEGNxf7jcYMAbvT4n492g5aUQ9e+umiaYC574Re6E
 function::sh                            PA9Q/R+AEXXCDtU8QIPNFbZr/iITh4DXEG6EWY6n4DM
 function::shb                           /COiQpKD0k/4B4/fnj1q1GtH+Z+ZQV0fJUwX6kSseks
@@ -198,11 +198,12 @@ vim-highlighters 902333a0bd6ed90ff919fe8477cb4e69
 __
 meta::cache('parent-state', <<'__');
 902333a0bd6ed90ff919fe8477cb4e69 a2UfhjT/gGzuzJhjQpPzYghjO5CQH4FkK/o/GudHAo8
-99aeabc9ec7fe80b1b39f5e53dc7e49e lKiIRzqawBQkDkNijhtz/y20IXLrf041WaoMhS6zsKk
+99aeabc9ec7fe80b1b39f5e53dc7e49e 8o6O4hqEnGDxNC5FgK+q340aKWykAb+LRLAe0Fi9xMc
 a1e8480e579614c01dabeecf0f963bcc TBP4VqMuHSrBGYCiWy55lQf/m9n+oFaFNxsHIxBGCnQ
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
+meta::data('file-nuke-backend', 'shred');
 meta::data('license', <<'__');
 MIT License
 Copyright (c) 2010 Spencer Tipping
@@ -227,6 +228,7 @@ THE SOFTWARE.
 __
 meta::data('permanent-identity', '62bc8a83ef5d4941cd2c1cdfb57a0320');
 meta::data('save-indirect', '1');
+meta::data('watching', '1');
 meta::function('parse-todo', <<'__');
 # Takes a string of todo text and parses it. Multiple todo lists can be
 # combined, resulting in a longer list.

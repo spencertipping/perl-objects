@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  0xn/2+1Lh7PbkGoht7mc7aO1En5to7OIN6H0Cu9uHBg
+# state:  wLZFp+Cny95oqRCd/dXE51z3OTJS2R7bNUffgR7gapQ
 # istate: iAbcMRz//IY47gJNRkUSfDa7cx3oJNjafbjo/ntCL8w
 # id:     ad190757af7fd55ea6da941fac1a5124
 
@@ -50,8 +50,8 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-eval `perl encrypted serialize -p`; die $@ if $@;
-eval `perl object serialize -p`; die $@ if $@;
+eval `encrypted serialize -p`; die $@ if $@;
+eval `object serialize -p`; die $@ if $@;
 meta::parent('object', <<'__');
 bootstrap::html                         /9nKOzNlCVjt5KpPCw6ktpNdorICJPOmdsxw8gRbQgs
 bootstrap::initialization               TvbsjnluOC8KVyAVtB4a6Yzd+QlZ0Caz+PywmbS+RsE
@@ -96,7 +96,7 @@ function::rm                            EwSp4uAK0uVy4lCYpJYvd0qu12q24rIlEiDUbfcW
 function::rmparent                      3RgK0wVGkKinmoqBJ0fZEyv72qWiL6a3unkz3etJC+M
 function::save                          r7HLe7LppWXiaooOuUztnOK04LpIb+ck3bEvQ2SzY14
 function::save-state                    KyoEB2NXy0ko1IYUVujXqEfbNbsoDckiKjwn8+zjvxs
-function::serialize                     fpr8J5+lJ6NJGTVizsyEjq6wbTS+YecLVVnBAAkIB9k
+function::serialize                     wGWkVgwClONRAAC0P+m5biPd+tJTjtrYWQa8VS3XL8Y
 function::serialize-single              bOoEGNxf7jcYMAbvT4n492g5aUQ9e+umiaYC574Re6E
 function::sh                            PA9Q/R+AEXXCDtU8QIPNFbZr/iITh4DXEG6EWY6n4DM
 function::shb                           /COiQpKD0k/4B4/fnj1q1GtH+Z+ZQV0fJUwX6kSseks
@@ -187,7 +187,7 @@ object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
 6a38f6fbcf92173ff757305a534a002b VZZ/EmURm86+v0XJi2+jG3K34/vrHInfXF1d0UPZf4k
-99aeabc9ec7fe80b1b39f5e53dc7e49e lKiIRzqawBQkDkNijhtz/y20IXLrf041WaoMhS6zsKk
+99aeabc9ec7fe80b1b39f5e53dc7e49e 8o6O4hqEnGDxNC5FgK+q340aKWykAb+LRLAe0Fi9xMc
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('contents', <<'__');
@@ -195,6 +195,7 @@ meta::data('contents', <<'__');
 
 __
 meta::data('default-action', 'setup');
+meta::data('file-nuke-backend', 'shred');
 meta::data('license', <<'__');
 MIT License
 Copyright (c) 2010 Spencer Tipping

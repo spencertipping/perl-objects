@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  HJP1HCToizy0iPtMTN91blM8cu1leoAwURdFx++twKk
+# state:  ivieYJd+zE7SRTxnTzmrni1hnMDJEU9B4+kuHW7cZkQ
 # istate: uL5HStYxxMLicibTHEUPiJTWuGEzH5tBdndvjwydTFQ
 # id:     05bc3036c343fdb8aec5b0be12a9b19e
 
@@ -50,8 +50,8 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-eval `perl configuration serialize -p`; die $@ if $@;
-eval `perl object serialize -p`; die $@ if $@;
+eval `configuration serialize -p`; die $@ if $@;
+eval `object serialize -p`; die $@ if $@;
 meta::meta('type::cached_dependency', <<'__');
 meta::configure 'cached_dependency', inherit => 0, extension => '';
 meta::define_form 'cached_dependency', \&meta::bootstrap::implementation;
@@ -100,7 +100,7 @@ function::rm                            EwSp4uAK0uVy4lCYpJYvd0qu12q24rIlEiDUbfcW
 function::rmparent                      3RgK0wVGkKinmoqBJ0fZEyv72qWiL6a3unkz3etJC+M
 function::save                          r7HLe7LppWXiaooOuUztnOK04LpIb+ck3bEvQ2SzY14
 function::save-state                    KyoEB2NXy0ko1IYUVujXqEfbNbsoDckiKjwn8+zjvxs
-function::serialize                     fpr8J5+lJ6NJGTVizsyEjq6wbTS+YecLVVnBAAkIB9k
+function::serialize                     wGWkVgwClONRAAC0P+m5biPd+tJTjtrYWQa8VS3XL8Y
 function::serialize-single              bOoEGNxf7jcYMAbvT4n492g5aUQ9e+umiaYC574Re6E
 function::sh                            PA9Q/R+AEXXCDtU8QIPNFbZr/iITh4DXEG6EWY6n4DM
 function::shb                           /COiQpKD0k/4B4/fnj1q1GtH+Z+ZQV0fJUwX6kSseks
@@ -190,7 +190,7 @@ configuration aa772900bb5b925cb84346bd72a4249d
 object 99aeabc9ec7fe80b1b39f5e53dc7e49e
 __
 meta::cache('parent-state', <<'__');
-99aeabc9ec7fe80b1b39f5e53dc7e49e lKiIRzqawBQkDkNijhtz/y20IXLrf041WaoMhS6zsKk
+99aeabc9ec7fe80b1b39f5e53dc7e49e 8o6O4hqEnGDxNC5FgK+q340aKWykAb+LRLAe0Fi9xMc
 aa772900bb5b925cb84346bd72a4249d iCOSakQyrb5CQLOFnwaZRNLUG89ef9cbpPffKUwhvoM
 __
 meta::configuration('dependencies', <<'__');
@@ -200,6 +200,7 @@ meta::configuration('dependencies', <<'__');
 __
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
+meta::data('file-nuke-backend', 'shred');
 meta::data('license', <<'__');
 MIT License
 Copyright (c) 2010 Spencer Tipping

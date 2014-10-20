@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  CYwsyUdfJdS8SGFyao3tuDl5PcPLefmhAvEqQPM3+YI
-# istate: lKiIRzqawBQkDkNijhtz/y20IXLrf041WaoMhS6zsKk
+# state:  3NoD0lKZiEfeqR2c+Pd+jUMQM4JzewczK/kP4d40qXk
+# istate: 8o6O4hqEnGDxNC5FgK+q340aKWykAb+LRLAe0Fi9xMc
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
 # This is a self-modifying Perl file. I'm sorry you're viewing the source (it's
@@ -636,7 +636,7 @@ my @trailing = (@attributes,
 
 my @final_array = @{$partial  ? [@attributes]
                   : $indirect ? [expanded_bootstrap(),
-                                 map(qq[eval `perl $_ serialize -p`; die \$@ if \$@;],
+                                 map(qq[eval `$_ serialize -p`; die \$@ if \$@;],
                                      @parents),
                                  @trailing]
                   :             [expanded_bootstrap(), @trailing]};

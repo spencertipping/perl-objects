@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  JQzZu9nVXhVFe/a/bv9r66+yk/bxk8Y+RHbW6jv34Tw
+# state:  0ygRkucDtZh+eVXlpF8qjK6+SIS+y5Es+R2+kwWHdcw
 # istate: L3U2Fc/1v/l5imG8S1kB3Wepu+piU+KIKS6XkUoaJSc
 # id:     8118b5c1b0aa08bce7e839df4ab80199
 
@@ -50,15 +50,16 @@ sub meta::eval_in {
 meta::define_form 'meta', sub {
   my ($name, $value) = @_;
   meta::eval_in($value, "meta::$name")};
-eval `perl object serialize -p`; die $@ if $@;
+eval `object serialize -p`; die $@ if $@;
 meta::meta('type::c', 'meta::functor::editable \'c\', extension => \'.c\', inherit => 1;');
 meta::meta('type::cc', 'meta::functor::editable \'cc\', extension => \'.cc\', inherit => 1;');
 meta::meta('type::h', 'meta::functor::editable \'h\', extension => \'.h\', inherit => 1;');
 meta::meta('type::hh', 'meta::functor::editable \'hh\', extension => \'.hh\', inherit => 1;');
 meta::cache('parent-identification', 'object 99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e lKiIRzqawBQkDkNijhtz/y20IXLrf041WaoMhS6zsKk');
+meta::cache('parent-state', '99aeabc9ec7fe80b1b39f5e53dc7e49e 8o6O4hqEnGDxNC5FgK+q340aKWykAb+LRLAe0Fi9xMc');
 meta::data('author', 'Spencer Tipping');
 meta::data('default-action', 'shell');
+meta::data('file-nuke-backend', 'shred');
 meta::data('license', <<'__');
 MIT License
 Copyright (c) 2010 Spencer Tipping
@@ -127,7 +128,7 @@ function::rm                            EwSp4uAK0uVy4lCYpJYvd0qu12q24rIlEiDUbfcW
 function::rmparent                      3RgK0wVGkKinmoqBJ0fZEyv72qWiL6a3unkz3etJC+M
 function::save                          r7HLe7LppWXiaooOuUztnOK04LpIb+ck3bEvQ2SzY14
 function::save-state                    KyoEB2NXy0ko1IYUVujXqEfbNbsoDckiKjwn8+zjvxs
-function::serialize                     fpr8J5+lJ6NJGTVizsyEjq6wbTS+YecLVVnBAAkIB9k
+function::serialize                     wGWkVgwClONRAAC0P+m5biPd+tJTjtrYWQa8VS3XL8Y
 function::serialize-single              bOoEGNxf7jcYMAbvT4n492g5aUQ9e+umiaYC574Re6E
 function::sh                            PA9Q/R+AEXXCDtU8QIPNFbZr/iITh4DXEG6EWY6n4DM
 function::shb                           /COiQpKD0k/4B4/fnj1q1GtH+Z+ZQV0fJUwX6kSseks
