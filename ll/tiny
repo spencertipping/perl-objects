@@ -12,16 +12,15 @@
 #    this value will persist across invocations of the script (provided your
 #    code allows control flow to proceed normally, that is).
 
-$_code = <<'_';
+eval($_code = <<'_');
 $_data = join '', <DATA>;
 
 # YOUR CODE HERE
 
 open my $fh, '>', $0;
-print $fh "#!/usr/bin/perl\n\$_code = <<'_';\n${_code}_\neval\$_code;\n__DATA__\n$_data";
+print $fh "#!/usr/bin/perl\n\eval($_code = <<'_');\n${_code}_\n__DATA__\n$_data";
 close $fh;
 _
-eval $_code;
 __DATA__
 
 
