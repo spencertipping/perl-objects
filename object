@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # 99aeabc9ec7fe80b1b39f5e53dc7e49e      <- self-modifying Perl magic
-# state:  4LtnIvV7AyTgT23vzeiHiE76CVLHySV62B1FQQzLJbs
+# state:  CYwsyUdfJdS8SGFyao3tuDl5PcPLefmhAvEqQPM3+YI
 # istate: lKiIRzqawBQkDkNijhtz/y20IXLrf041WaoMhS6zsKk
 # id:     99aeabc9ec7fe80b1b39f5e53dc7e49e
 
@@ -326,7 +326,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 __
 meta::data('permanent-identity', '99aeabc9ec7fe80b1b39f5e53dc7e49e');
-meta::data('save-indirect', '0');
+meta::data('save-indirect', <<'__');
+1
+
+__
 meta::function('ad', <<'__');
 my ($options, @paths) = separate_options(@_);
 @{$transient{path}} = () if $$options{-c};
